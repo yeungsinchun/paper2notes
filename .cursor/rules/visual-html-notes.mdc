@@ -1,0 +1,41 @@
+---
+description: Visual-first HTML notes conventions (Active Physics order, _source intake, concept checks)
+globs: notes/**
+alwaysApply: false
+---
+
+# Visual-first HTML notes
+
+Write notes under `notes/` as HTML. Do not add a full chapter until `_source` for that chapter exists.
+
+## Goal
+
+Prioritize diagrams (static or interactive). Keep prose short: labels, one-line definitions, equations. Follow Active Physics textbook order (Book 5 Ch.1 = syllabus Ch.25).
+
+## Sources (read, do not invent)
+
+- Intake: `notes/_source/<book-ch>/` (`ocr.md`, `outline.md`, `problems.md`, `images/INDEX.md`).
+- Local PDFs/banks (`active-physics/`, `dse-classified/`, `QB_501/`) are gitignored. If OCR and the page disagree, trust the page.
+- Flag gaps in the outline instead of filling them from memory (missing opener pages, Ch.26 topics, garbled A/Z).
+
+## Page recipe
+
+1. One idea per screen: a visual, then at most a few lines of text.
+2. Rebuild textbook figures as SVG/CSS/canvas. Use `_source/.../images/` only as redraw references, not as the final art.
+3. Animate processes (ionization, X-ray tube, α/β/γ decay, ion-pairs, GM pulses, E/B deflection, absorber stacks). Keep comparison tables static or toggleable.
+4. After each idea, add a concept check (T/F, pick-the-diagram, one calculation). Prefer items tagged `concept-check` in `problems.md`.
+5. At most one worked example per section, from `problems.md` (`worked-example`). Do not paste the whole HKDSE/QB set.
+
+## Do / don't
+
+```
+DO: diagram of α vs β vs γ through paper / Al / Pb, then one absorber MC.
+DON'T: three paragraphs on penetrating power plus a list of ten past papers.
+```
+
+```
+DO: show ᴬ_Z X → ᴬ⁻⁴_Z₋₂ Y + ⁴₂He on the animation.
+DON'T: invent half-life or sievert content in a Ch.25 page (that is Ch.26).
+```
+
+Stay inside `notes/`. Never commit `active-physics/`, `QB_501/`, or `dse-classified/`.
