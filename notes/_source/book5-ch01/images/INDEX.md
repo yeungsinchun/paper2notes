@@ -7,7 +7,7 @@ Prefer redrawing these as SVG / animation in the HTML notes. Photos of people, a
 | File | Printed p. | Caption / topic | Notes use |
 | --- | --- | --- | --- |
 | `fig25-03-ionization-knockout.png` | 5 | Fig. 25.3 Ionizing radiation knocks an electron out of an atom | **Animate:** incoming radiation, electron ejected, leftover positive ion |
-| `fig25-05-em-spectrum.png` | 5 | Fig. 25.5 EM spectrum; non-ionizing vs ionizing | **Interactive static/slider:** mark UV / X-ray / γ as ionizing |
+| `fig25-05-em-spectrum.png` | 5 | Fig. 25.5 EM spectrum; non-ionizing vs ionizing | **Interactive slider:** ionizing cut as in outline 25.1 A (after UV) |
 | `fig25-06-xray-tube.png` | 6 | Fig. 25.6 X-ray tube and production | **Animate:** electrons hit heavy-metal target, X-rays leave |
 | `fig25-07-xray-imaging.png` | 6 | Fig. 25.7 Hand radiograph and absorption sketch | **Animate:** X-rays through flesh vs bone onto film |
 | `table25-01-subatomic-particles.png` | 12 | Table 25.1 Proton / neutron / electron mass and charge | Static table; OCR of numbers is unreliable - check scan |

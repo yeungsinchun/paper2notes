@@ -90,7 +90,8 @@ Close 25.3 with Table 25.6 as one interactive comparison, not a wall of prose.
 ## Summary, common mistakes, chapter exercise
 
 - **Visual:** Rebuild the summary infographic (X-ray tube, nuclide notation, three decay equations, E/B paths). Common-mistake panels: (1) 5 mm Al does not prove “β only” without eliminating others; (2) β electron is nuclear, not orbital; (3) wait for Ch.26 for half-life graphs.
-- **Checks:** Use 2–3 Chapter Exercise items that need a diagram (decay-series isotope chain; E/B split; absorber logic). Do not dump the whole exercise.
+- **Checks:** Use 2–3 Chapter Exercise items that need a diagram (E/B split; absorber logic). Do not dump the whole exercise.
+- Gap: Chapter-exercise answer keys are not in the OCR. Do not score the V-W-X-Y-Z isotope-chain item until a source-backed key exists.
 
 ---
 
