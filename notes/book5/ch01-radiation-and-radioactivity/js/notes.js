@@ -502,43 +502,62 @@
     var talk = $("#flow-talk");
     if (!svg) return;
     var i = 0;
-    var side = null;
+    var hasAlpha = null;
+    var hasBeta = null;
+
+    function talkText() {
+      if (hasAlpha === true && i <= 1) {
+        return "Significant drop at paper → α is present. Still insert Al, then Pb.";
+      }
+      if (hasAlpha === true && i === 2) {
+        return "α already found. Insert ~5 mm Al to test for β, then Pb for γ.";
+      }
+      if (hasBeta === false && i === 4) {
+        return "No drop at Al → no β. Insert ~25 mm Pb to test for γ.";
+      }
+      return flowSteps[i].text;
+    }
 
     function show() {
       $all(".node", svg).forEach(function (n) {
         n.classList.remove("active", "done");
         var raw = n.getAttribute("data-step");
         if (raw === "alpha") {
-          if (side === "alpha") n.classList.add("active");
+          if (hasAlpha === true) n.classList.add(i <= 1 ? "active" : "done");
           return;
         }
         var idx = Number(raw);
+        if (idx === 1 && hasAlpha === true && i <= 1) {
+          n.classList.add("done");
+          return;
+        }
+        if (idx === 3 && hasBeta !== true) return;
         if (idx < i) n.classList.add("done");
         if (idx === i) n.classList.add("active");
       });
       $all(".edge", svg).forEach(function (e) {
         var branch = e.getAttribute("data-side");
-        if (branch) {
-          e.classList.toggle("lit", side === branch);
-          return;
-        }
         var need = Number(e.getAttribute("data-until"));
-        e.classList.toggle("lit", i >= need);
+        var lit = false;
+        if (branch === "alpha") lit = hasAlpha === true;
+        else if (branch === "no-alpha") lit = hasAlpha === false && i >= 2;
+        else if (branch === "beta") lit = hasBeta === true && i >= need;
+        else if (branch === "no-beta") lit = hasBeta === false && i >= 4;
+        else lit = i >= need;
+        e.classList.toggle("lit", lit);
       });
-      if (talk) {
-        talk.textContent = side === "alpha"
-          ? "Significant drop at paper → α is present. Still insert Al, then Pb."
-          : flowSteps[i].text;
-      }
+      if (talk) talk.textContent = talkText();
     }
 
     $("#flow-next") && $("#flow-next").addEventListener("click", function () {
-      side = null;
+      if (i === 1 && hasAlpha === null) hasAlpha = false;
+      if (i === 2 && hasBeta === null) hasBeta = true;
       i = Math.min(flowSteps.length - 1, i + 1);
       show();
     });
     $("#flow-reset") && $("#flow-reset").addEventListener("click", function () {
-      side = null;
+      hasAlpha = null;
+      hasBeta = null;
       i = 0;
       show();
     });
@@ -546,13 +565,26 @@
       n.addEventListener("click", function () {
         var raw = n.getAttribute("data-step");
         if (raw === "alpha") {
-          side = "alpha";
+          hasAlpha = true;
+          hasBeta = null;
           i = 1;
           show();
           return;
         }
-        side = null;
-        i = Number(raw);
+        var idx = Number(raw);
+        if (idx <= 1) {
+          hasAlpha = null;
+          hasBeta = null;
+        } else if (idx === 2) {
+          if (hasAlpha === null) hasAlpha = false;
+          hasBeta = null;
+        } else if (idx === 3) {
+          hasBeta = true;
+          if (hasAlpha === null) hasAlpha = false;
+        } else if (idx === 4) {
+          if (hasBeta === null) hasBeta = false;
+        }
+        i = idx;
         show();
       });
     });
