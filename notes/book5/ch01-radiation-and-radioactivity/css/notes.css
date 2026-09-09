@@ -383,13 +383,18 @@ tr.on td { background: #dff3ee; }
 }
 
 .knock .ray { transform-box: fill-box; transform-origin: left center; }
+.knock .eject,
+.pair .e2 {
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
 .play .knock .ray { animation: shoot 1.1s ease-out both; }
 .play .knock .eject { animation: fly 1.1s 0.45s ease-out both; }
 .play .knock .ion { animation: flush 0.4s 0.45s linear both; }
 .play .tube .e-beam { animation: beam 1.4s linear infinite; }
 .play .tube .xburst { animation: burst 1.4s ease-in infinite; }
 .play .pair .e2 { animation: capture 1.2s 0.5s ease-out both; }
-.play .pair .minus { animation: flush 0.4s 0.95s linear both; }
+.play .pair .minus { animation: flush-minus 0.4s 0.95s linear both; }
 .play .decay-a .he { animation: spit-a 1.15s ease-out both; }
 .play .decay-b .beta { animation: spit-b 1s ease-out both; }
 .play .decay-g .wave { animation: burst 1.4s ease-out both; }
@@ -402,15 +407,19 @@ tr.on td { background: #dff3ee; }
 }
 @keyframes fly {
   from { opacity: 0; transform: translate(0, 0); }
-  to { opacity: 1; transform: translate(92px, 42px); }
+  to { opacity: 1; transform: translate(14.375%, 19.090909%); }
 }
 @keyframes capture {
   from { opacity: 0; transform: translate(0, 0); }
-  to { opacity: 1; transform: translate(118px, 58px); }
+  to { opacity: 1; transform: translate(26.25%, 34%); }
 }
 @keyframes flush {
   from { fill: #e0a04a; }
   to { fill: #c0392b; }
+}
+@keyframes flush-minus {
+  from { fill: #e0a04a; }
+  to { fill: #2a62a8; }
 }
 @keyframes beam {
   from { stroke-dashoffset: 40; }

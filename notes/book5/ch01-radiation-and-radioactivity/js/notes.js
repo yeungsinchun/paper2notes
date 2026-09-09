@@ -739,6 +739,9 @@
       $all("[data-b-mark]").forEach(function (t) {
         t.textContent = into ? "×  B into the page" : "·  B out of the page";
       });
+      $all("[data-b-dots] text").forEach(function (t) {
+        t.textContent = into ? "×" : "·";
+      });
     }
 
     if (flip) {
