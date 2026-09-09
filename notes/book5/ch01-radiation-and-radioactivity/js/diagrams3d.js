@@ -761,6 +761,7 @@
     meter.position.set(3.45, 0.1, 0.15);
     gfx.scene.add(top, bot, source, gas, electron, meter);
     var kind = "alpha";
+    var sourceHud = host.querySelector('[data-hud="source"]');
     var t0 = performance.now();
     function needleRad() {
       return (kind === "alpha" ? -38 : -14) * Math.PI / 180;
@@ -770,6 +771,7 @@
     }
     function setKind(next) {
       kind = next === "beta" ? "beta" : "alpha";
+      if (sourceHud) sourceHud.textContent = kind === "beta" ? "β source" : "α source";
       restart();
     }
     function frame(now) {
@@ -786,6 +788,7 @@
     function snapshot() {
       return {
         kind: kind,
+        sourceLabel: sourceHud ? sourceHud.textContent : "",
         ionY: gas.position.y,
         electronY: electron.position.y,
         ionEndY: ionEnd.y,

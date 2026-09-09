@@ -232,6 +232,13 @@ test("25.1 imaging is X-rays down onto bone beside flesh, white film under bone"
     var filmB = box(document.getElementById("film-under-bone"));
     var filmF = box(document.getElementById("film-under-flesh"));
     var rays = Array.from(document.querySelectorAll("#imaging-vis [data-xray]"));
+    function inRect(pt, box) {
+      return pt.x >= box.x && pt.x <= box.x + box.w && pt.y >= box.y && pt.y <= box.y + box.h;
+    }
+    var ends = rays.map(function (p) {
+      var pt = p.getPointAtLength(p.getTotalLength());
+      return { x: pt.x, y: pt.y };
+    });
     return {
       bone: bone,
       flesh: flesh,
@@ -240,6 +247,9 @@ test("25.1 imaging is X-rays down onto bone beside flesh, white film under bone"
       boneLum: lum(rgb(filmB.fill)),
       fleshLum: lum(rgb(filmF.fill)),
       rayCount: rays.length,
+      stopInBone: ends.filter(function (pt) { return inRect(pt, bone); }).length,
+      stopInFlesh: ends.filter(function (pt) { return inRect(pt, flesh); }).length,
+      reachFilm: ends.filter(function (pt) { return pt.y >= filmB.y - 1; }).length,
       raysDown: rays.every(function (p) {
         var b = p.getBBox();
         return b.height > b.width * 1.2;
@@ -257,6 +267,9 @@ test("25.1 imaging is X-rays down onto bone beside flesh, white film under bone"
   assert.ok(img.boneLum > 180, "film under bone should stay white");
   assert.ok(img.fleshLum < 80, "film under flesh should blacken");
   assert.equal(img.rayCount, 5);
+  assert.equal(img.stopInFlesh, 0, "flesh must transmit, not absorb, an X-ray");
+  assert.equal(img.stopInBone, 3, "three X-rays should stop inside bone");
+  assert.equal(img.reachFilm, 2, "both flesh rays should reach the film");
   assert.equal(img.raysDown, true);
   assert.ok(img.texts.includes("X-rays"));
   assert.ok(img.texts.includes("photographic film"));
@@ -591,10 +604,13 @@ test("chapter map, summary, and concept-check scoring are the public notes surfa
   await cdp.goto(pageUrl("index.html"));
   const map = await cdp.evaluate(`({
     title: document.querySelector('h1').textContent,
+    brand: document.querySelector('.brand') && document.querySelector('.brand').textContent,
     lede: document.querySelector('.lede') && document.querySelector('.lede').textContent,
     links: Array.from(document.querySelectorAll('.toc a')).map((a) => a.getAttribute('href'))
   })`);
   assert.equal(map.title, "Radiation and Radioactivity");
+  assert.match(map.brand, /Book 5/);
+  assert.doesNotMatch(map.brand, /syllabus/i);
   assert.match(map.lede, /Ionizing radiation/);
   assert.doesNotMatch(map.lede, /textbook order/i);
   assert.doesNotMatch(map.lede, /book cut/i);
@@ -681,11 +697,13 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
   near(alphaIons.ionY, alphaIons.ionEndY, 0.12);
   near(alphaIons.electronY, alphaIons.electronEndY, 0.12);
   near(alphaIons.needleDeg, -38, 1);
+  assert.match(alphaIons.sourceLabel, /α source/);
 
   await cdp.evaluate("document.querySelector('[data-current=\"beta\"]').click()");
   await cdp.evaluate("new Promise((r) => setTimeout(r, 1600))");
   const betaIons = await cdp.evaluate("window.NotesScenes.current.snapshot()");
   assert.equal(betaIons.kind, "beta");
+  assert.match(betaIons.sourceLabel, /β source/);
   near(betaIons.ionY, alphaIons.ionEndY, 0.12);
   near(betaIons.electronY, alphaIons.electronEndY, 0.12);
   near(betaIons.ionEndY, alphaIons.ionEndY, 0.001);
