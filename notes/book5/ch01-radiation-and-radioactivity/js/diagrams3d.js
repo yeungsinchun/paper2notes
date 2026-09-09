@@ -132,25 +132,6 @@
     return mesh;
   }
 
-  function makeWavyRay(from, dir, length, radius) {
-    var nrm = dir.clone().normalize();
-    var side = new THREE.Vector3().crossVectors(nrm, new THREE.Vector3(0, 0, 1));
-    if (side.lengthSq() < 1e-6) side.set(0, 1, 0);
-    side.normalize();
-    var pts = [];
-    var k;
-    for (k = 0; k <= 24; k += 1) {
-      var t = k / 24;
-      var p = from.clone().addScaledVector(nrm, t * length);
-      p.addScaledVector(side, 0.055 * Math.sin(t * Math.PI * 5));
-      pts.push(p);
-    }
-    return new THREE.Mesh(
-      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 48, radius || 0.045, 8, false),
-      new THREE.MeshBasicMaterial({ color: 0xd4a017, transparent: true, opacity: 0.95 })
-    );
-  }
-
   function fit2d(canvas) {
     var rect = canvas.getBoundingClientRect();
     var w = Math.max(320, Math.floor(rect.width || canvas.width || 640));
@@ -398,20 +379,38 @@
     var waveAnchor = new THREE.Vector3(-2.7, 1.2, 0);
     var eAnchor = new THREE.Vector3(2.55, 1.2, 0);
     var goldMat = new THREE.LineBasicMaterial({ color: 0xd4a017 });
-    var wavePositions = new Float32Array(53 * 3);
+    var WAVE_N = 80;
+    var WAVE_X0 = -5.25;
+    var WAVE_X1 = -0.35;
+    var PACKET_SIGMA = 0.38;
+    var PACKET_K = 9.5;
+    var PACKET_C = 2.8;
+    var wavePositions = new Float32Array((WAVE_N + 1) * 3);
     var waveGeom = new THREE.BufferGeometry();
     waveGeom.setAttribute("position", new THREE.BufferAttribute(wavePositions, 3));
     var waveMesh = new THREE.Line(waveGeom, goldMat);
     gfx.scene.add(waveMesh);
-    function rebuildWave(phase) {
+    function rebuildWave(t) {
+      var travel = WAVE_X1 - WAVE_X0 + 6 * PACKET_SIGMA;
+      var center = WAVE_X0 - 2.5 * PACKET_SIGMA + ((t * PACKET_C) % travel);
+      var peakX = center;
+      var peakA = 0;
       var i;
-      for (i = 0; i <= 52; i += 1) {
-        var x = -5.25 + i * 0.095;
-        var y = 0.58 * Math.sin(i * 0.4 - phase);
+      for (i = 0; i <= WAVE_N; i += 1) {
+        var x = WAVE_X0 + (i / WAVE_N) * (WAVE_X1 - WAVE_X0);
+        var dx = x - center;
+        var env = Math.exp(-(dx * dx) / (2 * PACKET_SIGMA * PACKET_SIGMA));
+        var y = 0.62 * env * Math.sin(PACKET_K * x - PACKET_K * PACKET_C * t);
         wavePositions[i * 3] = x;
         wavePositions[i * 3 + 1] = y;
         wavePositions[i * 3 + 2] = 0;
+        var a = Math.abs(y);
+        if (a > peakA) {
+          peakA = a;
+          peakX = x;
+        }
       }
+      waveAnchor.set(peakX, 0.92, 0);
       waveGeom.attributes.position.needsUpdate = true;
       waveGeom.computeBoundingSphere();
     }
@@ -432,7 +431,7 @@
     function restart() { t0 = performance.now(); }
     function frame(now) {
       var t = (now - t0) / 1000;
-      rebuildWave(t * 4.4);
+      rebuildWave(t);
       electrons.forEach(function (mesh, idx) {
         var u = (t * 0.58 + idx * 0.125) % 1;
         mesh.position.set(lerp(0.55, 5.15, u), 0, 0);
@@ -442,10 +441,43 @@
       gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
     }
+    function snapshot() {
+      var minX = Infinity;
+      var maxX = -Infinity;
+      var sumX = 0;
+      var wsum = 0;
+      var peakA = 0;
+      var peakX = 0;
+      var i;
+      for (i = 0; i <= WAVE_N; i += 1) {
+        var x = wavePositions[i * 3];
+        var y = Math.abs(wavePositions[i * 3 + 1]);
+        if (y > peakA) {
+          peakA = y;
+          peakX = x;
+        }
+        if (y > 0.08) {
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          sumX += x * y;
+          wsum += y;
+        }
+      }
+      var v = waveAnchor.clone().project(gfx.camera);
+      return {
+        peakA: peakA,
+        peakX: peakX,
+        centroidX: wsum ? sumX / wsum : 0,
+        span: maxX > minX ? maxX - minX : 0,
+        track: WAVE_X1 - WAVE_X0,
+        waveHud: hudWave ? parseFloat(hudWave.style.left) : null,
+        waveProj: (v.x * 0.5 + 0.5) * (canvas.clientWidth || 1)
+      };
+    }
     hostReplay(host, restart);
     rebuildWave(0);
     requestAnimationFrame(frame);
-    scenes.beams = { replay: restart };
+    scenes.beams = { replay: restart, snapshot: snapshot };
   }
 
   function atom(host) {
@@ -855,6 +887,10 @@
     gfx.scene.add(top, bot, source, gas, electron, meter);
     var kind = "alpha";
     var sourceHud = host.querySelector('[data-hud="source"]');
+    var minusHud = host.querySelector('[data-hud="minus"]');
+    var plusHud = host.querySelector('[data-hud="plus"]');
+    var minusAnchor = top.position.clone().add(new THREE.Vector3(2.2, 0.28, 0));
+    var plusAnchor = bot.position.clone().add(new THREE.Vector3(2.2, -0.28, 0));
     var t0 = performance.now();
     function needleRad() {
       return (kind === "alpha" ? -38 : -14) * Math.PI / 180;
@@ -867,6 +903,13 @@
       if (sourceHud) sourceHud.textContent = kind === "beta" ? "β source" : "α source";
       restart();
     }
+    function projectXY(world) {
+      var v = world.clone().project(gfx.camera);
+      return {
+        x: (v.x * 0.5 + 0.5) * (canvas.clientWidth || 1),
+        y: (-v.y * 0.5 + 0.5) * (canvas.clientHeight || 1)
+      };
+    }
     function frame(now) {
       var t = ((now - t0) / 1000) % 2.4;
       var knock = smoothstep((t - 0.45) / 0.95);
@@ -876,10 +919,14 @@
       gas.material.color.setHex(knock > 0.04 ? 0xc0392b : 0xe0a04a);
       needlePivot.rotation.z = needleRad();
       placeHud(sourceHud, canvas, gfx.camera, source.position.clone().add(new THREE.Vector3(0, -0.55, 0)));
+      placeHud(minusHud, canvas, gfx.camera, minusAnchor);
+      placeHud(plusHud, canvas, gfx.camera, plusAnchor);
       gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
     }
     function snapshot() {
+      var minusP = projectXY(minusAnchor);
+      var plusP = projectXY(plusAnchor);
       return {
         kind: kind,
         sourceLabel: sourceHud ? sourceHud.textContent : "",
@@ -887,7 +934,15 @@
         electronY: electron.position.y,
         ionEndY: ionEnd.y,
         electronEndY: electronEnd.y,
-        needleDeg: needlePivot.rotation.z * 180 / Math.PI
+        needleDeg: needlePivot.rotation.z * 180 / Math.PI,
+        minusHud: minusHud ? parseFloat(minusHud.style.left) : null,
+        plusHud: plusHud ? parseFloat(plusHud.style.left) : null,
+        minusHudTop: minusHud ? parseFloat(minusHud.style.top) : null,
+        plusHudTop: plusHud ? parseFloat(plusHud.style.top) : null,
+        minusProj: minusP.x,
+        plusProj: plusP.x,
+        minusProjY: minusP.y,
+        plusProjY: plusP.y
       };
     }
     hostReplay(host, restart);

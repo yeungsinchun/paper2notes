@@ -722,6 +722,23 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
 
   await cdp.goto(pageUrl("25-1.html"));
   await cdp.evaluate("new Promise((r) => requestAnimationFrame(() => setTimeout(r, 80)))");
+  const beamA = await waitFor(async () => {
+    const snap = await cdp.evaluate("window.NotesScenes.beams.snapshot()");
+    if (!(snap.peakA > 0.25 && snap.span > 0.4)) throw new Error("packet not on screen yet");
+    return snap;
+  }, 2500, "localized EM wave packet");
+  assert.ok(
+    beamA.span < beamA.track * 0.62,
+    "light beam should be a localized packet, span=" + beamA.span + " track=" + beamA.track
+  );
+  near(beamA.waveHud, beamA.waveProj, 12);
+  await cdp.evaluate("new Promise((r) => setTimeout(r, 350))");
+  const beamB = await cdp.evaluate("window.NotesScenes.beams.snapshot()");
+  assert.ok(
+    Math.abs(beamB.centroidX - beamA.centroidX) > 0.2 || Math.abs(beamB.peakX - beamA.peakX) > 0.2,
+    "wave packet should travel, " + beamA.centroidX + " -> " + beamB.centroidX
+  );
+
   const tube = await cdp.evaluate("window.NotesScenes.tube.snapshot()");
   near(tube.gunHud, tube.gunProj, 10);
   near(tube.electronsHud, tube.electronsProj, 10);
@@ -740,6 +757,14 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
   near(alphaIons.electronY, alphaIons.electronEndY, 0.12);
   near(alphaIons.needleDeg, -38, 1);
   assert.match(alphaIons.sourceLabel, /α source/);
+  near(alphaIons.minusHud, alphaIons.minusProj, 10);
+  near(alphaIons.plusHud, alphaIons.plusProj, 10);
+  near(alphaIons.minusHudTop, alphaIons.minusProjY, 10);
+  near(alphaIons.plusHudTop, alphaIons.plusProjY, 10);
+  assert.ok(
+    alphaIons.minusHudTop < alphaIons.plusHudTop,
+    "− plate label should sit on the upper plate"
+  );
 
   await cdp.evaluate("document.querySelector('[data-current=\"beta\"]').click()");
   await cdp.evaluate("new Promise((r) => setTimeout(r, 1600))");

@@ -517,16 +517,6 @@
     return Math.max(bg, Math.round(count));
   }
 
-  function setRay(id, x2, faded) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    el.setAttribute("x2", String(x2));
-    el.setAttribute("opacity", faded ? "0.35" : "1");
-    if (id === "ray-g") {
-      el.setAttribute("stroke-dasharray", faded ? "6 5" : "0");
-    }
-  }
-
   function initAbsorbers() {
     var rateEl = $("#abs-rate");
     var note = $("#abs-note");
@@ -536,25 +526,6 @@
     var al = false;
     var pb = false;
     var bg = 61;
-    var paperX = 250;
-    var alX = 330;
-    var pbX = 430;
-    var gmX = 560;
-
-    function stopX(kind) {
-      if (kind === "a") {
-        if (paper) return paperX;
-        if (al) return alX;
-        if (pb) return pbX;
-        return gmX;
-      }
-      if (kind === "b") {
-        if (al) return alX;
-        if (pb) return pbX;
-        return gmX;
-      }
-      return gmX;
-    }
 
     function render() {
       var r = jitter(absorberCount(src, paper, al, pb, bg));
@@ -567,15 +538,6 @@
         note.textContent = src.label + (bits.length ? "  ·  " + bits.join(", ") : "  ·  air only") +
           "  ·  background ≈ " + bg + " cpm";
       }
-      setRay("ray-a", src.a ? stopX("a") : 90, !src.a);
-      setRay("ray-b", src.b ? stopX("b") : 90, !src.b);
-      setRay("ray-g", src.g ? stopX("g") : 90, !src.g || pb);
-      var paperSlab = $("#slab-paper");
-      var alSlab = $("#slab-al");
-      var pbSlab = $("#slab-pb");
-      if (paperSlab) paperSlab.setAttribute("opacity", paper ? "1" : "0.22");
-      if (alSlab) alSlab.setAttribute("opacity", al ? "1" : "0.22");
-      if (pbSlab) pbSlab.setAttribute("opacity", pb ? "1" : "0.22");
       if (window.NotesScenes && window.NotesScenes.absorbers) {
         window.NotesScenes.absorbers.set({
           hasA: !!src.a,
