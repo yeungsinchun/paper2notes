@@ -378,7 +378,7 @@
     var hudAtom = host.querySelector('[data-hud="atom-scale"]');
     var hudNucleus = host.querySelector('[data-hud="nucleus-scale"]');
     var atomAnchor = new THREE.Vector3(-1.55, 2.15, 0);
-    var nucleusAnchor = new THREE.Vector3(0.28, 0.42, 0);
+    var nucleusAnchor = new THREE.Vector3(0.16, 0.08, 0);
     var angle = 0;
     function frame() {
       angle += 0.01;
@@ -398,11 +398,15 @@
       var rim = new THREE.Vector3(0.14, 0, 0).project(gfx.camera);
       var nuc = nucleusAnchor.clone().project(gfx.camera);
       var w = canvas.clientWidth || 1;
+      var h = canvas.clientHeight || 1;
       return {
         zoom: gfx.camera.zoom,
         nucleusPx: Math.abs(rim.x - origin.x) * 0.5 * w,
         nucleusHud: hudNucleus ? parseFloat(hudNucleus.style.left) : null,
-        nucleusProjX: (nuc.x * 0.5 + 0.5) * w
+        nucleusHudTop: hudNucleus ? parseFloat(hudNucleus.style.top) : null,
+        nucleusProjX: (nuc.x * 0.5 + 0.5) * w,
+        nucleusNdcY: nuc.y,
+        canvasH: h
       };
     }
     requestAnimationFrame(frame);
@@ -733,7 +737,7 @@
     );
     wire.rotation.z = Math.PI / 2;
     var argon = ball(0.22, 0xe0a04a);
-    var argonHome = new THREE.Vector3(-1.6, 0.15, 0);
+    var argonHome = new THREE.Vector3(-1.6, 0.72, 0);
     argon.position.copy(argonHome);
     var electron = ball(0.12, 0x2a62a8);
     electron.position.copy(argonHome);

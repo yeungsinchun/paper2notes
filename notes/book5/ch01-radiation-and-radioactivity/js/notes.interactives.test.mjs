@@ -594,6 +594,11 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
     "zoom 8 should magnify the nucleus, " + zoom1.nucleusPx + " -> " + zoom8.nucleusPx
   );
   near(zoom8.zoom, 8, 0.05);
+  assert.ok(Math.abs(zoom8.nucleusNdcY) < 1, "nucleus label should stay in the zoomed frustum, ndcY=" + zoom8.nucleusNdcY);
+  assert.ok(
+    zoom8.nucleusHudTop > 0 && zoom8.nucleusHudTop < zoom8.canvasH,
+    "nucleus label should stay on canvas at zoom 8, top=" + zoom8.nucleusHudTop
+  );
 
   await cdp.goto(pageUrl("25-1.html"));
   await cdp.evaluate("new Promise((r) => requestAnimationFrame(() => setTimeout(r, 80)))");
@@ -625,6 +630,12 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
   assert.ok(Math.abs(betaIons.needleDeg) < Math.abs(alphaIons.needleDeg), "β needle must show a smaller current");
 
   await cdp.evaluate("window.NotesScenes.gm.replay()");
+  await cdp.evaluate("new Promise((r) => requestAnimationFrame(() => setTimeout(r, 40)))");
+  const pulseStart = await cdp.evaluate("window.NotesScenes.gm.snapshot()");
+  assert.ok(
+    pulseStart.electronY > 0.45,
+    "electron should start away from the anode wire, y=" + pulseStart.electronY
+  );
   await cdp.evaluate("new Promise((r) => setTimeout(r, 1100))");
   const pulse = await cdp.evaluate("window.NotesScenes.gm.snapshot()");
   near(pulse.electronX, pulse.homeX, 0.08);
@@ -632,6 +643,10 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
   near(pulse.electronY, 0.08, 0.08);
   assert.ok(pulse.argonY > 0.5, "positive ion should move out toward the case, y=" + pulse.argonY);
   assert.ok(Math.abs(pulse.electronX) > 1, "electron must not slide down the tube axis, x=" + pulse.electronX);
+  assert.ok(
+    pulseStart.electronY - pulse.electronY > 0.35,
+    "electron should travel radially onto the wire, " + pulseStart.electronY + " -> " + pulse.electronY
+  );
 
   if (evidenceDir) {
     await cdp.goto(pageUrl("25-2.html"));
