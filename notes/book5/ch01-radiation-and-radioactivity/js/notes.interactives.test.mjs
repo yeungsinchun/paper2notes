@@ -389,6 +389,13 @@ test("25.3 identification graph keeps taken yes/no edges", async () => {
   assert.match(state.talk, /α is present/);
   assert.doesNotMatch(state.talk, /700 → 700/);
 
+  await cdp.evaluate("document.querySelector('#id-flow .node[data-step=\"1\"]').dispatchEvent(new Event('click'))");
+  state = await flowState();
+  assert.ok(state.alphaEdges.every(Boolean));
+  assert.ok(state.noAlpha.every((lit) => !lit));
+  assert.match(state.talk, /α is present/);
+  assert.doesNotMatch(state.talk, /700 → 700/);
+
   await cdp.evaluate("document.querySelector('#id-flow .node[data-step=\"2\"]').dispatchEvent(new Event('click'))");
   state = await flowState();
   assert.equal(state.al.active, true);
@@ -569,6 +576,77 @@ test("chapter map, summary, and concept-check scoring are the public notes surfa
     await cdp.evaluate("document.querySelector('[data-badge=\"beta\"]').click()");
     await cdp.screenshot(path.join(evidenceDir, "25-3-film-badge-beta.png"), "#badge");
     await cdp.screenshot(path.join(evidenceDir, "25-3-eb-deflection.png"), "#fields");
+  }
+});
+
+test("3d scenes magnify, label the tube, keep β drift, and pulse radially", async () => {
+  await cdp.goto(pageUrl("25-2.html"));
+  await cdp.evaluate("new Promise((r) => requestAnimationFrame(() => setTimeout(r, 80)))");
+  const zoom1 = await cdp.evaluate("window.NotesScenes.atom.snapshot()");
+  assert.ok(zoom1.nucleusPx > 2, "nucleus should be visible at zoom 1, px=" + zoom1.nucleusPx);
+  near(zoom1.nucleusHud, zoom1.nucleusProjX, 8);
+
+  await cdp.evaluate("document.getElementById('atom-zoom-slider').value = 8");
+  await cdp.evaluate("new Promise((r) => requestAnimationFrame(() => setTimeout(r, 80)))");
+  const zoom8 = await cdp.evaluate("window.NotesScenes.atom.snapshot()");
+  assert.ok(
+    zoom8.nucleusPx > zoom1.nucleusPx * 5,
+    "zoom 8 should magnify the nucleus, " + zoom1.nucleusPx + " -> " + zoom8.nucleusPx
+  );
+  near(zoom8.zoom, 8, 0.05);
+
+  await cdp.goto(pageUrl("25-1.html"));
+  await cdp.evaluate("new Promise((r) => requestAnimationFrame(() => setTimeout(r, 80)))");
+  const tube = await cdp.evaluate("window.NotesScenes.tube.snapshot()");
+  near(tube.gunHud, tube.gunProj, 10);
+  near(tube.electronsHud, tube.electronsProj, 10);
+  near(tube.targetHud, tube.targetProj, 10);
+  near(tube.xraysHud, tube.xraysProj, 10);
+  assert.ok(tube.gunHud < tube.electronsHud, "gun label should sit left of electrons");
+  assert.ok(tube.electronsHud < tube.targetHud, "electrons label should sit left of the target");
+  assert.ok(tube.targetHud < tube.xraysHud, "target label should sit left of the X-rays");
+
+  await cdp.goto(pageUrl("25-3.html"));
+  await cdp.evaluate("window.NotesScenes.current.setKind('alpha')");
+  await cdp.evaluate("new Promise((r) => setTimeout(r, 1600))");
+  const alphaIons = await cdp.evaluate("window.NotesScenes.current.snapshot()");
+  near(alphaIons.ionY, alphaIons.ionEndY, 0.12);
+  near(alphaIons.electronY, alphaIons.electronEndY, 0.12);
+  near(alphaIons.needleDeg, -38, 1);
+
+  await cdp.evaluate("document.querySelector('[data-current=\"beta\"]').click()");
+  await cdp.evaluate("new Promise((r) => setTimeout(r, 1600))");
+  const betaIons = await cdp.evaluate("window.NotesScenes.current.snapshot()");
+  assert.equal(betaIons.kind, "beta");
+  near(betaIons.ionY, alphaIons.ionEndY, 0.12);
+  near(betaIons.electronY, alphaIons.electronEndY, 0.12);
+  near(betaIons.ionEndY, alphaIons.ionEndY, 0.001);
+  near(betaIons.needleDeg, -14, 1);
+  assert.ok(Math.abs(betaIons.needleDeg) < Math.abs(alphaIons.needleDeg), "β needle must show a smaller current");
+
+  await cdp.evaluate("window.NotesScenes.gm.replay()");
+  await cdp.evaluate("new Promise((r) => setTimeout(r, 1100))");
+  const pulse = await cdp.evaluate("window.NotesScenes.gm.snapshot()");
+  near(pulse.electronX, pulse.homeX, 0.08);
+  near(pulse.argonX, pulse.homeX, 0.08);
+  near(pulse.electronY, 0.08, 0.08);
+  assert.ok(pulse.argonY > 0.5, "positive ion should move out toward the case, y=" + pulse.argonY);
+  assert.ok(Math.abs(pulse.electronX) > 1, "electron must not slide down the tube axis, x=" + pulse.electronX);
+
+  if (evidenceDir) {
+    await cdp.goto(pageUrl("25-2.html"));
+    await cdp.evaluate("document.getElementById('atom-zoom-slider').value = 8");
+    await cdp.evaluate("new Promise((r) => requestAnimationFrame(() => setTimeout(r, 80)))");
+    await cdp.screenshot(path.join(evidenceDir, "25-2-atom-zoom-nucleus.png"), "#atom");
+    await cdp.goto(pageUrl("25-1.html"));
+    await cdp.screenshot(path.join(evidenceDir, "25-1-xray-tube-hud.png"), "#xray-tube");
+    await cdp.goto(pageUrl("25-3.html"));
+    await cdp.evaluate("document.querySelector('[data-current=\"beta\"]').click()");
+    await cdp.evaluate("new Promise((r) => setTimeout(r, 1600))");
+    await cdp.screenshot(path.join(evidenceDir, "25-3-current-beta-needle.png"), "#current");
+    await cdp.evaluate("window.NotesScenes.gm.replay()");
+    await cdp.evaluate("new Promise((r) => setTimeout(r, 1100))");
+    await cdp.screenshot(path.join(evidenceDir, "25-3-gm-radial-pulse.png"), "#gm");
   }
 });
 });

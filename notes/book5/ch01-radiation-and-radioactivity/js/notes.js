@@ -677,8 +677,10 @@
           return;
         }
         var idx = Number(raw);
-        if (idx <= 1) {
+        if (idx === 0) {
           hasAlpha = null;
+          hasBeta = null;
+        } else if (idx === 1) {
           hasBeta = null;
         } else if (idx === 2) {
           if (hasAlpha === null) hasAlpha = false;

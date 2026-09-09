@@ -40,7 +40,7 @@
     return mesh;
   }
 
-  function stage(canvas) {
+  function stage(canvas, fit) {
     var scene = new THREE.Scene();
     scene.background = new THREE.Color(0xfffaf1);
     var camera = new THREE.OrthographicCamera(-7.2, 7.2, 3.6, -3.6, 0.1, 40);
@@ -55,13 +55,28 @@
     var fill = new THREE.DirectionalLight(0x9bb6c4, 0.35);
     fill.position.set(6, -2, 4);
     scene.add(fill);
+    var contentHalfH = (fit && fit.halfH != null) ? fit.halfH : 3.6;
+    var contentHalfW = (fit && fit.halfW != null) ? fit.halfW : null;
     function resize() {
       var w = canvas.clientWidth || canvas.width;
       var h = canvas.clientHeight || canvas.height;
       renderer.setSize(w, h, false);
       var aspect = w / Math.max(h, 1);
-      var halfH = 3.6;
-      var halfW = halfH * aspect;
+      var halfH;
+      var halfW;
+      if (contentHalfW != null) {
+        var boxAspect = contentHalfW / Math.max(contentHalfH, 0.01);
+        if (aspect >= boxAspect) {
+          halfH = contentHalfH;
+          halfW = halfH * aspect;
+        } else {
+          halfW = contentHalfW;
+          halfH = halfW / aspect;
+        }
+      } else {
+        halfH = contentHalfH;
+        halfW = halfH * aspect;
+      }
       camera.left = -halfW;
       camera.right = halfW;
       camera.top = halfH;
@@ -343,7 +358,7 @@
   function atom(host) {
     if (!THREE) return;
     var canvas = host.querySelector("canvas");
-    var gfx = stage(canvas);
+    var gfx = stage(canvas, { halfW: 2.6, halfH: 2.6 });
     gfx.camera.position.set(2.2, 2.4, 10);
     gfx.camera.lookAt(0, 0, 0);
     var nucleus = new THREE.Group();
@@ -360,6 +375,10 @@
     outer.rotation.y = 0.5;
     gfx.scene.add(nucleus, inner, outer, e1, e2, e3);
     var slider = document.getElementById("atom-zoom-slider");
+    var hudAtom = host.querySelector('[data-hud="atom-scale"]');
+    var hudNucleus = host.querySelector('[data-hud="nucleus-scale"]');
+    var atomAnchor = new THREE.Vector3(-1.55, 2.15, 0);
+    var nucleusAnchor = new THREE.Vector3(0.28, 0.42, 0);
     var angle = 0;
     function frame() {
       angle += 0.01;
@@ -367,21 +386,43 @@
       e2.position.set(Math.cos(angle + 2.1) * 2.05, 0.2, Math.sin(angle + 2.1) * 2.05);
       e3.position.set(Math.cos(-angle + 4) * 2.05, -0.15, Math.sin(-angle + 4) * 2.05);
       var z = slider ? Number(slider.value) : 1;
-      gfx.camera.position.set(2.2 / z, 2.4 / z, Math.max(3.2, 10 / z));
-      gfx.camera.lookAt(0, 0, 0);
+      gfx.camera.zoom = Math.max(z, 0.01);
+      gfx.camera.updateProjectionMatrix();
+      placeHud(hudAtom, canvas, gfx.camera, atomAnchor);
+      placeHud(hudNucleus, canvas, gfx.camera, nucleusAnchor);
       gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
     }
+    function snapshot() {
+      var origin = new THREE.Vector3(0, 0, 0).project(gfx.camera);
+      var rim = new THREE.Vector3(0.14, 0, 0).project(gfx.camera);
+      var nuc = nucleusAnchor.clone().project(gfx.camera);
+      var w = canvas.clientWidth || 1;
+      return {
+        zoom: gfx.camera.zoom,
+        nucleusPx: Math.abs(rim.x - origin.x) * 0.5 * w,
+        nucleusHud: hudNucleus ? parseFloat(hudNucleus.style.left) : null,
+        nucleusProjX: (nuc.x * 0.5 + 0.5) * w
+      };
+    }
     requestAnimationFrame(frame);
-    scenes.atom = {};
+    scenes.atom = { snapshot: snapshot };
   }
 
   function tube(host) {
     if (!THREE) return;
     var canvas = host.querySelector("canvas");
-    var gfx = stage(canvas);
+    var gfx = stage(canvas, { halfW: 4.4, halfH: 2.5 });
     gfx.camera.position.set(0.2, 1.8, 11);
     gfx.camera.lookAt(0, 0, 0);
+    var hudGun = host.querySelector('[data-hud="gun"]');
+    var hudElectrons = host.querySelector('[data-hud="electrons"]');
+    var hudTarget = host.querySelector('[data-hud="target"]');
+    var hudXrays = host.querySelector('[data-hud="xrays"]');
+    var gunAnchor = new THREE.Vector3(-2.85, 0.55, 0);
+    var electronAnchor = new THREE.Vector3(-1.05, 0.55, 0);
+    var targetAnchor = new THREE.Vector3(0.35, 1.05, 0);
+    var xrayAnchor = new THREE.Vector3(1.7, -1.15, 0);
 
     var glassMat = new THREE.MeshStandardMaterial({
       color: 0xd5e3ea,
@@ -471,12 +512,32 @@
       xrays.forEach(function (ray, idx) {
         ray.material.opacity = 0.3 + 0.55 * Math.abs(Math.sin(t * 3.2 + idx));
       });
+      placeHud(hudGun, canvas, gfx.camera, gunAnchor);
+      placeHud(hudElectrons, canvas, gfx.camera, electronAnchor);
+      placeHud(hudTarget, canvas, gfx.camera, targetAnchor);
+      placeHud(hudXrays, canvas, gfx.camera, xrayAnchor);
       gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
     }
+    function projectX(world) {
+      var v = world.clone().project(gfx.camera);
+      return (v.x * 0.5 + 0.5) * (canvas.clientWidth || 1);
+    }
+    function snapshot() {
+      return {
+        gunHud: hudGun ? parseFloat(hudGun.style.left) : null,
+        gunProj: projectX(gunAnchor),
+        electronsHud: hudElectrons ? parseFloat(hudElectrons.style.left) : null,
+        electronsProj: projectX(electronAnchor),
+        targetHud: hudTarget ? parseFloat(hudTarget.style.left) : null,
+        targetProj: projectX(targetAnchor),
+        xraysHud: hudXrays ? parseFloat(hudXrays.style.left) : null,
+        xraysProj: projectX(xrayAnchor)
+      };
+    }
     hostReplay(host, restart);
     requestAnimationFrame(frame);
-    scenes.tube = { replay: restart };
+    scenes.tube = { replay: restart, snapshot: snapshot };
   }
 
   function nucleonCluster(protons, neutrons, spacing) {
@@ -598,9 +659,32 @@
     gas.position.copy(gasHome);
     var electron = ball(0.16, 0x2a62a8);
     electron.position.copy(gasHome);
-    gfx.scene.add(top, bot, source, gas, electron);
+    var ionEnd = new THREE.Vector3(0.5, 1.55, 0);
+    var electronEnd = new THREE.Vector3(0.9, -1.55, 0);
+    var face = new THREE.Mesh(
+      new THREE.CircleGeometry(0.58, 28),
+      new THREE.MeshStandardMaterial({ color: 0xf7f1e4, roughness: 0.55, side: THREE.DoubleSide })
+    );
+    var rim = new THREE.Mesh(
+      new THREE.TorusGeometry(0.58, 0.04, 8, 28),
+      new THREE.MeshStandardMaterial({ color: 0x4a5560 })
+    );
+    var needle = new THREE.Mesh(
+      new THREE.ConeGeometry(0.045, 0.78, 8),
+      new THREE.MeshStandardMaterial({ color: 0xc0392b })
+    );
+    needle.position.y = 0.22;
+    var needlePivot = new THREE.Group();
+    needlePivot.add(needle);
+    var meter = new THREE.Group();
+    meter.add(face, rim, needlePivot);
+    meter.position.set(3.45, 0.1, 0.15);
+    gfx.scene.add(top, bot, source, gas, electron, meter);
     var kind = "alpha";
     var t0 = performance.now();
+    function needleRad() {
+      return (kind === "alpha" ? -38 : -14) * Math.PI / 180;
+    }
     function restart() {
       t0 = performance.now();
     }
@@ -611,17 +695,27 @@
     function frame(now) {
       var t = ((now - t0) / 1000) % 2.4;
       var knock = smoothstep((t - 0.45) / 0.95);
-      var lift = kind === "alpha" ? 1 : 0.45;
       electron.material.opacity = 1;
-      electron.position.set(lerp(gasHome.x, 0.9, knock), lerp(gasHome.y, -1.45 * lift, knock), 0);
-      gas.position.set(lerp(gasHome.x, 0.5, knock), lerp(gasHome.y, 1.45 * lift, knock), 0);
+      electron.position.lerpVectors(gasHome, electronEnd, knock);
+      gas.position.lerpVectors(gasHome, ionEnd, knock);
       gas.material.color.setHex(knock > 0.04 ? 0xc0392b : 0xe0a04a);
+      needlePivot.rotation.z = needleRad();
       gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
     }
+    function snapshot() {
+      return {
+        kind: kind,
+        ionY: gas.position.y,
+        electronY: electron.position.y,
+        ionEndY: ionEnd.y,
+        electronEndY: electronEnd.y,
+        needleDeg: needlePivot.rotation.z * 180 / Math.PI
+      };
+    }
     hostReplay(host, restart);
     requestAnimationFrame(frame);
-    scenes.current = { replay: restart, setKind: setKind };
+    scenes.current = { replay: restart, setKind: setKind, snapshot: snapshot };
   }
 
   function gm(host) {
@@ -639,9 +733,10 @@
     );
     wire.rotation.z = Math.PI / 2;
     var argon = ball(0.22, 0xe0a04a);
-    argon.position.set(-1.6, 0.15, 0);
+    var argonHome = new THREE.Vector3(-1.6, 0.15, 0);
+    argon.position.copy(argonHome);
     var electron = ball(0.12, 0x2a62a8);
-    electron.position.copy(argon.position);
+    electron.position.copy(argonHome);
     gfx.scene.add(wall, wire, argon, electron);
     var t0 = performance.now();
     function restart() {
@@ -651,14 +746,24 @@
       var t = ((now - t0) / 1000) % 1.4;
       var fly = smoothstep(t / 1.05);
       electron.material.opacity = 1;
-      electron.position.set(lerp(-1.6, 0.05, fly), lerp(0.15, 0, fly), 0);
+      electron.position.set(argonHome.x, lerp(argonHome.y, 0.08, fly), 0);
+      argon.position.set(argonHome.x, lerp(argonHome.y, 0.98, fly), 0);
       argon.material.color.setHex(fly > 0.08 ? 0xd35400 : 0xe0a04a);
       gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
     }
+    function snapshot() {
+      return {
+        electronX: electron.position.x,
+        electronY: electron.position.y,
+        argonX: argon.position.x,
+        argonY: argon.position.y,
+        homeX: argonHome.x
+      };
+    }
     hostReplay(host, restart);
     requestAnimationFrame(frame);
-    scenes.gm = { replay: restart };
+    scenes.gm = { replay: restart, snapshot: snapshot };
   }
 
   function efield(host) {
