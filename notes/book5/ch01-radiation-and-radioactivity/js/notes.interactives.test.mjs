@@ -481,6 +481,42 @@ test("25.3 identification graph keeps taken yes/no edges", async () => {
   assert.doesNotMatch(state.talk, /no α/);
 
   await cdp.evaluate("document.querySelector('#flow-reset').click()");
+  await cdp.evaluate("document.querySelector('#id-flow .node[data-step=\"alpha\"]').dispatchEvent(new Event('click'))");
+  await cdp.evaluate("document.querySelector('#flow-next').click()");
+  await cdp.evaluate("document.querySelector('#flow-next').click()");
+  state = await flowState();
+  assert.equal(state.al.active, true);
+  assert.equal(state.beta.active, false);
+  assert.ok(state.betaEdges.every((lit) => !lit));
+  assert.match(state.talk, /α already found|test for β/);
+  assert.doesNotMatch(state.talk, /β present/);
+  assert.doesNotMatch(state.talk, /700 → 315/);
+
+  await cdp.evaluate("document.querySelector('#id-flow .node[data-step=\"2\"]').dispatchEvent(new Event('click'))");
+  await cdp.evaluate("document.querySelector('#flow-next').click()");
+  state = await flowState();
+  assert.equal(state.al.active, true);
+  assert.equal(state.beta.active, false);
+  assert.ok(state.betaEdges.every((lit) => !lit));
+  assert.doesNotMatch(state.talk, /β present/);
+
+  await cdp.evaluate("document.querySelector('#id-flow .node[data-step=\"3\"]').dispatchEvent(new Event('click'))");
+  state = await flowState();
+  assert.equal(state.beta.active, true);
+  assert.ok(state.betaEdges[0]);
+  assert.match(state.talk, /β present/);
+
+  await cdp.evaluate("document.querySelector('#flow-reset').click()");
+  await cdp.evaluate("document.querySelector('#flow-next').click()");
+  await cdp.evaluate("document.querySelector('#flow-next').click()");
+  await cdp.evaluate("document.querySelector('#flow-next').click()");
+  state = await flowState();
+  assert.equal(state.beta.active, true);
+  assert.ok(state.betaEdges[0]);
+  assert.ok(state.noAlpha.every(Boolean));
+  assert.match(state.talk, /β present/);
+
+  await cdp.evaluate("document.querySelector('#flow-reset').click()");
   await cdp.evaluate("document.querySelector('#id-flow .node[data-step=\"2\"]').dispatchEvent(new Event('click'))");
   await cdp.evaluate("document.querySelector('#id-flow .node[data-step=\"4\"]').dispatchEvent(new Event('click'))");
   state = await flowState();

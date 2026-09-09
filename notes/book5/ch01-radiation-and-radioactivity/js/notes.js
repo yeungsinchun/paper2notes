@@ -666,7 +666,10 @@
 
     $("#flow-next") && $("#flow-next").addEventListener("click", function () {
       if (i === 1 && hasAlpha === null) hasAlpha = false;
-      if (i === 2 && hasBeta === null) hasBeta = true;
+      if (i === 2 && hasBeta === null) {
+        if (hasAlpha === true) return;
+        hasBeta = true;
+      }
       i = Math.min(flowSteps.length - 1, i + 1);
       show();
     });
