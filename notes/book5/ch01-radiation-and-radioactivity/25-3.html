@@ -95,9 +95,9 @@
       </header>
       <div class="visual play stage" id="current-vis" data-autoplay data-scene="current">
         <canvas class="scene-canvas" width="960" height="420" aria-label="Alpha knocks an electron from a gas atom; the pair drifts to the plates"></canvas>
-        <span class="hud-label" data-hud="source" style="left:10%;top:48%">α source</span>
-        <span class="hud-label" style="left:78%;top:12%">− plate</span>
-        <span class="hud-label" style="left:78%;top:84%">+ plate</span>
+        <span class="hud-label" data-hud="source">α source</span>
+        <span class="hud-label" data-hud="minus">− plate</span>
+        <span class="hud-label" data-hud="plus">+ plate</span>
       </div>
       <div class="row">
         <button type="button" data-current="alpha">α source</button>
@@ -153,18 +153,11 @@
         <h2>Film badge: absorbers on film</h2>
         <span class="stamp">Fig. 25.29</span>
       </header>
-      <div class="visual">
-        <svg viewBox="0 0 640 180" role="img" aria-label="Film badge windows">
-          <rect id="badge-open" x="40" y="30" width="160" height="90" fill="#f2ead2" stroke="#333"/>
-          <text id="badge-open-text" x="120" y="80" text-anchor="middle" font-size="12">open window</text>
-          <rect id="badge-al" x="240" y="30" width="160" height="90" fill="#f2ead2" stroke="#333"/>
-          <text id="badge-al-text" x="320" y="80" text-anchor="middle" font-size="12">thin Al</text>
-          <rect id="badge-pb" x="440" y="30" width="160" height="90" fill="#f2ead2" stroke="#333"/>
-          <text id="badge-pb-text" x="520" y="80" text-anchor="middle" font-size="12">lead</text>
-          <text x="120" y="148" text-anchor="middle" font-size="12">open / wrap</text>
-          <text x="320" y="148" text-anchor="middle" font-size="12">Al sheets</text>
-          <text x="520" y="148" text-anchor="middle" font-size="12">Pb slab</text>
-        </svg>
+      <div class="visual play stage" id="badge-vis" data-scene="badge">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Film badge with open window, aluminium, and lead"></canvas>
+        <span class="hud-label" data-hud="open">open window</span>
+        <span class="hud-label" data-hud="al">thin Al</span>
+        <span class="hud-label" data-hud="pb">lead</span>
       </div>
       <div class="row">
         <button type="button" data-badge="alpha">shine α</button>
@@ -183,9 +176,9 @@
       </header>
       <div class="visual play stage" id="gm-vis" data-autoplay data-scene="gm">
         <canvas class="scene-canvas" width="960" height="420" aria-label="Argon atom in a GM tube loses an electron toward the anode wire"></canvas>
-        <span class="hud-label" style="left:12%;top:14%">thin window</span>
-        <span class="hud-label" style="left:78%;top:28%">+ wire</span>
-        <span class="hud-label" style="left:78%;top:72%">− case · argon</span>
+        <span class="hud-label" data-hud="window">thin window</span>
+        <span class="hud-label" data-hud="wire">+ wire</span>
+        <span class="hud-label" data-hud="case">− case · argon</span>
       </div>
       <div class="row">
         <span class="meter" id="gm-rate">0</span>
@@ -210,25 +203,13 @@
         <h2>Range in air vs penetrating stack</h2>
         <span class="stamp">Fig. 25.31-25.32</span>
       </header>
-      <div class="visual">
-        <svg viewBox="0 0 720 220" role="img" aria-label="Absorber stack with alpha beta gamma rays">
-          <text x="16" y="28" font-size="12">source</text>
-          <rect x="16" y="48" width="56" height="120" rx="6" fill="#8a9098"/>
-          <line id="ray-a" x1="72" y1="72" x2="560" y2="72" stroke="#c0392b" stroke-width="4"/>
-          <line id="ray-b" x1="72" y1="108" x2="560" y2="108" stroke="#1d4f91" stroke-width="3"/>
-          <line id="ray-g" x1="72" y1="144" x2="560" y2="144" stroke="#c9a227" stroke-width="2"/>
-          <text x="16" y="68" font-size="11" fill="#c0392b">α</text>
-          <text x="16" y="104" font-size="11" fill="#1d4f91">β</text>
-          <text x="16" y="140" font-size="11" fill="#c9a227">γ</text>
-          <rect id="slab-paper" x="240" y="40" width="14" height="136" fill="#f4efe0" stroke="#bbb" opacity="0.22"/>
-          <rect id="slab-al" x="320" y="40" width="22" height="136" fill="#c5ccd4" stroke="#888" opacity="0.22"/>
-          <rect id="slab-pb" x="418" y="40" width="28" height="136" fill="#2d3038" opacity="0.22"/>
-          <text x="228" y="196" font-size="11">paper</text>
-          <text x="312" y="196" font-size="11">5 mm Al</text>
-          <text x="406" y="196" font-size="11">25 mm Pb</text>
-          <rect x="548" y="70" width="70" height="76" rx="28" fill="none" stroke="#111" stroke-width="6"/>
-          <text x="558" y="114" font-size="11">GM</text>
-        </svg>
+      <div class="visual play stage" id="abs-vis" data-autoplay data-scene="absorbers">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Paper, aluminium and lead slabs in front of a GM tube"></canvas>
+        <span class="hud-label" data-hud="source">source</span>
+        <span class="hud-label" data-hud="paper">paper</span>
+        <span class="hud-label" data-hud="al">5 mm Al</span>
+        <span class="hud-label" data-hud="pb">25 mm Pb</span>
+        <span class="hud-label" data-hud="gm">GM</span>
       </div>
       <div class="row">
         <span>Unknown:</span>
@@ -243,11 +224,13 @@
         <span class="meter" id="abs-rate">0 cpm</span>
       </div>
       <p class="caption" id="abs-note"></p>
-      <div class="one-liners">
-        <p>In air (not to scale): α ~5 cm, β ~5 m, γ ~100 m.</p>
-        <p>Paper stops α. ~5 mm Al stops β. 25 mm Pb halves γ (does not zero it).</p>
-        <p>Never read a count below background unless the shield also blocks background.</p>
-      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>In air (not to scale): α ~5 cm, β ~5 m, γ ~100 m</td><td>Range and ionizing power go opposite ways</td></tr>
+          <tr><td>Paper stops α; 5 mm Al stops β; 25 mm Pb halves γ</td><td>A drop at Al is not "β only" until α and γ are checked</td></tr>
+        </tbody>
+      </table>
     </section>
 
     <section class="idea" id="identify">
@@ -366,34 +349,32 @@
       </header>
       <div class="visual play stage" id="efield-vis" data-autoplay data-scene="efield">
         <canvas class="scene-canvas" width="960" height="420" aria-label="Alpha toward the negative plate, beta toward the positive plate and bent more, gamma straight"></canvas>
-        <span class="hud-label" style="left:10%;top:82%">collimator</span>
-        <span class="hud-label" style="left:78%;top:12%">α toward −</span>
-        <span class="hud-label" style="left:78%;top:48%">γ straight</span>
-        <span class="hud-label" style="left:78%;top:84%">β toward + (bent more)</span>
+        <span class="hud-label" data-hud="collimator">collimator</span>
+        <span class="hud-label" data-hud="minus">− plate</span>
+        <span class="hud-label" data-hud="plus">+ plate</span>
+        <span class="hud-label" data-hud="alpha">α toward −</span>
+        <span class="hud-label" data-hud="gamma">γ straight</span>
+        <span class="hud-label" data-hud="beta">β toward + (bent more)</span>
       </div>
-      <div class="visual">
-        <svg viewBox="0 0 640 230" role="img" aria-label="Magnetic deflection">
-          <rect x="150" y="20" width="280" height="190" fill="#eef1f6" stroke="#99a"/>
-          <g fill="#334" font-size="14" data-b-dots>
-            <text x="170" y="50">×</text><text x="210" y="50">×</text><text x="250" y="50">×</text><text x="290" y="50">×</text>
-            <text x="170" y="90">×</text><text x="210" y="90">×</text><text x="250" y="90">×</text><text x="290" y="90">×</text>
-            <text x="170" y="130">×</text><text x="210" y="130">×</text><text x="250" y="130">×</text><text x="290" y="130">×</text>
-            <text x="170" y="170">×</text><text x="210" y="170">×</text><text x="250" y="170">×</text><text x="290" y="170">×</text>
-          </g>
-          <text x="330" y="44" data-b-mark>×  B into the page</text>
-          <path id="b-alpha" d="M 48 110 C 150 110 210 62 318 40" fill="none" stroke="#c0392b" stroke-width="3" stroke-dasharray="7 8"/>
-          <path id="b-beta" d="M 48 110 C 120 110 138 188 236 204" fill="none" stroke="#1d4f91" stroke-width="3" stroke-dasharray="4 6"/>
-          <line x1="48" y1="110" x2="430" y2="110" stroke="#c9a227" stroke-width="2"/>
-        </svg>
+      <div class="visual play stage" id="bfield-vis" data-autoplay data-scene="bfield">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Alpha, beta and gamma in a magnetic field"></canvas>
+        <span class="hud-label" data-hud="source">source</span>
+        <span class="hud-label" data-hud="alpha">α</span>
+        <span class="hud-label" data-hud="beta">β</span>
+        <span class="hud-label" data-hud="gamma">γ</span>
+        <span class="hud-label" data-b-mark>×  B into the page</span>
       </div>
       <div class="row">
         <button type="button" id="b-flip">Flip B into / out of page</button>
       </div>
-      <div class="one-liners">
-        <p>β mass ≈ 1/7200 of α → much larger deflection even though |q| is smaller.</p>
-        <p>Fleming left-hand rule: β travels opposite to conventional current I.</p>
-        <p>Do the E/B experiment in vacuum so α is not stopped in air.</p>
-      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>β mass ≈ 1/7200 of α, so β bends much more</td><td>|q| is smaller but m is far smaller, so deflection is larger</td></tr>
+          <tr><td>Fleming left-hand: β travels opposite to conventional I</td><td>α and β curve opposite ways; γ goes straight</td></tr>
+          <tr><td>α stops in a few cm of air</td><td>Do E/B in vacuum if you need the α path</td></tr>
+        </tbody>
+      </table>
       <!-- HKDSE 2017/31 -->
       <div class="check" data-check="mc" data-answer="A">
         <h3>Concept check</h3>

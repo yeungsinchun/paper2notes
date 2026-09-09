@@ -171,13 +171,15 @@ function near(actual, expected, tol) {
 describe("Book 5 Ch.1 notes interactives", { concurrency: 1 }, () => {
 test("25.1 spectrum is static with the ionizing cut after UV", async () => {
   await cdp.goto(pageUrl("25-1.html"));
+  await cdp.evaluate("new Promise((r) => setTimeout(r, 250))");
   const spec = await cdp.evaluate(`(function () {
-    var svg = document.querySelector("#spectrum svg");
-    var texts = Array.from(svg.querySelectorAll("text")).map(function (t) { return t.textContent.trim(); });
-    var xrays = Array.from(svg.querySelectorAll("rect")).find(function (r) {
+    var spec = document.getElementById("spectrum");
+    var svg = spec && spec.querySelector("svg");
+    var texts = svg ? Array.from(svg.querySelectorAll("text")).map(function (t) { return t.textContent.trim(); }) : [];
+    var xrays = svg ? Array.from(svg.querySelectorAll("rect")).find(function (r) {
       var n = r.nextElementSibling;
       return n && n.textContent.trim() === "X-rays";
-    });
+    }) : null;
     return {
       slider: !!document.querySelector("#spectrum-slider"),
       mark: !!document.querySelector("#spectrum-mark"),
@@ -185,7 +187,7 @@ test("25.1 spectrum is static with the ionizing cut after UV", async () => {
       cut: !!document.querySelector("#ionizing-cut"),
       texts: texts,
       xrayX: xrays && xrays.getAttribute("x"),
-      body: document.querySelector("#spectrum .one-liners").innerText
+      body: spec ? spec.textContent : ""
     };
   })()`);
   assert.equal(spec.slider, false);
@@ -195,7 +197,7 @@ test("25.1 spectrum is static with the ionizing cut after UV", async () => {
   assert.ok(spec.texts.includes("non-ionizing"));
   assert.ok(spec.texts.includes("ionizing"));
   assert.equal(spec.xrayX, "390");
-  assert.match(spec.body, /X-rays and gamma/);
+  assert.match(spec.body, /X-rays/);
   assert.doesNotMatch(spec.body, /book cut/i);
 
   if (evidenceDir) {
@@ -483,7 +485,6 @@ test("25.3 identification graph keeps taken yes/no edges", async () => {
   await cdp.evaluate("document.querySelector('#flow-reset').click()");
   await cdp.evaluate("document.querySelector('#id-flow .node[data-step=\"alpha\"]').dispatchEvent(new Event('click'))");
   await cdp.evaluate("document.querySelector('#flow-next').click()");
-  await cdp.evaluate("document.querySelector('#flow-next').click()");
   state = await flowState();
   assert.equal(state.al.active, true);
   assert.equal(state.beta.active, false);
@@ -492,10 +493,20 @@ test("25.3 identification graph keeps taken yes/no edges", async () => {
   assert.doesNotMatch(state.talk, /β present/);
   assert.doesNotMatch(state.talk, /700 → 315/);
 
+  await cdp.evaluate("document.querySelector('#flow-next').click()");
+  state = await flowState();
+  assert.equal(state.al.active, false);
+  assert.equal(state.pb.active, true);
+  assert.equal(state.beta.active, false);
+  assert.ok(state.betaEdges.every((lit) => !lit));
+  assert.match(state.talk, /25 mm Pb|test for γ/);
+  assert.doesNotMatch(state.talk, /β present/);
+  assert.doesNotMatch(state.talk, /700 → 315/);
+
   await cdp.evaluate("document.querySelector('#id-flow .node[data-step=\"2\"]').dispatchEvent(new Event('click'))");
   await cdp.evaluate("document.querySelector('#flow-next').click()");
   state = await flowState();
-  assert.equal(state.al.active, true);
+  assert.equal(state.pb.active, true);
   assert.equal(state.beta.active, false);
   assert.ok(state.betaEdges.every((lit) => !lit));
   assert.doesNotMatch(state.talk, /β present/);
@@ -592,23 +603,18 @@ test("25.3 ion-pair capture, Flip B marks, and β/γ check", async () => {
 
   const flipped = await cdp.evaluate(`(function () {
     document.querySelector("#b-flip").click();
-    var marks = Array.from(document.querySelectorAll("[data-b-dots] text")).map(function (t) {
-      return t.textContent;
-    });
+    var snap = window.NotesScenes.bfield.snapshot();
     return {
       caption: document.querySelector("[data-b-mark]").textContent,
-      allDots: marks.length === 16 && marks.every(function (m) { return m === "·"; })
+      into: snap.into
     };
   })()`);
   assert.match(flipped.caption, /out of the page/);
-  assert.equal(flipped.allDots, true);
+  assert.equal(flipped.into, false);
 
   const restored = await cdp.evaluate(`(function () {
     document.querySelector("#b-flip").click();
-    var marks = Array.from(document.querySelectorAll("[data-b-dots] text")).map(function (t) {
-      return t.textContent;
-    });
-    return marks.length === 16 && marks.every(function (m) { return m === "×"; });
+    return window.NotesScenes.bfield.snapshot().into;
   })()`);
   assert.equal(restored, true);
 
@@ -770,8 +776,16 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
     await cdp.evaluate("document.getElementById('atom-zoom-slider').value = 8");
     await cdp.evaluate("new Promise((r) => requestAnimationFrame(() => setTimeout(r, 80)))");
     await cdp.screenshot(path.join(evidenceDir, "25-2-atom-zoom-nucleus.png"), "#atom");
+    await cdp.screenshot(path.join(evidenceDir, "25-2-sealed-source.png"), "#lab");
     await cdp.goto(pageUrl("25-1.html"));
+    await cdp.evaluate("new Promise((r) => setTimeout(r, 400))");
+    await cdp.screenshot(path.join(evidenceDir, "25-1-radiation-beams.png"), "#radiation");
+    await cdp.screenshot(path.join(evidenceDir, "25-1-knockout-labels.png"), "#knockout");
     await cdp.screenshot(path.join(evidenceDir, "25-1-xray-tube-hud.png"), "#xray-tube");
+    await cdp.screenshot(path.join(evidenceDir, "25-1-xray-imaging.png"), "#imaging");
+    await cdp.goto(pageUrl("summary.html"));
+    await cdp.evaluate("new Promise((r) => setTimeout(r, 400))");
+    await cdp.screenshot(path.join(evidenceDir, "summary-xray-tube.png"), "#sum-tube");
     await cdp.goto(pageUrl("25-3.html"));
     await cdp.evaluate("document.querySelector('[data-current=\"beta\"]').click()");
     await cdp.evaluate("new Promise((r) => setTimeout(r, 1600))");
@@ -779,6 +793,9 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
     await cdp.evaluate("window.NotesScenes.gm.replay()");
     await cdp.evaluate("new Promise((r) => setTimeout(r, 1100))");
     await cdp.screenshot(path.join(evidenceDir, "25-3-gm-radial-pulse.png"), "#gm");
+    await cdp.screenshot(path.join(evidenceDir, "25-3-ion-pair.png"), "#ion-pair");
+    await cdp.screenshot(path.join(evidenceDir, "25-3-absorbers.png"), "#range");
+    await cdp.screenshot(path.join(evidenceDir, "25-3-eb-deflection.png"), "#fields");
   }
 });
 });

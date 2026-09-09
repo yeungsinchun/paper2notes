@@ -576,6 +576,16 @@
       if (paperSlab) paperSlab.setAttribute("opacity", paper ? "1" : "0.22");
       if (alSlab) alSlab.setAttribute("opacity", al ? "1" : "0.22");
       if (pbSlab) pbSlab.setAttribute("opacity", pb ? "1" : "0.22");
+      if (window.NotesScenes && window.NotesScenes.absorbers) {
+        window.NotesScenes.absorbers.set({
+          hasA: !!src.a,
+          hasB: !!src.b,
+          hasG: !!src.g,
+          paper: paper,
+          al: al,
+          pb: pb
+        });
+      }
     }
 
     $all("[data-src]").forEach(function (btn) {
@@ -627,6 +637,9 @@
       if (hasAlpha === true && i === 2) {
         return "α already found. Insert ~5 mm Al to test for β, then Pb for γ.";
       }
+      if (hasAlpha === true && i === 4 && hasBeta !== true) {
+        return "Insert ~25 mm Pb to test for γ. Remaining count above background → γ is present.";
+      }
       if (hasBeta === false && i === 4) {
         return "No drop at Al → no β. Insert ~25 mm Pb to test for γ.";
       }
@@ -667,7 +680,11 @@
     $("#flow-next") && $("#flow-next").addEventListener("click", function () {
       if (i === 1 && hasAlpha === null) hasAlpha = false;
       if (i === 2 && hasBeta === null) {
-        if (hasAlpha === true) return;
+        if (hasAlpha === true) {
+          i = Math.min(flowSteps.length - 1, 4);
+          show();
+          return;
+        }
         hasBeta = true;
       }
       i = Math.min(flowSteps.length - 1, i + 1);
@@ -712,28 +729,17 @@
   }
 
   function initFields() {
-    var eAlpha = $("#e-alpha");
-    var eBeta = $("#e-beta");
-    var bAlpha = $("#b-alpha");
-    var bBeta = $("#b-beta");
     var flip = $("#b-flip");
-    if (!bAlpha && !flip) return;
+    var mark = document.querySelector("[data-b-mark]");
+    if (!flip && !mark) return;
     var into = true;
 
     function setB() {
-      var a = into
-        ? "M 48 110 C 150 110 210 62 318 40"
-        : "M 48 110 C 150 110 210 158 318 180";
-      var b = into
-        ? "M 48 110 C 120 110 138 188 236 204"
-        : "M 48 110 C 120 110 138 32 236 16";
-      if (bAlpha) bAlpha.setAttribute("d", a);
-      if (bBeta) bBeta.setAttribute("d", b);
+      if (window.NotesScenes && window.NotesScenes.bfield) {
+        window.NotesScenes.bfield.setInto(into);
+      }
       $all("[data-b-mark]").forEach(function (t) {
         t.textContent = into ? "×  B into the page" : "·  B out of the page";
-      });
-      $all("[data-b-dots] text").forEach(function (t) {
-        t.textContent = into ? "×" : "·";
       });
     }
 
@@ -744,44 +750,14 @@
       });
     }
     setB();
-
-    var t = 0;
-    function bounce() {
-      t += 0.05;
-      if (eAlpha) eAlpha.setAttribute("stroke-dashoffset", String(-t * 18));
-      if (eBeta) eBeta.setAttribute("stroke-dashoffset", String(-t * 28));
-      if (bAlpha) bAlpha.setAttribute("stroke-dashoffset", String(-t * 18));
-      if (bBeta) bBeta.setAttribute("stroke-dashoffset", String(-t * 28));
-      requestAnimationFrame(bounce);
-    }
-    bounce();
   }
 
   function initBadge() {
-    var open = $("#badge-open");
-    var al = $("#badge-al");
-    var pb = $("#badge-pb");
-    if (!open) return;
-    function paint(el, tone, label) {
-      el.setAttribute("fill", tone);
-      var text = document.getElementById(el.id + "-text");
-      if (text) text.textContent = label;
-    }
     $all("[data-badge]").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var kind = btn.getAttribute("data-badge");
-        if (kind === "alpha") {
-          paint(open, "#e7d9b3", "α stopped by wrap");
-          paint(al, "#f2ead2", "");
-          paint(pb, "#f2ead2", "");
-        } else if (kind === "beta") {
-          paint(open, "#3a3428", "open window");
-          paint(al, "#e7d9b3", "Al stops β");
-          paint(pb, "#f2ead2", "");
-        } else {
-          paint(open, "#8a7b5d", "γ");
-          paint(al, "#8a7b5d", "γ");
-          paint(pb, "#8a7b5d", "γ");
+        if (window.NotesScenes && window.NotesScenes.badge) {
+          window.NotesScenes.badge.setKind(kind);
         }
       });
     });

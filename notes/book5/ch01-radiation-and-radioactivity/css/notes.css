@@ -312,6 +312,8 @@ table.compact td {
 }
 
 table.compact th { background: #efe6d4; }
+table.pair th,
+table.pair td { text-align: left; vertical-align: top; }
 
 .pie {
   display: grid;

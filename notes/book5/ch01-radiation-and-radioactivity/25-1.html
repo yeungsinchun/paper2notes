@@ -26,25 +26,20 @@
         <h2>Energy on the move</h2>
         <span class="stamp">Fig. 25.2</span>
       </header>
-      <div class="visual">
-        <svg viewBox="0 0 640 200" role="img" aria-label="Light wave versus electron beam">
-          <text x="28" y="28" font-size="14">EM wave</text>
-          <path d="M28 100 C 48 52, 68 52, 88 100 S 128 148, 148 100 S 188 52, 208 100 S 248 148, 268 100"
-                fill="none" stroke="#c9a227" stroke-width="3"/>
-          <text x="28" y="176" font-size="13" fill="#5b6573">light beam</text>
-          <text x="360" y="28" font-size="14">stream of particles (KE)</text>
-          <circle cx="380" cy="100" r="8" fill="#2a62a8"/>
-          <circle cx="424" cy="100" r="8" fill="#2a62a8"/>
-          <circle cx="468" cy="100" r="8" fill="#2a62a8"/>
-          <circle cx="512" cy="100" r="8" fill="#2a62a8"/>
-          <polygon points="548,100 528,90 528,110" fill="#2a62a8"/>
-          <text x="360" y="176" font-size="13" fill="#5b6573">electron beam</text>
-        </svg>
+      <div class="visual play stage" id="beam-vis" data-autoplay data-scene="beams">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Traveling EM wave beside a stream of electrons"></canvas>
+        <span class="hud-label" data-hud="wave">EM wave · light beam</span>
+        <span class="hud-label" data-hud="electrons">particles · electron beam</span>
       </div>
-      <div class="one-liners">
-        <p>Radiation = energy flowing from one place to another.</p>
-        <p>Carrier: EM wave, or particles that carry kinetic energy.</p>
-      </div>
+      <div class="row"><button type="button" data-replay="beam-vis">Replay</button></div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>Light: a traveling transverse EM wave packet</td><td>Energy is carried by an oscillating field</td></tr>
+          <tr><td>Electrons: a stream of particles with kinetic energy</td><td>Energy is carried by moving mass</td></tr>
+          <tr><td>Both transfer energy from one place to another</td><td>Both are forms of radiation</td></tr>
+        </tbody>
+      </table>
     </section>
 
     <section class="idea" id="knockout">
@@ -54,7 +49,6 @@
       </header>
       <div class="visual play stage" id="knock-vis" data-autoplay data-scene="knockout">
         <canvas class="scene-canvas" width="960" height="420" aria-label="Radiation knocks a bound electron out of an atom"></canvas>
-        <span class="hud-label" data-hud="ray">ionizing radiation</span>
         <span class="hud-label" data-hud="atom">atom</span>
         <span class="hud-label" data-hud="electron">electron</span>
       </div>
@@ -113,10 +107,13 @@
           <text x="640" y="148" font-size="11">→</text>
         </svg>
       </div>
-      <div class="one-liners">
-        <p>For EM waves: higher frequency → more energy.</p>
-        <p>Frequencies higher than ultraviolet (X-rays and gamma rays) are ionizing.</p>
-      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>Higher frequency on the bar (to the right)</td><td>More energy per photon</td></tr>
+          <tr><td>Cut after UV: X-rays and γ</td><td>Those EM waves are ionizing; radio to UV here are not</td></tr>
+        </tbody>
+      </table>
     </section>
 
     <section class="idea" id="xray-tube">
@@ -132,10 +129,13 @@
         <span class="hud-label" data-hud="xrays">X-rays</span>
       </div>
       <div class="row"><button type="button" data-replay="tube-vis">Replay</button></div>
-      <div class="one-liners">
-        <p>High-speed electrons hit a heavy metal target. Some KE becomes X-rays.</p>
-        <p>X-rays: uncharged EM, travel at c, blacken film, ionizing.</p>
-      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>Electrons hit the angled metal face; X-rays leave that impact</td><td>X-rays are made from the electrons' KE, not from the gun itself</td></tr>
+          <tr><td>X-rays: uncharged, speed c, blacken film</td><td>They are ionizing EM, not a beam of electrons</td></tr>
+        </tbody>
+      </table>
       <div class="check" data-check="tf">
         <h3>Concept check</h3>
         <div class="tf-item" data-answer="false">
@@ -232,14 +232,18 @@
           <rect id="film-under-bone" x="356" y="206" width="120" height="34" fill="#f4efe0"/>
           <rect id="film-under-flesh" x="476" y="206" width="148" height="34" fill="#1a1610"/>
           <text x="416" y="172" text-anchor="middle" font-size="14">bone</text>
-          <text x="630" y="131" text-anchor="start" font-size="14">flesh</text>
+          <text x="550" y="172" text-anchor="middle" font-size="14">flesh</text>
           <text x="490" y="262" text-anchor="middle" font-size="13">photographic film</text>
         </svg>
       </div>
       <div class="row"><button type="button" data-replay="imaging-vis">Replay</button></div>
-      <div class="one-liners">
-        <p>Soft tissue transmits → film blackens. Bone absorbs → bone looks white on the developed film.</p>
-      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>Flesh lets X-rays through; film under flesh goes dark</td><td>Soft tissue transmits</td></tr>
+          <tr><td>Bone stops X-rays; film under bone stays white</td><td>Bone absorbs, so bone looks white on the developed film</td></tr>
+        </tbody>
+      </table>
       <!-- HKDSE 2022/31 -->
       <div class="check" data-check="mc" data-answer="C">
         <h3>Concept check</h3>
@@ -332,11 +336,13 @@
           </g>
         </svg>
       </div>
-      <div class="one-liners">
-        <p>Radioactive substances emit from the <strong>nucleus</strong>.</p>
-        <p>Names α, β, γ were arbitrary at discovery.</p>
-        <p>Decay is spontaneous and random: you cannot control time or direction the way you switch an X-ray tube.</p>
-      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>α, β, γ come from the nucleus, randomly in time and direction</td><td>Decay is spontaneous; you cannot switch it like an X-ray tube</td></tr>
+          <tr><td>An X-ray tube fires only while the gun is on</td><td>X-rays are switched, not a nuclear decay</td></tr>
+        </tbody>
+      </table>
       <div class="check" data-check="tf">
         <h3>Concept check</h3>
         <div class="tf-item" data-answer="false">
