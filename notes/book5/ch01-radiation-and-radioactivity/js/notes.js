@@ -76,6 +76,7 @@
     el.classList.remove("play");
     void el.offsetWidth;
     el.classList.add("play");
+    el.dispatchEvent(new Event("notes-replay"));
   }
 
   function initReplays() {
@@ -90,28 +91,6 @@
     });
   }
 
-  function initSpectrum() {
-    var slider = $("#spectrum-slider");
-    var mark = $("#spectrum-mark");
-    var label = $("#spectrum-label");
-    if (!slider || !mark) return;
-    var cutX = 390;
-    function update() {
-      var f = Number(slider.value);
-      mark.setAttribute("x1", String(f));
-      mark.setAttribute("x2", String(f));
-      var pointer = $("#spectrum-pointer");
-      if (pointer) pointer.setAttribute("points", f + ",28 " + (f - 6) + ",18 " + (f + 6) + ",18");
-      var ionizing = f >= cutX;
-      label.textContent = ionizing
-        ? "Ionizing: X-rays and γ (frequency higher than UV)."
-        : "Non-ionizing: radio through ultraviolet.";
-      label.dataset.ion = ionizing ? "1" : "0";
-    }
-    slider.addEventListener("input", update);
-    update();
-  }
-
   function initImaging() {
     var film = $("#xray-film");
     var shadow = $("#xray-shadow");
@@ -120,7 +99,7 @@
     if (!film) return;
     function show(kind) {
       if (kind === "bone") {
-        film.setAttribute("fill", "#f4efe0");
+        film.setAttribute("fill", "#3d3426");
         if (shadow) shadow.setAttribute("opacity", "1");
         if (fleshRays) fleshRays.setAttribute("opacity", "0.25");
         if (boneBlock) boneBlock.setAttribute("opacity", "1");
@@ -422,12 +401,11 @@
   }
 
   function initIonCurrent() {
-    var needle = $("#galvo-needle");
-    if (!needle) return;
     $all("[data-current]").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        var ang = btn.getAttribute("data-current") === "alpha" ? -38 : -14;
-        needle.setAttribute("transform", "rotate(" + ang + " 200 148)");
+        if (window.NotesScenes && window.NotesScenes.current && window.NotesScenes.current.setKind) {
+          window.NotesScenes.current.setKind(btn.getAttribute("data-current"));
+        }
       });
     });
   }
@@ -724,7 +702,7 @@
     var bAlpha = $("#b-alpha");
     var bBeta = $("#b-beta");
     var flip = $("#b-flip");
-    if (!eAlpha) return;
+    if (!bAlpha && !flip) return;
     var into = true;
 
     function setB() {
@@ -809,7 +787,6 @@
     initMc();
     initTf();
     initReplays();
-    initSpectrum();
     initImaging();
     initAtomZoom();
     initIsotopes();

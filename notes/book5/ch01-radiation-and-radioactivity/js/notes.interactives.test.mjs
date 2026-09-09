@@ -114,7 +114,7 @@ before(async () => {
     chromePath,
     [
       "--headless=new",
-      "--disable-gpu",
+      "--use-angle=swiftshader",
       "--no-first-run",
       "--no-default-browser-check",
       "--disable-extensions",
@@ -169,60 +169,38 @@ function near(actual, expected, tol) {
 }
 
 describe("Book 5 Ch.1 notes interactives", { concurrency: 1 }, () => {
-test("25.1 spectrum mark starts non-ionizing and flips at the UV/X-ray cut", async () => {
+test("25.1 spectrum is static with the ionizing cut after UV", async () => {
   await cdp.goto(pageUrl("25-1.html"));
-  const initial = await cdp.evaluate(`({
-    value: document.querySelector('#spectrum-slider').value,
-    mark: document.querySelector('#spectrum-mark').getAttribute('x1'),
-    text: document.querySelector('#spectrum-label').textContent,
-    ion: document.querySelector('#spectrum-label').dataset.ion
-  })`);
-  assert.equal(initial.value, "72");
-  assert.equal(initial.mark, "72");
-  assert.equal(initial.ion, "0");
-  assert.match(initial.text, /Non-ionizing/);
-  assert.doesNotMatch(initial.text, /Ionizing:/);
-
-  const uv = await cdp.evaluate(`(function () {
-    var s = document.querySelector('#spectrum-slider');
-    s.value = '350';
-    s.dispatchEvent(new Event('input', { bubbles: true }));
+  const spec = await cdp.evaluate(`(function () {
+    var svg = document.querySelector("#spectrum svg");
+    var texts = Array.from(svg.querySelectorAll("text")).map(function (t) { return t.textContent.trim(); });
+    var xrays = Array.from(svg.querySelectorAll("rect")).find(function (r) {
+      var n = r.nextElementSibling;
+      return n && n.textContent.trim() === "X-rays";
+    });
     return {
-      text: document.querySelector('#spectrum-label').textContent,
-      ion: document.querySelector('#spectrum-label').dataset.ion,
-      mark: document.querySelector('#spectrum-mark').getAttribute('x1')
+      slider: !!document.querySelector("#spectrum-slider"),
+      mark: !!document.querySelector("#spectrum-mark"),
+      pointer: !!document.querySelector("#spectrum-pointer"),
+      cut: !!document.querySelector("#ionizing-cut"),
+      texts: texts,
+      xrayX: xrays && xrays.getAttribute("x"),
+      body: document.querySelector("#spectrum .one-liners").innerText
     };
   })()`);
-  assert.equal(uv.ion, "0");
-  assert.match(uv.text, /Non-ionizing/);
-  assert.equal(uv.mark, "350");
-
-  const cut = await cdp.evaluate(`(function () {
-    var s = document.querySelector('#spectrum-slider');
-    s.value = '390';
-    s.dispatchEvent(new Event('input', { bubbles: true }));
-    return {
-      text: document.querySelector('#spectrum-label').textContent,
-      ion: document.querySelector('#spectrum-label').dataset.ion
-    };
-  })()`);
-  assert.equal(cut.ion, "1");
-  assert.match(cut.text, /Ionizing: X-rays/);
+  assert.equal(spec.slider, false);
+  assert.equal(spec.mark, false);
+  assert.equal(spec.pointer, false);
+  assert.equal(spec.cut, true);
+  assert.ok(spec.texts.includes("non-ionizing"));
+  assert.ok(spec.texts.includes("ionizing"));
+  assert.equal(spec.xrayX, "390");
+  assert.match(spec.body, /X-rays and gamma/);
+  assert.doesNotMatch(spec.body, /book cut/i);
 
   if (evidenceDir) {
     await cdp.screenshot(path.join(evidenceDir, "25-1-knockout-animation.png"), "#knockout");
-    await cdp.evaluate(`(function () {
-      var s = document.querySelector('#spectrum-slider');
-      s.value = '72';
-      s.dispatchEvent(new Event('input', { bubbles: true }));
-    })()`);
-    await cdp.screenshot(path.join(evidenceDir, "25-1-spectrum-radio-non-ionizing.png"), "#spectrum");
-    await cdp.evaluate(`(function () {
-      var s = document.querySelector('#spectrum-slider');
-      s.value = '430';
-      s.dispatchEvent(new Event('input', { bubbles: true }));
-    })()`);
-    await cdp.screenshot(path.join(evidenceDir, "25-1-spectrum-xray-ionizing.png"), "#spectrum");
+    await cdp.screenshot(path.join(evidenceDir, "25-1-spectrum-static-cut.png"), "#spectrum");
   }
 });
 
@@ -444,44 +422,31 @@ test("25.3 identification graph keeps taken yes/no edges", async () => {
   }
 });
 
-test("25.1 knockout labels sit on the flushed ion and ejected electron", async () => {
+test("25.1 knockout ejects the bound electron already on the atom", async () => {
   await cdp.goto(pageUrl("25-1.html"));
-  await cdp.evaluate("new Promise((r) => setTimeout(r, 1800))");
-  const knock = await cdp.evaluate(`(function () {
-    function userCentre(el) {
-      var svg = el.ownerSVGElement;
-      var r = el.getBoundingClientRect();
-      var ctm = svg.getScreenCTM().inverse();
-      var pt = svg.createSVGPoint();
-      pt.x = r.left + r.width / 2;
-      pt.y = r.top + r.height / 2;
-      var u = pt.matrixTransform(ctm);
-      return { x: u.x, y: u.y };
-    }
-    var ion = document.querySelector("#knock-vis .ion");
-    var electron = document.querySelector("#knock-vis .eject circle");
-    var labels = Array.from(document.querySelectorAll("#knock-vis text")).map(function (t) {
-      var c = userCentre(t);
-      return { text: t.textContent.trim(), x: c.x, y: c.y };
-    });
-    var ionC = userCentre(ion);
-    var eC = userCentre(electron);
-    var pos = labels.find(function (l) { return l.text === "positive ion"; });
-    var eLab = labels.find(function (l) { return l.text === "electron"; });
-    function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
-    return {
-      hasAtom: labels.some(function (l) { return l.text === "atom"; }),
-      ionFill: getComputedStyle(ion).fill,
-      posNearIon: pos ? dist(pos, ionC) : null,
-      eLabNearElectron: eLab ? dist(eLab, eC) : null,
-      posFarRight: pos ? pos.x - ionC.x : null
-    };
+  await cdp.evaluate("new Promise((r) => setTimeout(r, 200))");
+  const bound = await cdp.evaluate(`(function () {
+    var scene = window.NotesScenes && window.NotesScenes.knockout;
+    if (!scene) return { missing: true };
+    scene.replay();
+    return scene.snapshot();
   })()`);
-  assert.equal(knock.hasAtom, false);
-  assert.match(knock.ionFill, /rgb\(192, 57, 43\)|#c0392b/i);
-  assert.ok(knock.posNearIon !== null && knock.posNearIon < 80, "positive ion label should sit on the flushed nucleus, dist=" + knock.posNearIon);
-  assert.ok(knock.eLabNearElectron !== null && knock.eLabNearElectron < 80, "electron label should sit at the eject destination, dist=" + knock.eLabNearElectron);
-  assert.ok(knock.posFarRight < 90, "positive ion label must not sit over empty space to the right");
+  assert.equal(bound.missing, undefined);
+  assert.equal(bound.electronOpacity, 1);
+  assert.ok(bound.distToNucleus < bound.shellRadius + 0.2, "electron should start on the shell, dist=" + bound.distToNucleus);
+  assert.equal(bound.atomLabel, "atom");
+
+  await cdp.evaluate("new Promise((r) => setTimeout(r, 400))");
+  const mid = await cdp.evaluate("window.NotesScenes.knockout.snapshot()");
+  assert.equal(mid.electronOpacity, 1);
+  assert.ok(mid.distToNucleus < mid.shellRadius + 0.25, "electron must stay on the atom until the ray hits, dist=" + mid.distToNucleus);
+
+  await cdp.evaluate("new Promise((r) => setTimeout(r, 1800))");
+  const end = await cdp.evaluate("window.NotesScenes.knockout.snapshot()");
+  assert.equal(end.electronOpacity, 1);
+  assert.ok(end.distToNucleus > end.shellRadius * 1.8, "same electron should be far from the nucleus after knockout, dist=" + end.distToNucleus);
+  assert.equal(end.atomLabel, "positive ion");
+  assert.match(end.nucleusHex, /c0392b/i);
 
   if (evidenceDir) {
     await cdp.screenshot(path.join(evidenceDir, "25-1-knockout-labels.png"), "#knockout");
@@ -492,35 +457,20 @@ test("25.3 ion-pair capture, Flip B marks, and β/γ check", async () => {
   await cdp.goto(pageUrl("25-3.html"));
   await cdp.evaluate("new Promise((r) => setTimeout(r, 1800))");
   const pair = await cdp.evaluate(`(function () {
-    function userCentre(el) {
-      var svg = el.ownerSVGElement;
-      var r = el.getBoundingClientRect();
-      var ctm = svg.getScreenCTM().inverse();
-      var pt = svg.createSVGPoint();
-      pt.x = r.left + r.width / 2;
-      pt.y = r.top + r.height / 2;
-      var u = pt.matrixTransform(ctm);
-      return { x: u.x, y: u.y };
-    }
-    var minus = document.querySelector("#pair-vis .minus");
-    var plus = document.querySelector("#pair-vis .ion");
-    var electron = document.querySelector("#pair-vis .e2 circle");
-    var eC = userCentre(electron);
-    var mC = userCentre(minus);
-    return {
-      extra508: !!document.querySelector('#pair-vis circle[cx="508"]'),
-      minusCx: minus.getAttribute("cx"),
-      distToMinus: Math.hypot(eC.x - mC.x, eC.y - mC.y),
-      minusFill: getComputedStyle(minus).fill,
-      plusFill: getComputedStyle(plus).fill
-    };
+    var scene = window.NotesScenes && window.NotesScenes.ionpair;
+    if (!scene) return { missing: true };
+    scene.replay();
+    return true;
   })()`);
-  assert.equal(pair.extra508, false);
-  assert.equal(pair.minusCx, "390");
-  assert.ok(pair.distToMinus < 40, "captured electron should sit on the − ion, dist=" + pair.distToMinus);
-  assert.match(pair.minusFill, /rgb\(42, 98, 168\)|#2a62a8/i);
-  assert.match(pair.plusFill, /rgb\(192, 57, 43\)|#c0392b/i);
-  assert.doesNotMatch(pair.minusFill, /rgb\(192, 57, 43\)|#c0392b/i);
+  assert.equal(pair, true);
+  await cdp.evaluate("new Promise((r) => setTimeout(r, 2200))");
+  const pairEnd = await cdp.evaluate("window.NotesScenes.ionpair.snapshot()");
+  assert.equal(pairEnd.electronOpacity, 1);
+  assert.ok(pairEnd.distToB < pairEnd.shellRadius + 0.5, "captured electron should sit on the − ion, dist=" + pairEnd.distToB);
+  assert.match(pairEnd.minusHex, /2a62a8/i);
+  assert.match(pairEnd.plusHex, /c0392b/i);
+  assert.equal(pairEnd.labelA, "+ ion");
+  assert.equal(pairEnd.labelB, "− ion");
 
   const flipped = await cdp.evaluate(`(function () {
     document.querySelector("#b-flip").click();
@@ -576,8 +526,9 @@ test("chapter map, summary, and concept-check scoring are the public notes surfa
     links: Array.from(document.querySelectorAll('.toc a')).map((a) => a.getAttribute('href'))
   })`);
   assert.equal(map.title, "Radiation and Radioactivity");
-  assert.match(map.lede, /Syllabus Ch\.25/);
+  assert.match(map.lede, /Ionizing radiation/);
   assert.doesNotMatch(map.lede, /textbook order/i);
+  assert.doesNotMatch(map.lede, /book cut/i);
   assert.deepEqual(map.links, ["25-1.html", "25-2.html", "25-3.html", "summary.html"]);
 
   await cdp.goto(pageUrl("summary.html"));

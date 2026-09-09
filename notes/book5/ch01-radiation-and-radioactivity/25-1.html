@@ -52,20 +52,11 @@
         <h2>Ionizing means knockout</h2>
         <span class="stamp">Fig. 25.3</span>
       </header>
-      <div class="visual play knock" id="knock-vis" data-autoplay>
-        <svg viewBox="0 0 640 220" class="knock" role="img" aria-label="Radiation knocks an electron out of an atom">
-          <line class="ray" x1="16" y1="88" x2="198" y2="88" stroke="#c9a227" stroke-width="8"/>
-          <text x="16" y="36" font-size="14">ionizing radiation</text>
-          <circle cx="248" cy="88" r="38" fill="none" stroke="#9bb6c4"/>
-          <circle class="ion" cx="248" cy="88" r="14" fill="#e0a04a"/>
-          <circle cx="248" cy="50" r="8" fill="#2a62a8"/>
-          <g class="eject">
-            <circle cx="280" cy="112" r="8" fill="#2a62a8"/>
-            <text x="277" y="116" font-size="11" fill="#fff">−</text>
-          </g>
-          <text x="218" y="148" font-size="12">positive ion</text>
-          <text x="348" y="176" font-size="12">electron</text>
-        </svg>
+      <div class="visual play stage" id="knock-vis" data-autoplay data-scene="knockout">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Radiation knocks a bound electron out of an atom"></canvas>
+        <span class="hud-label" data-hud="ray">ionizing radiation</span>
+        <span class="hud-label" data-hud="atom">atom</span>
+        <span class="hud-label" data-hud="electron">electron</span>
       </div>
       <div class="row">
         <button type="button" data-replay="knock-vis">Replay knockout</button>
@@ -114,8 +105,7 @@
           <text x="424" y="64" font-size="12" fill="#fff">X-rays</text>
           <rect x="510" y="40" width="180" height="40" fill="#1c2430"/>
           <text x="588" y="64" font-size="12" fill="#fff">γ</text>
-          <line id="spectrum-mark" x1="72" y1="32" x2="72" y2="88" stroke="#c47a12" stroke-width="3"/>
-          <polygon points="72,28 66,18 78,18" fill="#c47a12" id="spectrum-pointer"/>
+          <line id="ionizing-cut" x1="390" y1="34" x2="390" y2="88" stroke="#1c2430" stroke-width="2"/>
           <text x="20" y="148" font-size="11">10⁸ Hz</text>
           <text x="196" y="148" font-size="11">10¹²</text>
           <text x="348" y="148" font-size="11">vis</text>
@@ -123,15 +113,9 @@
           <text x="640" y="148" font-size="11">→</text>
         </svg>
       </div>
-      <div class="row">
-        <label>Frequency mark
-          <input id="spectrum-slider" type="range" min="20" max="680" value="72">
-        </label>
-      </div>
-      <p class="caption" id="spectrum-label"></p>
       <div class="one-liners">
         <p>For EM waves: higher frequency → more energy.</p>
-        <p>Book cut: frequencies higher than ultraviolet, i.e. X-rays and gamma rays, are ionizing.</p>
+        <p>Frequencies higher than ultraviolet (X-rays and gamma rays) are ionizing.</p>
       </div>
     </section>
 
@@ -140,20 +124,12 @@
         <h2>X-ray tube</h2>
         <span class="stamp">Fig. 25.6</span>
       </header>
-      <div class="visual play tube" id="tube-vis" data-autoplay>
-        <svg viewBox="0 0 640 230" class="tube" role="img" aria-label="Electrons hit a heavy metal target and X-rays leave">
-          <ellipse cx="300" cy="108" rx="250" ry="78" fill="#e8eef2" stroke="#333" stroke-width="2"/>
-          <text x="70" y="28" font-size="13">cathode −</text>
-          <rect x="78" y="90" width="22" height="36" rx="3" fill="#555"/>
-          <path d="M84 96 h10 M84 104 h10 M84 112 h10 M84 120 h10" stroke="#f4c542" stroke-width="2"/>
-          <line class="e-beam" x1="102" y1="108" x2="348" y2="108" stroke="#2a62a8" stroke-width="4" stroke-dasharray="8 7"/>
-          <polygon points="350,70 410,108 350,146 338,130 338,86" fill="#8a9098" stroke="#333"/>
-          <text x="300" y="200" font-size="13">heavy metal target +</text>
-          <path class="xburst" d="M392 118 L 470 168" fill="none" stroke="#c9a227" stroke-width="3"/>
-          <path class="xburst" d="M392 118 L 510 150" fill="none" stroke="#c9a227" stroke-width="3"/>
-          <path class="xburst" d="M392 118 L 500 188" fill="none" stroke="#c9a227" stroke-width="3"/>
-          <text x="500" y="130" font-size="14">X-rays</text>
-        </svg>
+      <div class="visual play stage" id="tube-vis" data-autoplay data-scene="tube">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="X-ray tube: electron gun, electrons hitting an angled heavy-metal target, X-rays leaving the target face"></canvas>
+        <span class="hud-label" style="left:10%;top:16%">electron gun</span>
+        <span class="hud-label" style="left:34%;top:18%">electrons</span>
+        <span class="hud-label" style="left:58%;top:14%">heavy metal target</span>
+        <span class="hud-label" style="left:78%;top:70%">X-rays</span>
       </div>
       <div class="row"><button type="button" data-replay="tube-vis">Replay</button></div>
       <div class="one-liners">
@@ -356,6 +332,8 @@
 
     <p class="lede"><a href="25-2.html">Next: 25.2 Origin of nuclear radiation →</a></p>
   </main>
+  <script src="js/lib/three.min.js"></script>
+  <script src="js/diagrams3d.js"></script>
   <script src="js/notes.js"></script>
 </body>
 </html>

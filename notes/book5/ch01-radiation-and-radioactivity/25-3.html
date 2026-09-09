@@ -26,18 +26,10 @@
         <h2>Ion-pairs, not lone positive ions</h2>
         <span class="stamp">Fig. 25.24</span>
       </header>
-      <div class="visual play pair" id="pair-vis" data-autoplay>
-        <svg viewBox="0 0 640 200" class="knock pair" role="img" aria-label="Knockout then capture makes an ion pair">
-          <line class="ray" x1="16" y1="70" x2="168" y2="70" stroke="#c9a227" stroke-width="8"/>
-          <circle class="ion" cx="204" cy="70" r="22" fill="#e0a04a"/>
-          <circle cx="204" cy="70" r="8" fill="#c0392b"/>
-          <g class="eject e2">
-            <circle cx="236" cy="88" r="8" fill="#2a62a8"/>
-          </g>
-          <circle class="minus" cx="390" cy="148" r="22" fill="#e0a04a"/>
-          <text x="184" y="112" font-size="12">+ ion</text>
-          <text x="370" y="186" font-size="12">− ion</text>
-        </svg>
+      <div class="visual play stage" id="pair-vis" data-autoplay data-scene="ionpair">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Knocked electron is captured by a second atom, making an ion pair"></canvas>
+        <span class="hud-label" data-hud="a">atom</span>
+        <span class="hud-label" data-hud="b">atom</span>
       </div>
       <div class="row"><button type="button" data-replay="pair-vis">Replay</button></div>
       <div class="one-liners">
@@ -101,22 +93,11 @@
         <h2>Ionized gas conducts</h2>
         <span class="stamp">Fig. 25.26</span>
       </header>
-      <div class="visual">
-        <svg viewBox="0 0 420 200" role="img" aria-label="Galvanometer between plates with alpha source">
-          <rect x="80" y="28" width="220" height="14" fill="#888"/>
-          <rect x="80" y="148" width="220" height="14" fill="#888"/>
-          <text x="310" y="40">−</text>
-          <text x="310" y="160">+</text>
-          <circle cx="40" cy="96" r="16" fill="#c0392b"/>
-          <text x="16" y="128" font-size="12">α source</text>
-          <circle cx="150" cy="70" r="6" fill="#d35400"/>
-          <text x="146" y="66" font-size="11">+</text>
-          <circle cx="210" cy="126" r="6" fill="#2a62a8"/>
-          <text x="206" y="122" font-size="11" fill="#fff">−</text>
-          <path d="M190 170 A 28 28 0 0 1 230 170" fill="none" stroke="#333"/>
-          <line id="galvo-needle" x1="200" y1="148" x2="200" y2="88" stroke="#c0392b" stroke-width="3"/>
-          <circle cx="200" cy="148" r="5" fill="#c0392b"/>
-        </svg>
+      <div class="visual play stage" id="current-vis" data-autoplay data-scene="current">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Alpha knocks an electron from a gas atom; the pair drifts to the plates"></canvas>
+        <span class="hud-label" style="left:10%;top:48%">α source</span>
+        <span class="hud-label" style="left:78%;top:12%">− plate</span>
+        <span class="hud-label" style="left:78%;top:84%">+ plate</span>
       </div>
       <div class="row">
         <button type="button" data-current="alpha">α source</button>
@@ -200,17 +181,11 @@
         <h2>GM tube: argon ion-pairs → pulses</h2>
         <span class="stamp">Fig. 25.30</span>
       </header>
-      <div class="visual play gm" id="gm-vis" data-autoplay>
-        <svg viewBox="0 0 640 170" class="gm" role="img" aria-label="GM tube cross section">
-          <rect x="40" y="40" width="360" height="80" rx="40" fill="#eef4f8" stroke="#111" stroke-width="8"/>
-          <line x1="88" y1="80" x2="360" y2="80" stroke="#c0392b" stroke-width="4"/>
-          <circle class="pair-dot" cx="140" cy="80" r="5" fill="#d35400"/>
-          <text x="40" y="28" font-size="12">thin window</text>
-          <text x="420" y="70" font-size="13">+ wire</text>
-          <text x="420" y="94" font-size="13">− case · argon</text>
-          <rect class="pulse" x="540" y="50" width="18" height="70" fill="#9cffb0"/>
-          <text x="530" y="140" font-size="12">pulse</text>
-        </svg>
+      <div class="visual play stage" id="gm-vis" data-autoplay data-scene="gm">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Argon atom in a GM tube loses an electron toward the anode wire"></canvas>
+        <span class="hud-label" style="left:12%;top:14%">thin window</span>
+        <span class="hud-label" style="left:78%;top:28%">+ wire</span>
+        <span class="hud-label" style="left:78%;top:72%">− case · argon</span>
       </div>
       <div class="row">
         <span class="meter" id="gm-rate">0</span>
@@ -389,21 +364,12 @@
         <h2>E and B split the three beams</h2>
         <span class="stamp">Fig. 25.33-25.34</span>
       </header>
-      <div class="visual">
-        <svg viewBox="0 0 640 230" role="img" aria-label="Electric deflection">
-          <rect x="18" y="40" width="16" height="140" fill="#111"/>
-          <text x="10" y="200" font-size="11">collimator</text>
-          <rect x="150" y="28" width="240" height="14" fill="#888"/>
-          <rect x="150" y="176" width="240" height="14" fill="#888"/>
-          <text x="400" y="40">−</text>
-          <text x="400" y="188">+</text>
-          <path id="e-alpha" d="M 40 110 C 150 110 200 64 340 48" fill="none" stroke="#c0392b" stroke-width="3" stroke-dasharray="7 8"/>
-          <path id="e-beta" d="M 40 110 C 130 110 160 188 300 200" fill="none" stroke="#1d4f91" stroke-width="3" stroke-dasharray="4 6"/>
-          <line x1="40" y1="110" x2="420" y2="110" stroke="#c9a227" stroke-width="2"/>
-          <text x="440" y="52" fill="#c0392b">α toward −</text>
-          <text x="440" y="204" fill="#1d4f91">β toward + (bent more)</text>
-          <text x="440" y="114" fill="#c9a227">γ straight</text>
-        </svg>
+      <div class="visual play stage" id="efield-vis" data-autoplay data-scene="efield">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Alpha toward the negative plate, beta toward the positive plate and bent more, gamma straight"></canvas>
+        <span class="hud-label" style="left:10%;top:82%">collimator</span>
+        <span class="hud-label" style="left:78%;top:12%">α toward −</span>
+        <span class="hud-label" style="left:78%;top:48%">γ straight</span>
+        <span class="hud-label" style="left:78%;top:84%">β toward + (bent more)</span>
       </div>
       <div class="visual">
         <svg viewBox="0 0 640 230" role="img" aria-label="Magnetic deflection">
@@ -456,6 +422,8 @@
 
     <p class="lede"><a href="summary.html">Close with the comparison table and common mistakes →</a></p>
   </main>
+  <script src="js/lib/three.min.js"></script>
+  <script src="js/diagrams3d.js"></script>
   <script src="js/notes.js"></script>
 </body>
 </html>

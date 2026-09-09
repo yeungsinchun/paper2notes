@@ -26,22 +26,10 @@
         <h2>Most of an atom is empty space</h2>
         <span class="stamp">Fig. 25.11</span>
       </header>
-      <div class="visual">
-        <svg viewBox="0 0 440 280" role="img" aria-label="Atom with nucleus zoom">
-          <g id="atom-zoom">
-            <circle cx="220" cy="140" r="110" fill="none" stroke="#9bb6c4"/>
-            <circle cx="220" cy="140" r="70" fill="none" stroke="#9bb6c4"/>
-            <circle cx="220" cy="30" r="8" fill="#2a62a8"/>
-            <circle cx="315" cy="175" r="8" fill="#2a62a8"/>
-            <circle cx="125" cy="175" r="8" fill="#2a62a8"/>
-            <circle cx="214" cy="134" r="7" fill="#c0392b"/>
-            <circle cx="226" cy="134" r="7" fill="#2f7a4a"/>
-            <circle cx="214" cy="146" r="7" fill="#2f7a4a"/>
-            <circle cx="226" cy="146" r="7" fill="#c0392b"/>
-          </g>
-          <text x="16" y="24" font-size="13">atom ~ 10⁻¹⁰ m</text>
-          <text x="292" y="150" font-size="13">nucleus ~ 10⁻¹⁴ m</text>
-        </svg>
+      <div class="visual play stage" id="atom-vis" data-scene="atom">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Atom with electrons on shells and a tiny nucleus"></canvas>
+        <span class="hud-label" style="left:18%;top:10%">atom ~ 10⁻¹⁰ m</span>
+        <span class="hud-label" style="left:72%;top:48%">nucleus ~ 10⁻¹⁴ m</span>
       </div>
       <div class="row">
         <label>Zoom toward nucleus
@@ -183,21 +171,11 @@
         <button type="button" data-decay="b">β of ⁶⁰Co</button>
         <button type="button" data-decay="g">γ of ⁶⁰Ni*</button>
       </div>
-      <div class="visual play" id="decay-a" data-decay-panel="a">
-        <svg viewBox="0 0 640 180" class="decay-a" role="img" aria-label="Alpha decay of polonium-208">
-          <circle cx="118" cy="90" r="48" fill="#e8d5c4"/>
-          <text x="96" y="72" font-size="12" font-family="Palatino, serif">208</text>
-          <text x="102" y="92" font-size="12" font-family="Palatino, serif">84</text>
-          <text x="118" y="88" font-size="22" font-family="Palatino, serif">Po</text>
-          <g class="he">
-            <circle cx="214" cy="72" r="8" fill="#c0392b"/>
-            <circle cx="228" cy="72" r="8" fill="#c0392b"/>
-            <circle cx="214" cy="86" r="8" fill="#2f7a4a"/>
-            <circle cx="228" cy="86" r="8" fill="#2f7a4a"/>
-          </g>
-          <text x="360" y="68" font-size="16" font-family="Palatino, serif">²⁰⁴₈₂Pb + ⁴₂He</text>
-          <text x="360" y="100" font-size="13">A − 4 · Z − 2</text>
-        </svg>
+      <div class="visual play stage" id="decay-a" data-decay-panel="a" data-autoplay data-scene="decay-a">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Alpha particle leaves the polonium-208 nucleus"></canvas>
+        <span class="hud-label" style="left:22%;top:16%">²⁰⁸₈₄Po</span>
+        <span class="hud-label" style="left:72%;top:22%">²⁰⁴₈₂Pb + ⁴₂He</span>
+        <span class="hud-label" style="left:72%;top:78%">A − 4 · Z − 2</span>
         <p class="eq">
           <span class="nuc"><span class="az"><span>A</span><span>Z</span></span>X</span>
           →
@@ -206,16 +184,11 @@
           <span class="nuc"><span class="az"><span>4</span><span>2</span></span>He</span>
         </p>
       </div>
-      <div class="visual play" id="decay-b" data-decay-panel="b" hidden>
-        <svg viewBox="0 0 640 180" class="decay-b" role="img" aria-label="Beta decay of cobalt-60">
-          <circle cx="118" cy="90" r="48" fill="#d5e0e8"/>
-          <text x="100" y="72" font-size="12" font-family="Palatino, serif">60</text>
-          <text x="104" y="92" font-size="12" font-family="Palatino, serif">27</text>
-          <text x="118" y="88" font-size="22" font-family="Palatino, serif">Co</text>
-          <g class="beta"><circle cx="220" cy="90" r="9" fill="#2a62a8"/><text x="216" y="94" fill="#fff">−</text></g>
-          <text x="360" y="68" font-size="16" font-family="Palatino, serif">⁶⁰₂₈Ni + ⁰₋₁e</text>
-          <text x="360" y="100" font-size="13">n → p + e⁻ inside the nucleus · A unchanged · Z + 1</text>
-        </svg>
+      <div class="visual play stage" id="decay-b" data-decay-panel="b" hidden data-scene="decay-b">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Beta electron leaves the cobalt-60 nucleus"></canvas>
+        <span class="hud-label" style="left:22%;top:16%">⁶⁰₂₇Co</span>
+        <span class="hud-label" style="left:72%;top:22%">⁶⁰₂₈Ni + ⁰₋₁e</span>
+        <span class="hud-label" style="left:72%;top:78%">n → p + e⁻ inside the nucleus</span>
         <p class="eq">
           <span class="nuc"><span class="az"><span>A</span><span>Z</span></span>X</span>
           →
@@ -224,17 +197,11 @@
           <span class="nuc"><span class="az"><span>0</span><span>−1</span></span>e</span>
         </p>
       </div>
-      <div class="visual play" id="decay-g" data-decay-panel="g" hidden>
-        <svg viewBox="0 0 640 180" class="decay-g" role="img" aria-label="Gamma emission of excited nickel-60">
-          <circle cx="118" cy="90" r="48" fill="#efe4c4"/>
-          <text x="100" y="72" font-size="12" font-family="Palatino, serif">60</text>
-          <text x="104" y="92" font-size="12" font-family="Palatino, serif">28</text>
-          <text x="118" y="88" font-size="22" font-family="Palatino, serif">Ni*</text>
-          <path class="wave" d="M214 90 C 228 54, 242 54, 256 90 S 284 126, 298 90 S 326 54, 340 90"
-                fill="none" stroke="#c9a227" stroke-width="3"/>
-          <text x="420" y="68" font-size="16" font-family="Palatino, serif">⁶⁰₂₈Ni + γ</text>
-          <text x="420" y="100" font-size="13">not a transmutation · A, Z unchanged</text>
-        </svg>
+      <div class="visual play stage" id="decay-g" data-decay-panel="g" hidden data-scene="decay-g">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Gamma pulse leaves excited nickel-60"></canvas>
+        <span class="hud-label" style="left:22%;top:16%">⁶⁰₂₈Ni*</span>
+        <span class="hud-label" style="left:72%;top:22%">⁶⁰₂₈Ni + γ</span>
+        <span class="hud-label" style="left:72%;top:78%">not a transmutation · A, Z unchanged</span>
         <p class="eq">
           <span class="nuc"><span class="az"><span>A</span><span>Z</span></span>X*</span>
           →
@@ -454,6 +421,8 @@
 
     <p class="lede"><a href="25-3.html">Next: 25.3 Properties, including the α/β/γ decision graph →</a></p>
   </main>
+  <script src="js/lib/three.min.js"></script>
+  <script src="js/diagrams3d.js"></script>
   <script src="js/notes.js"></script>
 </body>
 </html>
