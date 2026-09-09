@@ -170,33 +170,73 @@
         <h2>Flesh transmits, bone absorbs</h2>
         <span class="stamp">Fig. 25.7</span>
       </header>
-      <div class="visual">
-        <svg viewBox="0 0 640 210" role="img" aria-label="X-rays through flesh versus bone onto film">
-          <g stroke="#c9a227" stroke-width="3">
-            <line x1="24" y1="50" x2="148" y2="50"/>
-            <line x1="24" y1="80" x2="148" y2="80"/>
-            <line x1="24" y1="110" x2="148" y2="110"/>
-            <line x1="24" y1="140" x2="148" y2="140"/>
+      <div class="visual play" id="imaging-vis" data-autoplay>
+        <svg viewBox="0 0 760 300" role="img" aria-label="Hand radiograph beside X-rays coming down onto bone next to flesh, then photographic film">
+          <defs>
+            <marker id="xray-head" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0 0 L8 4 L0 8 Z" fill="#c9a227"/>
+            </marker>
+          </defs>
+          <g id="hand-radiograph">
+            <rect x="14" y="16" width="270" height="268" rx="5" fill="#10100e"/>
+            <path fill="#2f2c28" d="M128 276 C 76 258 40 218 34 172 C 28 128 52 104 74 90 C 60 68 46 44 52 30 C 58 16 78 16 86 32 L 100 20 C 112 8 128 10 132 26 L 144 16 C 158 6 174 10 176 26 L 192 34 C 208 50 224 82 234 116 C 248 160 250 204 208 244 C 182 268 154 276 128 276 Z"/>
+            <g fill="none" stroke="#f0e6d0" stroke-linecap="round">
+              <line x1="116" y1="272" x2="120" y2="230" stroke-width="12"/>
+              <line x1="142" y1="274" x2="150" y2="228" stroke-width="15"/>
+              <line x1="104" y1="214" x2="82" y2="156" stroke-width="8"/>
+              <line x1="122" y1="210" x2="110" y2="148" stroke-width="10"/>
+              <line x1="140" y1="208" x2="140" y2="144" stroke-width="11"/>
+              <line x1="158" y1="210" x2="168" y2="150" stroke-width="10"/>
+              <line x1="164" y1="222" x2="204" y2="184" stroke-width="12"/>
+              <line x1="82" y1="156" x2="70" y2="108" stroke-width="7"/>
+              <line x1="110" y1="148" x2="102" y2="96" stroke-width="8"/>
+              <line x1="140" y1="144" x2="140" y2="90" stroke-width="9"/>
+              <line x1="168" y1="150" x2="180" y2="98" stroke-width="8"/>
+              <line x1="204" y1="184" x2="228" y2="158" stroke-width="9"/>
+              <line x1="70" y1="108" x2="62" y2="74" stroke-width="6"/>
+              <line x1="102" y1="96" x2="96" y2="60" stroke-width="6.5"/>
+              <line x1="140" y1="90" x2="140" y2="52" stroke-width="7"/>
+              <line x1="180" y1="98" x2="190" y2="64" stroke-width="6.5"/>
+              <line x1="62" y1="74" x2="56" y2="48" stroke-width="5"/>
+              <line x1="96" y1="60" x2="92" y2="34" stroke-width="5.5"/>
+              <line x1="140" y1="52" x2="140" y2="24" stroke-width="6"/>
+              <line x1="190" y1="64" x2="198" y2="40" stroke-width="5.5"/>
+              <line x1="228" y1="158" x2="246" y2="140" stroke-width="7"/>
+            </g>
+            <g fill="#f0e6d0">
+              <ellipse cx="112" cy="220" rx="8" ry="7"/>
+              <ellipse cx="128" cy="216" rx="8" ry="7"/>
+              <ellipse cx="146" cy="216" rx="8" ry="7"/>
+              <ellipse cx="160" cy="222" rx="8" ry="7"/>
+              <ellipse cx="120" cy="232" rx="7" ry="6"/>
+              <ellipse cx="138" cy="230" rx="8" ry="6"/>
+              <ellipse cx="154" cy="234" rx="7" ry="6"/>
+            </g>
           </g>
-          <text x="24" y="32" font-size="13">X-rays</text>
-          <rect x="160" y="40" width="88" height="120" fill="#f0cbb0" opacity="0.85"/>
-          <text x="180" y="104" font-size="13">flesh</text>
-          <g id="xray-through-flesh" stroke="#c9a227" stroke-width="3">
-            <line x1="248" y1="50" x2="368" y2="50"/>
-            <line x1="248" y1="140" x2="368" y2="140"/>
+          <text x="530" y="28" text-anchor="middle" font-size="15">X-rays</text>
+          <g id="xray-body">
+            <rect id="slab-bone" x="356" y="96" width="120" height="58" fill="#f4efe4" fill-opacity="0.92" stroke="#8a8580"/>
+            <rect id="slab-flesh" x="476" y="96" width="148" height="58" fill="#e8c4a0" fill-opacity="0.9"/>
           </g>
-          <rect id="xray-stopped-bone" x="268" y="62" width="44" height="76" fill="#ece6d8" stroke="#888"/>
-          <text x="274" y="104" font-size="12">bone</text>
-          <rect id="xray-film" x="380" y="40" width="220" height="120" fill="#3d3426"/>
-          <rect id="xray-shadow" x="430" y="62" width="44" height="76" fill="#f4efe0" opacity="0"/>
-          <text x="468" y="108" font-size="13" fill="#eee">film</text>
+          <path data-xray="bone-short" fill="none" stroke="#c9a227" stroke-width="2.6" marker-end="url(#xray-head)"
+                d="M378.0 38.0 L383.1 42.0 L384.3 46.0 L380.8 50.0 L375.2 54.0 L371.7 58.0 L372.9 62.0 L378.0 66.0 L383.1 70.0 L384.3 74.0 L380.8 78.0 L375.2 82.0 L371.7 86.0 L372.9 90.0 L378.0 94.0 L383.1 98.0 L384.3 102.0 L380.8 106.0 L375.2 110.0 L371.7 114.0 L372.9 118.0"/>
+          <path data-xray="bone-mid" fill="none" stroke="#c9a227" stroke-width="2.6" marker-end="url(#xray-head)"
+                d="M424.0 38.0 L429.2 42.1 L430.3 46.2 L426.5 50.2 L420.8 54.3 L417.6 58.4 L419.4 62.5 L424.8 66.6 L429.6 70.6 L430.0 74.7 L425.7 78.8 L420.1 82.9 L417.5 87.0 L420.0 91.0 L425.6 95.1 L430.0 99.2 L429.7 103.3 L424.9 107.4 L419.5 111.4 L417.5 115.5 L420.7 119.6 L426.4 123.7 L430.2 127.8 L429.2 131.8 L424.1 135.9 L418.9 140.0"/>
+          <path data-xray="flesh-stop" fill="none" stroke="#c9a227" stroke-width="2.6" marker-end="url(#xray-head)"
+                d="M500.0 38.0 L505.1 42.0 L506.3 46.0 L502.8 50.0 L497.2 54.0 L493.7 58.0 L494.9 62.0 L500.0 66.0 L505.1 70.0 L506.3 74.0 L502.8 78.0 L497.2 82.0 L493.7 86.0 L494.9 90.0 L500.0 94.0 L505.1 98.0 L506.3 102.0 L502.8 106.0 L497.2 110.0 L493.7 114.0 L494.9 118.0 L500.0 122.0 L505.1 126.0 L506.3 130.0"/>
+          <path data-xray="flesh-thru1" fill="none" stroke="#c9a227" stroke-width="2.6" marker-end="url(#xray-head)"
+                d="M548.0 38.0 L553.1 42.0 L554.3 46.0 L550.8 50.0 L545.2 54.0 L541.7 58.0 L542.9 62.0 L548.0 66.0 L553.1 70.0 L554.3 74.0 L550.8 78.0 L545.2 82.0 L541.7 86.0 L542.9 90.0 L548.0 94.0 L553.1 98.0 L554.3 102.0 L550.8 106.0 L545.2 110.0 L541.7 114.0 L542.9 118.0 L548.0 122.0 L553.1 126.0 L554.3 130.0 L550.8 134.0 L545.2 138.0 L541.7 142.0 L542.9 146.0 L548.0 150.0 L553.1 154.0 L554.3 158.0 L550.8 162.0 L545.2 166.0 L541.7 170.0 L542.9 174.0 L548.0 178.0 L553.1 182.0 L554.3 186.0 L550.8 190.0 L545.2 194.0 L541.7 198.0 L542.9 202.0 L548.0 206.0"/>
+          <path data-xray="flesh-thru2" fill="none" stroke="#c9a227" stroke-width="2.6" marker-end="url(#xray-head)"
+                d="M596.0 38.0 L601.1 42.0 L602.3 46.0 L598.8 50.0 L593.2 54.0 L589.7 58.0 L590.9 62.0 L596.0 66.0 L601.1 70.0 L602.3 74.0 L598.8 78.0 L593.2 82.0 L589.7 86.0 L590.9 90.0 L596.0 94.0 L601.1 98.0 L602.3 102.0 L598.8 106.0 L593.2 110.0 L589.7 114.0 L590.9 118.0 L596.0 122.0 L601.1 126.0 L602.3 130.0 L598.8 134.0 L593.2 138.0 L589.7 142.0 L590.9 146.0 L596.0 150.0 L601.1 154.0 L602.3 158.0 L598.8 162.0 L593.2 166.0 L589.7 170.0 L590.9 174.0 L596.0 178.0 L601.1 182.0 L602.3 186.0 L598.8 190.0 L593.2 194.0 L589.7 198.0 L590.9 202.0 L596.0 206.0"/>
+          <rect id="xray-film" x="348" y="206" width="284" height="34" fill="#3d3426"/>
+          <rect id="film-under-bone" x="356" y="206" width="120" height="34" fill="#f4efe0"/>
+          <rect id="film-under-flesh" x="476" y="206" width="148" height="34" fill="#1a1610"/>
+          <text x="416" y="172" text-anchor="middle" font-size="14">bone</text>
+          <text x="630" y="131" text-anchor="start" font-size="14">flesh</text>
+          <text x="490" y="262" text-anchor="middle" font-size="13">photographic film</text>
         </svg>
       </div>
-      <div class="row">
-        <button type="button" data-tissue="flesh">Through flesh</button>
-        <button type="button" data-tissue="bone">Through bone</button>
-        <button type="button" data-tissue="air">No body</button>
-      </div>
+      <div class="row"><button type="button" data-replay="imaging-vis">Replay</button></div>
       <div class="one-liners">
         <p>Soft tissue transmits → film blackens. Bone absorbs → bone looks white on the developed film.</p>
       </div>

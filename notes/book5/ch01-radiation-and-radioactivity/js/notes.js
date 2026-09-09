@@ -92,34 +92,44 @@
   }
 
   function initImaging() {
-    var film = $("#xray-film");
-    var shadow = $("#xray-shadow");
-    var fleshRays = $("#xray-through-flesh");
-    var boneBlock = $("#xray-stopped-bone");
-    if (!film) return;
-    function show(kind) {
-      if (kind === "bone") {
-        film.setAttribute("fill", "#3d3426");
-        if (shadow) shadow.setAttribute("opacity", "1");
-        if (fleshRays) fleshRays.setAttribute("opacity", "0.25");
-        if (boneBlock) boneBlock.setAttribute("opacity", "1");
-      } else if (kind === "flesh") {
-        film.setAttribute("fill", "#3d3426");
-        if (shadow) shadow.setAttribute("opacity", "0");
-        if (fleshRays) fleshRays.setAttribute("opacity", "1");
-        if (boneBlock) boneBlock.setAttribute("opacity", "0.2");
-      } else {
-        film.setAttribute("fill", "#1c1812");
-        if (shadow) shadow.setAttribute("opacity", "0");
-        if (fleshRays) fleshRays.setAttribute("opacity", "1");
-        if (boneBlock) boneBlock.setAttribute("opacity", "0");
+    var host = $("#imaging-vis");
+    if (!host) return;
+    var rays = $all("[data-xray]", host);
+    var filmFlesh = $("#film-under-flesh");
+    var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var t0 = performance.now();
+    var lengths = rays.map(function (ray) {
+      try {
+        return ray.getTotalLength();
+      } catch (err) {
+        return 140;
+      }
+    });
+    function apply(sec) {
+      rays.forEach(function (ray, i) {
+        var len = lengths[i];
+        var dur = 0.5 + len / 260;
+        var u = reduced ? 1 : Math.max(0, Math.min(1, sec / dur));
+        ray.style.strokeDasharray = String(len);
+        ray.style.strokeDashoffset = String(len * (1 - u));
+      });
+      if (filmFlesh) {
+        var develop = reduced ? 1 : Math.max(0, Math.min(1, (sec - 0.65) / 0.45));
+        var r = Math.round(244 - develop * 218);
+        var g = Math.round(239 - develop * 217);
+        var b = Math.round(224 - develop * 208);
+        filmFlesh.setAttribute("fill", "rgb(" + r + "," + g + "," + b + ")");
       }
     }
-    $all("[data-tissue]").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        show(btn.getAttribute("data-tissue"));
-      });
+    host.addEventListener("notes-replay", function () {
+      t0 = performance.now();
     });
+    function frame(now) {
+      apply((now - t0) / 1000);
+      requestAnimationFrame(frame);
+    }
+    apply(reduced ? 8 : 0);
+    requestAnimationFrame(frame);
   }
 
   function initAtomZoom() {

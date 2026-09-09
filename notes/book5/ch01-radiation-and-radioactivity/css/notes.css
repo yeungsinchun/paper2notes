@@ -409,6 +409,10 @@ tr.on td { background: #dff3ee; }
   text-shadow: 0 0 6px #fffaf1;
 }
 
+#imaging-vis svg {
+  background: #fffaf1;
+}
+
 @media (max-width: 760px) {
   .flow, .pie { grid-template-columns: 1fr; }
 }

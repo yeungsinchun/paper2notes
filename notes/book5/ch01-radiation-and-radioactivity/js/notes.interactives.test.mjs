@@ -204,6 +204,68 @@ test("25.1 spectrum is static with the ionizing cut after UV", async () => {
   }
 });
 
+test("25.1 imaging is X-rays down onto bone beside flesh, white film under bone", async () => {
+  await cdp.goto(pageUrl("25-1.html"));
+  await cdp.evaluate("new Promise((r) => setTimeout(r, 1400))");
+  const img = await cdp.evaluate(`(function () {
+    function box(el) {
+      return {
+        x: Number(el.getAttribute("x")),
+        y: Number(el.getAttribute("y")),
+        w: Number(el.getAttribute("width")),
+        h: Number(el.getAttribute("height")),
+        fill: el.getAttribute("fill")
+      };
+    }
+    function rgb(fill) {
+      var hex = /^#([0-9a-f]{6})$/i.exec(fill || "");
+      if (hex) {
+        var n = parseInt(hex[1], 16);
+        return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+      }
+      var m = /rgb\\((\\d+),\\s*(\\d+),\\s*(\\d+)\\)/.exec(fill || "");
+      return m ? { r: Number(m[1]), g: Number(m[2]), b: Number(m[3]) } : { r: 0, g: 0, b: 0 };
+    }
+    function lum(c) { return 0.3 * c.r + 0.6 * c.g + 0.1 * c.b; }
+    var bone = box(document.getElementById("slab-bone"));
+    var flesh = box(document.getElementById("slab-flesh"));
+    var filmB = box(document.getElementById("film-under-bone"));
+    var filmF = box(document.getElementById("film-under-flesh"));
+    var rays = Array.from(document.querySelectorAll("#imaging-vis [data-xray]"));
+    return {
+      bone: bone,
+      flesh: flesh,
+      filmB: filmB,
+      filmF: filmF,
+      boneLum: lum(rgb(filmB.fill)),
+      fleshLum: lum(rgb(filmF.fill)),
+      rayCount: rays.length,
+      raysDown: rays.every(function (p) {
+        var b = p.getBBox();
+        return b.height > b.width * 1.2;
+      }),
+      toggles: document.querySelectorAll("[data-tissue]").length,
+      texts: Array.from(document.querySelectorAll("#imaging-vis text")).map(function (t) { return t.textContent.trim(); })
+    };
+  })()`);
+  assert.equal(img.toggles, 0);
+  assert.ok(img.bone.x + img.bone.w <= img.flesh.x + 1, "bone slab should sit left of flesh");
+  assert.ok(img.bone.y + img.bone.h <= img.filmB.y + 1, "film should sit under the slabs");
+  near(img.filmB.x, img.bone.x, 1);
+  near(img.filmB.w, img.bone.w, 1);
+  near(img.filmF.x, img.flesh.x, 1);
+  assert.ok(img.boneLum > 180, "film under bone should stay white");
+  assert.ok(img.fleshLum < 80, "film under flesh should blacken");
+  assert.equal(img.rayCount, 5);
+  assert.equal(img.raysDown, true);
+  assert.ok(img.texts.includes("X-rays"));
+  assert.ok(img.texts.includes("photographic film"));
+
+  if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "25-1-xray-imaging.png"), "#imaging");
+  }
+});
+
 test("25.2 pie wedge is 20% and Pu-239 bookkeeping is static n_α=8", async () => {
   await cdp.goto(pageUrl("25-2.html"));
   const pie = await cdp.evaluate(`(function () {
@@ -609,7 +671,8 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
   near(tube.xraysHud, tube.xraysProj, 10);
   assert.ok(tube.gunHud < tube.electronsHud, "gun label should sit left of electrons");
   assert.ok(tube.electronsHud < tube.targetHud, "electrons label should sit left of the target");
-  assert.ok(tube.targetHud < tube.xraysHud, "target label should sit left of the X-rays");
+  assert.ok(tube.faceNx < -0.4 && tube.faceNy > 0.4, "X-rays leave the slanted face toward the gun and up");
+  assert.ok(tube.rayDot > 0.85, "X-ray label sits on rays leaving the impact face, not the stem");
 
   await cdp.goto(pageUrl("25-3.html"));
   await cdp.evaluate("window.NotesScenes.current.setKind('alpha')");

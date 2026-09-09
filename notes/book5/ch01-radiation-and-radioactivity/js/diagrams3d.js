@@ -416,22 +416,22 @@
   function tube(host) {
     if (!THREE) return;
     var canvas = host.querySelector("canvas");
-    var gfx = stage(canvas, { halfW: 4.4, halfH: 2.5 });
-    gfx.camera.position.set(0.2, 1.8, 11);
-    gfx.camera.lookAt(0, 0, 0);
+    var gfx = stage(canvas, { halfW: 4.6, halfH: 2.55 });
+    gfx.camera.position.set(0, 0.2, 12);
+    gfx.camera.lookAt(0, 0.05, 0);
     var hudGun = host.querySelector('[data-hud="gun"]');
     var hudElectrons = host.querySelector('[data-hud="electrons"]');
     var hudTarget = host.querySelector('[data-hud="target"]');
     var hudXrays = host.querySelector('[data-hud="xrays"]');
-    var gunAnchor = new THREE.Vector3(-2.85, 0.55, 0);
-    var electronAnchor = new THREE.Vector3(-1.05, 0.55, 0);
+    var gunAnchor = new THREE.Vector3(-2.85, 0.58, 0);
+    var electronAnchor = new THREE.Vector3(-1.05, 0.48, 0);
     var targetAnchor = new THREE.Vector3(0.35, 1.05, 0);
-    var xrayAnchor = new THREE.Vector3(1.7, -1.15, 0);
+    var xrayAnchor = new THREE.Vector3(0, 1, 0);
 
     var glassMat = new THREE.MeshStandardMaterial({
       color: 0xd5e3ea,
       transparent: true,
-      opacity: 0.22,
+      opacity: 0.11,
       roughness: 0.18,
       metalness: 0.05,
       side: THREE.DoubleSide,
@@ -466,19 +466,57 @@
     filament.position.set(-2.45, 0, 0);
 
     var target = new THREE.Mesh(
-      new THREE.BoxGeometry(0.18, 1.15, 0.85),
+      new THREE.BoxGeometry(0.28, 1.2, 0.9),
       new THREE.MeshStandardMaterial({ color: 0x8a9098, metalness: 0.65, roughness: 0.28 })
     );
-    target.rotation.z = -0.55;
-    target.position.set(0.35, 0.05, 0);
+    target.rotation.z = -Math.PI / 4;
+    target.position.set(0.82, 0.02, 0);
     var stem = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.12, 0.12, 2.4, 12),
+      new THREE.CylinderGeometry(0.12, 0.12, 2.15, 12),
       new THREE.MeshStandardMaterial({ color: 0x6b7380, metalness: 0.55, roughness: 0.3 })
     );
     stem.rotation.z = Math.PI / 2;
-    stem.position.set(1.7, 0.08, 0);
+    stem.position.set(2.05, -0.04, 0);
 
     gfx.scene.add(bulb, leftArm, rightArm, capL, capR, gun, filament, target, stem);
+    var equator = new THREE.Mesh(
+      new THREE.TorusGeometry(1.55, 0.02, 8, 72),
+      new THREE.MeshBasicMaterial({ color: 0x8aa3ad, transparent: true, opacity: 0.4 })
+    );
+    gfx.scene.add(equator);
+    target.updateMatrixWorld(true);
+    var hit = new THREE.Vector3(-0.14, 0, 0).applyMatrix4(target.matrixWorld);
+    var face = new THREE.Vector3(-1, 0, 0).transformDirection(target.matrixWorld).normalize();
+    var targetTop = new THREE.Vector3(0.04, 0.68, 0).applyMatrix4(target.matrixWorld);
+    targetAnchor.copy(targetTop);
+    xrayAnchor.copy(hit).addScaledVector(face, 0.42).add(new THREE.Vector3(0, 0.32, 0));
+    electronAnchor.set((filament.position.x + hit.x) / 2, 0.48, 0);
+    gunAnchor.set(gun.position.x, 0.55, 0);
+
+    var insert = new THREE.Mesh(
+      new THREE.CircleGeometry(0.15, 22),
+      new THREE.MeshStandardMaterial({
+        color: 0xc4b49a,
+        metalness: 0.75,
+        roughness: 0.22,
+        side: THREE.DoubleSide
+      })
+    );
+    insert.position.copy(hit);
+    insert.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), face);
+    insert.scale.setScalar(0.55);
+    gfx.scene.add(insert);
+    var spark = new THREE.Mesh(
+      new THREE.SphereGeometry(0.08, 16, 12),
+      new THREE.MeshBasicMaterial({
+        color: 0xf6e08a,
+        transparent: true,
+        opacity: 0.95
+      })
+    );
+    spark.position.copy(hit);
+    spark.scale.setScalar(1.15);
+    gfx.scene.add(spark);
 
     var electrons = [];
     var i;
@@ -487,17 +525,47 @@
       electrons.push({ mesh: e, delay: i * 0.08 });
       gfx.scene.add(e);
     }
-    var xrays = [];
-    for (i = 0; i < 4; i += 1) {
-      var ray = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.035, 0.035, 2.2, 8),
-        new THREE.MeshStandardMaterial({ color: 0xc9a227, transparent: true, opacity: 0.9 })
+    function makeWavyRay(from, dir, length) {
+      var nrm = dir.clone().normalize();
+      var side = new THREE.Vector3().crossVectors(nrm, new THREE.Vector3(0, 0, 1));
+      if (side.lengthSq() < 1e-6) side.set(0, 1, 0);
+      side.normalize();
+      var pts = [];
+      var k;
+      for (k = 0; k <= 24; k += 1) {
+        var t = k / 24;
+        var p = from.clone().addScaledVector(nrm, t * length);
+        p.addScaledVector(side, 0.055 * Math.sin(t * Math.PI * 5));
+        pts.push(p);
+      }
+      return new THREE.Mesh(
+        new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 48, 0.045, 8, false),
+        new THREE.MeshBasicMaterial({
+          color: 0xd4a017,
+          transparent: true,
+          opacity: 0.95
+        })
       );
-      var tilt = 0.55 + i * 0.14;
-      ray.position.set(1.35 + i * 0.15, -0.85 - i * 0.18, 0.05 * i);
-      ray.rotation.z = Math.PI / 2 + tilt;
+    }
+    var xrays = [];
+    var zAxis = new THREE.Vector3(0, 0, 1);
+    var spreads = [0, 0.17, -0.17, 0.08];
+    var rayLen = 0.95;
+    var goldMat = new THREE.MeshBasicMaterial({
+      color: 0xd4a017,
+      transparent: true,
+      opacity: 0.95
+    });
+    for (i = 0; i < spreads.length; i += 1) {
+      var dir = face.clone().applyAxisAngle(zAxis, spreads[i]);
+      var ray = makeWavyRay(hit, dir, rayLen);
       xrays.push(ray);
       gfx.scene.add(ray);
+      var tip = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.16, 8), goldMat.clone());
+      tip.position.copy(hit).addScaledVector(dir, rayLen);
+      tip.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
+      gfx.scene.add(tip);
+      xrays.push(tip);
     }
 
     var t0 = performance.now();
@@ -509,12 +577,14 @@
       filament.material.emissiveIntensity = 0.55 + 0.35 * Math.abs(Math.sin(t * 8));
       electrons.forEach(function (item) {
         var u = (t * 0.7 + item.delay) % 1;
-        item.mesh.position.set(lerp(-2.35, 0.22, u), Math.sin(t * 9 + item.delay) * 0.04, 0);
+        item.mesh.position.set(lerp(filament.position.x + 0.12, hit.x, u), lerp(0, hit.y, u), 0);
         item.mesh.material.opacity = 1;
-        item.mesh.visible = u < 0.97;
+        item.mesh.visible = u < 0.9;
       });
+      spark.material.opacity = 0.55 + 0.4 * Math.abs(Math.sin(t * 6));
+      spark.scale.setScalar(0.9 + 0.2 * Math.abs(Math.sin(t * 6)));
       xrays.forEach(function (ray, idx) {
-        ray.material.opacity = 0.3 + 0.55 * Math.abs(Math.sin(t * 3.2 + idx));
+        ray.material.opacity = 0.35 + 0.55 * Math.abs(Math.sin(t * 3.2 + idx));
       });
       placeHud(hudGun, canvas, gfx.camera, gunAnchor);
       placeHud(hudElectrons, canvas, gfx.camera, electronAnchor);
@@ -528,6 +598,7 @@
       return (v.x * 0.5 + 0.5) * (canvas.clientWidth || 1);
     }
     function snapshot() {
+      var leave = xrayAnchor.clone().sub(hit);
       return {
         gunHud: hudGun ? parseFloat(hudGun.style.left) : null,
         gunProj: projectX(gunAnchor),
@@ -536,7 +607,12 @@
         targetHud: hudTarget ? parseFloat(hudTarget.style.left) : null,
         targetProj: projectX(targetAnchor),
         xraysHud: hudXrays ? parseFloat(hudXrays.style.left) : null,
-        xraysProj: projectX(xrayAnchor)
+        xraysProj: projectX(xrayAnchor),
+        faceNx: face.x,
+        faceNy: face.y,
+        hitX: hit.x,
+        hitY: hit.y,
+        rayDot: leave.lengthSq() ? face.dot(leave.normalize()) : 0
       };
     }
     hostReplay(host, restart);
