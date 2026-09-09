@@ -91,10 +91,10 @@
       var f = Number(slider.value);
       mark.setAttribute("x1", String(f));
       mark.setAttribute("x2", String(f));
-      var ionizing = f >= 72;
+      var ionizing = f >= 390;
       label.textContent = ionizing
-        ? "This band can knock electrons out (UV and above in the book cut)."
-        : "Non-ionizing on this spectrum: energy too low to knock electrons out.";
+        ? "Ionizing: X-rays and γ (frequencies higher than UV)."
+        : "Non-ionizing: radio through UV. Energy too low to knock electrons out.";
       label.dataset.ion = ionizing ? "1" : "0";
     }
     slider.addEventListener("input", update);
@@ -306,6 +306,11 @@
     var bg = 1;
     var extra = 0;
     var gridOn = true;
+    var picked = 0;
+    var needGridOff = false;
+    function applyExtra() {
+      extra = gridOn && needGridOff ? 0 : picked;
+    }
     function tick() {
       var shown = Math.max(0, jitter(bg + extra));
       display.textContent = String(shown);
@@ -314,18 +319,22 @@
     setInterval(tick, 700);
     tick();
     $("#gm-bg-btn") && $("#gm-bg-btn").addEventListener("click", function () {
-      extra = 0;
+      picked = 0;
+      needGridOff = false;
+      applyExtra();
     });
     $all("[data-gm-src]").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        extra = Number(btn.getAttribute("data-gm-src"));
-        if (gridOn && btn.getAttribute("data-need-grid") === "off") extra = 0;
+        picked = Number(btn.getAttribute("data-gm-src"));
+        needGridOff = btn.getAttribute("data-need-grid") === "off";
+        applyExtra();
       });
     });
     $("#gm-grid") && $("#gm-grid").addEventListener("click", function () {
       gridOn = !gridOn;
       this.setAttribute("aria-pressed", gridOn ? "true" : "false");
       this.textContent = gridOn ? "plastic grid on (blocks α)" : "plastic grid off (α can enter)";
+      applyExtra();
     });
     if (bgEl) bgEl.textContent = "HK typical background ≈ 1 count s⁻¹";
   }
@@ -408,10 +417,20 @@
   }
 
   var sources = {
-    abg: { a: 1, b: 1, g: 1, label: "α + β + γ" },
-    bg: { a: 0, b: 1, g: 1, label: "β + γ  (Example 25.6 pattern)" },
-    ag: { a: 1, b: 0, g: 1, label: "α + γ" }
+    abg: { a: 200, b: 385, g: 254, label: "α + β + γ" },
+    bg: { a: 0, b: 385, g: 254, label: "β + γ  (Example 25.6 pattern)" },
+    ag: { a: 150, b: 0, g: 254, label: "α + γ" }
   };
+
+  function absorberCount(src, paper, al, pb, bg) {
+    var count = bg;
+    var alphaStopped = paper || al || pb;
+    var betaStopped = al || pb;
+    if (src.a && !alphaStopped) count += src.a;
+    if (src.b && !betaStopped) count += src.b;
+    if (src.g) count += pb ? src.g / 2 : src.g;
+    return Math.max(bg, Math.round(count));
+  }
 
   function initAbsorbers() {
     var rateEl = $("#abs-rate");
@@ -424,27 +443,7 @@
     var bg = 61;
 
     function rate() {
-      var r = bg;
-      if (src.a && !paper) r += 0;
-      if (src.b && !al && !pb) r += src.b ? 385 : 0;
-      if (src.g) r += pb ? 130 : 255;
-      if (src === sources.bg) {
-        if (!paper && !al && !pb) return jitter(701);
-        if (paper && !al && !pb) return jitter(700);
-        if (al && !pb) return jitter(316);
-        return jitter(189);
-      }
-      if (src === sources.ag) {
-        if (!paper && !al && !pb) return jitter(450);
-        if (paper || al) {
-          if (pb) return jitter(100);
-          return jitter(300);
-        }
-      }
-      if (!paper && !al && !pb) return jitter(980);
-      if (paper && !al && !pb) return jitter(440);
-      if (al && !pb) return jitter(432);
-      return jitter(250);
+      return jitter(absorberCount(src, paper, al, pb, bg));
     }
 
     function render() {
@@ -488,12 +487,14 @@
   }
 
   var flowSteps = [
-    { id: "n0", text: "Unknown source in front of a GM tube. Subtract background later." },
-    { id: "n1", text: "Insert paper. Significant drop? → α is present. No drop? → no α." },
-    { id: "n2", text: "Insert ~5 mm Al. Significant drop from the paper reading? → β is present." },
-    { id: "n3", text: "Insert ~25 mm Pb. Drop, but still above background? → γ is present (strength only halved, not zero)." },
-    { id: "n4", text: "Confirm with E or B: α toward − / one B sense; β opposite and bent more; γ straight." },
-    { id: "n5", text: "Confirm with tracks: α thick-straight; β thin-irregular; γ faint/scattered." }
+    { text: "Unknown source in front of a GM tube. Subtract background later." },
+    { text: "Insert paper. Example 25.6: no drop (700 → 700) → no α. A drop would mean α is present." },
+    { text: "Insert ~5 mm Al. Example 25.6: drop from the paper reading (700 → 315) → β is present." },
+    { text: "β present. Continue to the Pb test for γ." },
+    { text: "Insert ~25 mm Pb. Example 25.6: drop but still above background (315 → 190) → γ is present (halved, not zero)." },
+    { text: "γ present. Strength only halved by 25 mm Pb, never read below background." },
+    { text: "Confirm with E or B: α toward − / one B sense; β opposite and bent more; γ straight." },
+    { text: "Confirm with tracks: α thick-straight; β thin-irregular; γ faint/scattered." }
   ];
 
   function initFlow() {
@@ -501,32 +502,57 @@
     var talk = $("#flow-talk");
     if (!svg) return;
     var i = 0;
+    var side = null;
 
     function show() {
       $all(".node", svg).forEach(function (n) {
         n.classList.remove("active", "done");
-        var idx = Number(n.getAttribute("data-step"));
+        var raw = n.getAttribute("data-step");
+        if (raw === "alpha") {
+          if (side === "alpha") n.classList.add("active");
+          return;
+        }
+        var idx = Number(raw);
         if (idx < i) n.classList.add("done");
         if (idx === i) n.classList.add("active");
       });
       $all(".edge", svg).forEach(function (e) {
+        var branch = e.getAttribute("data-side");
+        if (branch) {
+          e.classList.toggle("lit", side === branch);
+          return;
+        }
         var need = Number(e.getAttribute("data-until"));
         e.classList.toggle("lit", i >= need);
       });
-      if (talk) talk.textContent = flowSteps[i].text;
+      if (talk) {
+        talk.textContent = side === "alpha"
+          ? "Significant drop at paper → α is present. Still insert Al, then Pb."
+          : flowSteps[i].text;
+      }
     }
 
     $("#flow-next") && $("#flow-next").addEventListener("click", function () {
+      side = null;
       i = Math.min(flowSteps.length - 1, i + 1);
       show();
     });
     $("#flow-reset") && $("#flow-reset").addEventListener("click", function () {
+      side = null;
       i = 0;
       show();
     });
     $all(".node", svg).forEach(function (n) {
       n.addEventListener("click", function () {
-        i = Number(n.getAttribute("data-step"));
+        var raw = n.getAttribute("data-step");
+        if (raw === "alpha") {
+          side = "alpha";
+          i = 1;
+          show();
+          return;
+        }
+        side = null;
+        i = Number(raw);
         show();
       });
     });
@@ -617,25 +643,6 @@
     });
   }
 
-  function initPuWorked() {
-    var out = $("#pu-out");
-    var aIn = $("#pu-a");
-    if (!out || !aIn) return;
-    function run() {
-      var nA = Number(aIn.value);
-      var nB = 4;
-      var zAfterA = 94 - 2 * nA;
-      var zFinal = zAfterA + nB;
-      out.innerHTML =
-        "ΔA = 239 − 207 = 32 → n<sub>α</sub> = 32 / 4 = <strong>" + nA + "</strong><br>" +
-        "Z after only α: 94 − 2×" + nA + " = " + zAfterA + "<br>" +
-        "Need Z = 82, so n<sub>β</sub> = 82 − " + zAfterA + " = <strong>" + (82 - zAfterA) + "</strong>" +
-        (nA === 8 ? "  (bookkeeping matches ²⁰⁷₈₂Pb when n<sub>β</sub> = 4)" : "  (try n<sub>α</sub> = 8 from ΔA)");
-    }
-    aIn.addEventListener("input", run);
-    run();
-  }
-
   document.addEventListener("DOMContentLoaded", function () {
     initMc();
     initTf();
@@ -655,6 +662,5 @@
     initFields();
     initBadge();
     initCompare();
-    initPuWorked();
   });
 })();
