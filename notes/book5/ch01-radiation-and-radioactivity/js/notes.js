@@ -9,6 +9,14 @@
     return Array.from((root || document).querySelectorAll(sel));
   }
 
+  function svgEl(name, attrs) {
+    var el = document.createElementNS("http://www.w3.org/2000/svg", name);
+    Object.keys(attrs || {}).forEach(function (key) {
+      el.setAttribute(key, String(attrs[key]));
+    });
+    return el;
+  }
+
   function setFeedback(el, ok, text) {
     if (!el) return;
     el.textContent = text;
@@ -33,7 +41,7 @@
             btn.classList.add("wrong");
             var right = $("button[data-choice='" + answer + "']", box);
             if (right) right.classList.add("correct");
-            setFeedback(out, false, "The marked option is the one from the shortlist.");
+            setFeedback(out, false, "Not this one.");
           }
         });
       });
@@ -87,14 +95,17 @@
     var mark = $("#spectrum-mark");
     var label = $("#spectrum-label");
     if (!slider || !mark) return;
+    var cutX = 390;
     function update() {
       var f = Number(slider.value);
       mark.setAttribute("x1", String(f));
       mark.setAttribute("x2", String(f));
-      var ionizing = f >= 390;
+      var pointer = $("#spectrum-pointer");
+      if (pointer) pointer.setAttribute("points", f + ",28 " + (f - 6) + ",18 " + (f + 6) + ",18");
+      var ionizing = f >= cutX;
       label.textContent = ionizing
-        ? "Ionizing: X-rays and γ (frequencies higher than UV)."
-        : "Non-ionizing: radio through UV. Energy too low to knock electrons out.";
+        ? "Ionizing: X-rays and γ (frequency higher than UV)."
+        : "Non-ionizing: radio through ultraviolet.";
       label.dataset.ion = ionizing ? "1" : "0";
     }
     slider.addEventListener("input", update);
@@ -102,22 +113,32 @@
   }
 
   function initImaging() {
-    var bone = $("#xray-bone");
-    var flesh = $("#xray-flesh");
     var film = $("#xray-film");
-    if (!bone) return;
+    var shadow = $("#xray-shadow");
+    var fleshRays = $("#xray-through-flesh");
+    var boneBlock = $("#xray-stopped-bone");
+    if (!film) return;
+    function show(kind) {
+      if (kind === "bone") {
+        film.setAttribute("fill", "#f4efe0");
+        if (shadow) shadow.setAttribute("opacity", "1");
+        if (fleshRays) fleshRays.setAttribute("opacity", "0.25");
+        if (boneBlock) boneBlock.setAttribute("opacity", "1");
+      } else if (kind === "flesh") {
+        film.setAttribute("fill", "#3d3426");
+        if (shadow) shadow.setAttribute("opacity", "0");
+        if (fleshRays) fleshRays.setAttribute("opacity", "1");
+        if (boneBlock) boneBlock.setAttribute("opacity", "0.2");
+      } else {
+        film.setAttribute("fill", "#1c1812");
+        if (shadow) shadow.setAttribute("opacity", "0");
+        if (fleshRays) fleshRays.setAttribute("opacity", "1");
+        if (boneBlock) boneBlock.setAttribute("opacity", "0");
+      }
+    }
     $all("[data-tissue]").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        var kind = btn.getAttribute("data-tissue");
-        bone.setAttribute("opacity", kind === "bone" ? "1" : "0.25");
-        flesh.setAttribute("opacity", kind === "flesh" ? "1" : "0.25");
-        if (kind === "bone") {
-          film.setAttribute("fill", "#f4efe0");
-        } else if (kind === "flesh") {
-          film.setAttribute("fill", "#3d3426");
-        } else {
-          film.setAttribute("fill", "#1c1812");
-        }
+        show(btn.getAttribute("data-tissue"));
       });
     });
   }
@@ -132,60 +153,110 @@
     });
   }
 
-  function initIsotopes() {
-    var nExtra = $("#iso-neutrons");
-    var label = $("#iso-label");
-    if (!nExtra) return;
-    $all("[data-iso]").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var n = Number(btn.getAttribute("data-iso"));
-        nExtra.innerHTML = "";
-        for (var i = 0; i < n; i += 1) {
-          var c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-          c.setAttribute("cx", String(210 + (i % 2) * 16));
-          c.setAttribute("cy", String(118 + Math.floor(i / 2) * 16));
-          c.setAttribute("r", "8");
-          c.setAttribute("fill", "#2f7a4a");
-          nExtra.appendChild(c);
+  function honeycomb(count) {
+    var coords = [];
+    var span = 4;
+    var q;
+    for (q = -span; q <= span; q += 1) {
+      var r;
+      for (r = -span; r <= span; r += 1) {
+        var s = -q - r;
+        if (Math.max(Math.abs(q), Math.abs(r), Math.abs(s)) <= span) {
+          coords.push({
+            x: q + r / 2,
+            y: r * Math.sqrt(3) / 2,
+            order: q * q + r * r + s * s
+          });
         }
-        var names = ["¹H  (protium, N = 0)", "²H  deuterium (N = 1)", "³H  tritium (N = 2)"];
-        if (label) label.textContent = names[n] + "  ·  Z stays 1";
-      });
+      }
+    }
+    coords.sort(function (a, b) { return a.order - b.order; });
+    return coords.slice(0, count);
+  }
+
+  function drawCluster(parent, cx, cy, protons, neutrons, spacing) {
+    var items = [];
+    var i;
+    for (i = 0; i < protons; i += 1) items.push("#c0392b");
+    for (i = 0; i < neutrons; i += 1) items.push("#2f7a4a");
+    var pts = honeycomb(items.length);
+    pts.forEach(function (pt, idx) {
+      parent.appendChild(svgEl("circle", {
+        cx: cx + pt.x * spacing,
+        cy: cy + pt.y * spacing,
+        r: spacing * 0.42,
+        fill: items[idx]
+      }));
     });
   }
 
+  function drawShells(parent, cx, cy, electrons) {
+    var inner = Math.min(2, electrons);
+    var outer = Math.max(0, electrons - 2);
+    function place(n, radius) {
+      var i;
+      for (i = 0; i < n; i += 1) {
+        var angle = -Math.PI / 2 + (i * 2 * Math.PI) / n;
+        parent.appendChild(svgEl("circle", {
+          cx: cx + radius * Math.cos(angle),
+          cy: cy + radius * Math.sin(angle),
+          r: 6,
+          fill: "#2a62a8"
+        }));
+      }
+    }
+    if (inner) {
+      parent.appendChild(svgEl("circle", {
+        cx: cx, cy: cy, r: 28, fill: "none", stroke: "#9bb6c4"
+      }));
+      place(inner, 28);
+    }
+    if (outer) {
+      parent.appendChild(svgEl("circle", {
+        cx: cx, cy: cy, r: 48, fill: "none", stroke: "#9bb6c4"
+      }));
+      place(outer, 48);
+    }
+  }
+
+  function initIsotopes() {
+    var nucleus = $("#iso-nucleus");
+    var label = $("#iso-label");
+    if (!nucleus) return;
+    function draw(nNeutrons) {
+      nucleus.innerHTML = "";
+      drawCluster(nucleus, 200, 108, 1, nNeutrons, 14);
+      var names = ["¹H  protium  N = 0", "²H  deuterium  N = 1", "³H  tritium  N = 2"];
+      if (label) label.textContent = names[nNeutrons] + "  ·  Z = 1";
+    }
+    $all("[data-iso]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        draw(Number(btn.getAttribute("data-iso")));
+      });
+    });
+    draw(0);
+  }
+
   function initNuclides() {
-    var shells = $("#nuclide-shells");
+    var stage = $("#nuclide-stage");
     var counts = $("#nuclide-counts");
-    if (!shells) return;
+    if (!stage) return;
     var data = {
-      H: { a: 1, z: 1, n: 0, e: 1, name: "¹₁H" },
-      He: { a: 4, z: 2, n: 2, e: 2, name: "⁴₂He" },
-      Li: { a: 7, z: 3, n: 4, e: 3, name: "⁷₃Li" },
-      C: { a: 12, z: 6, n: 6, e: 6, name: "¹²₆C" }
+      H: { a: 1, z: 1, n: 0, e: 1, name: "H" },
+      He: { a: 4, z: 2, n: 2, e: 2, name: "He" },
+      Li: { a: 7, z: 3, n: 4, e: 3, name: "Li" },
+      C: { a: 12, z: 6, n: 6, e: 6, name: "C" }
     };
     function draw(key) {
       var d = data[key];
-      shells.innerHTML = "";
-      var i;
-      for (i = 0; i < d.z; i += 1) {
-        var p = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        p.setAttribute("cx", String(470 + (i % 3) * 14));
-        p.setAttribute("cy", String(70 + Math.floor(i / 3) * 14));
-        p.setAttribute("r", "6");
-        p.setAttribute("fill", "#c0392b");
-        shells.appendChild(p);
-      }
-      for (i = 0; i < d.n; i += 1) {
-        var n = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        n.setAttribute("cx", String(478 + (i % 3) * 14));
-        n.setAttribute("cy", String(78 + Math.floor(i / 3) * 14));
-        n.setAttribute("r", "6");
-        n.setAttribute("fill", "#2f7a4a");
-        shells.appendChild(n);
-      }
+      stage.innerHTML = "";
+      drawCluster(stage, 430, 100, d.z, d.n, 11);
+      drawShells(stage, 430, 100, d.e);
       if (counts) {
-        counts.textContent = d.name + "   A = " + d.a + "   Z = " + d.z + "   N = " + d.n + "   electrons = " + d.e;
+        counts.innerHTML =
+          '<span class="nuc"><span class="az"><span>' + d.a + "</span><span>" + d.z +
+          "</span></span>" + d.name + "</span>   A = " + d.a +
+          "   Z = " + d.z + "   N = " + d.n + "   electrons = " + d.e;
       }
     }
     $all("[data-nuclide]").forEach(function (btn) {
@@ -220,51 +291,62 @@
     var readout = $("#series-readout");
     if (!az || !nz) return;
     var step = 0;
+    var left = 48;
+    var right = 292;
+    var top = 22;
+    var bottom = 208;
+    var zMin = 81;
+    var zMax = 93;
+    var aMin = 204;
+    var aMax = 240;
+    var nMin = 122;
+    var nMax = 148;
 
-    function xZ(z) {
-      return 40 + (z - 80) * 18;
+    function xFromZ(z) {
+      return left + (z - zMin) * (right - left) / (zMax - zMin);
     }
-    function yA(a) {
-      return 220 - (a - 206) * 6.2;
+    function yFromA(a) {
+      return bottom - (a - aMin) * (bottom - top) / (aMax - aMin);
     }
-    function yN(n) {
-      return 220 - (n - 124) * 8.8;
+    function yFromN(n) {
+      return bottom - (n - nMin) * (bottom - top) / (nMax - nMin);
+    }
+
+    function plot(svg, yOf, key) {
+      $all(".plot", svg).forEach(function (node) { node.remove(); });
+      var pts = "";
+      var i;
+      var dots = [];
+      for (i = 0; i <= step; i += 1) {
+        var nu = series[i];
+        var x = xFromZ(nu.z);
+        var y = yOf(key === "a" ? nu.a : nu.n);
+        pts += x + "," + y + " ";
+        var fill = "#8aa39c";
+        if (i === step) fill = "#0e5f56";
+        else if (i > 0 && series[i - 1].kind === "β") fill = "#1d4f91";
+        else if (i > 0) fill = "#c0392b";
+        dots.push({ x: x, y: y, r: i === step ? 5 : 3.2, fill: fill });
+      }
+      svg.appendChild(svgEl("polyline", {
+        class: "plot",
+        points: pts,
+        fill: "none",
+        stroke: "#6b7380",
+        "stroke-width": "1.6"
+      }));
+      dots.forEach(function (dot) {
+        svg.appendChild(svgEl("circle", {
+          class: "plot", cx: dot.x, cy: dot.y, r: dot.r, fill: dot.fill
+        }));
+      });
     }
 
     function draw() {
-      function plot(svg, yfn, key) {
-        $all(".plot", svg).forEach(function (n) { n.remove(); });
-        var pts = "";
-        var i;
-        for (i = 0; i <= step; i += 1) {
-          var nu = series[i];
-          var x = xZ(nu.z);
-          var y = yfn(key === "a" ? nu.a : nu.n);
-          pts += x + "," + y + " ";
-          var c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-          c.setAttribute("class", "plot");
-          c.setAttribute("cx", String(x));
-          c.setAttribute("cy", String(y));
-          c.setAttribute("r", i === step ? "5" : "3");
-          var fill = "#8aa39c";
-          if (i === step) fill = "#0e5f56";
-          else if (i > 0 && series[i - 1].kind === "β") fill = "#1d4f91";
-          else if (i > 0) fill = "#c0392b";
-          c.setAttribute("fill", fill);
-          svg.appendChild(c);
-        }
-        var poly = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
-        poly.setAttribute("class", "plot");
-        poly.setAttribute("points", pts);
-        poly.setAttribute("fill", "none");
-        poly.setAttribute("stroke", "#6b7380");
-        poly.setAttribute("stroke-width", "1.6");
-        svg.appendChild(poly);
-      }
-      plot(az, yA, "a");
-      plot(nz, yN, "n");
+      plot(az, yFromA, "a");
+      plot(nz, yFromN, "n");
       var nu = series[step];
-      var next = nu.kind === "stable" ? "stable (end)" : "next: " + nu.kind;
+      var next = nu.kind === "stable" ? "stable" : "next " + nu.kind;
       readout.textContent =
         nu.el + "-" + nu.a + "   Z = " + nu.z + "   N = " + nu.n + "   ·  " + next +
         "   ·  γ would not move this point";
@@ -336,7 +418,7 @@
       this.textContent = gridOn ? "plastic grid on (blocks α)" : "plastic grid off (α can enter)";
       applyExtra();
     });
-    if (bgEl) bgEl.textContent = "HK typical background ≈ 1 count s⁻¹";
+    if (bgEl) bgEl.textContent = "Hong Kong typical background ≈ 1 count s⁻¹";
   }
 
   function initIonCurrent() {
@@ -344,8 +426,8 @@
     if (!needle) return;
     $all("[data-current]").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        var ang = btn.getAttribute("data-current") === "alpha" ? -35 : -12;
-        needle.setAttribute("transform", "rotate(" + ang + " 200 150)");
+        var ang = btn.getAttribute("data-current") === "alpha" ? -38 : -14;
+        needle.setAttribute("transform", "rotate(" + ang + " 200 148)");
       });
     });
   }
@@ -359,28 +441,34 @@
     var running = true;
 
     function drawAlpha() {
-      ctx.lineWidth = 5;
+      ctx.lineWidth = 6;
       ctx.strokeStyle = "#f4f0e4";
-      for (var i = 0; i < 5; i += 1) {
-        var y = 40 + i * 28;
+      ctx.lineCap = "round";
+      var i;
+      for (i = 0; i < 5; i += 1) {
+        var y = 36 + i * 32;
+        var length = 90 + (i % 3) * 18;
+        var grow = Math.min(length, (t * 3 + i * 12) % (length + 40));
         ctx.beginPath();
-        ctx.moveTo(30, y);
-        ctx.lineTo(30 + (t * 4 + i * 20) % 300, y + Math.sin(i) * 2);
+        ctx.moveTo(28, y);
+        ctx.lineTo(28 + grow, y);
         ctx.stroke();
       }
     }
 
     function drawBeta() {
-      ctx.lineWidth = 1.4;
+      ctx.lineWidth = 1.5;
       ctx.strokeStyle = "#dfe7f2";
-      for (var i = 0; i < 7; i += 1) {
+      var i;
+      for (i = 0; i < 6; i += 1) {
         ctx.beginPath();
-        var x = 30;
-        var y = 35 + i * 22;
+        var x = 28;
+        var y = 30 + i * 26;
         ctx.moveTo(x, y);
-        for (var s = 0; s < 18; s += 1) {
-          x += 14;
-          y += Math.sin(s * 1.7 + i + t * 0.2) * 10;
+        var s;
+        for (s = 0; s < 22; s += 1) {
+          x += 12;
+          y += Math.sin(s * 1.65 + i * 0.7 + t * 0.12) * 9;
           ctx.lineTo(x, y);
         }
         ctx.stroke();
@@ -389,12 +477,21 @@
 
     function drawGamma() {
       ctx.fillStyle = "#f4f0e4";
-      for (var i = 0; i < 12; i += 1) {
-        var x = 40 + ((i * 47 + t * 3) % 300);
-        var y = 30 + ((i * 73) % 150);
+      var i;
+      for (i = 0; i < 9; i += 1) {
+        var x = 50 + ((i * 53 + t * 2) % 520);
+        var y = 28 + ((i * 71) % 150);
         ctx.beginPath();
-        ctx.arc(x, y, 1.4, 0, 6.3);
+        ctx.arc(x, y, 1.6, 0, Math.PI * 2);
         ctx.fill();
+        if (i % 3 === 0) {
+          ctx.strokeStyle = "rgba(244,240,228,0.45)";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + 18, y + 10);
+          ctx.stroke();
+        }
       }
     }
 
@@ -418,7 +515,7 @@
 
   var sources = {
     abg: { a: 200, b: 385, g: 254, label: "α + β + γ" },
-    bg: { a: 0, b: 385, g: 254, label: "β + γ  (Example 25.6 pattern)" },
+    bg: { a: 0, b: 385, g: 254, label: "β + γ  (Example 25.6)" },
     ag: { a: 150, b: 0, g: 254, label: "α + γ" }
   };
 
@@ -432,6 +529,16 @@
     return Math.max(bg, Math.round(count));
   }
 
+  function setRay(id, x2, faded) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.setAttribute("x2", String(x2));
+    el.setAttribute("opacity", faded ? "0.35" : "1");
+    if (id === "ray-g") {
+      el.setAttribute("stroke-dasharray", faded ? "6 5" : "0");
+    }
+  }
+
   function initAbsorbers() {
     var rateEl = $("#abs-rate");
     var note = $("#abs-note");
@@ -441,25 +548,46 @@
     var al = false;
     var pb = false;
     var bg = 61;
+    var paperX = 250;
+    var alX = 330;
+    var pbX = 430;
+    var gmX = 560;
 
-    function rate() {
-      return jitter(absorberCount(src, paper, al, pb, bg));
+    function stopX(kind) {
+      if (kind === "a") {
+        if (paper) return paperX;
+        if (al) return alX;
+        if (pb) return pbX;
+        return gmX;
+      }
+      if (kind === "b") {
+        if (al) return alX;
+        if (pb) return pbX;
+        return gmX;
+      }
+      return gmX;
     }
 
     function render() {
-      var r = rate();
+      var r = jitter(absorberCount(src, paper, al, pb, bg));
       rateEl.textContent = r + " cpm";
       var bits = [];
       if (paper) bits.push("paper");
       if (al) bits.push("5 mm Al");
       if (pb) bits.push("25 mm Pb");
       if (note) {
-        note.textContent = src.label + (bits.length ? "  ·  absorbers: " + bits.join(", ") : "  ·  air only") +
+        note.textContent = src.label + (bits.length ? "  ·  " + bits.join(", ") : "  ·  air only") +
           "  ·  background ≈ " + bg + " cpm";
       }
-      document.dispatchEvent(new CustomEvent("abs-update", {
-        detail: { paper: paper, al: al, pb: pb, src: src, rate: r, bg: bg }
-      }));
+      setRay("ray-a", src.a ? stopX("a") : 90, !src.a);
+      setRay("ray-b", src.b ? stopX("b") : 90, !src.b);
+      setRay("ray-g", src.g ? stopX("g") : 90, !src.g || pb);
+      var paperSlab = $("#slab-paper");
+      var alSlab = $("#slab-al");
+      var pbSlab = $("#slab-pb");
+      if (paperSlab) paperSlab.setAttribute("opacity", paper ? "1" : "0.22");
+      if (alSlab) alSlab.setAttribute("opacity", al ? "1" : "0.22");
+      if (pbSlab) pbSlab.setAttribute("opacity", pb ? "1" : "0.22");
     }
 
     $all("[data-src]").forEach(function (btn) {
@@ -493,8 +621,7 @@
     { text: "β present. Continue to the Pb test for γ." },
     { text: "Insert ~25 mm Pb. Example 25.6: drop but still above background (315 → 190) → γ is present (halved, not zero)." },
     { text: "γ present. Strength only halved by 25 mm Pb, never read below background." },
-    { text: "Confirm with E or B: α toward − / one B sense; β opposite and bent more; γ straight." },
-    { text: "Confirm with tracks: α thick-straight; β thin-irregular; γ faint/scattered." }
+    { text: "Confirm: E or B splits α / β; γ straight. Tracks: thick / thin / faint." }
   ];
 
   function initFlow() {
@@ -601,12 +728,16 @@
     var into = true;
 
     function setB() {
-      var a = into ? "M 40 90 C 140 90 170 40 260 28" : "M 40 90 C 140 90 170 140 260 152";
-      var b = into ? "M 40 90 C 110 90 120 170 210 188" : "M 40 90 C 110 90 120 10 210 8";
+      var a = into
+        ? "M 48 110 C 150 110 210 62 318 40"
+        : "M 48 110 C 150 110 210 158 318 180";
+      var b = into
+        ? "M 48 110 C 120 110 138 188 236 204"
+        : "M 48 110 C 120 110 138 32 236 16";
       if (bAlpha) bAlpha.setAttribute("d", a);
       if (bBeta) bBeta.setAttribute("d", b);
       $all("[data-b-mark]").forEach(function (t) {
-        t.textContent = into ? "×  B into page" : "·  B out of page";
+        t.textContent = into ? "×  B into the page" : "·  B out of the page";
       });
     }
 
@@ -631,34 +762,30 @@
   }
 
   function initBadge() {
-    var a = $("#badge-open");
-    var b = $("#badge-al");
-    var c = $("#badge-pb");
-    if (!a) return;
+    var open = $("#badge-open");
+    var al = $("#badge-al");
+    var pb = $("#badge-pb");
+    if (!open) return;
+    function paint(el, tone, label) {
+      el.setAttribute("fill", tone);
+      var text = document.getElementById(el.id + "-text");
+      if (text) text.textContent = label;
+    }
     $all("[data-badge]").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var kind = btn.getAttribute("data-badge");
-        a.className = "film";
-        b.className = "film";
-        c.className = "film";
         if (kind === "alpha") {
-          a.classList.add("pale");
-          a.textContent = "α never reaches film (paper wrap)";
-          b.textContent = "blank";
-          c.textContent = "blank";
+          paint(open, "#e7d9b3", "α stopped by wrap");
+          paint(al, "#f2ead2", "");
+          paint(pb, "#f2ead2", "");
         } else if (kind === "beta") {
-          a.classList.add("dark");
-          b.classList.add("pale");
-          a.textContent = "open window blackened";
-          b.textContent = "Al stops most β";
-          c.textContent = "Pb: blank";
+          paint(open, "#3a3428", "open window");
+          paint(al, "#e7d9b3", "Al stops β");
+          paint(pb, "#f2ead2", "");
         } else {
-          a.classList.add("mid");
-          b.classList.add("mid");
-          c.classList.add("mid");
-          a.textContent = "γ blacks all regions";
-          b.textContent = "γ through Al";
-          c.textContent = "γ through Pb";
+          paint(open, "#8a7b5d", "γ");
+          paint(al, "#8a7b5d", "γ");
+          paint(pb, "#8a7b5d", "γ");
         }
       });
     });

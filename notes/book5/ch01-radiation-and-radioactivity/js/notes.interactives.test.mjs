@@ -229,10 +229,13 @@ test("25.1 spectrum mark starts non-ionizing and flips at the UV/X-ray cut", asy
 test("25.2 pie wedge is 20% and Pu-239 bookkeeping is static n_α=8", async () => {
   await cdp.goto(pageUrl("25-2.html"));
   const pie = await cdp.evaluate(`(function () {
-    var path = document.querySelector('.pie path');
-    var label = document.querySelector('.pie text[text-anchor="middle"]');
-    var d = path.getAttribute('d');
-    var m = /M([\\d.]+) ([\\d.]+) L([\\d.]+) ([\\d.]+) A([\\d.]+) [\\d.]+ 0 0 1 ([\\d.]+) ([\\d.]+)/.exec(d);
+    var paths = Array.from(document.querySelectorAll('.pie path'));
+    var path = paths[paths.length - 1];
+    var label = Array.from(document.querySelectorAll('.pie text')).find(function (t) {
+      return t.textContent.trim() === "20%";
+    });
+    var d = path.getAttribute("d");
+    var m = /M\\s*([\\d.]+)\\s+([\\d.]+)\\s+L\\s*([\\d.]+)\\s+([\\d.]+)\\s+A\\s*([\\d.]+)\\s+[\\d.]+\\s+0\\s+0\\s+1\\s+([\\d.]+)\\s+([\\d.]+)/.exec(d);
     var cx = Number(m[1]);
     var cy = Number(m[2]);
     var endX = Number(m[6]);
@@ -241,16 +244,19 @@ test("25.2 pie wedge is 20% and Pu-239 bookkeeping is static n_α=8", async () =
     var endAngle = Math.atan2(endX - cx, cy - endY);
     var sweepDeg = (endAngle - startAngle) * 180 / Math.PI;
     if (sweepDeg < 0) sweepDeg += 360;
-    var lx = Number(label.getAttribute('x'));
-    var ly = Number(label.getAttribute('y'));
+    var lx = Number(label.getAttribute("x"));
+    var ly = Number(label.getAttribute("y"));
     var labelDeg = Math.atan2(lx - cx, cy - ly) * 180 / Math.PI;
     if (labelDeg < 0) labelDeg += 360;
+    var startDeg = startAngle * 180 / Math.PI;
+    if (startDeg < 0) startDeg += 360;
+    var labelFromStart = (labelDeg - startDeg + 360) % 360;
     return {
       sweepDeg: sweepDeg,
       label: label.textContent,
-      labelInside: labelDeg > 0 && labelDeg < sweepDeg,
-      puRanges: document.querySelectorAll('#pu239 input[type=range]').length,
-      puText: document.querySelector('#pu239').innerText
+      labelInside: labelFromStart >= 0 && labelFromStart <= sweepDeg,
+      puRanges: document.querySelectorAll("#pu239 input[type=range]").length,
+      puText: document.querySelector("#pu239").innerText
     };
   })()`);
   near(pie.sweepDeg, 72, 2);
@@ -450,14 +456,14 @@ test("chapter map, summary, and concept-check scoring are the public notes surfa
   await cdp.goto(pageUrl("summary.html"));
   const summary = await cdp.evaluate(`({
     isotopeItem: /which are isotopes/i.test(document.body.innerText),
-    caption: document.querySelector('.caption') && document.querySelector('.caption').textContent,
+    later: document.querySelector('.later') && document.querySelector('.later').textContent,
     highlight: (function () {
       document.querySelector('[data-compare="range"]').click();
       return Array.from(document.querySelectorAll('tr[data-row="range"]')).every((tr) => tr.classList.contains('on'));
     })()
   })`);
   assert.equal(summary.isotopeItem, false);
-  assert.match(summary.caption, /isotope-chain key is not in the OCR/);
+  assert.match(summary.later, /Chapter 26/);
   assert.equal(summary.highlight, true);
 
   await cdp.goto(pageUrl("25-1.html"));

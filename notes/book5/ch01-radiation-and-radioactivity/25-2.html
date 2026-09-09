@@ -18,8 +18,8 @@
     </nav>
   </header>
   <main>
-    <p class="kicker">Printed pp.11-26</p>
-    <h1>25.2 Origin of nuclear radiation</h1>
+    <p class="kicker">25.2</p>
+    <h1>Origin of nuclear radiation</h1>
 
     <section class="idea" id="atom">
       <header>
@@ -32,15 +32,15 @@
             <circle cx="220" cy="140" r="110" fill="none" stroke="#9bb6c4"/>
             <circle cx="220" cy="140" r="70" fill="none" stroke="#9bb6c4"/>
             <circle cx="220" cy="30" r="8" fill="#2a62a8"/>
-            <circle cx="320" cy="170" r="8" fill="#2a62a8"/>
-            <circle cx="140" cy="180" r="8" fill="#2a62a8"/>
-            <circle cx="214" cy="134" r="8" fill="#c0392b"/>
-            <circle cx="226" cy="134" r="8" fill="#2f7a4a"/>
-            <circle cx="214" cy="146" r="8" fill="#2f7a4a"/>
-            <circle cx="226" cy="146" r="8" fill="#c0392b"/>
+            <circle cx="315" cy="175" r="8" fill="#2a62a8"/>
+            <circle cx="125" cy="175" r="8" fill="#2a62a8"/>
+            <circle cx="214" cy="134" r="7" fill="#c0392b"/>
+            <circle cx="226" cy="134" r="7" fill="#2f7a4a"/>
+            <circle cx="214" cy="146" r="7" fill="#2f7a4a"/>
+            <circle cx="226" cy="146" r="7" fill="#c0392b"/>
           </g>
-          <text x="20" y="24" font-size="13">atom ~ 10⁻¹⁰ m</text>
-          <text x="300" y="150" font-size="13">nucleus ~ 10⁻¹⁴ m</text>
+          <text x="16" y="24" font-size="13">atom ~ 10⁻¹⁰ m</text>
+          <text x="292" y="150" font-size="13">nucleus ~ 10⁻¹⁴ m</text>
         </svg>
       </div>
       <div class="row">
@@ -48,9 +48,14 @@
           <input id="atom-zoom-slider" type="range" min="1" max="8" step="0.1" value="1">
         </label>
       </div>
+      <div class="legend">
+        <span><i class="swatch p"></i>proton</span>
+        <span><i class="swatch n"></i>neutron</span>
+        <span><i class="swatch e"></i>electron</span>
+      </div>
       <div class="one-liners">
         <p>Nucleus = protons + neutrons (nucleons). Neutral atom: Z electrons = Z protons.</p>
-        <p>A = Z + N. Football-field analogy in the book: nucleus like a grain of sand.</p>
+        <p>A = Z + N. The nucleus is like a grain of sand on a football field.</p>
       </div>
       <table class="compact" aria-label="Table 25.1">
         <thead><tr><th></th><th>relative mass</th><th>relative charge</th></tr></thead>
@@ -60,7 +65,6 @@
           <tr><td>electron</td><td>≈ 0 (≈ 1/1839 of a neutron)</td><td>−1</td></tr>
         </tbody>
       </table>
-      <p class="caption">Absolute SI masses in the scan are poorly OCR'd. Relative charges/masses above match Table 25.1's teaching use.</p>
     </section>
 
     <section class="idea" id="notation">
@@ -69,14 +73,14 @@
         <span class="stamp">Fig. 25.12 · Table 25.2</span>
       </header>
       <div class="visual">
-        <svg viewBox="0 0 640 200" role="img" aria-label="A over Z beside element symbol">
-          <text x="40" y="70" font-size="48" font-family="Palatino, serif">A</text>
-          <text x="48" y="120" font-size="28" font-family="Palatino, serif">Z</text>
-          <text x="90" y="100" font-size="64" font-family="Palatino, serif">X</text>
-          <text x="200" y="60" font-size="14">A = mass / nucleon number</text>
-          <text x="200" y="88" font-size="14">Z = atomic / proton number</text>
-          <text x="200" y="116" font-size="14">N = A − Z</text>
-          <g id="nuclide-shells"></g>
+        <svg viewBox="0 0 640 210" role="img" aria-label="A over Z beside element symbol">
+          <text x="52" y="78" font-size="22" font-family="Palatino, serif" text-anchor="end">A</text>
+          <text x="52" y="128" font-size="22" font-family="Palatino, serif" text-anchor="end">Z</text>
+          <text x="64" y="112" font-size="64" font-family="Palatino, serif">X</text>
+          <text x="160" y="58" font-size="14">A = mass / nucleon number</text>
+          <text x="160" y="84" font-size="14">Z = atomic / proton number</text>
+          <text x="160" y="110" font-size="14">N = A − Z</text>
+          <g id="nuclide-stage"></g>
         </svg>
       </div>
       <p class="caption" id="nuclide-counts"></p>
@@ -88,7 +92,7 @@
       </div>
       <div class="one-liners">
         <p>Nuclide = given A and Z. Isotopes: same Z, different N.</p>
-        <p>Strong nuclear force: short range; Z &gt; 83 unstable (enrichment note).</p>
+        <p>Strong nuclear force: short range; Z &gt; 83 unstable.</p>
       </div>
     </section>
 
@@ -98,20 +102,20 @@
         <span class="stamp">Fig. 25.13</span>
       </header>
       <div class="visual">
-        <svg viewBox="0 0 400 200" role="img" aria-label="Hydrogen isotopes">
-          <circle cx="180" cy="90" r="10" fill="#c0392b"/>
-          <g id="iso-neutrons"></g>
-          <circle cx="180" cy="40" r="8" fill="#2a62a8"/>
+        <svg viewBox="0 0 400 210" role="img" aria-label="Hydrogen isotopes">
+          <circle cx="200" cy="108" r="58" fill="none" stroke="#9bb6c4"/>
+          <circle cx="200" cy="50" r="8" fill="#2a62a8"/>
+          <g id="iso-nucleus"></g>
         </svg>
       </div>
-      <p class="caption" id="iso-label">¹H  (protium, N = 0)  ·  Z stays 1</p>
+      <p class="caption" id="iso-label">¹H  protium  N = 0  ·  Z = 1</p>
       <div class="row">
         <button type="button" data-iso="0">¹H</button>
         <button type="button" data-iso="1">²H</button>
         <button type="button" data-iso="2">³H</button>
       </div>
       <div class="check" data-check="tf">
-        <h3>Concept check · after the atomic model</h3>
+        <h3>Concept check</h3>
         <div class="tf-item" data-answer="true">
           <p>The volume of an atom is mostly empty space.</p>
           <div class="row"><button type="button" data-tf="true">True</button><button type="button" data-tf="false">False</button></div>
@@ -123,28 +127,39 @@
           <p class="feedback"></p>
         </div>
       </div>
+      <!-- HKDSE 2012/36 -->
       <div class="check" data-check="mc" data-answer="D">
-        <h3>Concept check · HKDSE 2012/36</h3>
-        <p>For isotopes of one element, N vs A. Fixed Z ⇒ N = A − Z, so the line meets the A-axis at A = Z.</p>
+        <h3>Concept check</h3>
+        <p>For isotopes of one element, N versus A. Fixed Z ⇒ N = A − Z, so the line meets the A-axis at A = Z.</p>
         <div class="visual">
           <svg viewBox="0 0 640 160" role="img" aria-label="Four N-A sketches">
             <g>
-              <text x="20" y="18">A</text>
-              <line x1="30" y1="140" x2="140" y2="40" stroke="#333"/>
-              <text x="60" y="158">N</text>
+              <text x="20" y="16">A</text>
+              <line x1="36" y1="132" x2="140" y2="132" stroke="#333"/>
+              <line x1="36" y1="132" x2="36" y2="28" stroke="#333"/>
+              <text x="132" y="148" font-size="11">A</text>
+              <text x="8" y="36" font-size="11">N</text>
+              <line x1="36" y1="132" x2="112" y2="56" stroke="#333" stroke-width="2"/>
             </g>
             <g>
-              <text x="180" y="18">B</text>
-              <line x1="190" y1="40" x2="300" y2="140" stroke="#333"/>
+              <text x="176" y="16">B</text>
+              <line x1="192" y1="132" x2="296" y2="132" stroke="#333"/>
+              <line x1="192" y1="132" x2="192" y2="28" stroke="#333"/>
+              <line x1="192" y1="56" x2="268" y2="132" stroke="#333" stroke-width="2"/>
             </g>
             <g>
-              <text x="340" y="18">C</text>
-              <line x1="350" y1="90" x2="470" y2="90" stroke="#333"/>
+              <text x="332" y="16">C</text>
+              <line x1="348" y1="132" x2="452" y2="132" stroke="#333"/>
+              <line x1="348" y1="132" x2="348" y2="28" stroke="#333"/>
+              <line x1="348" y1="80" x2="452" y2="80" stroke="#333" stroke-width="2"/>
             </g>
             <g>
-              <text x="500" y="18">D</text>
-              <line x1="520" y1="130" x2="620" y2="40" stroke="#0e5f56" stroke-width="3"/>
-              <text x="510" y="150" font-size="11">intercept A = Z</text>
+              <text x="488" y="16">D</text>
+              <line x1="504" y1="132" x2="620" y2="132" stroke="#333"/>
+              <line x1="504" y1="132" x2="504" y2="28" stroke="#333"/>
+              <text x="528" y="148" font-size="11">Z</text>
+              <line x1="536" y1="132" x2="536" y2="138" stroke="#333"/>
+              <line x1="536" y1="132" x2="612" y2="56" stroke="#0e5f56" stroke-width="3"/>
             </g>
           </svg>
         </div>
@@ -170,38 +185,62 @@
       </div>
       <div class="visual play" id="decay-a" data-decay-panel="a">
         <svg viewBox="0 0 640 180" class="decay-a" role="img" aria-label="Alpha decay of polonium-208">
-          <circle cx="120" cy="90" r="50" fill="#e8d5c4"/>
-          <text x="88" y="96">²⁰⁸₈₄Po</text>
+          <circle cx="118" cy="90" r="48" fill="#e8d5c4"/>
+          <text x="96" y="72" font-size="12" font-family="Palatino, serif">208</text>
+          <text x="102" y="92" font-size="12" font-family="Palatino, serif">84</text>
+          <text x="118" y="88" font-size="22" font-family="Palatino, serif">Po</text>
           <g class="he">
-            <circle cx="220" cy="80" r="8" fill="#c0392b"/>
-            <circle cx="232" cy="80" r="8" fill="#c0392b"/>
-            <circle cx="220" cy="94" r="8" fill="#2f7a4a"/>
-            <circle cx="232" cy="94" r="8" fill="#2f7a4a"/>
+            <circle cx="214" cy="72" r="8" fill="#c0392b"/>
+            <circle cx="228" cy="72" r="8" fill="#c0392b"/>
+            <circle cx="214" cy="86" r="8" fill="#2f7a4a"/>
+            <circle cx="228" cy="86" r="8" fill="#2f7a4a"/>
           </g>
-          <text x="360" y="80">²⁰⁴₈₂Pb + ⁴₂He</text>
-          <text x="360" y="110" font-size="13">A − 4 · Z − 2</text>
+          <text x="360" y="68" font-size="16" font-family="Palatino, serif">²⁰⁴₈₂Pb + ⁴₂He</text>
+          <text x="360" y="100" font-size="13">A − 4 · Z − 2</text>
         </svg>
-        <p class="eq">ᴬ_Z X → ᴬ⁻⁴_Z₋₂ Y + ⁴₂He</p>
+        <p class="eq">
+          <span class="nuc"><span class="az"><span>A</span><span>Z</span></span>X</span>
+          →
+          <span class="nuc"><span class="az"><span>A−4</span><span>Z−2</span></span>Y</span>
+          +
+          <span class="nuc"><span class="az"><span>4</span><span>2</span></span>He</span>
+        </p>
       </div>
       <div class="visual play" id="decay-b" data-decay-panel="b" hidden>
         <svg viewBox="0 0 640 180" class="decay-b" role="img" aria-label="Beta decay of cobalt-60">
-          <circle cx="120" cy="90" r="50" fill="#d5e0e8"/>
-          <text x="92" y="96">⁶⁰₂₇Co</text>
+          <circle cx="118" cy="90" r="48" fill="#d5e0e8"/>
+          <text x="100" y="72" font-size="12" font-family="Palatino, serif">60</text>
+          <text x="104" y="92" font-size="12" font-family="Palatino, serif">27</text>
+          <text x="118" y="88" font-size="22" font-family="Palatino, serif">Co</text>
           <g class="beta"><circle cx="220" cy="90" r="9" fill="#2a62a8"/><text x="216" y="94" fill="#fff">−</text></g>
-          <text x="360" y="80">⁶⁰₂₈Ni + ⁰₋₁e</text>
-          <text x="360" y="110" font-size="13">n → p + e⁻ inside the nucleus · A unchanged · Z + 1</text>
+          <text x="360" y="68" font-size="16" font-family="Palatino, serif">⁶⁰₂₈Ni + ⁰₋₁e</text>
+          <text x="360" y="100" font-size="13">n → p + e⁻ inside the nucleus · A unchanged · Z + 1</text>
         </svg>
-        <p class="eq">ᴬ_Z X → ᴬ_Z₊₁ Y + ⁰₋₁e</p>
+        <p class="eq">
+          <span class="nuc"><span class="az"><span>A</span><span>Z</span></span>X</span>
+          →
+          <span class="nuc"><span class="az"><span>A</span><span>Z+1</span></span>Y</span>
+          +
+          <span class="nuc"><span class="az"><span>0</span><span>−1</span></span>e</span>
+        </p>
       </div>
       <div class="visual play" id="decay-g" data-decay-panel="g" hidden>
         <svg viewBox="0 0 640 180" class="decay-g" role="img" aria-label="Gamma emission of excited nickel-60">
-          <circle cx="120" cy="90" r="50" fill="#efe4c4"/>
-          <text x="88" y="96">⁶⁰₂₈Ni*</text>
-          <path class="wave" d="M220 90 q 20 -28 40 0 t 40 0 t 40 0" fill="none" stroke="#c9a227" stroke-width="3"/>
-          <text x="420" y="80">⁶⁰₂₈Ni + γ</text>
-          <text x="420" y="110" font-size="13">not a transmutation · A, Z unchanged</text>
+          <circle cx="118" cy="90" r="48" fill="#efe4c4"/>
+          <text x="100" y="72" font-size="12" font-family="Palatino, serif">60</text>
+          <text x="104" y="92" font-size="12" font-family="Palatino, serif">28</text>
+          <text x="118" y="88" font-size="22" font-family="Palatino, serif">Ni*</text>
+          <path class="wave" d="M214 90 C 228 54, 242 54, 256 90 S 284 126, 298 90 S 326 54, 340 90"
+                fill="none" stroke="#c9a227" stroke-width="3"/>
+          <text x="420" y="68" font-size="16" font-family="Palatino, serif">⁶⁰₂₈Ni + γ</text>
+          <text x="420" y="100" font-size="13">not a transmutation · A, Z unchanged</text>
         </svg>
-        <p class="eq">ᴬ_Z X* → ᴬ_Z X + γ</p>
+        <p class="eq">
+          <span class="nuc"><span class="az"><span>A</span><span>Z</span></span>X*</span>
+          →
+          <span class="nuc"><span class="az"><span>A</span><span>Z</span></span>X</span>
+          + γ
+        </p>
       </div>
       <div class="one-liners">
         <p>β electron comes from a neutron in the nucleus, not from an orbit.</p>
@@ -217,33 +256,49 @@
       <div class="visual">
         <svg viewBox="0 0 640 250" role="img" aria-label="Decay series plots">
           <g id="series-az">
-            <line x1="40" y1="220" x2="300" y2="220" stroke="#333"/>
-            <line x1="40" y1="220" x2="40" y2="20" stroke="#333"/>
-            <text x="120" y="244" font-size="12">Z</text>
-            <text x="8" y="20" font-size="12">A</text>
+            <line x1="48" y1="208" x2="292" y2="208" stroke="#333"/>
+            <line x1="48" y1="208" x2="48" y2="22" stroke="#333"/>
+            <text x="154" y="236" font-size="12">Z</text>
+            <text x="8" y="28" font-size="12">A</text>
+            <text x="40" y="222" font-size="10">82</text>
+            <text x="268" y="222" font-size="10">92</text>
+            <text x="8" y="214" font-size="10">206</text>
+            <text x="8" y="36" font-size="10">238</text>
           </g>
           <g id="series-nz" transform="translate(320,0)">
-            <line x1="40" y1="220" x2="300" y2="220" stroke="#333"/>
-            <line x1="40" y1="220" x2="40" y2="20" stroke="#333"/>
-            <text x="120" y="244" font-size="12">Z</text>
-            <text x="8" y="20" font-size="12">N</text>
+            <line x1="48" y1="208" x2="292" y2="208" stroke="#333"/>
+            <line x1="48" y1="208" x2="48" y2="22" stroke="#333"/>
+            <text x="154" y="236" font-size="12">Z</text>
+            <text x="8" y="28" font-size="12">N</text>
+            <text x="40" y="222" font-size="10">82</text>
+            <text x="268" y="222" font-size="10">92</text>
+            <text x="8" y="214" font-size="10">124</text>
+            <text x="8" y="36" font-size="10">146</text>
           </g>
         </svg>
       </div>
       <div class="row">
-        <button type="button" id="series-next">Step α (red-ish diagonal) / β</button>
+        <button type="button" id="series-next">Step α / β</button>
         <button type="button" id="series-reset">Reset to U-238</button>
       </div>
       <p class="caption" id="series-readout"></p>
-      <div class="legend"><span><i class="swatch a"></i>α: A − 4, Z − 2</span><span><i class="swatch b"></i>β: A same, Z + 1</span><span><i class="swatch g"></i>γ: invisible on these axes</span></div>
+      <div class="legend">
+        <span><i class="swatch a"></i>α: A − 4, Z − 2</span>
+        <span><i class="swatch b"></i>β: A same, Z + 1</span>
+        <span><i class="swatch g"></i>γ: invisible on these axes</span>
+      </div>
     </section>
 
     <section class="idea" id="pu239">
       <header>
         <h2>Worked example · count α then β</h2>
-        <span class="stamp">HKDSE 2021/31</span>
+        <span class="stamp">Worked example</span>
       </header>
-      <p class="eq">²³⁹₉₄Pu → ²⁰⁷₈₂Pb</p>
+      <p class="eq">
+        <span class="nuc"><span class="az"><span>239</span><span>94</span></span>Pu</span>
+        →
+        <span class="nuc"><span class="az"><span>207</span><span>82</span></span>Pb</span>
+      </p>
       <p class="eq">ΔA = 239 − 207 = 32 → n<sub>α</sub> = 32 / 4 = 8</p>
       <p class="eq">Z after only α: 94 − 2×8 = 78</p>
       <p class="eq">Need Z = 82, so n<sub>β</sub> = 82 − 78 = 4</p>
@@ -262,7 +317,7 @@
     <section class="idea" id="arith">
       <header>
         <h2>α then ββ arithmetic</h2>
-        <span class="stamp">HKDSE 2013/34 · 2014/31</span>
+        <span class="stamp">Series bookkeeping</span>
       </header>
       <div class="check" data-check="mc" data-answer="A">
         <h3>U-238 undergoes α-β-β-α. Atomic number and mass number of X?</h3>
@@ -286,8 +341,8 @@
         <p class="feedback"></p>
       </div>
       <div class="check" data-check="mc" data-answer="B">
-        <h3>Bi-213 → Po-213 → Pb-209 (HKDSE 2026/12(a)(i) only)</h3>
-        <p>Graph language: A unchanged then A − 4. Omit half-life parts (ii-iii): those are Ch.26.</p>
+        <h3>Bi-213 → Po-213 → Pb-209</h3>
+        <p>A unchanged, then A − 4.</p>
         <div class="choices">
           <button type="button" data-choice="A">α then β</button>
           <button type="button" data-choice="B">β then α</button>
@@ -305,22 +360,29 @@
       </header>
       <div class="visual">
         <svg viewBox="0 0 640 180" role="img" aria-label="Sealed source in a metal case with mesh">
-          <rect x="80" y="40" width="160" height="90" rx="8" fill="#c5ccd4" stroke="#333"/>
-          <rect x="100" y="55" width="120" height="40" fill="#8a9098"/>
-          <text x="118" y="80" font-size="12">radioactive material</text>
-          <text x="110" y="150" font-size="12">metal case + mesh</text>
-          <circle cx="400" cy="90" r="40" fill="none" stroke="#c47a12" stroke-width="6"/>
-          <path d="M400 55 v70 M365 90 h70 M375 65 l50 50 M375 115 l50 -50" stroke="#c47a12" stroke-width="4"/>
-          <text x="360" y="160" font-size="12">trefoil on the lead box</text>
+          <rect x="70" y="40" width="180" height="88" rx="8" fill="#c5ccd4" stroke="#333"/>
+          <rect x="92" y="56" width="136" height="36" fill="#8a9098"/>
+          <text x="108" y="78" font-size="12">radioactive material</text>
+          <line x1="92" y1="100" x2="228" y2="100" stroke="#333"/>
+          <line x1="92" y1="108" x2="228" y2="108" stroke="#333"/>
+          <line x1="92" y1="116" x2="228" y2="116" stroke="#333"/>
+          <text x="110" y="152" font-size="12">metal case + mesh</text>
+          <g transform="translate(430,90)" fill="#c47a12">
+            <circle r="7"/>
+            <path d="M 0 -16 A 36 36 0 0 1 31.2 18 L 10.4 6 A 12 12 0 0 0 0 -16 Z"/>
+            <path d="M 0 -16 A 36 36 0 0 1 31.2 18 L 10.4 6 A 12 12 0 0 0 0 -16 Z" transform="rotate(120)"/>
+            <path d="M 0 -16 A 36 36 0 0 1 31.2 18 L 10.4 6 A 12 12 0 0 0 0 -16 Z" transform="rotate(240)"/>
+          </g>
+          <text x="372" y="160" font-size="12">trefoil on the lead box</text>
         </svg>
       </div>
       <table class="compact">
-        <thead><tr><th>source</th><th>types (from Table 25.3)</th></tr></thead>
+        <thead><tr><th>source</th><th>types</th></tr></thead>
         <tbody>
           <tr><td>Ra-226</td><td>α, β and γ</td></tr>
           <tr><td>Am-241</td><td>α and γ (small amount)</td></tr>
           <tr><td>Sr-90</td><td>β</td></tr>
-          <tr><td>Co-60</td><td><span class="gap" style="margin:0;padding:0.1rem 0.3rem">OCR of this cell is "i". Intake flags γ, possibly with β. Do not treat the garbled letter as data.</span></td></tr>
+          <tr><td>Co-60</td><td>γ</td></tr>
         </tbody>
       </table>
       <div class="one-liners">
@@ -334,20 +396,27 @@
         <span class="stamp">Fig. 25.21-25.23</span>
       </header>
       <div class="visual pie">
-        <svg viewBox="0 0 180 180" role="img" aria-label="Background pie">
-          <circle cx="90" cy="90" r="70" fill="#c47a12"/>
-          <path d="M90 90 L90 20 A70 70 0 0 1 156.6 68.4 z" fill="#0e5f56"/>
-          <text x="70" y="80" fill="#fff" font-size="12">80%</text>
-          <text x="112" y="62" fill="#fff" font-size="11" text-anchor="middle">20%</text>
+        <svg viewBox="0 0 240 240" role="img" aria-label="Background pie">
+          <path d="M110 110 L110 22 A88 88 0 0 1 152.39 187.11 Z" fill="#c47a12"/>
+          <path d="M110 110 L152.39 187.11 A88 88 0 0 1 67.61 187.11 Z" fill="#8d6e3f"/>
+          <path d="M110 110 L67.61 187.11 A88 88 0 0 1 24.76 131.88 Z" fill="#5c7a6a"/>
+          <path d="M110 110 L24.76 131.88 A88 88 0 0 1 26.31 82.81 Z" fill="#7aa39a"/>
+          <path d="M110 110 L26.31 82.81 A88 88 0 0 1 110 22 Z" fill="#0e5f56"/>
+          <text x="168" y="90" font-size="11" fill="#fff" text-anchor="middle">42%</text>
+          <text x="110" y="188" font-size="11" fill="#fff" text-anchor="middle">16%</text>
+          <text x="48" y="168" font-size="11" fill="#fff" text-anchor="middle">13%</text>
+          <text x="36" y="108" font-size="11" fill="#fff" text-anchor="middle">9%</text>
+          <text x="58" y="48" font-size="11" fill="#fff" text-anchor="middle">20%</text>
         </svg>
         <div>
           <p>Natural ~80%: radon 42% (largest slice), rock/soil 16%, cosmic 13%, food/drink 9%.</p>
-          <p>Artificial ~20%, almost all medicine in the book's pie.</p>
+          <p>Artificial ~20%, almost all from medicine.</p>
           <p>Irradiation does not make an object radioactive; contamination does.</p>
         </div>
       </div>
+      <!-- HKDSE 2021/33 -->
       <div class="check" data-check="mc" data-answer="D">
-        <h3>Concept check · HKDSE 2021/33</h3>
+        <h3>Concept check</h3>
         <p>Which may contain sources of ionizing radiation? (1) sea water (2) a rock sample (3) human body</p>
         <div class="choices">
           <button type="button" data-choice="A">(1) only</button>
@@ -358,17 +427,18 @@
         <p class="feedback"></p>
       </div>
       <div class="check" data-check="mc" data-answer="B">
-        <h3>Concept check · not background (QB PHY15011117)</h3>
+        <h3>Concept check</h3>
+        <p>Which is <strong>not</strong> a source of background ionizing radiation?</p>
         <div class="choices">
           <button type="button" data-choice="A">radon in buildings</button>
-          <button type="button" data-choice="B">microwaves from a mobile phone (non-ionizing snapshot in 25.1)</button>
+          <button type="button" data-choice="B">microwaves from a mobile phone</button>
           <button type="button" data-choice="C">cosmic rays</button>
           <button type="button" data-choice="D">radioactive minerals in rock</button>
         </div>
         <p class="feedback"></p>
       </div>
       <div class="check" data-check="tf">
-        <h3>Checkpoint on background</h3>
+        <h3>Concept check</h3>
         <div class="tf-item" data-answer="true">
           <p>Background radiation varies from place to place.</p>
           <div class="row"><button type="button" data-tf="true">True</button><button type="button" data-tf="false">False</button></div>

@@ -18,8 +18,8 @@
     </nav>
   </header>
   <main>
-    <p class="kicker">Printed pp.27-44</p>
-    <h1>25.3 Properties of nuclear radiation</h1>
+    <p class="kicker">25.3</p>
+    <h1>Properties of nuclear radiation</h1>
 
     <section class="idea" id="ion-pair">
       <header>
@@ -28,15 +28,16 @@
       </header>
       <div class="visual play pair" id="pair-vis" data-autoplay>
         <svg viewBox="0 0 640 200" class="knock pair" role="img" aria-label="Knockout then capture makes an ion pair">
-          <line class="ray" x1="20" y1="70" x2="180" y2="70" stroke="#c9a227" stroke-width="8"/>
-          <circle class="ion" cx="210" cy="70" r="22" fill="#e0a04a"/>
+          <line class="ray" x1="16" y1="70" x2="168" y2="70" stroke="#c9a227" stroke-width="8"/>
+          <circle class="ion" cx="204" cy="70" r="22" fill="#e0a04a"/>
+          <circle cx="204" cy="70" r="8" fill="#c0392b"/>
           <g class="eject e2">
-            <circle cx="250" cy="90" r="9" fill="#2a62a8"/>
+            <circle cx="236" cy="88" r="8" fill="#2a62a8"/>
           </g>
-          <circle cx="360" cy="140" r="22" fill="#e0a04a"/>
-          <circle class="minus" cx="500" cy="140" r="22" fill="#e0a04a"/>
-          <text x="190" y="120" font-size="12">+ ion</text>
-          <text x="480" y="180" font-size="12">− ion</text>
+          <circle cx="390" cy="148" r="22" fill="#e0a04a"/>
+          <circle class="minus" cx="508" cy="148" r="22" fill="#e0a04a"/>
+          <text x="184" y="112" font-size="12">+ ion</text>
+          <text x="488" y="186" font-size="12">− ion</text>
         </svg>
       </div>
       <div class="row"><button type="button" data-replay="pair-vis">Replay</button></div>
@@ -56,15 +57,20 @@
           <text x="10" y="40">α</text>
           <line x1="40" y1="36" x2="600" y2="36" stroke="#c0392b" stroke-width="3"/>
           <g fill="#d35400">
-            <circle cx="70" cy="36" r="3"/><circle cx="90" cy="36" r="3"/><circle cx="110" cy="36" r="3"/>
-            <circle cx="130" cy="36" r="3"/><circle cx="150" cy="36" r="3"/><circle cx="170" cy="36" r="3"/>
-            <circle cx="190" cy="36" r="3"/><circle cx="210" cy="36" r="3"/>
+            <circle cx="56" cy="36" r="3"/><circle cx="72" cy="36" r="3"/><circle cx="88" cy="36" r="3"/>
+            <circle cx="104" cy="36" r="3"/><circle cx="120" cy="36" r="3"/><circle cx="136" cy="36" r="3"/>
+            <circle cx="152" cy="36" r="3"/><circle cx="168" cy="36" r="3"/><circle cx="184" cy="36" r="3"/>
+            <circle cx="200" cy="36" r="3"/><circle cx="216" cy="36" r="3"/><circle cx="232" cy="36" r="3"/>
           </g>
           <text x="10" y="90">β</text>
           <line x1="40" y1="86" x2="600" y2="86" stroke="#1d4f91" stroke-width="2"/>
-          <circle cx="80" cy="86" r="3" fill="#d35400"/><circle cx="160" cy="86" r="3" fill="#d35400"/><circle cx="260" cy="86" r="3" fill="#d35400"/>
+          <circle cx="80" cy="86" r="3" fill="#d35400"/>
+          <circle cx="170" cy="86" r="3" fill="#d35400"/>
+          <circle cx="280" cy="86" r="3" fill="#d35400"/>
+          <circle cx="410" cy="86" r="3" fill="#d35400"/>
           <text x="10" y="140">γ</text>
-          <path d="M40 136 q 20 -12 40 0 t 40 0 t 40 0 t 40 0 t 40 0" fill="none" stroke="#c9a227" stroke-width="2"/>
+          <path d="M40 136 C 60 112, 80 112, 100 136 S 140 160, 160 136 S 200 112, 220 136 S 260 160, 280 136"
+                fill="none" stroke="#c9a227" stroke-width="2"/>
           <circle cx="200" cy="136" r="3" fill="#d35400"/>
         </svg>
       </div>
@@ -77,8 +83,9 @@
         </tbody>
       </table>
       <p class="caption">Ionizing power: α &gt; β &gt; γ. Inverse of range and penetrating power, next.</p>
+      <!-- HKDSE 2016/32 -->
       <div class="check" data-check="mc" data-answer="A">
-        <h3>Concept check · HKDSE 2016/32</h3>
+        <h3>Concept check</h3>
         <p>(1) Ionizing power of α is much stronger than β. (2) γ can be completely shielded by 10 cm concrete. (3) α, β and γ all deflect in an E field.</p>
         <div class="choices">
           <button type="button" data-choice="A">(1) only</button>
@@ -93,17 +100,23 @@
     <section class="idea" id="current">
       <header>
         <h2>Ionized gas conducts</h2>
-        <span class="stamp">Fig. 25.26 · Example 25.5</span>
+        <span class="stamp">Fig. 25.26</span>
       </header>
       <div class="visual">
-        <svg viewBox="0 0 400 180" role="img" aria-label="Galvanometer between plates with alpha source">
-          <rect x="70" y="30" width="200" height="16" fill="#888"/>
-          <rect x="70" y="130" width="200" height="16" fill="#888"/>
-          <text x="280" y="42">−</text>
-          <text x="280" y="144">+</text>
-          <line id="galvo-needle" x1="200" y1="150" x2="200" y2="80" stroke="#c0392b" stroke-width="3"/>
-          <circle cx="200" cy="80" r="8" fill="#c0392b"/>
-          <text x="40" y="90">α source</text>
+        <svg viewBox="0 0 420 200" role="img" aria-label="Galvanometer between plates with alpha source">
+          <rect x="80" y="28" width="220" height="14" fill="#888"/>
+          <rect x="80" y="148" width="220" height="14" fill="#888"/>
+          <text x="310" y="40">−</text>
+          <text x="310" y="160">+</text>
+          <circle cx="40" cy="96" r="16" fill="#c0392b"/>
+          <text x="16" y="128" font-size="12">α source</text>
+          <circle cx="150" cy="70" r="6" fill="#d35400"/>
+          <text x="146" y="66" font-size="11">+</text>
+          <circle cx="210" cy="126" r="6" fill="#2a62a8"/>
+          <text x="206" y="122" font-size="11" fill="#fff">−</text>
+          <path d="M190 170 A 28 28 0 0 1 230 170" fill="none" stroke="#333"/>
+          <line id="galvo-needle" x1="200" y1="148" x2="200" y2="88" stroke="#c0392b" stroke-width="3"/>
+          <circle cx="200" cy="148" r="5" fill="#c0392b"/>
         </svg>
       </div>
       <div class="row">
@@ -112,10 +125,10 @@
       </div>
       <div class="one-liners">
         <p>+ ions to the negative plate, − ions to the positive plate → current.</p>
-        <p>Amy/Bob: a charged sphere of either sign can discharge, because ion-pairs exist.</p>
+        <p>A charged sphere of either sign can discharge, because ion-pairs exist.</p>
       </div>
       <div class="check" data-check="mc" data-answer="C">
-        <h3>Concept check · PP q34</h3>
+        <h3>Concept check</h3>
         <p>(1) α is heavier than β. (2) α has stronger penetrating power than β. (3) An α source can discharge a positively charged metal sphere nearby.</p>
         <div class="choices">
           <button type="button" data-choice="A">(1) only</button>
@@ -141,11 +154,11 @@
         <button type="button" data-track="gamma">γ faint / scattered</button>
       </div>
       <div class="one-liners">
-        <p>Droplets condense on ions. Evacuate the vapour → no tracks (QB PHY15011111).</p>
+        <p>Droplets condense on ions. Evacuate the vapour → no tracks.</p>
         <p>Massive → straighter. Stronger ionizing → thicker.</p>
       </div>
       <div class="check" data-check="mc" data-answer="B">
-        <h3>Concept check · no vapour</h3>
+        <h3>Concept check</h3>
         <div class="choices">
           <button type="button" data-choice="A">Tracks are the particles themselves glowing.</button>
           <button type="button" data-choice="B">No supersaturated vapour → no droplets → no visible tracks.</button>
@@ -160,19 +173,18 @@
         <h2>Film badge: absorbers on film</h2>
         <span class="stamp">Fig. 25.29</span>
       </header>
-      <div class="badge-grid">
-        <div>
-          <div class="film" id="badge-open">open window</div>
-          <p>open / plastic wrap</p>
-        </div>
-        <div>
-          <div class="film" id="badge-al">Al sheets</div>
-          <p>thin Al</p>
-        </div>
-        <div>
-          <div class="film" id="badge-pb">Pb slab</div>
-          <p>lead</p>
-        </div>
+      <div class="visual">
+        <svg viewBox="0 0 640 180" role="img" aria-label="Film badge windows">
+          <rect id="badge-open" x="40" y="30" width="160" height="90" fill="#f2ead2" stroke="#333"/>
+          <text id="badge-open-text" x="120" y="80" text-anchor="middle" font-size="12">open window</text>
+          <rect id="badge-al" x="240" y="30" width="160" height="90" fill="#f2ead2" stroke="#333"/>
+          <text id="badge-al-text" x="320" y="80" text-anchor="middle" font-size="12">thin Al</text>
+          <rect id="badge-pb" x="440" y="30" width="160" height="90" fill="#f2ead2" stroke="#333"/>
+          <text id="badge-pb-text" x="520" y="80" text-anchor="middle" font-size="12">lead</text>
+          <text x="120" y="148" text-anchor="middle" font-size="12">open / wrap</text>
+          <text x="320" y="148" text-anchor="middle" font-size="12">Al sheets</text>
+          <text x="520" y="148" text-anchor="middle" font-size="12">Pb slab</text>
+        </svg>
       </div>
       <div class="row">
         <button type="button" data-badge="alpha">shine α</button>
@@ -181,7 +193,6 @@
       </div>
       <div class="one-liners">
         <p>Blackening ≈ dose. α never seen if paper/plastic wraps the film.</p>
-        <p>2026/12(b) ring dosimeter: plastic enclosure ≈ that wrap.</p>
       </div>
     </section>
 
@@ -190,13 +201,16 @@
         <h2>GM tube: argon ion-pairs → pulses</h2>
         <span class="stamp">Fig. 25.30</span>
       </header>
-      <div class="visual">
-        <svg viewBox="0 0 640 160" role="img" aria-label="GM tube cross section">
-          <rect x="40" y="40" width="360" height="80" rx="40" fill="none" stroke="#111" stroke-width="8"/>
-          <line x1="80" y1="80" x2="360" y2="80" stroke="#c0392b" stroke-width="4"/>
-          <text x="420" y="70" font-size="13">+ wire</text>
-          <text x="420" y="95" font-size="13">− case · argon</text>
+      <div class="visual play gm" id="gm-vis" data-autoplay>
+        <svg viewBox="0 0 640 170" class="gm" role="img" aria-label="GM tube cross section">
+          <rect x="40" y="40" width="360" height="80" rx="40" fill="#eef4f8" stroke="#111" stroke-width="8"/>
+          <line x1="88" y1="80" x2="360" y2="80" stroke="#c0392b" stroke-width="4"/>
+          <circle class="pair-dot" cx="140" cy="80" r="5" fill="#d35400"/>
           <text x="40" y="28" font-size="12">thin window</text>
+          <text x="420" y="70" font-size="13">+ wire</text>
+          <text x="420" y="94" font-size="13">− case · argon</text>
+          <rect class="pulse" x="540" y="50" width="18" height="70" fill="#9cffb0"/>
+          <text x="530" y="140" font-size="12">pulse</text>
         </svg>
       </div>
       <div class="row">
@@ -223,18 +237,28 @@
         <span class="stamp">Fig. 25.31-25.32</span>
       </header>
       <div class="visual">
-        <svg viewBox="0 0 720 160" role="img" aria-label="Ranges and absorbers">
-          <line x1="20" y1="40" x2="80" y2="40" stroke="#c0392b" stroke-width="4"/>
-          <text x="20" y="28">α ~5 cm</text>
-          <line x1="20" y1="80" x2="280" y2="80" stroke="#1d4f91" stroke-width="3"/>
-          <text x="20" y="68">β ~5 m</text>
-          <line x1="20" y1="120" x2="680" y2="120" stroke="#c9a227" stroke-width="2"/>
-          <text x="20" y="108">γ ~100 m</text>
+        <svg viewBox="0 0 720 220" role="img" aria-label="Absorber stack with alpha beta gamma rays">
+          <text x="16" y="28" font-size="12">source</text>
+          <rect x="16" y="48" width="56" height="120" rx="6" fill="#8a9098"/>
+          <line id="ray-a" x1="72" y1="72" x2="560" y2="72" stroke="#c0392b" stroke-width="4"/>
+          <line id="ray-b" x1="72" y1="108" x2="560" y2="108" stroke="#1d4f91" stroke-width="3"/>
+          <line id="ray-g" x1="72" y1="144" x2="560" y2="144" stroke="#c9a227" stroke-width="2"/>
+          <text x="16" y="68" font-size="11" fill="#c0392b">α</text>
+          <text x="16" y="104" font-size="11" fill="#1d4f91">β</text>
+          <text x="16" y="140" font-size="11" fill="#c9a227">γ</text>
+          <rect id="slab-paper" x="240" y="40" width="14" height="136" fill="#f4efe0" stroke="#bbb" opacity="0.22"/>
+          <rect id="slab-al" x="320" y="40" width="22" height="136" fill="#c5ccd4" stroke="#888" opacity="0.22"/>
+          <rect id="slab-pb" x="418" y="40" width="28" height="136" fill="#2d3038" opacity="0.22"/>
+          <text x="228" y="196" font-size="11">paper</text>
+          <text x="312" y="196" font-size="11">5 mm Al</text>
+          <text x="406" y="196" font-size="11">25 mm Pb</text>
+          <rect x="548" y="70" width="70" height="76" rx="28" fill="none" stroke="#111" stroke-width="6"/>
+          <text x="558" y="114" font-size="11">GM</text>
         </svg>
       </div>
       <div class="row">
         <span>Unknown:</span>
-        <button type="button" data-src="bg">Example 25.6 mix</button>
+        <button type="button" data-src="bg">β + γ</button>
         <button type="button" data-src="ag">α + γ</button>
         <button type="button" data-src="abg">α + β + γ</button>
       </div>
@@ -246,6 +270,7 @@
       </div>
       <p class="caption" id="abs-note"></p>
       <div class="one-liners">
+        <p>In air (not to scale): α ~5 cm, β ~5 m, γ ~100 m.</p>
         <p>Paper stops α. ~5 mm Al stops β. 25 mm Pb halves γ (does not zero it).</p>
         <p>Never read a count below background unless the shield also blocks background.</p>
       </div>
@@ -253,72 +278,75 @@
 
     <section class="idea" id="identify">
       <header>
-        <h2>Identify α, β, γ: directed graph</h2>
-        <span class="stamp">Example 25.6 tactics</span>
+        <h2>Identify α, β, γ</h2>
+        <span class="stamp">Absorber decision flow</span>
       </header>
-      <p class="lede">Click a node, or step the Example 25.6 path. Edges are yes / no outcomes, not paragraphs.</p>
+      <p class="lede">Click a node, or step the example path. Yes / no on the edges.</p>
       <div class="flow">
         <div>
-          <svg id="id-flow" viewBox="0 0 420 536" role="img" aria-label="Decision graph for identifying radiation">
+          <svg id="id-flow" viewBox="0 0 520 600" role="img" aria-label="Decision graph for identifying radiation">
             <defs>
               <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
                 <path d="M0,0 L8,4 L0,8 z" fill="#6b7380"/>
               </marker>
+              <marker id="arrow-lit" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                <path d="M0,0 L8,4 L0,8 z" fill="#0e5f56"/>
+              </marker>
             </defs>
-            <path class="edge" data-until="1" d="M210 50 L210 72"/>
-            <path class="edge" data-side="alpha" d="M150 124 L70 168"/>
-            <path class="edge" data-side="no-alpha" d="M270 124 L315 168"/>
-            <path class="edge" data-side="alpha" d="M125 192 L230 195"/>
-            <path class="edge" data-side="beta" data-until="3" d="M310 220 L310 258"/>
-            <path class="edge" data-side="no-beta" d="M250 220 L200 340"/>
-            <path class="edge" data-side="beta" data-until="4" d="M280 302 L240 340"/>
-            <path class="edge" data-until="5" d="M210 388 L210 408"/>
-            <path class="edge" data-until="6" d="M180 448 L100 476"/>
-            <path class="edge" data-until="7" d="M240 448 L310 476"/>
+            <path class="edge" data-until="1" d="M260 48 L260 68"/>
+            <path class="edge" data-side="alpha" data-until="1" d="M170 114 L80 114 L80 156"/>
+            <path class="edge" data-side="no-alpha" data-until="2" d="M350 114 L430 114 L430 156"/>
+            <path class="edge" data-side="alpha" data-until="2" d="M140 178 L350 178"/>
+            <path class="edge" data-side="beta" data-until="3" d="M430 206 L430 226"/>
+            <path class="edge" data-side="beta" data-until="4" d="M430 270 L430 300 L260 300 L260 328"/>
+            <path class="edge" data-side="no-beta" d="M350 206 L220 206 L220 328"/>
+            <path class="edge" data-until="5" d="M260 378 L260 398"/>
+            <path class="edge" data-until="6" d="M260 438 L120 438 L120 468"/>
+            <path class="edge" data-until="6" d="M260 438 L400 438 L400 468"/>
+            <text class="edge-label" x="92" y="106">yes → α</text>
+            <text class="edge-label" x="372" y="106">no</text>
+            <text class="edge-label" x="448" y="220">yes → β</text>
+            <text class="edge-label" x="228" y="198">no β</text>
             <g class="node" data-step="0">
-              <ellipse cx="210" cy="30" rx="90" ry="20"/>
-              <text x="210" y="34" text-anchor="middle" font-size="12">unknown source</text>
+              <ellipse cx="260" cy="28" rx="100" ry="20"/>
+              <text x="260" y="32" text-anchor="middle" font-size="13">unknown source</text>
             </g>
             <g class="node" data-step="1">
-              <rect x="120" y="72" width="180" height="52" rx="6"/>
-              <text x="210" y="94" text-anchor="middle" font-size="12">paper?</text>
-              <text x="210" y="112" text-anchor="middle" font-size="11">count drop?</text>
+              <rect x="170" y="68" width="180" height="46" rx="6"/>
+              <text x="260" y="88" text-anchor="middle" font-size="13">paper?</text>
+              <text x="260" y="104" text-anchor="middle" font-size="11">count drop?</text>
             </g>
-            <text x="50" y="148" font-size="11">yes → α</text>
-            <text x="320" y="148" font-size="11">no</text>
             <g class="node" data-step="alpha">
-              <rect x="15" y="168" width="110" height="48" rx="6"/>
-              <text x="70" y="196" text-anchor="middle" font-size="12">α present</text>
+              <rect x="20" y="156" width="120" height="44" rx="6"/>
+              <text x="80" y="182" text-anchor="middle" font-size="13">α present</text>
             </g>
             <g class="node" data-step="2">
-              <rect x="230" y="168" width="160" height="52" rx="6"/>
-              <text x="310" y="190" text-anchor="middle" font-size="12">5 mm Al?</text>
-              <text x="310" y="208" text-anchor="middle" font-size="11">drop vs paper?</text>
+              <rect x="350" y="156" width="160" height="50" rx="6"/>
+              <text x="430" y="178" text-anchor="middle" font-size="13">5 mm Al?</text>
+              <text x="430" y="194" text-anchor="middle" font-size="11">drop vs paper?</text>
             </g>
-            <text x="340" y="246" font-size="11">yes → β</text>
-            <text x="168" y="290" font-size="11">no</text>
             <g class="node" data-step="3">
-              <rect x="245" y="258" width="130" height="44" rx="6"/>
-              <text x="310" y="284" text-anchor="middle" font-size="12">β present</text>
+              <rect x="370" y="226" width="120" height="44" rx="6"/>
+              <text x="430" y="252" text-anchor="middle" font-size="13">β present</text>
             </g>
             <g class="node" data-step="4">
-              <rect x="135" y="340" width="150" height="48" rx="6"/>
-              <text x="210" y="360" text-anchor="middle" font-size="11">25 mm Pb</text>
-              <text x="210" y="376" text-anchor="middle" font-size="11">still &gt; background?</text>
+              <rect x="185" y="328" width="150" height="50" rx="6"/>
+              <text x="260" y="350" text-anchor="middle" font-size="12">25 mm Pb</text>
+              <text x="260" y="366" text-anchor="middle" font-size="11">still &gt; background?</text>
             </g>
             <g class="node" data-step="5">
-              <rect x="135" y="408" width="150" height="40" rx="6"/>
-              <text x="210" y="433" text-anchor="middle" font-size="12">γ present</text>
+              <rect x="185" y="398" width="150" height="40" rx="6"/>
+              <text x="260" y="422" text-anchor="middle" font-size="13">γ present</text>
             </g>
             <g class="node" data-step="6">
-              <rect x="20" y="476" width="160" height="48" rx="6"/>
-              <text x="100" y="496" text-anchor="middle" font-size="11">E / B deflection</text>
-              <text x="100" y="512" text-anchor="middle" font-size="11">α / β opposite; γ straight</text>
+              <rect x="40" y="468" width="160" height="50" rx="6"/>
+              <text x="120" y="488" text-anchor="middle" font-size="12">E / B deflection</text>
+              <text x="120" y="504" text-anchor="middle" font-size="11">α / β opposite; γ straight</text>
             </g>
-            <g class="node" data-step="7">
-              <rect x="240" y="476" width="160" height="48" rx="6"/>
-              <text x="320" y="496" text-anchor="middle" font-size="11">cloud tracks</text>
-              <text x="320" y="512" text-anchor="middle" font-size="11">thick / thin / faint</text>
+            <g class="node" data-step="6">
+              <rect x="320" y="468" width="160" height="50" rx="6"/>
+              <text x="400" y="488" text-anchor="middle" font-size="12">cloud tracks</text>
+              <text x="400" y="504" text-anchor="middle" font-size="11">thick / thin / faint</text>
             </g>
           </svg>
           <div class="row">
@@ -329,11 +357,11 @@
         <div>
           <p class="one-liners" id="flow-talk"></p>
           <p class="eq">air 700 → paper 700 → Al 315 → Pb 190 &nbsp; (bg ≈ 61 cpm)</p>
-          <p>No drop at paper → no α. Drop at Al → β. Drop at Pb but still above background → γ.</p>
         </div>
       </div>
+      <!-- HKDSE 2019/31 -->
       <div class="check" data-check="mc" data-answer="D">
-        <h3>Concept check · HKDSE 2019/31</h3>
+        <h3>Concept check</h3>
         <p>Source emits α, β and γ. Cardboard, then 5 mm Al, then 10 mm Pb. Detectors at X, Y, Z after each slab.</p>
         <div class="choices">
           <button type="button" data-choice="A">No radiation from the source is detected at Z.</button>
@@ -343,8 +371,9 @@
         </div>
         <p class="feedback"></p>
       </div>
+      <!-- HKDSE 2014/32 -->
       <div class="check" data-check="mc" data-answer="A">
-        <h3>Concept check · HKDSE 2014/32</h3>
+        <h3>Concept check</h3>
         <p>α + γ source. Recorded 450 cpm, background 50. Cardboard x, 1 mm Al y, 2 mm Pb z.</p>
         <div class="choices">
           <button type="button" data-choice="A">x = 300, y = 300, z = 100</button>
@@ -362,28 +391,34 @@
         <span class="stamp">Fig. 25.33-25.34</span>
       </header>
       <div class="visual">
-        <svg viewBox="0 0 640 220" role="img" aria-label="Electric deflection">
-          <rect x="20" y="20" width="18" height="160" fill="#111"/>
+        <svg viewBox="0 0 640 230" role="img" aria-label="Electric deflection">
+          <rect x="18" y="40" width="16" height="140" fill="#111"/>
           <text x="10" y="200" font-size="11">collimator</text>
-          <rect x="160" y="20" width="220" height="16" fill="#888"/>
-          <rect x="160" y="164" width="220" height="16" fill="#888"/>
-          <text x="390" y="34">−</text>
-          <text x="390" y="176">+</text>
-          <path id="e-alpha" d="M 40 100 C 150 100 180 50 300 36" fill="none" stroke="#c0392b" stroke-width="3" stroke-dasharray="6 8"/>
-          <path id="e-beta" d="M 40 100 C 130 100 150 170 280 188" fill="none" stroke="#1d4f91" stroke-width="3" stroke-dasharray="4 6"/>
-          <line x1="40" y1="100" x2="400" y2="100" stroke="#c9a227" stroke-width="2"/>
-          <text x="430" y="40" fill="#c0392b">α toward −</text>
-          <text x="430" y="190" fill="#1d4f91">β toward + (bent more)</text>
-          <text x="430" y="104" fill="#c9a227">γ straight</text>
+          <rect x="150" y="28" width="240" height="14" fill="#888"/>
+          <rect x="150" y="176" width="240" height="14" fill="#888"/>
+          <text x="400" y="40">−</text>
+          <text x="400" y="188">+</text>
+          <path id="e-alpha" d="M 40 110 C 150 110 200 64 340 48" fill="none" stroke="#c0392b" stroke-width="3" stroke-dasharray="7 8"/>
+          <path id="e-beta" d="M 40 110 C 130 110 160 188 300 200" fill="none" stroke="#1d4f91" stroke-width="3" stroke-dasharray="4 6"/>
+          <line x1="40" y1="110" x2="420" y2="110" stroke="#c9a227" stroke-width="2"/>
+          <text x="440" y="52" fill="#c0392b">α toward −</text>
+          <text x="440" y="204" fill="#1d4f91">β toward + (bent more)</text>
+          <text x="440" y="114" fill="#c9a227">γ straight</text>
         </svg>
       </div>
       <div class="visual">
-        <svg viewBox="0 0 640 220" role="img" aria-label="Magnetic deflection">
-          <rect x="160" y="20" width="260" height="180" fill="#eef1f6" stroke="#99a"/>
-          <text x="180" y="44" data-b-mark>×  B into page</text>
-          <path id="b-alpha" d="M 40 90 C 140 90 170 40 260 28" fill="none" stroke="#c0392b" stroke-width="3" stroke-dasharray="6 8"/>
-          <path id="b-beta" d="M 40 90 C 110 90 120 170 210 188" fill="none" stroke="#1d4f91" stroke-width="3" stroke-dasharray="4 6"/>
-          <line x1="40" y1="90" x2="400" y2="90" stroke="#c9a227" stroke-width="2"/>
+        <svg viewBox="0 0 640 230" role="img" aria-label="Magnetic deflection">
+          <rect x="150" y="20" width="280" height="190" fill="#eef1f6" stroke="#99a"/>
+          <g fill="#334" font-size="14">
+            <text x="170" y="50">×</text><text x="210" y="50">×</text><text x="250" y="50">×</text><text x="290" y="50">×</text>
+            <text x="170" y="90">×</text><text x="210" y="90">×</text><text x="250" y="90">×</text><text x="290" y="90">×</text>
+            <text x="170" y="130">×</text><text x="210" y="130">×</text><text x="250" y="130">×</text><text x="290" y="130">×</text>
+            <text x="170" y="170">×</text><text x="210" y="170">×</text><text x="250" y="170">×</text><text x="290" y="170">×</text>
+          </g>
+          <text x="330" y="44" data-b-mark>×  B into the page</text>
+          <path id="b-alpha" d="M 48 110 C 150 110 210 62 318 40" fill="none" stroke="#c0392b" stroke-width="3" stroke-dasharray="7 8"/>
+          <path id="b-beta" d="M 48 110 C 120 110 138 188 236 204" fill="none" stroke="#1d4f91" stroke-width="3" stroke-dasharray="4 6"/>
+          <line x1="48" y1="110" x2="430" y2="110" stroke="#c9a227" stroke-width="2"/>
         </svg>
       </div>
       <div class="row">
@@ -394,9 +429,10 @@
         <p>Fleming left-hand rule: β travels opposite to conventional current I.</p>
         <p>Do the E/B experiment in vacuum so α is not stopped in air.</p>
       </div>
+      <!-- HKDSE 2017/31 -->
       <div class="check" data-check="mc" data-answer="A">
-        <h3>Concept check · HKDSE 2017/31 (uniform E in vacuum)</h3>
-        <p>Pick the path pair: α toward the negative plate, β the other way and bent more.</p>
+        <h3>Concept check</h3>
+        <p>Uniform E in vacuum. Pick the path pair: α toward the negative plate, β the other way and bent more.</p>
         <div class="choices">
           <button type="button" data-choice="A">α gentle curve to − ; β sharp curve to +</button>
           <button type="button" data-choice="B">both curve the same way</button>
@@ -406,8 +442,8 @@
         <p class="feedback"></p>
       </div>
       <div class="check" data-check="mc" data-answer="D">
-        <h3>Concept check · PP q35</h3>
-        <p>B into the page. GM tubes at X and Y record 101 cpm and 400 cpm. Which deduction <strong>must</strong> be correct? (Printed figure is in the PP; intake OCR of the diagram is garbled.)</p>
+        <h3>Concept check</h3>
+        <p>B into the page. GM tubes at X and Y record 101 cpm and 400 cpm. Which deduction <strong>must</strong> be correct?</p>
         <div class="choices">
           <button type="button" data-choice="A">The source does not emit α.</button>
           <button type="button" data-choice="B">The source emits β.</button>
@@ -416,8 +452,9 @@
         </div>
         <p class="feedback"></p>
       </div>
+      <!-- HKDSE 2017/32 -->
       <div class="check" data-check="mc" data-answer="C">
-        <h3>Concept check · HKDSE 2017/32</h3>
+        <h3>Concept check</h3>
         <div class="choices">
           <button type="button" data-choice="A">Only β can ionize air.</button>
           <button type="button" data-choice="B">Only γ can travel through vacuum.</button>
@@ -428,7 +465,7 @@
       </div>
     </section>
 
-    <p class="lede"><a href="summary.html">Close with Table 25.6 and common mistakes →</a></p>
+    <p class="lede"><a href="summary.html">Close with the comparison table and common mistakes →</a></p>
   </main>
   <script src="js/notes.js"></script>
 </body>

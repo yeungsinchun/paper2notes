@@ -6,9 +6,9 @@ This file is the project's committed home for project-intrinsic agent knowledge:
 
 ## Notes
 
-HTML notes live under `notes/`. Open a chapter `index.html` in a browser (no build). Intake for each chapter is `notes/_source/<book-ch>/` (OCR, outline, problem shortlist, figure crops). Conventions: `.cursor/rules/visual-html-notes.mdc` (`globs: notes/**`). Local textbooks and banks (`active-physics/`, `dse-classified/`, `QB_501/`) are gitignored.
+HTML notes live under `notes/`. Open a chapter `index.html` in a browser (no build). Intake for each chapter is `notes/_source/<book-ch>/` (OCR, outline, problem shortlist, figure crops). Conventions: `.cursor/rules/visual-html-notes.mdc` (`globs: notes/**`). Local textbooks and banks (`active-physics/`, `dse-classified/`, `QB_501/`) are gitignored. Student pages must not show intake/OCR/QB provenance; keep that in `_source` or HTML comments.
 
-Book 5 Ch.1 first draft: `notes/book5/ch01-radiation-and-radioactivity/`.
+Book 5 Ch.1 first draft: `notes/book5/ch01-radiation-and-radioactivity/`. Browser interactives are covered by `js/notes.interactives.test.mjs` (needs Google Chrome).
 
 ## Maintaining this file
 

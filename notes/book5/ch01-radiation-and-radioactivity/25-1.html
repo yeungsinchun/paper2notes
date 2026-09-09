@@ -18,9 +18,8 @@
     </nav>
   </header>
   <main>
-    <p class="kicker">Printed pp.4-10</p>
-    <h1>25.1 Ionizing radiation</h1>
-    <div class="gap">Opener pages 1-3 are not in the intake PDF. This section starts where the scan starts: what counts as radiation.</div>
+    <p class="kicker">25.1</p>
+    <h1>Ionizing radiation</h1>
 
     <section class="idea" id="radiation">
       <header>
@@ -29,15 +28,17 @@
       </header>
       <div class="visual">
         <svg viewBox="0 0 640 200" role="img" aria-label="Light wave versus electron beam">
-          <text x="40" y="28" font-size="14">EM wave</text>
-          <path d="M30 90 q 20 -40 40 0 t 40 0 t 40 0 t 40 0 t 40 0" fill="none" stroke="#c9a227" stroke-width="3"/>
+          <text x="28" y="28" font-size="14">EM wave</text>
+          <path d="M28 100 C 48 52, 68 52, 88 100 S 128 148, 148 100 S 188 52, 208 100 S 248 148, 268 100"
+                fill="none" stroke="#c9a227" stroke-width="3"/>
+          <text x="28" y="176" font-size="13" fill="#5b6573">light beam</text>
           <text x="360" y="28" font-size="14">stream of particles (KE)</text>
-          <circle cx="380" cy="90" r="8" fill="#2a62a8"/>
-          <circle cx="430" cy="90" r="8" fill="#2a62a8"/>
-          <circle cx="480" cy="90" r="8" fill="#2a62a8"/>
-          <polygon points="520,90 500,82 500,98" fill="#2a62a8"/>
-          <text x="40" y="170" font-size="13" fill="#5b6573">light beam</text>
-          <text x="360" y="170" font-size="13" fill="#5b6573">electron beam</text>
+          <circle cx="380" cy="100" r="8" fill="#2a62a8"/>
+          <circle cx="424" cy="100" r="8" fill="#2a62a8"/>
+          <circle cx="468" cy="100" r="8" fill="#2a62a8"/>
+          <circle cx="512" cy="100" r="8" fill="#2a62a8"/>
+          <polygon points="548,100 528,90 528,110" fill="#2a62a8"/>
+          <text x="360" y="176" font-size="13" fill="#5b6573">electron beam</text>
         </svg>
       </div>
       <div class="one-liners">
@@ -52,19 +53,19 @@
         <span class="stamp">Fig. 25.3</span>
       </header>
       <div class="visual play knock" id="knock-vis" data-autoplay>
-        <svg viewBox="0 0 640 210" class="knock" role="img" aria-label="Radiation knocks an electron out of an atom">
-          <line class="ray" x1="20" y1="90" x2="230" y2="90" stroke="#c9a227" stroke-width="8"/>
-          <text x="20" y="40" font-size="14">ionizing radiation</text>
-          <circle cx="260" cy="90" r="28" fill="#e0a04a"/>
-          <text x="246" y="96" font-size="12">atom</text>
-          <circle class="ion" cx="430" cy="70" r="26" fill="#e0a04a"/>
-          <text x="418" y="64" font-size="16" fill="#fff">+</text>
-          <text x="410" y="118" font-size="12">positive ion</text>
+        <svg viewBox="0 0 640 220" class="knock" role="img" aria-label="Radiation knocks an electron out of an atom">
+          <line class="ray" x1="16" y1="88" x2="198" y2="88" stroke="#c9a227" stroke-width="8"/>
+          <text x="16" y="36" font-size="14">ionizing radiation</text>
+          <circle cx="248" cy="88" r="38" fill="none" stroke="#9bb6c4"/>
+          <circle class="ion" cx="248" cy="88" r="14" fill="#e0a04a"/>
+          <circle cx="248" cy="50" r="8" fill="#2a62a8"/>
           <g class="eject">
-            <circle cx="320" cy="120" r="10" fill="#2a62a8"/>
-            <text x="316" y="124" font-size="12" fill="#fff">−</text>
+            <circle cx="280" cy="112" r="8" fill="#2a62a8"/>
+            <text x="277" y="116" font-size="11" fill="#fff">−</text>
           </g>
-          <text x="470" y="160" font-size="12">electron</text>
+          <text x="226" y="148" font-size="12">atom</text>
+          <text x="390" y="70" font-size="12">positive ion</text>
+          <text x="430" y="176" font-size="12">electron</text>
         </svg>
       </div>
       <div class="row">
@@ -72,13 +73,14 @@
       </div>
       <div class="one-liners">
         <p>Ionizing radiation has enough energy to knock an electron out of an atom or molecule.</p>
-        <p>Hazard: damaged tissue / DNA. (Fig. 25.4 still is optional here.)</p>
+        <p>Hazard: damaged tissue / DNA.</p>
       </div>
+      <!-- QB PHY15011101 -->
       <div class="check" data-check="mc" data-answer="B">
-        <h3>Concept check · ionizing definition</h3>
-        <p>QB PHY15011101 (paraphrase of Fig. 25.3 wording)</p>
+        <h3>Concept check</h3>
+        <p>What does ionizing radiation do to an atom?</p>
         <div class="choices">
-          <button type="button" data-choice="A">Ionizing radiation is a beam of ions.</button>
+          <button type="button" data-choice="A">It is a beam of ions.</button>
           <button type="button" data-choice="B">It knocks electrons out of atoms or molecules, turning them into ions.</button>
           <button type="button" data-choice="C">Only charged particles can be ionizing.</button>
         </div>
@@ -92,31 +94,38 @@
         <span class="stamp">Fig. 25.5</span>
       </header>
       <div class="visual">
-        <svg viewBox="0 0 720 160" role="img" aria-label="EM spectrum with ionizing cut after UV">
-          <text x="20" y="24">non-ionizing</text>
-          <text x="520" y="24">ionizing</text>
-          <rect x="20" y="40" width="88" height="36" fill="#d9e4f0"/>
-          <text x="30" y="62" font-size="11">radio</text>
-          <rect x="108" y="40" width="88" height="36" fill="#cfe0c8"/>
-          <text x="118" y="62" font-size="11">micro</text>
-          <rect x="196" y="40" width="88" height="36" fill="#f0d5b8"/>
-          <text x="226" y="62" font-size="11">IR</text>
-          <rect x="284" y="40" width="36" height="36" fill="#c0392b"/>
-          <rect x="320" y="40" width="70" height="36" fill="#7e57c2"/>
-          <text x="338" y="62" font-size="11" fill="#fff">UV</text>
-          <rect x="390" y="40" width="120" height="36" fill="#455a64"/>
-          <text x="424" y="62" font-size="11" fill="#fff">X-rays</text>
-          <rect x="510" y="40" width="180" height="36" fill="#1c2430"/>
-          <text x="560" y="62" font-size="11" fill="#fff">γ</text>
-          <line id="spectrum-mark" x1="72" y1="36" x2="72" y2="88" stroke="#c47a12" stroke-width="3"/>
-          <text x="20" y="140" font-size="11">10⁸</text>
-          <text x="196" y="140" font-size="11">10¹²</text>
-          <text x="390" y="140" font-size="11">10¹⁶</text>
-          <text x="620" y="140" font-size="11">Hz →</text>
+        <svg viewBox="0 0 720 170" role="img" aria-label="EM spectrum with ionizing cut after UV">
+          <text x="20" y="22">non-ionizing</text>
+          <text x="520" y="22">ionizing</text>
+          <rect x="20" y="40" width="88" height="40" fill="#d9e4f0"/>
+          <text x="42" y="64" font-size="12">radio</text>
+          <rect x="108" y="40" width="88" height="40" fill="#cfe0c8"/>
+          <text x="124" y="64" font-size="12">micro</text>
+          <rect x="196" y="40" width="88" height="40" fill="#f0d5b8"/>
+          <text x="230" y="64" font-size="12">IR</text>
+          <rect x="284" y="40" width="12" height="40" fill="#c0392b"/>
+          <rect x="296" y="40" width="12" height="40" fill="#e67e22"/>
+          <rect x="308" y="40" width="12" height="40" fill="#f1c40f"/>
+          <rect x="320" y="40" width="12" height="40" fill="#27ae60"/>
+          <rect x="332" y="40" width="12" height="40" fill="#2980b9"/>
+          <rect x="344" y="40" width="12" height="40" fill="#8e44ad"/>
+          <rect x="356" y="40" width="34" height="40" fill="#7e57c2"/>
+          <text x="360" y="64" font-size="11" fill="#fff">UV</text>
+          <rect x="390" y="40" width="120" height="40" fill="#455a64"/>
+          <text x="424" y="64" font-size="12" fill="#fff">X-rays</text>
+          <rect x="510" y="40" width="180" height="40" fill="#1c2430"/>
+          <text x="588" y="64" font-size="12" fill="#fff">γ</text>
+          <line id="spectrum-mark" x1="72" y1="32" x2="72" y2="88" stroke="#c47a12" stroke-width="3"/>
+          <polygon points="72,28 66,18 78,18" fill="#c47a12" id="spectrum-pointer"/>
+          <text x="20" y="148" font-size="11">10⁸ Hz</text>
+          <text x="196" y="148" font-size="11">10¹²</text>
+          <text x="348" y="148" font-size="11">vis</text>
+          <text x="390" y="148" font-size="11">10¹⁶</text>
+          <text x="640" y="148" font-size="11">→</text>
         </svg>
       </div>
       <div class="row">
-        <label>Slide frequency mark
+        <label>Frequency mark
           <input id="spectrum-slider" type="range" min="20" max="680" value="72">
         </label>
       </div>
@@ -133,16 +142,18 @@
         <span class="stamp">Fig. 25.6</span>
       </header>
       <div class="visual play tube" id="tube-vis" data-autoplay>
-        <svg viewBox="0 0 640 220" class="tube" role="img" aria-label="Electrons hit a heavy metal target and X-rays leave">
-          <rect x="40" y="70" width="160" height="80" rx="8" fill="#dfe7ea" stroke="#333"/>
-          <text x="70" y="60" font-size="13">electron gun −</text>
-          <line class="e-beam" x1="200" y1="110" x2="360" y2="110" stroke="#2a62a8" stroke-width="4" stroke-dasharray="8 8"/>
-          <polygon points="380,90 430,130 380,150" fill="#8a9098"/>
-          <text x="360" y="180" font-size="13">heavy metal target</text>
-          <path class="xburst" d="M430 100 q 40 -40 80 -20" fill="none" stroke="#c9a227" stroke-width="3"/>
-          <path class="xburst" d="M430 110 q 50 -10 90 10" fill="none" stroke="#c9a227" stroke-width="3"/>
-          <path class="xburst" d="M430 120 q 40 30 70 40" fill="none" stroke="#c9a227" stroke-width="3"/>
-          <text x="520" y="70" font-size="14">X-rays</text>
+        <svg viewBox="0 0 640 230" class="tube" role="img" aria-label="Electrons hit a heavy metal target and X-rays leave">
+          <ellipse cx="300" cy="108" rx="250" ry="78" fill="#e8eef2" stroke="#333" stroke-width="2"/>
+          <text x="70" y="28" font-size="13">cathode −</text>
+          <rect x="78" y="90" width="22" height="36" rx="3" fill="#555"/>
+          <path d="M84 96 h10 M84 104 h10 M84 112 h10 M84 120 h10" stroke="#f4c542" stroke-width="2"/>
+          <line class="e-beam" x1="102" y1="108" x2="348" y2="108" stroke="#2a62a8" stroke-width="4" stroke-dasharray="8 7"/>
+          <polygon points="350,70 410,108 350,146 338,130 338,86" fill="#8a9098" stroke="#333"/>
+          <text x="300" y="200" font-size="13">heavy metal target +</text>
+          <path class="xburst" d="M392 118 L 470 168" fill="none" stroke="#c9a227" stroke-width="3"/>
+          <path class="xburst" d="M392 118 L 510 150" fill="none" stroke="#c9a227" stroke-width="3"/>
+          <path class="xburst" d="M392 118 L 500 188" fill="none" stroke="#c9a227" stroke-width="3"/>
+          <text x="500" y="130" font-size="14">X-rays</text>
         </svg>
       </div>
       <div class="row"><button type="button" data-replay="tube-vis">Replay</button></div>
@@ -151,7 +162,7 @@
         <p>X-rays: uncharged EM, travel at c, blacken film, ionizing.</p>
       </div>
       <div class="check" data-check="tf">
-        <h3>Concept check · Checkpoint 1</h3>
+        <h3>Concept check</h3>
         <div class="tf-item" data-answer="false">
           <p>(a) A beam of X-rays is a stream of fast-moving electrons.</p>
           <div class="row">
@@ -185,16 +196,25 @@
         <span class="stamp">Fig. 25.7</span>
       </header>
       <div class="visual">
-        <svg viewBox="0 0 640 200" role="img" aria-label="X-rays through flesh versus bone onto film">
-          <path d="M40 40 h80" stroke="#c9a227" stroke-width="4"/>
-          <path d="M40 80 h80" stroke="#c9a227" stroke-width="4"/>
-          <path d="M40 120 h80" stroke="#c9a227" stroke-width="4"/>
-          <rect x="150" y="30" width="70" height="110" fill="#f0cbb0" id="xray-flesh"/>
-          <text x="162" y="90" font-size="12">flesh</text>
-          <rect x="250" y="40" width="50" height="90" fill="#ece6d8" stroke="#888" id="xray-bone"/>
-          <text x="258" y="90" font-size="12">bone</text>
-          <rect id="xray-film" x="360" y="30" width="200" height="110" fill="#3d3426"/>
-          <text x="420" y="90" font-size="13" fill="#eee">film</text>
+        <svg viewBox="0 0 640 210" role="img" aria-label="X-rays through flesh versus bone onto film">
+          <g stroke="#c9a227" stroke-width="3">
+            <line x1="24" y1="50" x2="148" y2="50"/>
+            <line x1="24" y1="80" x2="148" y2="80"/>
+            <line x1="24" y1="110" x2="148" y2="110"/>
+            <line x1="24" y1="140" x2="148" y2="140"/>
+          </g>
+          <text x="24" y="32" font-size="13">X-rays</text>
+          <rect x="160" y="40" width="88" height="120" fill="#f0cbb0" opacity="0.85"/>
+          <text x="180" y="104" font-size="13">flesh</text>
+          <g id="xray-through-flesh" stroke="#c9a227" stroke-width="3">
+            <line x1="248" y1="50" x2="368" y2="50"/>
+            <line x1="248" y1="140" x2="368" y2="140"/>
+          </g>
+          <rect id="xray-stopped-bone" x="268" y="62" width="44" height="76" fill="#ece6d8" stroke="#888"/>
+          <text x="274" y="104" font-size="12">bone</text>
+          <rect id="xray-film" x="380" y="40" width="220" height="120" fill="#3d3426"/>
+          <rect id="xray-shadow" x="430" y="62" width="44" height="76" fill="#f4efe0" opacity="0"/>
+          <text x="468" y="108" font-size="13" fill="#eee">film</text>
         </svg>
       </div>
       <div class="row">
@@ -204,10 +224,10 @@
       </div>
       <div class="one-liners">
         <p>Soft tissue transmits → film blackens. Bone absorbs → bone looks white on the developed film.</p>
-        <p>Same idea at security / industry; Röntgen history is optional sidebar.</p>
       </div>
+      <!-- HKDSE 2022/31 -->
       <div class="check" data-check="mc" data-answer="C">
-        <h3>Concept check · HKDSE 2022/31</h3>
+        <h3>Concept check</h3>
         <p>Which statement about X-rays is <strong>incorrect</strong>?</p>
         <div class="choices">
           <button type="button" data-choice="A">X-rays can be produced by high-speed electrons hitting a metal target.</button>
@@ -225,31 +245,35 @@
         <span class="stamp">Exercise after 25.1</span>
       </header>
       <div class="visual">
-        <svg viewBox="0 0 640 180" role="img" aria-label="Four setups: UV or electrons on sponge or metal">
+        <svg viewBox="0 0 640 190" role="img" aria-label="Four setups: UV or electrons on sponge or metal">
           <g>
             <text x="40" y="24">A  UV → sponge</text>
-            <path d="M40 70 q 12 -16 24 0 t 24 0" fill="none" stroke="#7e57c2" stroke-width="2"/>
-            <ellipse cx="110" cy="110" rx="28" ry="16" fill="#e8c9a8"/>
+            <path d="M40 70 C 51 48, 62 48, 73 70 S 95 92, 106 70" fill="none" stroke="#7e57c2" stroke-width="2.5"/>
+            <ellipse cx="118" cy="118" rx="30" ry="16" fill="#e8c9a8" stroke="#b08968"/>
           </g>
           <g>
             <text x="200" y="24">B  UV → metal</text>
-            <path d="M200 70 q 12 -16 24 0 t 24 0" fill="none" stroke="#7e57c2" stroke-width="2"/>
-            <rect x="250" y="96" width="40" height="28" fill="#8a9098"/>
+            <path d="M200 70 C 211 48, 222 48, 233 70 S 255 92, 266 70" fill="none" stroke="#7e57c2" stroke-width="2.5"/>
+            <rect x="250" y="102" width="44" height="28" fill="#8a9098" stroke="#333"/>
           </g>
           <g>
             <text x="360" y="24">C  e⁻ → sponge</text>
-            <circle cx="380" cy="70" r="6" fill="#2a62a8"/>
-            <ellipse cx="430" cy="110" rx="28" ry="16" fill="#e8c9a8"/>
+            <circle cx="378" cy="70" r="6" fill="#2a62a8"/>
+            <circle cx="400" cy="70" r="6" fill="#2a62a8"/>
+            <polygon points="422,70 410,64 410,76" fill="#2a62a8"/>
+            <ellipse cx="438" cy="118" rx="30" ry="16" fill="#e8c9a8" stroke="#b08968"/>
           </g>
           <g>
             <text x="500" y="24">D  e⁻ → metal</text>
-            <circle cx="520" cy="70" r="6" fill="#2a62a8"/>
-            <rect x="560" y="96" width="40" height="28" fill="#8a9098"/>
+            <circle cx="518" cy="70" r="6" fill="#2a62a8"/>
+            <circle cx="540" cy="70" r="6" fill="#2a62a8"/>
+            <polygon points="562,70 550,64 550,76" fill="#2a62a8"/>
+            <rect x="560" y="102" width="44" height="28" fill="#8a9098" stroke="#333"/>
           </g>
         </svg>
       </div>
       <div class="check" data-check="mc" data-answer="D">
-        <h3>Concept check · pick the diagram</h3>
+        <h3>Concept check</h3>
         <p>UV light and fast-moving electrons hit sponge and heavy metal in turn. Where are X-rays produced?</p>
         <div class="choices">
           <button type="button" data-choice="A">A</button>
@@ -267,27 +291,29 @@
         <span class="stamp">25.1 C</span>
       </header>
       <div class="visual">
-        <svg viewBox="0 0 720 180" role="img" aria-label="Alpha helium nucleus, beta electron, gamma wave">
+        <svg viewBox="0 0 720 180" role="img" aria-label="Alpha helium nucleus, beta electron, gamma wave, X-ray tube">
           <g>
-            <circle cx="70" cy="80" r="12" fill="#c0392b"/>
-            <circle cx="88" cy="80" r="12" fill="#c0392b"/>
-            <circle cx="70" cy="96" r="12" fill="#2f7a4a"/>
-            <circle cx="88" cy="96" r="12" fill="#2f7a4a"/>
-            <text x="40" y="150">α  He nucleus</text>
+            <circle cx="64" cy="78" r="12" fill="#c0392b"/>
+            <circle cx="86" cy="78" r="12" fill="#c0392b"/>
+            <circle cx="64" cy="100" r="12" fill="#2f7a4a"/>
+            <circle cx="86" cy="100" r="12" fill="#2f7a4a"/>
+            <text x="36" y="150">α  He nucleus</text>
           </g>
           <g>
-            <circle cx="280" cy="88" r="10" fill="#2a62a8"/>
-            <text x="276" y="92" fill="#fff" font-size="14">−</text>
-            <text x="230" y="150">β  fast electron</text>
+            <circle cx="250" cy="90" r="11" fill="#2a62a8"/>
+            <text x="246" y="94" fill="#fff" font-size="14">−</text>
+            <text x="198" y="150">β  fast electron</text>
           </g>
           <g>
-            <path d="M430 88 q 20 -30 40 0 t 40 0 t 40 0" fill="none" stroke="#c9a227" stroke-width="3"/>
-            <text x="450" y="150">γ  high-f EM</text>
+            <path d="M400 90 C 414 54, 428 54, 442 90 S 470 126, 484 90 S 512 54, 526 90"
+                  fill="none" stroke="#c9a227" stroke-width="3"/>
+            <text x="420" y="150">γ  high-f EM</text>
           </g>
           <g>
-            <rect x="600" y="40" width="70" height="90" fill="#dfe7ea" stroke="#333"/>
-            <text x="610" y="88" font-size="11">tube</text>
-            <text x="598" y="150" font-size="12">X-ray: switched</text>
+            <rect x="600" y="48" width="72" height="72" rx="8" fill="#dfe7ea" stroke="#333"/>
+            <line x1="612" y1="84" x2="648" y2="84" stroke="#2a62a8" stroke-width="3"/>
+            <polygon points="658,70 678,84 658,98" fill="#8a9098"/>
+            <text x="592" y="150" font-size="12">X-ray: switched</text>
           </g>
         </svg>
       </div>
@@ -297,7 +323,7 @@
         <p>Decay is spontaneous and random: you cannot control time or direction the way you switch an X-ray tube.</p>
       </div>
       <div class="check" data-check="tf">
-        <h3>Concept check · Checkpoint 2</h3>
+        <h3>Concept check</h3>
         <div class="tf-item" data-answer="false">
           <p>(a) All types of nuclear radiation are EM waves.</p>
           <div class="row"><button type="button" data-tf="true">True</button><button type="button" data-tf="false">False</button></div>
@@ -314,8 +340,9 @@
           <p class="feedback"></p>
         </div>
       </div>
+      <!-- HKDSE 2015/31 -->
       <div class="check" data-check="mc" data-answer="A">
-        <h3>Concept check · HKDSE 2015/31</h3>
+        <h3>Concept check</h3>
         <p>Which nuclear reaction(s) is/are spontaneous?</p>
         <p>(1) β decay of Na-24 &nbsp; (2) incoming neutron on a boron nucleus &nbsp; (3) fusion of hydrogen isotopes</p>
         <div class="choices">
