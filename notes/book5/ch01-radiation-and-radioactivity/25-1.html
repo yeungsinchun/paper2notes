@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>25.1 Ionizing radiation</title>
+  <link rel="stylesheet" href="css/notes.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html">Book 5 · Ch.1<small>25.1 Ionizing radiation</small></a>
+    <nav>
+      <a href="index.html">Map</a>
+      <a href="25-1.html" aria-current="page">25.1</a>
+      <a href="25-2.html">25.2</a>
+      <a href="25-3.html">25.3</a>
+      <a href="summary.html">Summary</a>
+    </nav>
+  </header>
+  <main>
+    <p class="kicker">Printed pp.4-10</p>
+    <h1>25.1 Ionizing radiation</h1>
+    <div class="gap">Opener pages 1-3 are not in the intake PDF. This section starts where the scan starts: what counts as radiation.</div>
+
+    <section class="idea" id="radiation">
+      <header>
+        <h2>Energy on the move</h2>
+        <span class="stamp">Fig. 25.2</span>
+      </header>
+      <div class="visual">
+        <svg viewBox="0 0 640 200" role="img" aria-label="Light wave versus electron beam">
+          <text x="40" y="28" font-size="14">EM wave</text>
+          <path d="M30 90 q 20 -40 40 0 t 40 0 t 40 0 t 40 0 t 40 0" fill="none" stroke="#c9a227" stroke-width="3"/>
+          <text x="360" y="28" font-size="14">stream of particles (KE)</text>
+          <circle cx="380" cy="90" r="8" fill="#2a62a8"/>
+          <circle cx="430" cy="90" r="8" fill="#2a62a8"/>
+          <circle cx="480" cy="90" r="8" fill="#2a62a8"/>
+          <polygon points="520,90 500,82 500,98" fill="#2a62a8"/>
+          <text x="40" y="170" font-size="13" fill="#5b6573">light beam</text>
+          <text x="360" y="170" font-size="13" fill="#5b6573">electron beam</text>
+        </svg>
+      </div>
+      <div class="one-liners">
+        <p>Radiation = energy flowing from one place to another.</p>
+        <p>Carrier: EM wave, or particles that carry kinetic energy.</p>
+      </div>
+    </section>
+
+    <section class="idea" id="knockout">
+      <header>
+        <h2>Ionizing means knockout</h2>
+        <span class="stamp">Fig. 25.3</span>
+      </header>
+      <div class="visual play knock" id="knock-vis" data-autoplay>
+        <svg viewBox="0 0 640 210" class="knock" role="img" aria-label="Radiation knocks an electron out of an atom">
+          <line class="ray" x1="20" y1="90" x2="230" y2="90" stroke="#c9a227" stroke-width="8"/>
+          <text x="20" y="40" font-size="14">ionizing radiation</text>
+          <circle cx="260" cy="90" r="28" fill="#e0a04a"/>
+          <text x="246" y="96" font-size="12">atom</text>
+          <circle class="ion" cx="430" cy="70" r="26" fill="#e0a04a"/>
+          <text x="418" y="64" font-size="16" fill="#fff">+</text>
+          <text x="410" y="118" font-size="12">positive ion</text>
+          <g class="eject">
+            <circle cx="320" cy="120" r="10" fill="#2a62a8"/>
+            <text x="316" y="124" font-size="12" fill="#fff">−</text>
+          </g>
+          <text x="470" y="160" font-size="12">electron</text>
+        </svg>
+      </div>
+      <div class="row">
+        <button type="button" data-replay="knock-vis">Replay knockout</button>
+      </div>
+      <div class="one-liners">
+        <p>Ionizing radiation has enough energy to knock an electron out of an atom or molecule.</p>
+        <p>Hazard: damaged tissue / DNA. (Fig. 25.4 still is optional here.)</p>
+      </div>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3>Concept check · ionizing definition</h3>
+        <p>QB PHY15011101 (paraphrase of Fig. 25.3 wording)</p>
+        <div class="choices">
+          <button type="button" data-choice="A">Ionizing radiation is a beam of ions.</button>
+          <button type="button" data-choice="B">It knocks electrons out of atoms or molecules, turning them into ions.</button>
+          <button type="button" data-choice="C">Only charged particles can be ionizing.</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+    </section>
+
+    <section class="idea" id="spectrum">
+      <header>
+        <h2>Where the EM cut sits</h2>
+        <span class="stamp">Fig. 25.5</span>
+      </header>
+      <div class="visual">
+        <svg viewBox="0 0 720 160" role="img" aria-label="EM spectrum with ionizing cut after UV">
+          <text x="20" y="24">non-ionizing</text>
+          <text x="520" y="24">ionizing</text>
+          <rect x="20" y="40" width="88" height="36" fill="#d9e4f0"/>
+          <text x="30" y="62" font-size="11">radio</text>
+          <rect x="108" y="40" width="88" height="36" fill="#cfe0c8"/>
+          <text x="118" y="62" font-size="11">micro</text>
+          <rect x="196" y="40" width="88" height="36" fill="#f0d5b8"/>
+          <text x="226" y="62" font-size="11">IR</text>
+          <rect x="284" y="40" width="36" height="36" fill="#c0392b"/>
+          <rect x="320" y="40" width="70" height="36" fill="#7e57c2"/>
+          <text x="338" y="62" font-size="11" fill="#fff">UV</text>
+          <rect x="390" y="40" width="120" height="36" fill="#455a64"/>
+          <text x="424" y="62" font-size="11" fill="#fff">X-rays</text>
+          <rect x="510" y="40" width="180" height="36" fill="#1c2430"/>
+          <text x="560" y="62" font-size="11" fill="#fff">γ</text>
+          <line id="spectrum-mark" x1="72" y1="36" x2="72" y2="88" stroke="#c47a12" stroke-width="3"/>
+          <text x="20" y="140" font-size="11">10⁸</text>
+          <text x="196" y="140" font-size="11">10¹²</text>
+          <text x="390" y="140" font-size="11">10¹⁶</text>
+          <text x="620" y="140" font-size="11">Hz →</text>
+        </svg>
+      </div>
+      <div class="row">
+        <label>Slide frequency mark
+          <input id="spectrum-slider" type="range" min="20" max="680" value="72">
+        </label>
+      </div>
+      <p class="caption" id="spectrum-label"></p>
+      <div class="one-liners">
+        <p>For EM waves: higher frequency → more energy.</p>
+        <p>Book cut: frequencies higher than ultraviolet, i.e. X-rays and gamma rays, are ionizing.</p>
+      </div>
+    </section>
+
+    <section class="idea" id="xray-tube">
+      <header>
+        <h2>X-ray tube</h2>
+        <span class="stamp">Fig. 25.6</span>
+      </header>
+      <div class="visual play tube" id="tube-vis" data-autoplay>
+        <svg viewBox="0 0 640 220" class="tube" role="img" aria-label="Electrons hit a heavy metal target and X-rays leave">
+          <rect x="40" y="70" width="160" height="80" rx="8" fill="#dfe7ea" stroke="#333"/>
+          <text x="70" y="60" font-size="13">electron gun −</text>
+          <line class="e-beam" x1="200" y1="110" x2="360" y2="110" stroke="#2a62a8" stroke-width="4" stroke-dasharray="8 8"/>
+          <polygon points="380,90 430,130 380,150" fill="#8a9098"/>
+          <text x="360" y="180" font-size="13">heavy metal target</text>
+          <path class="xburst" d="M430 100 q 40 -40 80 -20" fill="none" stroke="#c9a227" stroke-width="3"/>
+          <path class="xburst" d="M430 110 q 50 -10 90 10" fill="none" stroke="#c9a227" stroke-width="3"/>
+          <path class="xburst" d="M430 120 q 40 30 70 40" fill="none" stroke="#c9a227" stroke-width="3"/>
+          <text x="520" y="70" font-size="14">X-rays</text>
+        </svg>
+      </div>
+      <div class="row"><button type="button" data-replay="tube-vis">Replay</button></div>
+      <div class="one-liners">
+        <p>High-speed electrons hit a heavy metal target. Some KE becomes X-rays.</p>
+        <p>X-rays: uncharged EM, travel at c, blacken film, ionizing.</p>
+      </div>
+      <div class="check" data-check="tf">
+        <h3>Concept check · Checkpoint 1</h3>
+        <div class="tf-item" data-answer="false">
+          <p>(a) A beam of X-rays is a stream of fast-moving electrons.</p>
+          <div class="row">
+            <button type="button" data-tf="true">True</button>
+            <button type="button" data-tf="false">False</button>
+          </div>
+          <p class="feedback"></p>
+        </div>
+        <div class="tf-item" data-answer="false">
+          <p>(b) X-rays are produced by bombarding a metal target with high-frequency EM waves.</p>
+          <div class="row">
+            <button type="button" data-tf="true">True</button>
+            <button type="button" data-tf="false">False</button>
+          </div>
+          <p class="feedback"></p>
+        </div>
+        <div class="tf-item" data-answer="true">
+          <p>(c) Exposure to X-rays is dangerous because they can damage cells.</p>
+          <div class="row">
+            <button type="button" data-tf="true">True</button>
+            <button type="button" data-tf="false">False</button>
+          </div>
+          <p class="feedback"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="idea" id="imaging">
+      <header>
+        <h2>Flesh transmits, bone absorbs</h2>
+        <span class="stamp">Fig. 25.7</span>
+      </header>
+      <div class="visual">
+        <svg viewBox="0 0 640 200" role="img" aria-label="X-rays through flesh versus bone onto film">
+          <path d="M40 40 h80" stroke="#c9a227" stroke-width="4"/>
+          <path d="M40 80 h80" stroke="#c9a227" stroke-width="4"/>
+          <path d="M40 120 h80" stroke="#c9a227" stroke-width="4"/>
+          <rect x="150" y="30" width="70" height="110" fill="#f0cbb0" id="xray-flesh"/>
+          <text x="162" y="90" font-size="12">flesh</text>
+          <rect x="250" y="40" width="50" height="90" fill="#ece6d8" stroke="#888" id="xray-bone"/>
+          <text x="258" y="90" font-size="12">bone</text>
+          <rect id="xray-film" x="360" y="30" width="200" height="110" fill="#3d3426"/>
+          <text x="420" y="90" font-size="13" fill="#eee">film</text>
+        </svg>
+      </div>
+      <div class="row">
+        <button type="button" data-tissue="flesh">Through flesh</button>
+        <button type="button" data-tissue="bone">Through bone</button>
+        <button type="button" data-tissue="air">No body</button>
+      </div>
+      <div class="one-liners">
+        <p>Soft tissue transmits → film blackens. Bone absorbs → bone looks white on the developed film.</p>
+        <p>Same idea at security / industry; Röntgen history is optional sidebar.</p>
+      </div>
+      <div class="check" data-check="mc" data-answer="C">
+        <h3>Concept check · HKDSE 2022/31</h3>
+        <p>Which statement about X-rays is <strong>incorrect</strong>?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">X-rays can be produced by high-speed electrons hitting a metal target.</button>
+          <button type="button" data-choice="B">X-rays are a kind of electromagnetic wave.</button>
+          <button type="button" data-choice="C">X-rays can be deflected by an electric field.</button>
+          <button type="button" data-choice="D">Although X-rays do not carry charges, they can cause ionization.</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+    </section>
+
+    <section class="idea" id="make-xrays">
+      <header>
+        <h2>Which hit makes X-rays?</h2>
+        <span class="stamp">Exercise after 25.1</span>
+      </header>
+      <div class="visual">
+        <svg viewBox="0 0 640 180" role="img" aria-label="Four setups: UV or electrons on sponge or metal">
+          <g>
+            <text x="40" y="24">A  UV → sponge</text>
+            <path d="M40 70 q 12 -16 24 0 t 24 0" fill="none" stroke="#7e57c2" stroke-width="2"/>
+            <ellipse cx="110" cy="110" rx="28" ry="16" fill="#e8c9a8"/>
+          </g>
+          <g>
+            <text x="200" y="24">B  UV → metal</text>
+            <path d="M200 70 q 12 -16 24 0 t 24 0" fill="none" stroke="#7e57c2" stroke-width="2"/>
+            <rect x="250" y="96" width="40" height="28" fill="#8a9098"/>
+          </g>
+          <g>
+            <text x="360" y="24">C  e⁻ → sponge</text>
+            <circle cx="380" cy="70" r="6" fill="#2a62a8"/>
+            <ellipse cx="430" cy="110" rx="28" ry="16" fill="#e8c9a8"/>
+          </g>
+          <g>
+            <text x="500" y="24">D  e⁻ → metal</text>
+            <circle cx="520" cy="70" r="6" fill="#2a62a8"/>
+            <rect x="560" y="96" width="40" height="28" fill="#8a9098"/>
+          </g>
+        </svg>
+      </div>
+      <div class="check" data-check="mc" data-answer="D">
+        <h3>Concept check · pick the diagram</h3>
+        <p>UV light and fast-moving electrons hit sponge and heavy metal in turn. Where are X-rays produced?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">A</button>
+          <button type="button" data-choice="B">B</button>
+          <button type="button" data-choice="C">C</button>
+          <button type="button" data-choice="D">D</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+    </section>
+
+    <section class="idea" id="nuclear-vs-x">
+      <header>
+        <h2>Nuclear radiation vs an X-ray switch</h2>
+        <span class="stamp">25.1 C</span>
+      </header>
+      <div class="visual">
+        <svg viewBox="0 0 720 180" role="img" aria-label="Alpha helium nucleus, beta electron, gamma wave">
+          <g>
+            <circle cx="70" cy="80" r="12" fill="#c0392b"/>
+            <circle cx="88" cy="80" r="12" fill="#c0392b"/>
+            <circle cx="70" cy="96" r="12" fill="#2f7a4a"/>
+            <circle cx="88" cy="96" r="12" fill="#2f7a4a"/>
+            <text x="40" y="150">α  He nucleus</text>
+          </g>
+          <g>
+            <circle cx="280" cy="88" r="10" fill="#2a62a8"/>
+            <text x="276" y="92" fill="#fff" font-size="14">−</text>
+            <text x="230" y="150">β  fast electron</text>
+          </g>
+          <g>
+            <path d="M430 88 q 20 -30 40 0 t 40 0 t 40 0" fill="none" stroke="#c9a227" stroke-width="3"/>
+            <text x="450" y="150">γ  high-f EM</text>
+          </g>
+          <g>
+            <rect x="600" y="40" width="70" height="90" fill="#dfe7ea" stroke="#333"/>
+            <text x="610" y="88" font-size="11">tube</text>
+            <text x="598" y="150" font-size="12">X-ray: switched</text>
+          </g>
+        </svg>
+      </div>
+      <div class="one-liners">
+        <p>Radioactive substances emit from the <strong>nucleus</strong>.</p>
+        <p>Names α, β, γ were arbitrary at discovery.</p>
+        <p>Decay is spontaneous and random: you cannot control time or direction the way you switch an X-ray tube.</p>
+      </div>
+      <div class="check" data-check="tf">
+        <h3>Concept check · Checkpoint 2</h3>
+        <div class="tf-item" data-answer="false">
+          <p>(a) All types of nuclear radiation are EM waves.</p>
+          <div class="row"><button type="button" data-tf="true">True</button><button type="button" data-tf="false">False</button></div>
+          <p class="feedback"></p>
+        </div>
+        <div class="tf-item" data-answer="false">
+          <p>(b) Emission from uranium can be controlled like an X-ray tube.</p>
+          <div class="row"><button type="button" data-tf="true">True</button><button type="button" data-tf="false">False</button></div>
+          <p class="feedback"></p>
+        </div>
+        <div class="tf-item" data-answer="false">
+          <p>(c) Nuclear radiation can be spread out by winds (as if it were a beam of air-borne stuff).</p>
+          <div class="row"><button type="button" data-tf="true">True</button><button type="button" data-tf="false">False</button></div>
+          <p class="feedback"></p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="A">
+        <h3>Concept check · HKDSE 2015/31</h3>
+        <p>Which nuclear reaction(s) is/are spontaneous?</p>
+        <p>(1) β decay of Na-24 &nbsp; (2) incoming neutron on a boron nucleus &nbsp; (3) fusion of hydrogen isotopes</p>
+        <div class="choices">
+          <button type="button" data-choice="A">(1) only</button>
+          <button type="button" data-choice="B">(3) only</button>
+          <button type="button" data-choice="C">(1) and (2) only</button>
+          <button type="button" data-choice="D">(2) and (3) only</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+    </section>
+
+    <p class="lede"><a href="25-2.html">Next: 25.2 Origin of nuclear radiation →</a></p>
+  </main>
+  <script src="js/notes.js"></script>
+</body>
+</html>

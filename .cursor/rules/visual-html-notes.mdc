@@ -25,6 +25,7 @@ Prioritize diagrams (static or interactive). Keep prose short: labels, one-line 
 3. Animate processes (ionization, X-ray tube, α/β/γ decay, ion-pairs, GM pulses, E/B deflection, absorber stacks). Keep comparison tables static or toggleable.
 4. After each idea, add a concept check (T/F, pick-the-diagram, one calculation). Prefer items tagged `concept-check` in `problems.md`.
 5. At most one worked example per section, from `problems.md` (`worked-example`). Do not paste the whole HKDSE/QB set.
+6. Example-driven directed graphs / decision flows: teach procedures such as distinguishing α / β / γ (absorbers, E/B deflection, cloud-chamber tracks) as a steppable or clickable graph, not as a wall of prose.
 
 ## Do / don't
 
