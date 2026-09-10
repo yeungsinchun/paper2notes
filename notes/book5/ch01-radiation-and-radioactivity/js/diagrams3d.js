@@ -761,6 +761,38 @@
     return group;
   }
 
+  function decayHud(host, canvas, camera) {
+    var parentHud = host.querySelector('[data-hud="parent"]');
+    var ejectileHud = host.querySelector('[data-hud="ejectile"]');
+    function projectXY(world) {
+      var v = world.clone().project(camera);
+      return {
+        x: (v.x * 0.5 + 0.5) * (canvas.clientWidth || 1),
+        y: (-v.y * 0.5 + 0.5) * (canvas.clientHeight || 1)
+      };
+    }
+    return {
+      place: function (parentWorld, ejectileWorld) {
+        placeHud(parentHud, canvas, camera, parentWorld);
+        placeHud(ejectileHud, canvas, camera, ejectileWorld);
+      },
+      snapshot: function (parentWorld, ejectileWorld) {
+        var p = projectXY(parentWorld);
+        var e = projectXY(ejectileWorld);
+        return {
+          parentHud: parentHud ? parseFloat(parentHud.style.left) : null,
+          ejectileHud: ejectileHud ? parseFloat(ejectileHud.style.left) : null,
+          parentHudTop: parentHud ? parseFloat(parentHud.style.top) : null,
+          ejectileHudTop: ejectileHud ? parseFloat(ejectileHud.style.top) : null,
+          parentProj: p.x,
+          ejectileProj: e.x,
+          parentProjY: p.y,
+          ejectileProjY: e.y
+        };
+      }
+    };
+  }
+
   function decayAlpha(host) {
     if (!THREE) return;
     var canvas = host.querySelector("canvas");
@@ -772,9 +804,15 @@
     var alphaAway = new THREE.Vector3(2.6, 0.9, 0);
     alpha.position.copy(alphaHome);
     gfx.scene.add(parent, alpha);
+    var hud = decayHud(host, canvas, gfx.camera);
+    var parentAnchor = parent.position.clone().add(new THREE.Vector3(0, 0.9, 0));
     var t0 = performance.now();
+    function ejectileAnchor() {
+      return alpha.position.clone().add(new THREE.Vector3(0.45, 0.45, 0));
+    }
     function restart() {
       t0 = performance.now();
+      gfx.resize();
     }
     function frame(now) {
       var fly = smoothstep(((now - t0) / 1000 - 0.15) / 1.05);
@@ -782,12 +820,18 @@
       alpha.children.forEach(function (ch) {
         ch.material.opacity = 1;
       });
+      hud.place(parentAnchor, ejectileAnchor());
       gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
     }
     hostReplay(host, restart);
     requestAnimationFrame(frame);
-    scenes["decay-a"] = { replay: restart };
+    scenes["decay-a"] = {
+      replay: restart,
+      snapshot: function () {
+        return hud.snapshot(parentAnchor, ejectileAnchor());
+      }
+    };
   }
 
   function decayBeta(host) {
@@ -801,20 +845,32 @@
     var away = new THREE.Vector3(3.1, 0.35, 0);
     electron.position.copy(home);
     gfx.scene.add(parent, electron);
+    var hud = decayHud(host, canvas, gfx.camera);
+    var parentAnchor = parent.position.clone().add(new THREE.Vector3(0, 0.9, 0));
     var t0 = performance.now();
+    function ejectileAnchor() {
+      return electron.position.clone().add(new THREE.Vector3(0.45, 0.45, 0));
+    }
     function restart() {
       t0 = performance.now();
+      gfx.resize();
     }
     function frame(now) {
       var fly = smoothstep(((now - t0) / 1000 - 0.12) / 0.95);
       electron.material.opacity = 1;
       electron.position.lerpVectors(home, away, fly);
+      hud.place(parentAnchor, ejectileAnchor());
       gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
     }
     hostReplay(host, restart);
     requestAnimationFrame(frame);
-    scenes["decay-b"] = { replay: restart };
+    scenes["decay-b"] = {
+      replay: restart,
+      snapshot: function () {
+        return hud.snapshot(parentAnchor, ejectileAnchor());
+      }
+    };
   }
 
   function decayGamma(host) {
@@ -828,9 +884,15 @@
       new THREE.MeshStandardMaterial({ color: 0xc9a227, transparent: true, opacity: 0.9 })
     );
     gfx.scene.add(parent, wave);
+    var hud = decayHud(host, canvas, gfx.camera);
+    var parentAnchor = parent.position.clone().add(new THREE.Vector3(0, 0.9, 0));
     var t0 = performance.now();
+    function ejectileAnchor() {
+      return wave.position.clone().add(new THREE.Vector3(0.45, 0.45, 0));
+    }
     function restart() {
       t0 = performance.now();
+      gfx.resize();
     }
     function frame(now) {
       var t = (now - t0) / 1000;
@@ -838,12 +900,18 @@
       wave.position.set(lerp(-2.0, 3.2, u), 0.2, 0);
       wave.scale.setScalar(lerp(0.6, 2.2, u));
       wave.material.opacity = lerp(0.95, 0.25, u);
+      hud.place(parentAnchor, ejectileAnchor());
       gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
     }
     hostReplay(host, restart);
     requestAnimationFrame(frame);
-    scenes["decay-g"] = { replay: restart };
+    scenes["decay-g"] = {
+      replay: restart,
+      snapshot: function () {
+        return hud.snapshot(parentAnchor, ejectileAnchor());
+      }
+    };
   }
 
   function current(host) {

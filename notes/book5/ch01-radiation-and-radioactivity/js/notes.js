@@ -132,16 +132,6 @@
     requestAnimationFrame(frame);
   }
 
-  function initAtomZoom() {
-    var g = $("#atom-zoom");
-    var slider = $("#atom-zoom-slider");
-    if (!g || !slider) return;
-    slider.addEventListener("input", function () {
-      var z = Number(slider.value);
-      g.setAttribute("transform", "translate(220 140) scale(" + z + ") translate(-220 -140)");
-    });
-  }
-
   function honeycomb(count) {
     var coords = [];
     var span = 4;
@@ -741,7 +731,6 @@
     initTf();
     initReplays();
     initImaging();
-    initAtomZoom();
     initIsotopes();
     initNuclides();
     initSeries();

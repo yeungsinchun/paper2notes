@@ -329,6 +329,36 @@ test("25.2 pie wedge is 20% and Pu-239 bookkeeping is static n_α=8", async () =
   }
 });
 
+test("25.2 decay labels sit on the parent and outgoing particle", async () => {
+  await cdp.goto(pageUrl("25-2.html"));
+  await cdp.evaluate("window.NotesScenes['decay-a'].replay()");
+  await cdp.evaluate("new Promise((r) => setTimeout(r, 900))");
+  const alpha = await cdp.evaluate("window.NotesScenes['decay-a'].snapshot()");
+  near(alpha.parentHud, alpha.parentProj, 10);
+  near(alpha.ejectileHud, alpha.ejectileProj, 10);
+  near(alpha.parentHudTop, alpha.parentProjY, 10);
+  near(alpha.ejectileHudTop, alpha.ejectileProjY, 10);
+  assert.ok(alpha.parentHud < alpha.ejectileHud, "α parent label should sit left of the outgoing α");
+
+  await cdp.evaluate("document.querySelector('[data-decay=\"b\"]').click()");
+  await cdp.evaluate("new Promise((r) => setTimeout(r, 900))");
+  const beta = await cdp.evaluate("window.NotesScenes['decay-b'].snapshot()");
+  near(beta.parentHud, beta.parentProj, 10);
+  near(beta.ejectileHud, beta.ejectileProj, 10);
+  near(beta.parentHudTop, beta.parentProjY, 10);
+  near(beta.ejectileHudTop, beta.ejectileProjY, 10);
+  assert.ok(beta.parentHud < beta.ejectileHud, "β parent label should sit left of the outgoing electron");
+
+  await cdp.evaluate("document.querySelector('[data-decay=\"g\"]').click()");
+  await cdp.evaluate("new Promise((r) => setTimeout(r, 900))");
+  const gamma = await cdp.evaluate("window.NotesScenes['decay-g'].snapshot()");
+  near(gamma.parentHud, gamma.parentProj, 10);
+  near(gamma.ejectileHud, gamma.ejectileProj, 10);
+  near(gamma.parentHudTop, gamma.parentProjY, 10);
+  near(gamma.ejectileHudTop, gamma.ejectileProjY, 10);
+  assert.ok(gamma.parentHud < gamma.ejectileHud, "γ parent label should sit left of the outgoing γ");
+});
+
 test("25.3 absorber presets follow paper/Al/Pb contribution rules", async () => {
   await cdp.goto(pageUrl("25-3.html"));
 
