@@ -670,6 +670,35 @@ test("chapter map, summary, and concept-check scoring are the public notes surfa
   assert.equal(check.ok, true);
   assert.equal(check.text, "Yes.");
 
+  const replay25_1 = await cdp.evaluate(`({
+    all: Array.from(document.querySelectorAll("[data-replay]")).map(function (b) { return b.getAttribute("data-replay"); }),
+    radiation: document.querySelectorAll("#radiation [data-replay]").length,
+    knockout: document.querySelectorAll("#knockout [data-replay]").length,
+    tube: document.querySelectorAll("#xray-tube [data-replay]").length,
+    imaging: document.querySelectorAll("#imaging [data-replay]").length
+  })`);
+  assert.deepEqual(replay25_1.all, ["knock-vis"]);
+  assert.equal(replay25_1.radiation, 0, "looping Fig 25.2 panes should not have Replay");
+  assert.equal(replay25_1.knockout, 1, "knockout ejection should stay replayable");
+  assert.equal(replay25_1.tube, 0, "X-ray tube loop should not have Replay");
+  assert.equal(replay25_1.imaging, 0, "imaging beam loop should not have Replay");
+
+  await cdp.goto(pageUrl("25-2.html"));
+  const replay25_2 = await cdp.evaluate("document.querySelectorAll('[data-replay]').length");
+  assert.equal(replay25_2, 0);
+
+  await cdp.goto(pageUrl("25-3.html"));
+  const replay25_3 = await cdp.evaluate(`({
+    all: Array.from(document.querySelectorAll("[data-replay]")).map(function (b) { return b.getAttribute("data-replay"); }),
+    ionPair: document.querySelectorAll("#ion-pair [data-replay]").length
+  })`);
+  assert.deepEqual(replay25_3.all, ["pair-vis"]);
+  assert.equal(replay25_3.ionPair, 1, "ion-pair capture should stay replayable");
+
+  await cdp.goto(pageUrl("summary.html"));
+  const replaySum = await cdp.evaluate("document.querySelectorAll('[data-replay]').length");
+  assert.equal(replaySum, 0);
+
   if (evidenceDir) {
     await cdp.goto(pageUrl("index.html"));
     await cdp.screenshot(path.join(evidenceDir, "index-chapter-map.png"));

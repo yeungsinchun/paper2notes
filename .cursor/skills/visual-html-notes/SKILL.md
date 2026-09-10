@@ -60,6 +60,10 @@ Worked item after Fig. 25.3 (QB PHY15011101 idea): "What does ionizing radiation
 
 Answer B. A is "radiation made of ions". C keeps EM wave and electron beam as two types. D is non-ionizing. None of those is off-topic filler.
 
+## Worked replay
+
+A Replay button is only for a clip with a beginning and an end a student would watch again. Worked keep: knockout ejection (`#knock-vis`), ion-pair capture (`#pair-vis`). Worked drop: Fig. 25.2 Two types of radiation (both panes loop), the X-ray tube (electrons and X-rays keep coming), the imaging beam (X-rays keep coming down). Do not leave an empty button row.
+
 ## Worked procedure (α / β / γ)
 
 Teach identification as a steppable directed graph (paper / Al / Pb, then E or B, then cloud tracks), not a wall of prose. Example 25.6 numbers stay on the edges: air 700 → paper 700 (no α) → Al 315 (β) → Pb 190 (γ halved).
@@ -69,6 +73,7 @@ Teach identification as a steppable directed graph (paper / Al / Pb, then E or B
 | Do this | Not this |
 | --- | --- |
 | Fig 25.2: two canvases (E+B wave and electron stream); the heading names the class | One scene with floor, rail, divider, or class HUD |
+| Replay only on finite clips (knockout, ion-pair) | Replay on a continuous loop such as Fig 25.2, the X-ray tube, or imaging |
 | Knockout: the same bound electron leaves the shell | An electron that fades in beside the atom |
 | X-rays leave the electron impact on the angled target face as a wide fan | Tight gold stubs plus a cramped E+B train on one axis |
 | Imaging: X-rays down onto bone beside flesh; film white under bone, dark under flesh | Sideways beams or toggles that hide the textbook layout |
