@@ -111,12 +111,12 @@ class Cdp {
     });
   }
 
-  async evaluate(expression) {
+  async evaluate(expression, timeoutMs) {
     const result = await this.send("Runtime.evaluate", {
       expression,
       returnByValue: true,
       awaitPromise: true,
-    });
+    }, timeoutMs);
     if (result.exceptionDetails) {
       const desc = result.exceptionDetails.exception && result.exceptionDetails.exception.description;
       throw new Error(desc || result.exceptionDetails.text || "evaluate failed");
@@ -142,7 +142,11 @@ class Cdp {
     await this.navigateOnce("about:blank", 8000);
     await this.navigateOnce(dest.href, 15000);
     try { await this.send("Page.bringToFront"); } catch (_) { /* headless */ }
-    await this.evaluate("new Promise((r) => requestAnimationFrame(() => setTimeout(r, 40)))");
+    try {
+      await this.evaluate("new Promise((r) => requestAnimationFrame(() => setTimeout(r, 40)))", 8000);
+    } catch (_) {
+      // Multi-canvas notes pages can starve rAF while WebGL boots; tests wait on scenes.
+    }
   }
 
   async screenshot(filePath, selector) {
@@ -235,7 +239,7 @@ function near(actual, expected, tol) {
 }
 
 function chromeTest(name, fn) {
-  test(name, { timeout: 90000 }, fn);
+  test(name, { timeout: evidenceDir ? 240000 : 180000 }, fn);
 }
 
 describe("Book 5 Ch.1 notes interactives", { concurrency: 1 }, () => {
@@ -306,6 +310,9 @@ chromeTest("25.1 imaging is X-rays down through a hand onto film that starts whi
   assert.ok(start.nFlesh >= 5, "hand should contain flesh, n=" + start.nFlesh);
   assert.ok(start.boneLum > 180, "film under bone starts white");
   assert.ok(start.fleshLum > 180, "whole film starts white, fleshLum=" + start.fleshLum);
+  if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "25-1-xray-imaging-start-white.png"), "#imaging");
+  }
   await cdp.evaluate("new Promise((r) => setTimeout(r, 1500))");
   const img = await cdp.evaluate(`(function () {
     var snap = window.NotesScenes.imaging.snapshot();
@@ -365,9 +372,17 @@ chromeTest("25.2 pie wedge is 20% and Pu-239 bookkeeping is static n_α=8", asyn
 
 chromeTest("25.2 decay labels sit on the parent and outgoing particle", async () => {
   await cdp.goto(pageUrl("25-2.html"));
+  await waitFor(async () => {
+    const ready = await cdp.evaluate("!!(window.NotesScenes && window.NotesScenes['decay-a'] && window.NotesScenes['decay-b'] && window.NotesScenes['decay-g'])");
+    if (!ready) throw new Error("decay scenes not booted");
+    return true;
+  }, 8000, "decay scenes");
   await cdp.evaluate("window.NotesScenes['decay-a'].replay()");
-  await cdp.evaluate("new Promise((r) => setTimeout(r, 900))");
-  const alpha = await cdp.evaluate("window.NotesScenes['decay-a'].snapshot()");
+  const alpha = await waitFor(async () => {
+    const snap = await cdp.evaluate("window.NotesScenes['decay-a'].snapshot()");
+    if (!(snap.parentHud < snap.ejectileHud)) throw new Error("α ejectile not yet to the right of parent");
+    return snap;
+  }, 4000, "alpha decay hud");
   near(alpha.parentHud, alpha.parentProj, 10);
   near(alpha.ejectileHud, alpha.ejectileProj, 10);
   near(alpha.parentHudTop, alpha.parentProjY, 10);
@@ -375,8 +390,11 @@ chromeTest("25.2 decay labels sit on the parent and outgoing particle", async ()
   assert.ok(alpha.parentHud < alpha.ejectileHud, "α parent label should sit left of the outgoing α");
 
   await cdp.evaluate("document.querySelector('[data-decay=\"b\"]').click()");
-  await cdp.evaluate("new Promise((r) => setTimeout(r, 900))");
-  const beta = await cdp.evaluate("window.NotesScenes['decay-b'].snapshot()");
+  const beta = await waitFor(async () => {
+    const snap = await cdp.evaluate("window.NotesScenes['decay-b'].snapshot()");
+    if (!(snap.parentHud < snap.ejectileHud)) throw new Error("β ejectile not yet to the right of parent");
+    return snap;
+  }, 4000, "beta decay hud");
   near(beta.parentHud, beta.parentProj, 10);
   near(beta.ejectileHud, beta.ejectileProj, 10);
   near(beta.parentHudTop, beta.parentProjY, 10);
@@ -384,8 +402,11 @@ chromeTest("25.2 decay labels sit on the parent and outgoing particle", async ()
   assert.ok(beta.parentHud < beta.ejectileHud, "β parent label should sit left of the outgoing electron");
 
   await cdp.evaluate("document.querySelector('[data-decay=\"g\"]').click()");
-  await cdp.evaluate("new Promise((r) => setTimeout(r, 900))");
-  const gamma = await cdp.evaluate("window.NotesScenes['decay-g'].snapshot()");
+  const gamma = await waitFor(async () => {
+    const snap = await cdp.evaluate("window.NotesScenes['decay-g'].snapshot()");
+    if (!(snap.parentHud < snap.ejectileHud)) throw new Error("γ ejectile not yet to the right of parent");
+    return snap;
+  }, 4000, "gamma decay hud");
   near(gamma.parentHud, gamma.parentProj, 10);
   near(gamma.ejectileHud, gamma.ejectileProj, 10);
   near(gamma.parentHudTop, gamma.parentProjY, 10);
