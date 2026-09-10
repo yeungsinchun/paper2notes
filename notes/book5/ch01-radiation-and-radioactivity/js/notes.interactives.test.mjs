@@ -722,6 +722,26 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
   near(alphaIons.plusHud, alphaIons.plusProj, 10);
   near(alphaIons.minusHudTop, alphaIons.minusProjY, 10);
   near(alphaIons.plusHudTop, alphaIons.plusProjY, 10);
+  const hudPad = await cdp.evaluate(`(function () {
+    var canvas = document.querySelector("#current-vis canvas");
+    var minus = document.querySelector('#current-vis [data-hud="minus"]');
+    var canvasRect = canvas.getBoundingClientRect();
+    var minusRect = minus.getBoundingClientRect();
+    var snap = window.NotesScenes.current.snapshot();
+    var localX = (snap.minusNdcX * 0.5 + 0.5) * canvas.clientWidth;
+    var localY = (-snap.minusNdcY * 0.5 + 0.5) * canvas.clientHeight;
+    return {
+      offsetLeft: canvas.offsetLeft,
+      offsetTop: canvas.offsetTop,
+      centerX: minusRect.left + minusRect.width / 2,
+      top: minusRect.top,
+      expectX: canvasRect.left + localX,
+      expectY: canvasRect.top + localY
+    };
+  })()`);
+  assert.ok(hudPad.offsetLeft > 4, "stage padding should inset the canvas, offsetLeft=" + hudPad.offsetLeft);
+  near(hudPad.centerX, hudPad.expectX, 10);
+  near(hudPad.top, hudPad.expectY, 10);
   assert.ok(
     alphaIons.minusHudTop < alphaIons.plusHudTop,
     "− plate label should sit on the upper plate"
@@ -756,6 +776,48 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
     pulseStart.electronY - pulse.electronY > 0.35,
     "electron should travel radially onto the wire, " + pulseStart.electronY + " -> " + pulse.electronY
   );
+
+  await cdp.evaluate("new Promise((r) => requestAnimationFrame(() => setTimeout(r, 80)))");
+  const tracksA = await cdp.evaluate(`(function () {
+    var snap = window.NotesScenes.tracks.snapshot();
+    snap.pressed = Array.from(document.querySelectorAll("[data-track]")).map(function (btn) {
+      return { kind: btn.getAttribute("data-track"), pressed: btn.getAttribute("aria-pressed") };
+    });
+    return snap;
+  })()`);
+  assert.equal(tracksA.kind, "alpha");
+  assert.match(tracksA.label, /α/);
+  assert.equal(tracksA.visible, true);
+  assert.equal(tracksA.hiddenOthers, true);
+  near(tracksA.hudX, tracksA.projX, 10);
+  near(tracksA.hudY, tracksA.projY, 10);
+  assert.ok(tracksA.canvasOffsetLeft > 4, "track labels should include canvas inset");
+  assert.deepEqual(tracksA.pressed, [
+    { kind: "alpha", pressed: "true" },
+    { kind: "beta", pressed: "false" },
+    { kind: "gamma", pressed: "false" }
+  ]);
+
+  await cdp.evaluate("document.querySelector('[data-track=\"gamma\"]').click()");
+  await cdp.evaluate("new Promise((r) => requestAnimationFrame(() => setTimeout(r, 80)))");
+  const tracksG = await cdp.evaluate(`(function () {
+    var snap = window.NotesScenes.tracks.snapshot();
+    snap.pressed = Array.from(document.querySelectorAll("[data-track]")).map(function (btn) {
+      return { kind: btn.getAttribute("data-track"), pressed: btn.getAttribute("aria-pressed") };
+    });
+    return snap;
+  })()`);
+  assert.equal(tracksG.kind, "gamma");
+  assert.match(tracksG.label, /γ/);
+  assert.equal(tracksG.visible, true);
+  assert.equal(tracksG.hiddenOthers, true);
+  near(tracksG.hudX, tracksG.projX, 10);
+  near(tracksG.hudY, tracksG.projY, 10);
+  assert.deepEqual(tracksG.pressed, [
+    { kind: "alpha", pressed: "false" },
+    { kind: "beta", pressed: "false" },
+    { kind: "gamma", pressed: "true" }
+  ]);
 
   if (evidenceDir) {
     await cdp.goto(pageUrl("25-2.html"));

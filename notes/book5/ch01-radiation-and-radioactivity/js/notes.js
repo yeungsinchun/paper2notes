@@ -280,13 +280,22 @@
   }
 
   function initTracks() {
-    $all("[data-track]").forEach(function (btn) {
+    var buttons = $all("[data-track]");
+    function press(kind) {
+      buttons.forEach(function (btn) {
+        btn.setAttribute("aria-pressed", btn.getAttribute("data-track") === kind ? "true" : "false");
+      });
+    }
+    buttons.forEach(function (btn) {
       btn.addEventListener("click", function () {
+        var kind = btn.getAttribute("data-track");
         if (window.NotesScenes && window.NotesScenes.tracks) {
-          window.NotesScenes.tracks.setKind(btn.getAttribute("data-track"));
+          window.NotesScenes.tracks.setKind(kind);
         }
+        press(kind);
       });
     });
+    if (buttons.length) press("alpha");
   }
 
   var sources = {

@@ -101,27 +101,25 @@
     return { scene: scene, camera: camera, renderer: renderer, resize: resize };
   }
 
+  function projectXY(camera, canvas, world) {
+    var v = world.clone().project(camera);
+    return {
+      x: (v.x * 0.5 + 0.5) * (canvas.clientWidth || 1) + (canvas.offsetLeft || 0),
+      y: (-v.y * 0.5 + 0.5) * (canvas.clientHeight || 1) + (canvas.offsetTop || 0)
+    };
+  }
+
   function placeHud(el, canvas, camera, world) {
     if (!el) return;
-    var v = world.clone().project(camera);
-    var x = (v.x * 0.5 + 0.5) * canvas.clientWidth;
-    var y = (-v.y * 0.5 + 0.5) * canvas.clientHeight;
-    el.style.left = x + "px";
-    el.style.top = y + "px";
+    var p = projectXY(camera, canvas, world);
+    el.style.left = p.x + "px";
+    el.style.top = p.y + "px";
   }
 
   function hudXY(el) {
     return {
       x: el ? parseFloat(el.style.left) : null,
       y: el ? parseFloat(el.style.top) : null
-    };
-  }
-
-  function projectXY(camera, canvas, world) {
-    var v = world.clone().project(camera);
-    return {
-      x: (v.x * 0.5 + 0.5) * (canvas.clientWidth || 1),
-      y: (-v.y * 0.5 + 0.5) * (canvas.clientHeight || 1)
     };
   }
 
@@ -641,12 +639,13 @@
       var nuc = nucleusAnchor.clone().project(gfx.camera);
       var w = canvas.clientWidth || 1;
       var h = canvas.clientHeight || 1;
+      var nucHud = projectXY(gfx.camera, canvas, nucleusAnchor);
       return {
         zoom: gfx.camera.zoom,
         nucleusPx: Math.abs(rim.x - origin.x) * 0.5 * w,
         nucleusHud: hudNucleus ? parseFloat(hudNucleus.style.left) : null,
         nucleusHudTop: hudNucleus ? parseFloat(hudNucleus.style.top) : null,
-        nucleusProjX: (nuc.x * 0.5 + 0.5) * w,
+        nucleusProjX: nucHud.x,
         nucleusNdcY: nuc.y,
         canvasH: h
       };
@@ -832,8 +831,7 @@
       requestAnimationFrame(frame);
     }
     function projectX(world) {
-      var v = world.clone().project(gfx.camera);
-      return (v.x * 0.5 + 0.5) * (canvas.clientWidth || 1);
+      return projectXY(gfx.camera, canvas, world).x;
     }
     function snapshot() {
       var leave = xrayAnchor.clone().sub(hit);
@@ -877,21 +875,14 @@
   function decayHud(host, canvas, camera) {
     var parentHud = host.querySelector('[data-hud="parent"]');
     var ejectileHud = host.querySelector('[data-hud="ejectile"]');
-    function projectXY(world) {
-      var v = world.clone().project(camera);
-      return {
-        x: (v.x * 0.5 + 0.5) * (canvas.clientWidth || 1),
-        y: (-v.y * 0.5 + 0.5) * (canvas.clientHeight || 1)
-      };
-    }
     return {
       place: function (parentWorld, ejectileWorld) {
         placeHud(parentHud, canvas, camera, parentWorld);
         placeHud(ejectileHud, canvas, camera, ejectileWorld);
       },
       snapshot: function (parentWorld, ejectileWorld) {
-        var p = projectXY(parentWorld);
-        var e = projectXY(ejectileWorld);
+        var p = projectXY(camera, canvas, parentWorld);
+        var e = projectXY(camera, canvas, ejectileWorld);
         return {
           parentHud: parentHud ? parseFloat(parentHud.style.left) : null,
           ejectileHud: ejectileHud ? parseFloat(ejectileHud.style.left) : null,
@@ -1087,13 +1078,6 @@
       if (sourceHud) sourceHud.textContent = kind === "beta" ? "β source" : "α source";
       restart();
     }
-    function projectXY(world) {
-      var v = world.clone().project(gfx.camera);
-      return {
-        x: (v.x * 0.5 + 0.5) * (canvas.clientWidth || 1),
-        y: (-v.y * 0.5 + 0.5) * (canvas.clientHeight || 1)
-      };
-    }
     function frame(now) {
       var t = ((now - t0) / 1000) % 2.4;
       var knock = smoothstep((t - 0.45) / 0.95);
@@ -1109,8 +1093,9 @@
       requestAnimationFrame(frame);
     }
     function snapshot() {
-      var minusP = projectXY(minusAnchor);
-      var plusP = projectXY(plusAnchor);
+      var minusP = projectXY(gfx.camera, canvas, minusAnchor);
+      var plusP = projectXY(gfx.camera, canvas, plusAnchor);
+      var minusNdc = minusAnchor.clone().project(gfx.camera);
       return {
         kind: kind,
         sourceLabel: sourceHud ? sourceHud.textContent : "",
@@ -1126,7 +1111,9 @@
         minusProj: minusP.x,
         plusProj: plusP.x,
         minusProjY: minusP.y,
-        plusProjY: plusP.y
+        plusProjY: plusP.y,
+        minusNdcX: minusNdc.x,
+        minusNdcY: minusNdc.y
       };
     }
     hostReplay(host, restart);
@@ -1892,8 +1879,34 @@
       new THREE.MeshStandardMaterial({ color: 0x243028, transparent: true, opacity: 0.18, side: THREE.DoubleSide })
     );
     gfx.scene.add(box, glass);
+    var hudA = host.querySelector('[data-hud="alpha"]');
+    var hudB = host.querySelector('[data-hud="beta"]');
+    var hudG = host.querySelector('[data-hud="gamma"]');
     var kind = "alpha";
     var trails = [];
+    function hudFor(name) {
+      if (name === "alpha") return hudA;
+      if (name === "beta") return hudB;
+      return hudG;
+    }
+    function showKindHud(name) {
+      [hudA, hudB, hudG].forEach(function (el) {
+        if (el) el.style.display = el === hudFor(name) ? "" : "none";
+      });
+    }
+    function kindAnchor() {
+      if (kind === "alpha") {
+        var a = trails[2] || trails[0];
+        return a ? a.position.clone().add(new THREE.Vector3(0, 0.32, 0)) : new THREE.Vector3(0, 0.15, 0);
+      }
+      if (kind === "beta") {
+        return new THREE.Vector3(0.15, 0.22, 0);
+      }
+      var sum = new THREE.Vector3();
+      trails.forEach(function (m) { sum.add(m.position); });
+      if (!trails.length) return new THREE.Vector3(0, 0.1, 0);
+      return sum.multiplyScalar(1 / trails.length).add(new THREE.Vector3(0, 0.35, 0));
+    }
     function clearTrails() {
       trails.forEach(function (m) { gfx.scene.remove(m); });
       trails = [];
@@ -1939,11 +1952,12 @@
       }
     }
     function setKind(next) {
-      kind = next;
+      kind = next === "beta" || next === "gamma" ? next : "alpha";
       clearTrails();
       if (kind === "alpha") makeAlpha();
       else if (kind === "beta") makeBeta();
       else makeGamma();
+      showKindHud(kind);
     }
     var t0 = performance.now();
     function frame(now) {
@@ -1960,12 +1974,31 @@
           m.position.x = -3.2 + ((i * 1.1 + t * 0.8) % 6.8);
         });
       }
+      placeHud(hudFor(kind), canvas, gfx.camera, kindAnchor());
       gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
     }
+    function snapshot() {
+      var hud = hudFor(kind);
+      var proj = projectXY(gfx.camera, canvas, kindAnchor());
+      return {
+        kind: kind,
+        label: hud ? hud.textContent.trim() : "",
+        visible: hud ? hud.style.display !== "none" : false,
+        hiddenOthers: [hudA, hudB, hudG].every(function (el) {
+          return !el || el === hud || el.style.display === "none";
+        }),
+        hudX: hud ? parseFloat(hud.style.left) : null,
+        hudY: hud ? parseFloat(hud.style.top) : null,
+        projX: proj.x,
+        projY: proj.y,
+        canvasOffsetLeft: canvas.offsetLeft || 0,
+        canvasOffsetTop: canvas.offsetTop || 0
+      };
+    }
     setKind("alpha");
     requestAnimationFrame(frame);
-    scenes.tracks = { setKind: setKind };
+    scenes.tracks = { setKind: setKind, snapshot: snapshot };
   }
 
   function hydrogen(host) {

@@ -415,6 +415,10 @@ tr.on td { background: #dff3ee; }
 #track-vis canvas.scene-canvas {
   background: #11150f;
 }
+#track-vis .hud-label {
+  color: #f4f0e4;
+  text-shadow: 0 0 6px #11150f;
+}
 .stage .hud-label {
   position: absolute;
   font-size: 12px;

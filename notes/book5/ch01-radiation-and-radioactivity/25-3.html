@@ -117,11 +117,14 @@
       </header>
       <div class="visual play stage" id="track-vis" data-scene="tracks">
         <canvas class="scene-canvas" width="960" height="420" aria-label="Animated cloud-chamber tracks"></canvas>
+        <span class="hud-label" data-hud="alpha">α</span>
+        <span class="hud-label" data-hud="beta">β</span>
+        <span class="hud-label" data-hud="gamma">γ</span>
       </div>
       <div class="row">
-        <button type="button" data-track="alpha">α thick straight</button>
-        <button type="button" data-track="beta">β thin irregular</button>
-        <button type="button" data-track="gamma">γ faint / scattered</button>
+        <button type="button" data-track="alpha" aria-pressed="true">α thick straight</button>
+        <button type="button" data-track="beta" aria-pressed="false">β thin irregular</button>
+        <button type="button" data-track="gamma" aria-pressed="false">γ faint / scattered</button>
       </div>
       <table class="compact pair">
         <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
