@@ -497,6 +497,28 @@ test("25.3 identification graph keeps taken yes/no edges", async () => {
   assert.ok(state.betaEdges.every((lit) => !lit));
   assert.match(state.talk, /No drop at Al → no β/);
 
+  await cdp.evaluate("document.querySelector('#flow-reset').click()");
+  await cdp.evaluate("document.querySelector('#id-flow .node[data-step=\"alpha\"]').dispatchEvent(new Event('click'))");
+  await cdp.evaluate("document.querySelector('#id-flow .node[data-step=\"4\"]').dispatchEvent(new Event('click'))");
+  state = await flowState();
+  assert.equal(state.pb.active, true);
+  assert.ok(state.alphaEdges.every(Boolean));
+  assert.ok(state.noBeta.every((lit) => !lit));
+  assert.ok(state.betaEdges.every((lit) => !lit));
+  assert.match(state.talk, /test for γ/);
+  assert.doesNotMatch(state.talk, /no β/);
+  assert.doesNotMatch(state.talk, /315 → 190/);
+
+  await cdp.evaluate("document.querySelector('#id-flow .node[data-step=\"3\"]').dispatchEvent(new Event('click'))");
+  await cdp.evaluate("document.querySelector('#id-flow .node[data-step=\"4\"]').dispatchEvent(new Event('click'))");
+  state = await flowState();
+  assert.equal(state.pb.active, true);
+  assert.ok(state.alphaEdges.every(Boolean));
+  assert.ok(state.betaEdges[0]);
+  assert.ok(state.noBeta.every((lit) => !lit));
+  assert.match(state.talk, /test for γ/);
+  assert.doesNotMatch(state.talk, /315 → 190/);
+
   if (evidenceDir) {
     await cdp.evaluate("document.querySelector('#flow-reset').click()");
     await cdp.evaluate("document.querySelector('#flow-next').click()");

@@ -396,7 +396,7 @@
       if (hasAlpha === true && i === 2) {
         return "α already found. Insert ~5 mm Al to test for β, then Pb for γ.";
       }
-      if (hasAlpha === true && i === 4 && hasBeta !== true) {
+      if (hasAlpha === true && i === 4) {
         return "Insert ~25 mm Pb to test for γ. Remaining count above background → γ is present.";
       }
       if (hasBeta === false && i === 4) {
@@ -478,7 +478,7 @@
           hasBeta = true;
           if (hasAlpha === null) hasAlpha = false;
         } else if (idx === 4) {
-          if (hasBeta === null) hasBeta = false;
+          if (hasBeta === null && hasAlpha !== true) hasBeta = false;
         }
         i = idx;
         show();
