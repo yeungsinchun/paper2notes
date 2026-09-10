@@ -298,7 +298,9 @@ button[aria-pressed="true"],
 }
 
 table.compact {
-  width: 100%;
+  width: max-content;
+  max-width: 100%;
+  table-layout: auto;
   border-collapse: collapse;
   font-size: 0.92rem;
   margin-top: 0.6rem;
@@ -309,11 +311,29 @@ table.compact td {
   border: 1px solid var(--rule);
   padding: 0.35rem 0.45rem;
   text-align: center;
+  width: auto;
 }
 
 table.compact th { background: #efe6d4; }
+table.pair {
+  width: 100%;
+}
 table.pair th,
 table.pair td { text-align: left; vertical-align: top; }
+table.pair thead th:first-child:nth-last-child(2),
+table.pair tbody td:first-child:nth-last-child(2) {
+  width: 64%;
+}
+table.pair thead th:last-child:nth-child(2),
+table.pair tbody td:last-child:nth-child(2) {
+  width: 36%;
+}
+table.compact thead th:first-child:empty,
+table.compact tbody td:first-child:nth-last-child(n + 3) {
+  width: 1%;
+  white-space: nowrap;
+  text-align: left;
+}
 
 .pie {
   display: grid;

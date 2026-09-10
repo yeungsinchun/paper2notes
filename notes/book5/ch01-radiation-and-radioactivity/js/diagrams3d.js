@@ -1776,148 +1776,211 @@
     if (!THREE) return;
     var canvas = host.querySelector("canvas");
     var gfx = stage(canvas, {
-      persp: { fov: 28, x: 1.6, y: 4.4, z: 10.4, lookX: -0.35, lookY: 0.05, lookZ: 0 }
+      persp: { fov: 32, x: 3.2, y: 5.4, z: 6.8, lookX: 0.05, lookY: 0.2, lookZ: 0.25 }
     });
     var hudX = host.querySelector('[data-hud="xrays"]');
     var hudBone = host.querySelector('[data-hud="bone"]');
     var hudFlesh = host.querySelector('[data-hud="flesh"]');
     var hudFilm = host.querySelector('[data-hud="film"]');
     var lift = new THREE.DirectionalLight(0xffffff, 0.55);
-    lift.position.set(1, 8, 3);
+    lift.position.set(2, 8, 4);
     gfx.scene.add(lift);
-    var dark = new THREE.Mesh(
-      new THREE.BoxGeometry(2.6, 3.2, 0.06),
-      new THREE.MeshStandardMaterial({ color: 0x14120f, roughness: 0.92 })
-    );
-    dark.position.set(-3.55, 0.2, -0.45);
-    gfx.scene.add(dark);
-    function boneCyl(x, y, z, h, r, rx) {
-      var m = new THREE.Mesh(
-        new THREE.CylinderGeometry(r, r * 0.82, h, 10),
-        new THREE.MeshStandardMaterial({ color: 0xf2ead2, roughness: 0.4, metalness: 0.05, emissive: 0x3a3428, emissiveIntensity: 0.12 })
-      );
-      m.position.set(x, y, z);
-      if (rx) m.rotation.z = rx;
-      gfx.scene.add(m);
-      return m;
-    }
-    boneCyl(-3.7, -0.85, 0.15, 1.15, 0.18);
-    boneCyl(-3.42, -0.7, 0.18, 1.25, 0.2);
-    boneCyl(-3.95, 0.45, 0.16, 0.95, 0.09);
-    boneCyl(-3.68, 0.62, 0.18, 1.15, 0.1);
-    boneCyl(-3.4, 0.68, 0.2, 1.2, 0.11);
-    boneCyl(-3.14, 0.5, 0.18, 1.0, 0.1);
-    boneCyl(-2.95, 0.05, 0.22, 0.7, 0.13, -0.7);
-    var bone = new THREE.Mesh(
-      new THREE.BoxGeometry(1.85, 0.95, 1.35),
-      new THREE.MeshStandardMaterial({ color: 0xf7f1e4, roughness: 0.38, metalness: 0.06 })
-    );
-    bone.position.set(-0.15, 0.35, 0);
-    var flesh = new THREE.Mesh(
-      new THREE.BoxGeometry(2.15, 0.95, 1.35),
-      new THREE.MeshStandardMaterial({ color: 0xe8c4a0, roughness: 0.7, transparent: true, opacity: 0.88 })
-    );
-    flesh.position.set(1.95, 0.35, 0);
-    var filmBone = new THREE.Mesh(
-      new THREE.BoxGeometry(1.85, 0.08, 1.4),
-      new THREE.MeshStandardMaterial({ color: 0xfffaf1, roughness: 0.7, emissive: 0xf4efe0, emissiveIntensity: 0.35 })
-    );
-    filmBone.position.set(-0.15, -1.35, 0);
-    var filmFlesh = new THREE.Mesh(
-      new THREE.BoxGeometry(2.15, 0.08, 1.4),
-      new THREE.MeshStandardMaterial({ color: 0x3d3426, roughness: 0.85 })
-    );
-    filmFlesh.position.set(1.95, -1.35, 0);
-    gfx.scene.add(bone, flesh, filmBone, filmFlesh);
-    var rays = [];
+
+    var filmW = 5.0;
+    var filmD = 5.6;
+    var filmY = -1.52;
+    var startY = 2.42;
+    var boneStopY = 0.78;
     var specs = [
-      { x: -0.7, stopY: 0.55, toFilm: false },
-      { x: -0.15, stopY: 0.2, toFilm: false },
-      { x: 0.4, stopY: 0.45, toFilm: false },
-      { x: 1.45, stopY: -1.31, toFilm: true },
-      { x: 2.45, stopY: -1.31, toFilm: true }
+      { x: -1.38, z: 0.18, absorb: false },
+      { x: -0.98, z: 0.42, absorb: true },
+      { x: -0.7, z: 0.85, absorb: false },
+      { x: -0.48, z: 1.22, absorb: true },
+      { x: -0.22, z: 1.28, absorb: false },
+      { x: 0.0, z: 1.38, absorb: true },
+      { x: 0.24, z: 1.3, absorb: false },
+      { x: 0.46, z: 1.22, absorb: true },
+      { x: 0.7, z: 0.95, absorb: false },
+      { x: 0.88, z: 0.9, absorb: true }
     ];
-    specs.forEach(function (sp) {
-      var startY = 2.15;
-      var len = startY - sp.stopY;
-      var mesh = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.035, 0.035, 1, 8),
-        new THREE.MeshBasicMaterial({ color: 0xd4a017, transparent: true, opacity: 0.95 })
-      );
-      mesh.userData.startY = startY;
-      mesh.userData.stopY = sp.stopY;
-      mesh.userData.x = sp.x;
-      mesh.userData.toFilm = sp.toFilm;
-      mesh.userData.fullLen = len;
-      gfx.scene.add(mesh);
-      var head = new THREE.Mesh(
-        new THREE.ConeGeometry(0.08, 0.18, 8),
-        new THREE.MeshBasicMaterial({ color: 0xd4a017 })
-      );
-      mesh.userData.head = head;
-      gfx.scene.add(head);
-      rays.push(mesh);
+    var filmCanvas = document.createElement("canvas");
+    filmCanvas.width = 512;
+    filmCanvas.height = 512;
+    var fctx = filmCanvas.getContext("2d");
+    var filmTex = new THREE.CanvasTexture(filmCanvas);
+    function xzToPx(x, z) {
+      return {
+        cx: ((x / filmW) + 0.5) * 512,
+        cy: (0.5 - (z / filmD)) * 512
+      };
+    }
+    function paintFilm(develop) {
+      fctx.fillStyle = "#fffaf1";
+      fctx.fillRect(0, 0, 512, 512);
+      if (develop > 0) {
+        specs.forEach(function (sp) {
+          if (sp.absorb) return;
+          var p = xzToPx(sp.x, sp.z);
+          var g = fctx.createRadialGradient(p.cx, p.cy, 3, p.cx, p.cy, 32);
+          var a = 0.78 * develop;
+          g.addColorStop(0, "rgba(22,18,14," + a + ")");
+          g.addColorStop(1, "rgba(22,18,14,0)");
+          fctx.fillStyle = g;
+          fctx.beginPath();
+          fctx.arc(p.cx, p.cy, 32, 0, Math.PI * 2);
+          fctx.fill();
+        });
+      }
+      filmTex.needsUpdate = true;
+    }
+    var cassette = new THREE.Mesh(
+      new THREE.BoxGeometry(filmW + 0.28, 0.08, filmD + 0.28),
+      new THREE.MeshStandardMaterial({ color: 0x3a3f46, roughness: 0.7 })
+    );
+    cassette.position.set(0.05, filmY - 0.07, 0.15);
+    var film = new THREE.Mesh(
+      new THREE.PlaneGeometry(filmW, filmD),
+      new THREE.MeshStandardMaterial({
+        map: filmTex,
+        roughness: 0.82,
+        metalness: 0.02,
+        emissive: 0xf4efe0,
+        emissiveIntensity: 0.18
+      })
+    );
+    film.rotation.x = -Math.PI / 2;
+    film.position.set(0.05, filmY, 0.15);
+    gfx.scene.add(cassette, film);
+
+    var fleshMat = new THREE.MeshStandardMaterial({
+      color: 0xe3b394,
+      roughness: 0.78,
+      metalness: 0.02,
+      transparent: true,
+      opacity: 0.4,
+      depthWrite: false
     });
+    var boneMat = new THREE.MeshStandardMaterial({
+      color: 0xf4ead6,
+      roughness: 0.42,
+      metalness: 0.05
+    });
+    var hand = new THREE.Group();
+    gfx.scene.add(hand);
+    var nBone = 0;
+    var nFlesh = 0;
+    function alongZ(mesh, len) {
+      mesh.rotation.x = Math.PI / 2;
+      mesh.scale.y = len;
+    }
+    function limb(x, y, z, len, rF, rB) {
+      var flesh = new THREE.Mesh(new THREE.CylinderGeometry(rF * 0.84, rF, 1, 14), fleshMat);
+      var bone = new THREE.Mesh(new THREE.CylinderGeometry(rB * 0.84, rB, 0.92, 10), boneMat);
+      alongZ(flesh, len);
+      alongZ(bone, len);
+      flesh.position.set(x, y, z);
+      bone.position.set(x, y, z);
+      hand.add(flesh, bone);
+      nFlesh += 1;
+      nBone += 1;
+    }
+    var palm = new THREE.Mesh(new THREE.SphereGeometry(1, 22, 16), fleshMat);
+    palm.scale.set(1.18, 0.34, 1.08);
+    palm.position.set(0.12, 0.54, -0.22);
+    hand.add(palm);
+    nFlesh += 1;
+    limb(0.12, 0.52, -1.05, 0.85, 0.42, 0.16);
+    limb(-0.42, 0.58, 0.22, 0.95, 0.13, 0.055);
+    limb(-0.02, 0.58, 0.28, 1.02, 0.135, 0.058);
+    limb(0.4, 0.58, 0.22, 0.95, 0.125, 0.052);
+    limb(0.78, 0.56, 0.08, 0.78, 0.11, 0.048);
+    limb(-0.48, 0.62, 1.18, 1.28, 0.155, 0.068);
+    limb(0.0, 0.64, 1.32, 1.42, 0.165, 0.072);
+    limb(0.46, 0.62, 1.2, 1.28, 0.15, 0.065);
+    limb(0.88, 0.58, 0.92, 1.02, 0.13, 0.055);
+    var thumb = new THREE.Group();
+    var tFlesh = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.17, 1, 14), fleshMat);
+    var tBone = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.92, 10), boneMat);
+    alongZ(tFlesh, 0.95);
+    alongZ(tBone, 0.95);
+    thumb.add(tFlesh, tBone);
+    thumb.position.set(-0.95, 0.55, 0.12);
+    thumb.rotation.y = 0.72;
+    thumb.rotation.z = 0.38;
+    hand.add(thumb);
+    nFlesh += 1;
+    nBone += 1;
+
+    var rays = [];
+    specs.forEach(function (sp, i) {
+      var stopY = sp.absorb ? boneStopY : filmY + 0.04;
+      var glyph = wavyArrow(gfx.scene, {
+        origin: new THREE.Vector3(sp.x, startY, sp.z),
+        dir: new THREE.Vector3(0, -1, 0),
+        length: startY - stopY,
+        amp: 0.09,
+        waves: 3.4,
+        radius: 0.028,
+        hex: 0xd4a017,
+        phase: i * 0.45,
+        side: new THREE.Vector3(1, 0, 0)
+      });
+      sp.stopY = stopY;
+      rays.push(glyph);
+    });
+
     var t0 = performance.now();
+    var lastT = 0;
     var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     function apply(sec) {
-      rays.forEach(function (mesh, i) {
-        var dur = 0.55 + i * 0.08;
-        var u = reduced ? 1 : clamp01(sec / dur);
-        var y1 = mesh.userData.startY;
-        var y2 = lerp(y1, mesh.userData.stopY, u);
-        var len = Math.max(0.08, y1 - y2);
-        mesh.scale.set(1, len, 1);
-        mesh.position.set(mesh.userData.x, (y1 + y2) / 2, 0.35);
-        mesh.userData.head.position.set(mesh.userData.x, y2 - 0.05, 0.35);
-        mesh.userData.head.rotation.x = Math.PI;
-        mesh.userData.endY = y2;
+      lastT = sec;
+      var develop = clamp01((sec - 0.12) / (reduced ? 0.25 : 1.05));
+      paintFilm(develop);
+      rays.forEach(function (g, i) {
+        if (g.userData.update) g.userData.update(sec + i);
       });
-      var develop = reduced ? 1 : clamp01((sec - 0.65) / 0.45);
-      filmFlesh.material.color.setRGB(
-        (244 - develop * 218) / 255,
-        (239 - develop * 217) / 255,
-        (224 - develop * 208) / 255
-      );
-      placeHud(hudX, canvas, gfx.camera, new THREE.Vector3(0.9, 2.05, 0.4));
-      placeHud(hudBone, canvas, gfx.camera, bone.position.clone().add(new THREE.Vector3(0, -0.7, 0.5)));
-      placeHud(hudFlesh, canvas, gfx.camera, flesh.position.clone().add(new THREE.Vector3(0, -0.7, 0.5)));
-      placeHud(hudFilm, canvas, gfx.camera, new THREE.Vector3(0.9, -1.7, 0.4));
+      placeHud(hudX, canvas, gfx.camera, new THREE.Vector3(0.15, 2.28, 0.3));
+      placeHud(hudBone, canvas, gfx.camera, new THREE.Vector3(0.0, 0.95, 1.35));
+      placeHud(hudFlesh, canvas, gfx.camera, new THREE.Vector3(0.95, 0.55, -0.15));
+      placeHud(hudFilm, canvas, gfx.camera, new THREE.Vector3(0.15, filmY - 0.02, 2.35));
     }
-    function restart() { t0 = performance.now(); }
+    function lumAt(x, z) {
+      var p = xzToPx(x, z);
+      var cx = Math.max(0, Math.min(511, Math.round(p.cx)));
+      var cy = Math.max(0, Math.min(511, Math.round(p.cy)));
+      var d = fctx.getImageData(cx, cy, 1, 1).data;
+      return 0.3 * d[0] + 0.6 * d[1] + 0.1 * d[2];
+    }
+    function restart() { t0 = performance.now(); paintFilm(0); }
     function frame(now) {
       apply((now - t0) / 1000);
       gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
     }
-    function lumOf(mat) {
-      var c = mat.color;
-      return 0.3 * c.r * 255 + 0.6 * c.g * 255 + 0.1 * c.b * 255;
-    }
     function snapshot() {
-      var boneBox = { x: bone.position.x, y: bone.position.y, w: 1.85, h: 0.95 };
-      var fleshBox = { x: flesh.position.x, y: flesh.position.y, w: 2.15, h: 0.95 };
-      var filmY = filmBone.position.y;
-      function inBox(x, y, box) {
-        return x >= box.x - box.w / 2 && x <= box.x + box.w / 2 &&
-          y >= box.y - box.h / 2 && y <= box.y + box.h / 2;
-      }
-      var ends = rays.map(function (m) {
-        return { x: m.userData.x, y: m.userData.endY };
-      });
+      var fleshSpec = specs.filter(function (s) { return !s.absorb; });
+      var boneSpec = specs.filter(function (s) { return s.absorb; });
+      var fleshLum = fleshSpec.reduce(function (a, s) { return a + lumAt(s.x, s.z); }, 0) / Math.max(1, fleshSpec.length);
+      var boneLum = boneSpec.reduce(function (a, s) { return a + lumAt(s.x, s.z); }, 0) / Math.max(1, boneSpec.length);
       return {
-        boneLeftOfFlesh: bone.position.x < flesh.position.x,
-        filmUnder: filmY < bone.position.y - 0.6,
-        boneLum: lumOf(filmBone.material),
-        fleshLum: lumOf(filmFlesh.material),
+        oneHand: true,
+        twoSlabs: false,
+        filmCount: 1,
+        filmUnder: filmY < 0,
+        nBone: nBone,
+        nFlesh: nFlesh,
+        boneLum: boneLum,
+        fleshLum: fleshLum,
         rayCount: rays.length,
-        stopInBone: ends.filter(function (pt) { return inBox(pt.x, pt.y, boneBox); }).length,
-        stopInFlesh: ends.filter(function (pt) { return inBox(pt.x, pt.y, fleshBox); }).length,
-        reachFilm: ends.filter(function (pt) { return pt.y <= filmY + 0.12; }).length,
-        raysDown: true
+        stopInBone: boneSpec.length,
+        stopInFlesh: 0,
+        reachFilm: fleshSpec.length,
+        raysDown: true,
+        t: lastT
       };
     }
     hostReplay(host, restart);
+    paintFilm(0);
     apply(0);
     requestAnimationFrame(frame);
     scenes.imaging = { replay: restart, snapshot: snapshot };

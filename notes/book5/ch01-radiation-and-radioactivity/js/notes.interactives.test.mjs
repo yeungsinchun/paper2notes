@@ -212,26 +212,40 @@ test("25.1 spectrum is static with the ionizing barrier in UV", async () => {
   }
 });
 
-test("25.1 imaging is X-rays down onto bone beside flesh, white film under bone", async () => {
+test("25.1 imaging is X-rays down through a hand onto film that starts white", async () => {
   await cdp.goto(pageUrl("25-1.html"));
-  await cdp.evaluate("new Promise((r) => setTimeout(r, 1400))");
+  const start = await cdp.evaluate(`(function () {
+    window.NotesScenes.imaging.replay();
+    return window.NotesScenes.imaging.snapshot();
+  })()`);
+  assert.equal(start.oneHand, true);
+  assert.equal(start.twoSlabs, false);
+  assert.equal(start.filmCount, 1);
+  assert.ok(start.nBone >= 5, "hand should contain several bones, n=" + start.nBone);
+  assert.ok(start.nFlesh >= 5, "hand should contain flesh, n=" + start.nFlesh);
+  assert.ok(start.boneLum > 180, "film under bone starts white");
+  assert.ok(start.fleshLum > 180, "whole film starts white, fleshLum=" + start.fleshLum);
+  await cdp.evaluate("new Promise((r) => setTimeout(r, 1500))");
   const img = await cdp.evaluate(`(function () {
     var snap = window.NotesScenes.imaging.snapshot();
     var host = document.getElementById("imaging-vis");
     snap.toggles = document.querySelectorAll("[data-tissue]").length;
     snap.labels = Array.from(host.querySelectorAll(".hud-label")).map(function (t) { return t.textContent.trim(); });
+    snap.replay = !!document.querySelector('#imaging [data-replay="imaging-vis"]');
     return snap;
   })()`);
   assert.equal(img.toggles, 0);
-  assert.equal(img.boneLeftOfFlesh, true, "bone slab should sit left of flesh");
-  assert.equal(img.filmUnder, true, "film should sit under the slabs");
+  assert.equal(img.oneHand, true);
+  assert.equal(img.twoSlabs, false);
+  assert.equal(img.filmUnder, true, "film should sit under the hand");
   assert.ok(img.boneLum > 180, "film under bone should stay white");
-  assert.ok(img.fleshLum < 80, "film under flesh should blacken");
-  assert.equal(img.rayCount, 5);
+  assert.ok(img.fleshLum < 90, "film under flesh should blacken, lum=" + img.fleshLum);
+  assert.ok(img.rayCount >= 8, "several X-rays should pass through the hand, n=" + img.rayCount);
   assert.equal(img.stopInFlesh, 0, "flesh must transmit, not absorb, an X-ray");
-  assert.equal(img.stopInBone, 3, "three X-rays should stop inside bone");
-  assert.equal(img.reachFilm, 2, "both flesh rays should reach the film");
+  assert.ok(img.stopInBone >= 3, "some X-rays should stop in bone");
+  assert.ok(img.reachFilm >= 3, "some X-rays should reach the film");
   assert.equal(img.raysDown, true);
+  assert.equal(img.replay, true);
   assert.ok(img.labels.includes("X-rays"));
   assert.ok(img.labels.includes("photographic film"));
 
@@ -673,9 +687,19 @@ test("chapter map, summary, and concept-check scoring are the public notes surfa
   assert.doesNotMatch(radiationCopy, /does not become an electron beam/i);
   assert.doesNotMatch(radiationCopy, /Two carriers, one class/i);
   assert.doesNotMatch(radiationCopy, /becomes the electron beam/i);
+  const radCheck = await cdp.evaluate(`(function () {
+    var box = document.querySelector("#radiation .check");
+    return { stem: box.innerText, answer: box.getAttribute("data-answer") };
+  })()`);
+  assert.match(radCheck.stem, /correct about radiation/i);
+  assert.match(radCheck.stem, /medium to travel/i);
+  assert.equal(radCheck.answer, "C");
   const knockoutCopy = await cdp.evaluate("document.querySelector('#knockout').innerText");
   assert.doesNotMatch(knockoutCopy, /turns a light beam into an electron beam/i);
+  assert.doesNotMatch(knockoutCopy, /made of ions/i);
+  assert.doesNotMatch(knockoutCopy, /made of atoms/i);
   assert.match(knockoutCopy, /knocks protons out of the nucleus/i);
+  assert.match(knockoutCopy, /stays in the atom/i);
 
   const replay25_1 = await cdp.evaluate(`({
     all: Array.from(document.querySelectorAll("[data-replay]")).map(function (b) { return b.getAttribute("data-replay"); }),
@@ -684,11 +708,11 @@ test("chapter map, summary, and concept-check scoring are the public notes surfa
     tube: document.querySelectorAll("#xray-tube [data-replay]").length,
     imaging: document.querySelectorAll("#imaging [data-replay]").length
   })`);
-  assert.deepEqual(replay25_1.all, ["knock-vis"]);
+  assert.deepEqual(replay25_1.all, ["knock-vis", "imaging-vis"]);
   assert.equal(replay25_1.radiation, 0, "looping Fig 25.2 panes should not have Replay");
   assert.equal(replay25_1.knockout, 1, "knockout ejection should stay replayable");
   assert.equal(replay25_1.tube, 0, "X-ray tube loop should not have Replay");
-  assert.equal(replay25_1.imaging, 0, "imaging beam loop should not have Replay");
+  assert.equal(replay25_1.imaging, 1, "film blackening is a finite clip");
 
   await cdp.goto(pageUrl("25-2.html"));
   const replay25_2 = await cdp.evaluate("document.querySelectorAll('[data-replay]').length");

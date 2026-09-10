@@ -51,18 +51,24 @@ Name the physics, not a private nickname. Bad: "where the EM cut sits". Good: "N
 
 Pull stem and options from the textbook figure, `problems.md`, QB, or DSE. Every distractor must be a real mix-up from this section.
 
+Worked item after Fig. 25.2: "Which of the following is correct about radiation?"
+
+(1) It always requires a medium to travel in. (2) Mass is taken from one place to another. (3) All EM waves are a form of radiation.
+
+Answer (3) only. (1) is false: radiation need not travel in a medium. (2) is false as a general claim: EM radiation transfers energy, not mass.
+
 Worked item after Fig. 25.3 (QB PHY15011101 idea): "What does ionizing radiation do to an atom?"
 
-| A | It is made of ions. |
+| A | It raises a bound electron to a higher shell, but the electron stays in the atom. |
 | B | It knocks electrons out of atoms or molecules, turning them into ions. |
 | C | It knocks protons out of the nucleus. |
 | D | It has too little energy to knock electrons out. |
 
-Answer B. A is "radiation made of ions". C confuses ionization with a nuclear change. D is non-ionizing. None of those is off-topic filler.
+Answer B. A is excitation without knockout. C confuses ionization with a nuclear change. D is non-ionizing. Do not use "it is made of ions" or "it is made of atoms".
 
 ## Worked replay
 
-A Replay button is only for a clip with a beginning and an end a student would watch again. Worked keep: knockout ejection (`#knock-vis`), ion-pair capture (`#pair-vis`). Worked drop: Fig. 25.2 Two types of radiation (both panes loop), the X-ray tube (electrons and X-rays keep coming), the imaging beam (X-rays keep coming down). Do not leave an empty button row.
+A Replay button is only for a clip with a beginning and an end a student would watch again. Worked keep: knockout ejection (`#knock-vis`), ion-pair capture (`#pair-vis`), Fig. 25.7 film blackening (`#imaging-vis`). Worked drop: Fig. 25.2 Two types of radiation (both panes loop), the X-ray tube (electrons and X-rays keep coming). Do not leave an empty button row.
 
 ## Worked procedure (α / β / γ)
 
@@ -73,10 +79,11 @@ Teach identification as a steppable directed graph (paper / Al / Pb, then E or B
 | Do this | Not this |
 | --- | --- |
 | Fig 25.2: two canvases (E+B wave and electron stream); the heading names the class | One scene with floor, rail, divider, or class HUD |
-| Replay only on finite clips (knockout, ion-pair) | Replay on a continuous loop such as Fig 25.2, the X-ray tube, or imaging |
+| Replay only on finite clips (knockout, ion-pair, film blackening) | Replay on a continuous loop such as Fig 25.2 or the X-ray tube |
 | Knockout: the same bound electron leaves the shell | An electron that fades in beside the atom |
 | X-rays leave the electron impact on the angled target face as a wide fan | Tight gold stubs plus a cramped E+B train on one axis |
-| Imaging: X-rays down onto bone beside flesh; film white under bone, dark under flesh | Sideways beams or toggles that hide the textbook layout |
+| Imaging: X-rays down through one hand (flesh and bones together); film starts white; only reached spots blacken | Side-by-side bone/flesh boxes, a pre-dark film, or growing-arrow slabs |
+| Tables: columns sized to content; pair tables give the long prose column more width | Equal-width 100% slabs that squash short headers or stretch empty columns |
 | Spectrum: static barrier in UV (~1/10 of UV still non-ionizing) | A frequency mark, slider, or "cut after all UV" |
 | Follow `outline.md`; flag gaps | Invent Ch.26 half-life / sievert / dating |
 | Concept check after each idea (`problems.md`) | Dumping the whole HKDSE/QB set, or nonsense options |
