@@ -404,6 +404,97 @@
     return lineCount >= 2 || arrowCount >= 6;
   }
 
+  function geoKind(obj, kind) {
+    if (!obj || !obj.geometry) return false;
+    var t = obj.geometry.type;
+    return t === kind + "Geometry" || t === kind + "BufferGeometry";
+  }
+
+  function meshWorldBox(mesh) {
+    mesh.updateWorldMatrix(true, false);
+    if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
+    return mesh.geometry.boundingBox.clone().applyMatrix4(mesh.matrixWorld);
+  }
+
+  function pointInMesh(mesh, point) {
+    var local = mesh.worldToLocal(point.clone());
+    var geo = mesh.geometry;
+    var p = geo.parameters || {};
+    if (geoKind(mesh, "Sphere")) {
+      return local.length() <= (p.radius || 1) * 1.02;
+    }
+    if (geoKind(mesh, "Cylinder")) {
+      var h = p.height || 1;
+      if (local.y < -h / 2 || local.y > h / 2) return false;
+      var u = (local.y + h / 2) / h;
+      var r = (p.radiusBottom || 1) + ((p.radiusTop || 1) - (p.radiusBottom || 1)) * u;
+      return Math.hypot(local.x, local.z) <= r * 1.02;
+    }
+    if (!geo.boundingBox) geo.computeBoundingBox();
+    return geo.boundingBox.containsPoint(local);
+  }
+
+  function imagingFromScene(scene, filmY) {
+    var flesh = [];
+    var bone = [];
+    var slabs = 0;
+    var glyphs = [];
+    var hands = 0;
+    scene.traverse(function (obj) {
+      if (obj.isGroup && obj.userData && obj.userData.dir && obj.userData.tip) {
+        glyphs.push(obj);
+      }
+      if (!obj.isMesh) return;
+      if (geoKind(obj, "Box")) {
+        var hy = obj.geometry.parameters
+          ? obj.geometry.parameters.height * Math.abs(obj.scale.y)
+          : 0;
+        if (hy > 0.35) slabs += 1;
+      }
+      var mat = obj.material;
+      if (!mat) return;
+      if (mat.transparent && mat.opacity < 0.85 && (geoKind(obj, "Cylinder") || geoKind(obj, "Sphere"))) {
+        flesh.push(obj);
+      } else if (!mat.transparent && geoKind(obj, "Cylinder")) {
+        bone.push(obj);
+      }
+    });
+    scene.children.forEach(function (obj) {
+      if (!obj.isGroup || (obj.userData && obj.userData.dir)) return;
+      var hasFlesh = false;
+      var hasBone = false;
+      obj.traverse(function (child) {
+        if (flesh.indexOf(child) !== -1) hasFlesh = true;
+        if (bone.indexOf(child) !== -1) hasBone = true;
+      });
+      if (hasFlesh && hasBone) hands += 1;
+    });
+    var down = glyphs.length > 0;
+    var stopInFlesh = 0;
+    glyphs.forEach(function (g) {
+      var dir = g.userData.dir;
+      var tip = g.userData.tip;
+      if (!dir || dir.y > -0.7) down = false;
+      if (!tip || tip.y < filmY + 0.25) return;
+      var inBone = bone.some(function (m) { return pointInMesh(m, tip); });
+      if (inBone) return;
+      var i;
+      for (i = 0; i < flesh.length; i += 1) {
+        if (!pointInMesh(flesh[i], tip)) continue;
+        if (tip.y <= meshWorldBox(flesh[i]).max.y - 0.1) {
+          stopInFlesh += 1;
+          break;
+        }
+      }
+    });
+    return {
+      oneHand: hands === 1,
+      twoSlabs: slabs >= 2,
+      raysDown: down,
+      stopInFlesh: stopInFlesh
+    };
+  }
+
   function hostReplay(host, restart) {
     host.addEventListener("notes-replay", restart);
     if (host.hasAttribute("data-autoplay") || host.classList.contains("play")) {
@@ -1962,9 +2053,11 @@
       var boneSpec = specs.filter(function (s) { return s.absorb; });
       var fleshLum = fleshSpec.reduce(function (a, s) { return a + lumAt(s.x, s.z); }, 0) / Math.max(1, fleshSpec.length);
       var boneLum = boneSpec.reduce(function (a, s) { return a + lumAt(s.x, s.z); }, 0) / Math.max(1, boneSpec.length);
+      gfx.scene.updateMatrixWorld(true);
+      var live = imagingFromScene(gfx.scene, filmY);
       return {
-        oneHand: true,
-        twoSlabs: false,
+        oneHand: live.oneHand,
+        twoSlabs: live.twoSlabs,
         filmCount: 1,
         filmUnder: filmY < 0,
         nBone: nBone,
@@ -1973,9 +2066,9 @@
         fleshLum: fleshLum,
         rayCount: rays.length,
         stopInBone: boneSpec.length,
-        stopInFlesh: 0,
+        stopInFlesh: live.stopInFlesh,
         reachFilm: fleshSpec.length,
-        raysDown: true,
+        raysDown: live.raysDown,
         t: lastT
       };
     }
@@ -2571,7 +2664,7 @@
       s.start = start;
       s.mid = mid;
       s.sweepDeg = sweep * 180 / Math.PI;
-      s.anchor = new THREE.Vector3(Math.cos(mid) * 0.85, 0.28, Math.sin(mid) * 0.85);
+      s.anchor = new THREE.Vector3(Math.sin(mid) * 0.85, 0.28, Math.cos(mid) * 0.85);
       if (s.frac === 0.2) art = s;
       start += sweep;
     });
