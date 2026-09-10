@@ -16,7 +16,7 @@ Source gap: this PDF starts at printed p.4 (25.1). Printed pp.1–3 (chapter ope
 
 ### B. X-rays: production and imaging
 
-- **Visual:** Fig. 25.6 tube animation. Fig. 25.7 flesh vs bone vs film. Optional: scissors darkening rank from the 25.1 exercise.
+- **Visual:** Fig. 25.6 tube animation. Fig. 25.7 X-rays through one hand onto film. Optional: scissors darkening rank from the 25.1 exercise.
 - **Text:** Produced when high-speed electrons hit a heavy metal target (KE → X-rays). Soft tissue transmits, bone absorbs → white bone on film. Neutral, travel at c, blacken film. Medical vs security vs industrial uses; Röntgen history is optional sidebar.
 - **Check:** HKDSE 2022/31 (which X-ray statement is incorrect). Textbook exercise Q2 (UV vs electron on sponge vs metal).
 

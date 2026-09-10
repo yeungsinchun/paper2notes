@@ -36,7 +36,7 @@ placeHud(hudB, canvas, camera, bTip);
 
 Every other EM-wave callout (X-rays from a target, γ from a nucleus, UV hitting a sample) is a small glyph: a few wavy arrows that say "EM wave produced here", not another cramped E+B train.
 
-Local three.js: `js/lib/three.min.js`. No CDN requirement. `stage()` makes the scene orbitable: drag to rotate only. No wheel zoom, pinch zoom, `camera.zoom` dolly, or `sph.radius` scaling. The Fig. 25.2 atom nucleus range slider is a teaching control, not orbit zoom. `placeHud` keeps labels on the objects as the camera moves.
+Local three.js: `js/lib/three.min.js`. No CDN requirement. `stage()` makes the scene orbitable: drag to rotate only. No wheel zoom, pinch zoom, `camera.zoom` dolly, or `sph.radius` scaling. The Fig. 25.11 atom nucleus range slider is a teaching control, not orbit zoom. `placeHud` keeps labels on the objects as the camera moves.
 
 ```javascript
 gfx.orbit.nudge(40, 6); // same motion a student drag would make
@@ -83,7 +83,7 @@ Teach identification as a steppable directed graph (paper / Al / Pb, then E or B
 | Knockout: the same bound electron leaves the shell | An electron that fades in beside the atom |
 | X-rays leave the electron impact on the angled target face as three fanned glyphs | Tight gold stubs, five-plus rays, or a cramped E+B train on one axis |
 | Imaging: X-rays down through one hand (flesh and bones together); transmit through palm/finger flesh, not air gaps; film starts white; only reached spots blacken | Side-by-side bone/flesh boxes, rays in finger gaps, a pre-dark film, or growing-arrow slabs |
-| Orbit: drag-rotate only; atom nucleus slider stays | Wheel / pinch / radius zoom on the apparatus |
+| Orbit: drag-rotate only; Fig. 25.11 atom nucleus slider stays | Wheel / pinch / radius zoom on the apparatus |
 | Tables: columns sized to content; pair tables give the long prose column more width | Equal-width 100% slabs that squash short headers or stretch empty columns |
 | Spectrum: static barrier in UV (~1/10 of UV still non-ionizing) | A frequency mark, slider, or "cut after all UV" |
 | Follow `outline.md`; flag gaps | Invent Ch.26 half-life / sievert / dating |

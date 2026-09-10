@@ -9,7 +9,7 @@ Prefer redrawing these as diagrams / animation in the HTML notes. Photos of peop
 | `fig25-03-ionization-knockout.png` | 5 | Fig. 25.3 Ionizing radiation knocks an electron out of an atom | **Animate:** incoming radiation, electron ejected, leftover positive ion |
 | `fig25-05-em-spectrum.png` | 5 | Fig. 25.5 EM spectrum; non-ionizing vs ionizing | **Static bar:** ionizing barrier in UV; no frequency scrubber |
 | `fig25-06-xray-tube.png` | 6 | Fig. 25.6 X-ray tube and production | **Animate:** electrons hit heavy-metal target, X-rays leave |
-| `fig25-07-xray-imaging.png` | 6 | Fig. 25.7 Hand radiograph and absorption sketch | **Animate:** X-rays through flesh vs bone onto film |
+| `fig25-07-xray-imaging.png` | 6 | Fig. 25.7 Hand radiograph and absorption sketch | **Animate:** X-rays down through one hand onto film |
 | `table25-01-subatomic-particles.png` | 12 | Table 25.1 Proton / neutron / electron mass and charge | Static table; OCR of numbers is unreliable - check scan |
 | `fig25-11-atomic-structure.png` | 11 | Fig. 25.11 Atom (not to scale); nucleus ~10⁻¹⁴ m, atom ~10⁻¹⁰ m | **Animate / zoom:** empty space vs nucleus |
 | `fig25-12-nuclide-notation.png` | 13 | Fig. 25.12 Nuclide notation  ᴬ_Z X | Static callout; keep A and Z labels |
