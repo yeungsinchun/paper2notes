@@ -46,6 +46,8 @@ class Cdp {
     this.ws = ws;
     this.nextId = 1;
     this.pending = new Map();
+    this.lifecycleWaiters = [];
+    this.recentLifecycle = [];
     this.ws.addEventListener("message", (ev) => {
       const msg = JSON.parse(ev.data);
       if (msg.id && this.pending.has(msg.id)) {
@@ -53,15 +55,59 @@ class Cdp {
         this.pending.delete(msg.id);
         if (msg.error) reject(new Error(msg.error.message));
         else resolve(msg.result);
+        return;
+      }
+      if (msg.method === "Page.lifecycleEvent") {
+        this.recentLifecycle.push(msg.params || {});
+        if (this.recentLifecycle.length > 30) this.recentLifecycle.shift();
+        this.flushLifecycleWaiters();
       }
     });
   }
 
-  send(method, params) {
+  send(method, params, timeoutMs) {
     const id = this.nextId++;
+    const ms = timeoutMs == null ? 20000 : timeoutMs;
     return new Promise((resolve, reject) => {
-      this.pending.set(id, { resolve, reject });
+      const timer = setTimeout(() => {
+        this.pending.delete(id);
+        reject(new Error(method + " timed out after " + ms + "ms"));
+      }, ms);
+      this.pending.set(id, {
+        resolve: (value) => { clearTimeout(timer); resolve(value); },
+        reject: (err) => { clearTimeout(timer); reject(err); }
+      });
       this.ws.send(JSON.stringify({ id, method, params }));
+    });
+  }
+
+  lifecycleMatches(waiter, params) {
+    if (waiter.name !== params.name) return false;
+    if (!waiter.loaderId) return false;
+    return waiter.loaderId === params.loaderId;
+  }
+
+  flushLifecycleWaiters() {
+    for (let i = 0; i < this.lifecycleWaiters.length; i += 1) {
+      const waiter = this.lifecycleWaiters[i];
+      const hit = this.recentLifecycle.find((params) => this.lifecycleMatches(waiter, params));
+      if (!hit) continue;
+      this.lifecycleWaiters.splice(i, 1);
+      clearTimeout(waiter.timer);
+      waiter.resolve(hit);
+      i -= 1;
+    }
+  }
+
+  waitLifecycle(name, loaderId, timeoutMs) {
+    return new Promise((resolve, reject) => {
+      const waiter = { name, loaderId, resolve, reject, timer: null };
+      waiter.timer = setTimeout(() => {
+        this.lifecycleWaiters = this.lifecycleWaiters.filter((w) => w !== waiter);
+        reject(new Error("Page.lifecycleEvent " + name + " timed out"));
+      }, timeoutMs);
+      this.lifecycleWaiters.push(waiter);
+      this.flushLifecycleWaiters();
     });
   }
 
@@ -78,11 +124,24 @@ class Cdp {
     return result.result.value;
   }
 
+  async navigateOnce(url, timeoutMs) {
+    const nav = await this.send("Page.navigate", { url });
+    if (nav && nav.errorText) throw new Error("navigate " + url + ": " + nav.errorText);
+    if (!nav || !nav.loaderId) return;
+    try {
+      await this.waitLifecycle("load", nav.loaderId, timeoutMs);
+    } catch (err) {
+      const state = await this.evaluate("document.readyState");
+      if (state !== "complete" && state !== "interactive") throw err;
+    }
+  }
+
   async goto(url) {
-    await this.send("Page.navigate", { url });
-    await this.evaluate(
-      "new Promise((resolve) => { if (document.readyState === 'complete') resolve(); else window.addEventListener('load', () => resolve(), { once: true }); })"
-    );
+    const dest = new URL(url);
+    dest.searchParams.set("_cdp", String(Date.now()));
+    await this.navigateOnce("about:blank", 8000);
+    await this.navigateOnce(dest.href, 15000);
+    try { await this.send("Page.bringToFront"); } catch (_) { /* headless */ }
     await this.evaluate("new Promise((r) => requestAnimationFrame(() => setTimeout(r, 40)))");
   }
 
@@ -144,7 +203,11 @@ before(async () => {
   });
   cdp = new Cdp(ws);
   await cdp.send("Page.enable");
+  await cdp.send("Page.setLifecycleEventsEnabled", { enabled: true });
   await cdp.send("Runtime.enable");
+  try {
+    await cdp.send("Emulation.setFocusEmulationEnabled", { enabled: true });
+  } catch (_) { /* older Chrome */ }
   await cdp.send("Emulation.setDeviceMetricsOverride", {
     width: 1280,
     height: 900,
@@ -171,8 +234,12 @@ function near(actual, expected, tol) {
   );
 }
 
+function chromeTest(name, fn) {
+  test(name, { timeout: 90000 }, fn);
+}
+
 describe("Book 5 Ch.1 notes interactives", { concurrency: 1 }, () => {
-test("25.1 spectrum is static with the ionizing barrier in UV", async () => {
+chromeTest("25.1 spectrum is static with the ionizing barrier in UV", async () => {
   await cdp.goto(pageUrl("25-1.html"));
   await cdp.evaluate("new Promise((r) => setTimeout(r, 250))");
   const spec = await cdp.evaluate(`(function () {
@@ -227,7 +294,7 @@ test("25.1 spectrum is static with the ionizing barrier in UV", async () => {
   }
 });
 
-test("25.1 imaging is X-rays down through a hand onto film that starts white", async () => {
+chromeTest("25.1 imaging is X-rays down through a hand onto film that starts white", async () => {
   await cdp.goto(pageUrl("25-1.html"));
   const start = await cdp.evaluate(`(function () {
     window.NotesScenes.imaging.replay();
@@ -273,7 +340,7 @@ test("25.1 imaging is X-rays down through a hand onto film that starts white", a
   }
 });
 
-test("25.2 pie wedge is 20% and Pu-239 bookkeeping is static n_α=8", async () => {
+chromeTest("25.2 pie wedge is 20% and Pu-239 bookkeeping is static n_α=8", async () => {
   await cdp.goto(pageUrl("25-2.html"));
   await cdp.evaluate("new Promise((r) => setTimeout(r, 200))");
   const pie = await cdp.evaluate(`(function () {
@@ -297,7 +364,7 @@ test("25.2 pie wedge is 20% and Pu-239 bookkeeping is static n_α=8", async () =
   }
 });
 
-test("25.2 decay labels sit on the parent and outgoing particle", async () => {
+chromeTest("25.2 decay labels sit on the parent and outgoing particle", async () => {
   await cdp.goto(pageUrl("25-2.html"));
   await cdp.evaluate("window.NotesScenes['decay-a'].replay()");
   await cdp.evaluate("new Promise((r) => setTimeout(r, 900))");
@@ -327,7 +394,7 @@ test("25.2 decay labels sit on the parent and outgoing particle", async () => {
   assert.ok(gamma.parentHud < gamma.ejectileHud, "γ parent label should sit left of the outgoing γ");
 });
 
-test("25.3 absorber presets follow paper/Al/Pb contribution rules", async () => {
+chromeTest("25.3 absorber presets follow paper/Al/Pb contribution rules", async () => {
   await cdp.goto(pageUrl("25-3.html"));
 
   async function setAbs(src, paper, al, pb) {
@@ -384,7 +451,7 @@ test("25.3 absorber presets follow paper/Al/Pb contribution rules", async () => 
   }
 });
 
-test("25.3 GM extra recomputes when the plastic grid toggles", async () => {
+chromeTest("25.3 GM extra recomputes when the plastic grid toggles", async () => {
   await cdp.goto(pageUrl("25-3.html"));
   await cdp.evaluate(`document.querySelector('[data-need-grid="off"]').click()`);
   await new Promise((r) => setTimeout(r, 800));
@@ -408,7 +475,7 @@ test("25.3 GM extra recomputes when the plastic grid toggles", async () => {
   }
 });
 
-test("25.3 identification graph keeps taken yes/no edges", async () => {
+chromeTest("25.3 identification graph keeps taken yes/no edges", async () => {
   await cdp.goto(pageUrl("25-3.html"));
 
   async function flowState() {
@@ -571,7 +638,7 @@ test("25.3 identification graph keeps taken yes/no edges", async () => {
   }
 });
 
-test("25.1 knockout ejects the bound electron already on the atom", async () => {
+chromeTest("25.1 knockout ejects the bound electron already on the atom", async () => {
   await cdp.goto(pageUrl("25-1.html"));
   await cdp.evaluate("new Promise((r) => setTimeout(r, 200))");
   const bound = await cdp.evaluate(`(function () {
@@ -602,7 +669,7 @@ test("25.1 knockout ejects the bound electron already on the atom", async () => 
   }
 });
 
-test("25.3 ion-pair capture, Flip B marks, and β/γ check", async () => {
+chromeTest("25.3 ion-pair capture, Flip B marks, and β/γ check", async () => {
   await cdp.goto(pageUrl("25-3.html"));
   await cdp.evaluate("new Promise((r) => setTimeout(r, 1800))");
   const pair = await cdp.evaluate(`(function () {
@@ -662,7 +729,7 @@ test("25.3 ion-pair capture, Flip B marks, and β/γ check", async () => {
   }
 });
 
-test("chapter map, summary, and concept-check scoring are the public notes surface", async () => {
+chromeTest("chapter map, summary, and concept-check scoring are the public notes surface", async () => {
   await cdp.goto(pageUrl("index.html"));
   const map = await cdp.evaluate(`({
     title: document.querySelector('h1').textContent,
@@ -821,7 +888,7 @@ test("chapter map, summary, and concept-check scoring are the public notes surfa
   }
 });
 
-test("3d scenes magnify, label the tube, keep β drift, and pulse radially", async () => {
+chromeTest("3d scenes magnify, label the tube, keep β drift, and pulse radially", async () => {
   await cdp.goto(pageUrl("25-2.html"));
   await cdp.evaluate("new Promise((r) => requestAnimationFrame(() => setTimeout(r, 80)))");
   const zoom1 = await cdp.evaluate("window.NotesScenes.atom.snapshot()");
@@ -875,11 +942,12 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
   near(beamA.bHud, beamA.bProj, 18);
   assert.match(beamA.waveLabel, /EM wave/);
   assert.equal(beamA.paneCount, 2);
-  await cdp.evaluate("new Promise((r) => setTimeout(r, 350))");
-  const beamB = await cdp.evaluate("window.NotesScenes['beams-em'].snapshot()");
-  assert.ok(Math.abs(beamB.crestX - beamA.crestX) > 0.15 || Math.abs(beamB.eAtProbe - beamA.eAtProbe) > 0.15,
-    "E and B should travel, E " + beamA.eAtProbe + " -> " + beamB.eAtProbe
-  );
+  const beamB = await waitFor(async () => {
+    const snap = await cdp.evaluate("window.NotesScenes['beams-em'].snapshot()");
+    const moved = Math.abs(snap.crestX - beamA.crestX) > 0.15 || Math.abs(snap.eAtProbe - beamA.eAtProbe) > 0.15;
+    if (!moved) throw new Error("E and B not yet traveled, E " + beamA.eAtProbe + " -> " + snap.eAtProbe);
+    return snap;
+  }, 2500, "traveling E+B crest");
   const electronsA = await cdp.evaluate("window.NotesScenes['beams-e'].snapshot()");
   assert.equal(electronsA.n, 8);
   assert.match(electronsA.label, /particles/);
@@ -938,8 +1006,12 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
 
   await cdp.goto(pageUrl("25-3.html"));
   await cdp.evaluate("window.NotesScenes.current.setKind('alpha')");
-  await cdp.evaluate("new Promise((r) => setTimeout(r, 1600))");
-  const alphaIons = await cdp.evaluate("window.NotesScenes.current.snapshot()");
+  const alphaIons = await waitFor(async () => {
+    const snap = await cdp.evaluate("window.NotesScenes.current.snapshot()");
+    if (Math.abs(snap.ionY - snap.ionEndY) > 0.12) throw new Error("alpha ion y " + snap.ionY);
+    if (Math.abs(snap.electronY - snap.electronEndY) > 0.12) throw new Error("alpha electron y " + snap.electronY);
+    return snap;
+  }, 4000, "alpha ions at plates");
   near(alphaIons.ionY, alphaIons.ionEndY, 0.12);
   near(alphaIons.electronY, alphaIons.electronEndY, 0.12);
   near(alphaIons.needleDeg, -38, 1);
@@ -974,8 +1046,14 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
   );
 
   await cdp.evaluate("document.querySelector('[data-current=\"beta\"]').click()");
-  await cdp.evaluate("new Promise((r) => setTimeout(r, 1600))");
-  const betaIons = await cdp.evaluate("window.NotesScenes.current.snapshot()");
+  const betaIons = await waitFor(async () => {
+    const snap = await cdp.evaluate("window.NotesScenes.current.snapshot()");
+    if (snap.kind !== "beta") throw new Error("kind " + snap.kind);
+    if (Math.abs(snap.needleDeg - (-14)) > 1) throw new Error("beta needle " + snap.needleDeg);
+    if (Math.abs(snap.ionY - snap.ionEndY) > 0.12) throw new Error("beta ion y " + snap.ionY);
+    if (Math.abs(snap.electronY - snap.electronEndY) > 0.12) throw new Error("beta electron y " + snap.electronY);
+    return snap;
+  }, 4000, "beta ions at plates");
   assert.equal(betaIons.kind, "beta");
   assert.match(betaIons.sourceLabel, /β source/);
   near(betaIons.ionY, alphaIons.ionEndY, 0.12);
@@ -991,8 +1069,12 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
     pulseStart.electronY > 0.45,
     "electron should start away from the anode wire, y=" + pulseStart.electronY
   );
-  await cdp.evaluate("new Promise((r) => setTimeout(r, 1100))");
-  const pulse = await cdp.evaluate("window.NotesScenes.gm.snapshot()");
+  const pulse = await waitFor(async () => {
+    const snap = await cdp.evaluate("window.NotesScenes.gm.snapshot()");
+    if (Math.abs(snap.electronY - 0.08) > 0.08) throw new Error("GM electron y " + snap.electronY);
+    if (pulseStart.electronY - snap.electronY <= 0.35) throw new Error("GM radial travel " + pulseStart.electronY + " -> " + snap.electronY);
+    return snap;
+  }, 4000, "GM radial pulse");
   near(pulse.electronX, pulse.homeX, 0.08);
   near(pulse.argonX, pulse.homeX, 0.08);
   near(pulse.electronY, 0.08, 0.08);
