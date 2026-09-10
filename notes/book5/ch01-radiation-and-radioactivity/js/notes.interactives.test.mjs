@@ -169,7 +169,7 @@ function near(actual, expected, tol) {
 }
 
 describe("Book 5 Ch.1 notes interactives", { concurrency: 1 }, () => {
-test("25.1 spectrum is static with the ionizing cut after UV", async () => {
+test("25.1 spectrum is static with the ionizing barrier in UV", async () => {
   await cdp.goto(pageUrl("25-1.html"));
   await cdp.evaluate("new Promise((r) => setTimeout(r, 250))");
   const spec = await cdp.evaluate(`(function () {
@@ -180,6 +180,7 @@ test("25.1 spectrum is static with the ionizing cut after UV", async () => {
       mark: !!document.querySelector("#spectrum-mark"),
       pointer: !!document.querySelector("#spectrum-pointer"),
       snap: snap,
+      title: spec ? spec.querySelector("h2").textContent : "",
       body: spec ? spec.textContent : "",
       nonion: spec && spec.querySelector('[data-hud="nonion"]') && spec.querySelector('[data-hud="nonion"]').textContent,
       ion: spec && spec.querySelector('[data-hud="ion"]') && spec.querySelector('[data-hud="ion"]').textContent
@@ -189,12 +190,18 @@ test("25.1 spectrum is static with the ionizing cut after UV", async () => {
   assert.equal(spec.mark, false);
   assert.equal(spec.pointer, false);
   assert.equal(spec.snap.cut, true);
-  assert.equal(spec.snap.cutAfterUV, true);
+  assert.equal(spec.snap.cutInUV, true);
+  assert.equal(spec.snap.cutAfterUV, false);
+  assert.ok(spec.snap.nonIonizingUVFrac > 0.05 && spec.snap.nonIonizingUVFrac < 0.18);
+  assert.equal(spec.snap.mostUVionizing, true);
   assert.equal(spec.snap.xrayAfterCut, true);
+  assert.match(spec.title, /Non-ionizing and ionizing EM waves/i);
   assert.match(spec.nonion, /non-ionizing/);
   assert.match(spec.ion, /ionizing/);
   assert.match(spec.body, /X-rays/);
+  assert.match(spec.body, /one-tenth|1\/10|most of UV/i);
   assert.doesNotMatch(spec.body, /book cut/i);
+  assert.doesNotMatch(spec.title, /where the EM cut sits/i);
 
   if (evidenceDir) {
     await cdp.screenshot(path.join(evidenceDir, "25-1-knockout-animation.png"), "#knockout");
@@ -695,10 +702,19 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
   near(beamA.bHud, beamA.bProj, 18);
   await cdp.evaluate("new Promise((r) => setTimeout(r, 350))");
   const beamB = await cdp.evaluate("window.NotesScenes.beams.snapshot()");
-  assert.ok(
-    Math.abs(beamB.eAtProbe - beamA.eAtProbe) > 0.15 || Math.abs(beamB.crestX - beamA.crestX) > 0.15,
+  assert.ok(Math.abs(beamB.crestX - beamA.crestX) > 0.15 || Math.abs(beamB.eAtProbe - beamA.eAtProbe) > 0.15,
     "E and B should travel, E " + beamA.eAtProbe + " -> " + beamB.eAtProbe
   );
+  const cam0 = await cdp.evaluate("window.NotesScenes.beams.snapshot()");
+  await cdp.evaluate("window.NotesScenes.beams.orbitBy(40, 6)");
+  await cdp.evaluate("new Promise((r) => setTimeout(r, 250))");
+  const cam1 = await cdp.evaluate("window.NotesScenes.beams.snapshot()");
+  assert.ok(
+    Math.abs(cam1.camX - cam0.camX) > 0.12 || Math.abs(cam1.camZ - cam0.camZ) > 0.12,
+    "drag-orbit should move the camera around the apparatus"
+  );
+  near(cam1.eHud, cam1.eProj, 18);
+  near(cam1.bHud, cam1.bProj, 20);
 
   const tube = await cdp.evaluate("window.NotesScenes.tube.snapshot()");
   near(tube.gunHud, tube.gunProj, 10);
@@ -707,8 +723,12 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
   near(tube.xraysHud, tube.xraysProj, 10);
   assert.ok(tube.gunHud < tube.electronsHud, "gun label should sit left of electrons");
   assert.ok(tube.electronsHud < tube.targetHud, "electrons label should sit left of the target");
-  assert.ok(tube.faceNx < -0.4 && tube.faceNy > 0.4, "X-rays leave the slanted face toward the gun and up");
-  assert.ok(tube.rayDot > 0.85, "X-ray label sits on rays leaving the impact face, not the stem");
+  assert.ok(tube.faceNx < -0.4 && tube.faceNy > 0.4, "target face still points toward the gun and up");
+  assert.equal(tube.hasEmTrain, false);
+  assert.ok(tube.nRays >= 4, "X-rays should leave as several rays, n=" + tube.nRays);
+  assert.ok(tube.fanSpreadDeg > 55, "X-ray fan should be wide, spread=" + tube.fanSpreadDeg);
+  assert.equal(tube.originAtHit, true);
+  assert.equal(tube.xrayAboveHit, true);
 
   await cdp.goto(pageUrl("25-3.html"));
   await cdp.evaluate("window.NotesScenes.current.setKind('alpha')");

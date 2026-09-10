@@ -20,7 +20,7 @@ Same table style elsewhere: `What you see` / `Therefore`, for example "Both tran
 
 ## Worked figure (Fig. 25.2 light beam)
 
-An EM wave is the combination of the E field and the B field. In three.js that is a traveling train of arrows: E along y, B along z, both `sin(kx − ωt)`, Poynting along +x. Not a 2D sine path and not a scalar packet on one axis. The electron beam is a moving KE particle stream. Labels sit on the objects with `placeHud`.
+An EM wave is the combination of the E field and the B field. In three.js that is a traveling train of arrows: E along y, B along z, both `sin(kx − ωt)`, Poynting along +x. That full E+B animation belongs only here. The electron beam is a moving KE particle stream beside it, not a conversion of the wave. Labels sit on the objects with `placeHud`.
 
 ```javascript
 var train = emTrain(scene, {
@@ -34,7 +34,31 @@ placeHud(hudE, canvas, camera, eTip);
 placeHud(hudB, canvas, camera, bTip);
 ```
 
-Local three.js: `js/lib/three.min.js`. No CDN requirement.
+Every other EM-wave callout (X-rays from a target, γ from a nucleus, UV hitting a sample) is a small glyph: a few wavy arrows that say "EM wave produced here", not another cramped E+B train.
+
+Local three.js: `js/lib/three.min.js`. No CDN requirement. `stage()` makes the scene orbitable: drag to rotate, scroll to zoom; `placeHud` keeps labels on the objects as the camera moves.
+
+```javascript
+gfx.orbit.nudge(40, 6); // same motion a student drag would make
+placeHud(hudE, canvas, gfx.camera, eFieldAnchor);
+```
+
+## Worked title (Fig. 25.5)
+
+Name the physics, not a private nickname. Bad: "where the EM cut sits". Good: "Non-ionizing and ionizing EM waves". The ionizing barrier sits far on the low-frequency side of UV: about one-tenth of UV is non-ionizing, most of UV plus X-rays and γ are ionizing. No frequency slider or mark.
+
+## Worked concept check
+
+Pull stem and options from the textbook figure, `problems.md`, QB, or DSE. Every distractor must be a real mix-up from this section.
+
+Worked item after Fig. 25.3 (QB PHY15011101 idea): "What does ionizing radiation do to an atom?"
+
+| A | It is made of ions. |
+| B | It knocks electrons out of atoms or molecules, turning them into ions. |
+| C | It turns a light beam into an electron beam. |
+| D | It has too little energy to knock electrons out. |
+
+Answer B. A is "radiation made of ions". C keeps EM wave and electron beam as two types. D is non-ionizing. None of those is off-topic filler.
 
 ## Worked procedure (α / β / γ)
 
@@ -45,9 +69,9 @@ Teach identification as a steppable directed graph (paper / Al / Pb, then E or B
 | Do this | Not this |
 | --- | --- |
 | Knockout: the same bound electron leaves the shell | An electron that fades in beside the atom |
-| X-rays leave the electron impact on the angled target face | Rays from the gun or the stem |
+| X-rays leave the electron impact on the angled target face as a wide fan | Tight gold stubs plus a cramped E+B train on one axis |
 | Imaging: X-rays down onto bone beside flesh; film white under bone, dark under flesh | Sideways beams or toggles that hide the textbook layout |
-| Spectrum: static ionizing cut after UV | A frequency mark or slider |
+| Spectrum: static barrier in UV (~1/10 of UV still non-ionizing) | A frequency mark, slider, or "cut after all UV" |
 | Follow `outline.md`; flag gaps | Invent Ch.26 half-life / sievert / dating |
-| Concept check after each idea (`problems.md`) | Dumping the whole HKDSE/QB set |
+| Concept check after each idea (`problems.md`) | Dumping the whole HKDSE/QB set, or nonsense options |
 | Redraw from `_source/.../images/` in SVG/CSS/canvas/three.js | Embedding crop PNGs as final art |

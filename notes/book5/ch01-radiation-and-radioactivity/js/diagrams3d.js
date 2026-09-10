@@ -44,15 +44,18 @@
     var scene = new THREE.Scene();
     scene.background = new THREE.Color(0xfffaf1);
     var persp = fit && fit.persp;
+    var look = persp
+      ? new THREE.Vector3(persp.lookX || 0, persp.lookY || 0, persp.lookZ || 0)
+      : new THREE.Vector3(0, 0, 0);
     var camera;
     if (persp) {
       camera = new THREE.PerspectiveCamera(persp.fov || 32, 2, 0.1, 80);
       camera.position.set(persp.x, persp.y, persp.z);
-      camera.lookAt(persp.lookX || 0, persp.lookY || 0, persp.lookZ || 0);
+      camera.lookAt(look);
     } else {
       camera = new THREE.OrthographicCamera(-7.2, 7.2, 3.6, -3.6, 0.1, 40);
       camera.position.set(0.4, 1.6, 12);
-      camera.lookAt(0, 0, 0);
+      camera.lookAt(look);
     }
     var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -98,7 +101,67 @@
     }
     resize();
     window.addEventListener("resize", resize);
-    return { scene: scene, camera: camera, renderer: renderer, resize: resize };
+    var orbit = attachOrbit(canvas, camera, look);
+    return { scene: scene, camera: camera, renderer: renderer, resize: resize, look: look, orbit: orbit };
+  }
+
+  function attachOrbit(canvas, camera, target) {
+    var sph = new THREE.Spherical();
+    var dragging = false;
+    var lastX = 0;
+    var lastY = 0;
+    var synced = false;
+    function sync() {
+      sph.setFromVector3(camera.position.clone().sub(target));
+      synced = true;
+    }
+    function apply() {
+      camera.position.copy(new THREE.Vector3().setFromSpherical(sph).add(target));
+      camera.lookAt(target);
+      camera.updateMatrixWorld();
+    }
+    canvas.style.touchAction = "none";
+    canvas.addEventListener("pointerdown", function (e) {
+      if (e.button != null && e.button !== 0) return;
+      if (!synced) sync();
+      dragging = true;
+      lastX = e.clientX;
+      lastY = e.clientY;
+      try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+    });
+    canvas.addEventListener("pointermove", function (e) {
+      if (!dragging) return;
+      sph.theta -= (e.clientX - lastX) * 0.008;
+      sph.phi -= (e.clientY - lastY) * 0.008;
+      sph.phi = Math.max(0.18, Math.min(Math.PI - 0.18, sph.phi));
+      lastX = e.clientX;
+      lastY = e.clientY;
+      apply();
+    });
+    function endDrag() { dragging = false; }
+    canvas.addEventListener("pointerup", endDrag);
+    canvas.addEventListener("pointercancel", endDrag);
+    canvas.addEventListener("wheel", function (e) {
+      e.preventDefault();
+      if (!synced) sync();
+      var factor = e.deltaY > 0 ? 1.08 : 0.925;
+      if (camera.isOrthographicCamera) {
+        camera.zoom = Math.max(0.35, Math.min(12, camera.zoom / factor));
+        camera.updateProjectionMatrix();
+        return;
+      }
+      sph.radius = Math.max(2.2, Math.min(28, sph.radius * factor));
+      apply();
+    }, { passive: false });
+    return {
+      target: target,
+      nudge: function (dx, dy) {
+        if (!synced) sync();
+        sph.theta -= dx * 0.008;
+        sph.phi = Math.max(0.18, Math.min(Math.PI - 0.18, sph.phi - dy * 0.008));
+        apply();
+      }
+    };
   }
 
   function projectXY(camera, canvas, world) {
@@ -153,6 +216,65 @@
     group.userData.shaft.scale.set(1, shaftLen, 1);
     group.userData.shaft.position.y = shaftLen / 2;
     group.userData.head.position.y = shaftLen + 0.09;
+  }
+
+  function wavyArrow(scene, opts) {
+    var origin = opts.origin;
+    var dir = opts.dir.clone().normalize();
+    var length = opts.length || 1.35;
+    var amp = opts.amp != null ? opts.amp : 0.12;
+    var waves = opts.waves || 3.1;
+    var radius = opts.radius || 0.032;
+    var n = opts.n || 36;
+    var hex = opts.hex || 0xd4a017;
+    var binormal = opts.side ? opts.side.clone() : new THREE.Vector3(0, 0, 1);
+    if (Math.abs(dir.dot(binormal)) > 0.92) binormal = new THREE.Vector3(0, 1, 0);
+    var side = new THREE.Vector3().crossVectors(dir, binormal).normalize();
+    var pts = [];
+    var i;
+    for (i = 0; i <= n; i += 1) {
+      var s = i / n;
+      var p = origin.clone().addScaledVector(dir, s * length);
+      p.addScaledVector(side, amp * Math.sin(s * waves * Math.PI * 2 + (opts.phase || 0)));
+      pts.push(p);
+    }
+    var mat = new THREE.MeshBasicMaterial({
+      color: hex,
+      transparent: true,
+      opacity: 0.92
+    });
+    var tube = new THREE.Mesh(
+      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), n, radius, 6, false),
+      mat
+    );
+    var tipDir = pts[n].clone().sub(pts[n - 1]).normalize();
+    var cone = new THREE.Mesh(new THREE.ConeGeometry(radius * 2.4, 0.16, 8), mat);
+    cone.position.copy(pts[n]);
+    cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tipDir);
+    var group = new THREE.Group();
+    group.add(tube, cone);
+    scene.add(group);
+    group.userData.dir = dir;
+    group.userData.origin = origin.clone();
+    group.userData.tip = pts[n].clone();
+    group.userData.mid = pts[Math.floor(n / 2)].clone();
+    group.userData.update = function (t) {
+      mat.opacity = 0.55 + 0.4 * Math.abs(Math.sin(t * 4 + (opts.phase || 0)));
+    };
+    return group;
+  }
+
+  function maxSpreadDeg(dirs) {
+    var max = 0;
+    var i;
+    var j;
+    for (i = 0; i < dirs.length; i += 1) {
+      for (j = i + 1; j < dirs.length; j += 1) {
+        var a = dirs[i].clone().normalize().angleTo(dirs[j].clone().normalize()) * 180 / Math.PI;
+        if (a > max) max = a;
+      }
+    }
+    return max;
   }
 
   function emTrain(scene, opts) {
@@ -548,6 +670,11 @@
       requestAnimationFrame(frame);
     }
     function snapshot() {
+      gfx.camera.updateMatrixWorld();
+      placeHud(hudWave, canvas, gfx.camera, waveAnchor);
+      placeHud(hudE, canvas, gfx.camera, eFieldAnchor);
+      placeHud(hudB, canvas, gfx.camera, bFieldAnchor);
+      placeHud(hudElectrons, canvas, gfx.camera, eBeamAnchor);
       var probeS = length * 0.4;
       var sm = train.sample(probeS, lastT);
       var eVec = sm.eVec;
@@ -586,13 +713,20 @@
         eHud: eHud.x,
         eProj: eProj.x,
         bHud: bHud.x,
-        bProj: bProj.x
+        bProj: bProj.x,
+        camX: gfx.camera.position.x,
+        camY: gfx.camera.position.y,
+        camZ: gfx.camera.position.z
       };
     }
     hostReplay(host, restart);
     train.update(0);
     requestAnimationFrame(frame);
-    scenes.beams = { replay: restart, snapshot: snapshot };
+    scenes.beams = {
+      replay: restart,
+      snapshot: snapshot,
+      orbitBy: function (dx, dy) { gfx.orbit.nudge(dx, dy); }
+    };
   }
 
   function atom(host) {
@@ -766,43 +900,28 @@
       electrons.push({ mesh: e, delay: i * 0.08 });
       gfx.scene.add(e);
     }
-    var xrays = [];
-    var zAxis = new THREE.Vector3(0, 0, 1);
-    var spreads = [0, 0.17, -0.17, 0.08];
-    var rayLen = 0.95;
-    var goldMat = new THREE.MeshBasicMaterial({
-      color: 0xd4a017,
-      transparent: true,
-      opacity: 0.95
+    var fanDirs = [
+      new THREE.Vector3(-0.12, 1, 0.08),
+      new THREE.Vector3(-0.82, 0.72, 0.12),
+      new THREE.Vector3(0.55, 0.9, 0.18),
+      new THREE.Vector3(-0.45, 0.38, 0.82),
+      new THREE.Vector3(0.22, 0.62, -0.72)
+    ];
+    var xrayGlyphs = fanDirs.map(function (raw, idx) {
+      return wavyArrow(gfx.scene, {
+        origin: hit.clone(),
+        dir: raw,
+        length: 1.45 + (idx % 3) * 0.12,
+        amp: 0.11,
+        waves: 3.4,
+        phase: idx * 0.7,
+        hex: 0xd4a017
+      });
     });
-    for (i = 0; i < spreads.length; i += 1) {
-      var dir = face.clone().applyAxisAngle(zAxis, spreads[i]);
-      var ray = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.035, 0.035, rayLen, 8),
-        goldMat.clone()
-      );
-      ray.position.copy(hit).addScaledVector(dir, rayLen / 2);
-      ray.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
-      xrays.push(ray);
-      gfx.scene.add(ray);
-      var tip = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.16, 8), goldMat.clone());
-      tip.position.copy(hit).addScaledVector(dir, rayLen);
-      tip.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
-      gfx.scene.add(tip);
-      xrays.push(tip);
-    }
-    var xrayEM = emTrain(gfx.scene, {
-      origin: hit.clone(),
-      dir: face.clone().normalize(),
-      eHat: new THREE.Vector3().crossVectors(face, new THREE.Vector3(0, 0, 1)).normalize(),
-      bHat: new THREE.Vector3().crossVectors(face.clone().normalize(), new THREE.Vector3().crossVectors(face, new THREE.Vector3(0, 0, 1)).normalize()),
-      length: 1.05,
-      n: 8,
-      eAmp: 0.28,
-      bAmp: 0.22,
-      k: 14,
-      omega: 16
-    });
+    var fanMid = new THREE.Vector3();
+    xrayGlyphs.forEach(function (g) { fanMid.add(g.userData.mid); });
+    fanMid.multiplyScalar(1 / xrayGlyphs.length);
+    xrayAnchor.copy(fanMid);
 
     var t0 = performance.now();
     function restart() {
@@ -819,10 +938,7 @@
       });
       spark.material.opacity = 0.55 + 0.4 * Math.abs(Math.sin(t * 6));
       spark.scale.setScalar(0.9 + 0.2 * Math.abs(Math.sin(t * 6)));
-      xrayEM.update(t);
-      xrays.forEach(function (ray, idx) {
-        ray.material.opacity = 0.28 + 0.5 * Math.abs(Math.sin(t * 3.2 + idx));
-      });
+      xrayGlyphs.forEach(function (g) { g.userData.update(t); });
       placeHud(hudGun, canvas, gfx.camera, gunAnchor);
       placeHud(hudElectrons, canvas, gfx.camera, electronAnchor);
       placeHud(hudTarget, canvas, gfx.camera, targetAnchor);
@@ -848,7 +964,14 @@
         faceNy: face.y,
         hitX: hit.x,
         hitY: hit.y,
-        rayDot: leave.lengthSq() ? face.dot(leave.normalize()) : 0
+        rayDot: leave.lengthSq() ? face.dot(leave.clone().normalize()) : 0,
+        nRays: xrayGlyphs.length,
+        fanSpreadDeg: maxSpreadDeg(fanDirs),
+        xrayAboveHit: xrayAnchor.y > hit.y + 0.15,
+        originAtHit: xrayGlyphs.every(function (g) {
+          return g.userData.origin.distanceTo(hit) < 0.04;
+        }),
+        hasEmTrain: false
       };
     }
     hostReplay(host, restart);
@@ -985,16 +1108,20 @@
     });
     var parent = nucleonCluster(5, 6, 0.34);
     parent.position.set(-2.4, 0.1, 0);
-    var pulse = new THREE.Group();
-    var eA = arrowMesh(0xc0392b);
-    var bA = arrowMesh(0x1d4f91);
-    pulse.add(eA, bA);
-    gfx.scene.add(parent, pulse);
+    gfx.scene.add(parent);
+    var glyph = wavyArrow(gfx.scene, {
+      origin: new THREE.Vector3(-1.7, 0.2, 0),
+      dir: new THREE.Vector3(1, 0.08, 0),
+      length: 1.55,
+      amp: 0.14,
+      waves: 3.2,
+      hex: 0xd4a017
+    });
     var hud = decayHud(host, canvas, gfx.camera);
     var parentAnchor = parent.position.clone().add(new THREE.Vector3(0, 0.9, 0));
     var t0 = performance.now();
     function ejectileAnchor() {
-      return pulse.position.clone().add(new THREE.Vector3(0.45, 0.45, 0));
+      return glyph.userData.mid.clone().add(glyph.position);
     }
     function restart() {
       t0 = performance.now();
@@ -1003,10 +1130,8 @@
     function frame(now) {
       var t = (now - t0) / 1000;
       var u = smoothstep(t / 1.2);
-      pulse.position.set(lerp(-2.0, 3.2, u), 0.2, 0);
-      var osc = Math.sin(t * 16);
-      setArrowVec(eA, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0.62 * osc, 0));
-      setArrowVec(bA, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0.48 * osc));
+      glyph.position.set(lerp(0, 3.6, u), 0, 0);
+      glyph.userData.update(t);
       hud.place(parentAnchor, ejectileAnchor());
       gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
@@ -1730,13 +1855,13 @@
     var hudNI = host.querySelector('[data-hud="nonion"]');
     var hudI = host.querySelector('[data-hud="ion"]');
     var bands = [
-      { name: "radio", hex: 0xd9e4f0, w: 1.35, x: -4.7 },
-      { name: "micro", hex: 0xcfe0c8, w: 1.2, x: -3.35 },
-      { name: "IR", hex: 0xf0d5b8, w: 1.15, x: -2.1 },
-      { name: "vis", hex: 0xf1c40f, w: 0.55, x: -1.2 },
-      { name: "UV", hex: 0x7e57c2, w: 0.7, x: -0.5 },
-      { name: "X-rays", hex: 0x455a64, w: 1.7, x: 0.85 },
-      { name: "γ", hex: 0x1c2430, w: 2.15, x: 2.9 }
+      { name: "radio", hex: 0xd9e4f0, w: 1.4, x: -5.05 },
+      { name: "micro", hex: 0xcfe0c8, w: 1.25, x: -3.65 },
+      { name: "IR", hex: 0xf0d5b8, w: 1.3, x: -2.3 },
+      { name: "vis", hex: 0xf1c40f, w: 0.48, x: -1.35 },
+      { name: "UV", hex: 0xb8a4d4, w: 1.15, x: -0.48 },
+      { name: "X-rays", hex: 0x455a64, w: 1.45, x: 0.9 },
+      { name: "γ", hex: 0x1c2430, w: 1.7, x: 2.55 }
     ];
     bands.forEach(function (b) {
       var m = new THREE.Mesh(
@@ -1753,20 +1878,24 @@
         new THREE.BoxGeometry(0.08, 0.72, 0.56),
         new THREE.MeshStandardMaterial({ color: hex })
       );
-      sl.position.set(-1.42 + i * 0.09, 0.15, 0.01);
+      sl.position.set(-1.54 + i * 0.075, 0.15, 0.01);
       gfx.scene.add(sl);
     });
+    var uv = bands[4];
+    var uvLeft = uv.x - uv.w / 2;
+    var uvRight = uv.x + uv.w / 2;
+    var cutX = uvLeft + 0.1 * uv.w;
     var cut = new THREE.Mesh(
-      new THREE.BoxGeometry(0.045, 1.35, 0.7),
+      new THREE.BoxGeometry(0.04, 1.45, 0.72),
       new THREE.MeshStandardMaterial({ color: 0x1c2430 })
     );
-    cut.position.set(-0.12, 0.35, 0.1);
+    cut.position.set(cutX, 0.4, 0.12);
     cut.name = "ionizing-cut";
     gfx.scene.add(cut);
     var xrayMesh = bands[5].mesh;
     function frame() {
-      placeHud(hudNI, canvas, gfx.camera, new THREE.Vector3(-3.1, 1.15, 0));
-      placeHud(hudI, canvas, gfx.camera, new THREE.Vector3(2.2, 1.15, 0));
+      placeHud(hudNI, canvas, gfx.camera, new THREE.Vector3(-3.2, 1.2, 0));
+      placeHud(hudI, canvas, gfx.camera, new THREE.Vector3(1.85, 1.2, 0));
       gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
     }
@@ -1779,9 +1908,14 @@
           pointer: !!document.querySelector("#spectrum-pointer"),
           cut: true,
           cutX: cut.position.x,
-          uvX: bands[4].mesh.position.x,
+          uvX: uv.x,
+          uvLeft: uvLeft,
+          uvRight: uvRight,
           xrayX: xrayMesh.position.x,
-          cutAfterUV: cut.position.x > bands[4].mesh.position.x,
+          cutInUV: cut.position.x > uvLeft && cut.position.x < uvRight,
+          nonIonizingUVFrac: (cut.position.x - uvLeft) / uv.w,
+          mostUVionizing: (uvRight - cut.position.x) / uv.w > 0.75,
+          cutAfterUV: cut.position.x > uvRight,
           xrayAfterCut: xrayMesh.position.x > cut.position.x
         };
       }
@@ -1824,19 +1958,14 @@
         gfx.scene.add(plus, minus);
       }
       if (wavy) {
-        var train = emTrain(gfx.scene, {
-          origin: new THREE.Vector3(-4.6, y, 0),
+        return wavyArrow(gfx.scene, {
+          origin: new THREE.Vector3(-4.55, y, 0),
           dir: new THREE.Vector3(1, 0, 0),
-          eHat: new THREE.Vector3(0, 1, 0),
-          bHat: new THREE.Vector3(0, 0, 1),
-          length: 1.1,
-          n: 6,
-          eAmp: 0.22,
-          bAmp: 0.16,
-          k: 12,
-          omega: 10
+          length: 1.35,
+          amp: 0.13,
+          waves: 3.4,
+          hex: 0xd4a017
         });
-        return train;
       }
       return null;
     }
@@ -1848,10 +1977,10 @@
     gfx.scene.add(alpha, beta);
     trail(1.15, 0xc0392b, 12, 0.62, false);
     trail(0.05, 0x1d4f91, 4, 1.45, false);
-    var gTrain = trail(-1.1, 0xc9a227, 2, 2.4, true);
+    var gGlyph = trail(-1.1, 0xc9a227, 2, 2.4, true);
     var t0 = performance.now();
     function frame(now) {
-      if (gTrain) gTrain.update((now - t0) / 1000);
+      if (gGlyph) gGlyph.userData.update((now - t0) / 1000);
       placeHud(hudA, canvas, gfx.camera, new THREE.Vector3(-4.55, 1.55, 0));
       placeHud(hudB, canvas, gfx.camera, new THREE.Vector3(-4.55, 0.45, 0));
       placeHud(hudG, canvas, gfx.camera, new THREE.Vector3(-4.55, -0.7, 0));
@@ -2123,18 +2252,26 @@
     minus.position.z = 0.22;
     beta.add(minus);
     gfx.scene.add(alpha, beta);
-    var gTrain = emTrain(gfx.scene, {
-      origin: new THREE.Vector3(0.35, 0.15, 0),
-      dir: new THREE.Vector3(1, 0, 0),
-      eHat: new THREE.Vector3(0, 1, 0),
-      bHat: new THREE.Vector3(0, 0, 1),
-      length: 2.1,
-      n: 9,
-      eAmp: 0.55,
-      bAmp: 0.4,
-      k: 5.5,
-      omega: 7
-    });
+    var gGlyphs = [
+      wavyArrow(gfx.scene, {
+        origin: new THREE.Vector3(0.35, 0.28, 0),
+        dir: new THREE.Vector3(1, 0.12, 0),
+        length: 1.55,
+        amp: 0.12,
+        waves: 3.2,
+        phase: 0,
+        hex: 0xd4a017
+      }),
+      wavyArrow(gfx.scene, {
+        origin: new THREE.Vector3(0.4, 0.02, 0),
+        dir: new THREE.Vector3(1, -0.08, 0.08),
+        length: 1.4,
+        amp: 0.1,
+        waves: 3.0,
+        phase: 1.1,
+        hex: 0xc9a227
+      })
+    ];
     var gun = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 0.55, 12), metal(0x333333));
     gun.rotation.z = Math.PI / 2;
     gun.position.set(3.55, 0.15, 0);
@@ -2145,7 +2282,7 @@
     var t0 = performance.now();
     function frame(now) {
       var t = (now - t0) / 1000;
-      gTrain.update(t);
+      gGlyphs.forEach(function (g) { g.userData.update(t); });
       placeHud(hudA, canvas, gfx.camera, alpha.position.clone().add(new THREE.Vector3(0, -0.95, 0)));
       placeHud(hudB, canvas, gfx.camera, beta.position.clone().add(new THREE.Vector3(0, -0.95, 0)));
       placeHud(hudG, canvas, gfx.camera, new THREE.Vector3(1.4, -0.95, 0));
@@ -2187,29 +2324,22 @@
     metalBlock(-1.4);
     sponge(1.35);
     metalBlock(4.15);
-    var uvA = emTrain(gfx.scene, {
+    var uvA = wavyArrow(gfx.scene, {
       origin: new THREE.Vector3(-4.15, 1.15, 0),
       dir: new THREE.Vector3(0, -1, 0),
-      eHat: new THREE.Vector3(1, 0, 0),
-      bHat: new THREE.Vector3(0, 0, 1),
-      length: 1.05,
-      n: 7,
-      eAmp: 0.28,
-      bAmp: 0.2,
-      k: 10,
-      omega: 12
+      length: 1.15,
+      amp: 0.1,
+      waves: 3.0,
+      hex: 0x7e57c2
     });
-    var uvB = emTrain(gfx.scene, {
+    var uvB = wavyArrow(gfx.scene, {
       origin: new THREE.Vector3(-1.4, 1.15, 0),
       dir: new THREE.Vector3(0, -1, 0),
-      eHat: new THREE.Vector3(1, 0, 0),
-      bHat: new THREE.Vector3(0, 0, 1),
-      length: 1.05,
-      n: 7,
-      eAmp: 0.28,
-      bAmp: 0.2,
-      k: 10,
-      omega: 12
+      length: 1.15,
+      amp: 0.1,
+      waves: 3.0,
+      phase: 0.8,
+      hex: 0x7e57c2
     });
     var eC = [];
     var eD = [];
@@ -2221,24 +2351,40 @@
       eD.push(d);
       gfx.scene.add(c, d);
     }
-    var xrayOut = emTrain(gfx.scene, {
-      origin: new THREE.Vector3(4.15, -0.25, 0),
-      dir: new THREE.Vector3(0.35, 0.7, 0).normalize(),
-      eHat: new THREE.Vector3(-0.7, 0.35, 0).normalize(),
-      bHat: new THREE.Vector3(0, 0, 1),
-      length: 1.15,
-      n: 7,
-      eAmp: 0.32,
-      bAmp: 0.22,
-      k: 11,
-      omega: 14
-    });
+    var xrayOut = [
+      wavyArrow(gfx.scene, {
+        origin: new THREE.Vector3(4.15, -0.28, 0),
+        dir: new THREE.Vector3(0.15, 1, 0.12),
+        length: 1.15,
+        amp: 0.1,
+        waves: 3.2,
+        hex: 0xd4a017
+      }),
+      wavyArrow(gfx.scene, {
+        origin: new THREE.Vector3(4.15, -0.28, 0),
+        dir: new THREE.Vector3(0.72, 0.7, 0),
+        length: 1.05,
+        amp: 0.09,
+        waves: 3.0,
+        phase: 1.2,
+        hex: 0xd4a017
+      }),
+      wavyArrow(gfx.scene, {
+        origin: new THREE.Vector3(4.15, -0.28, 0),
+        dir: new THREE.Vector3(-0.45, 0.9, 0.2),
+        length: 1.1,
+        amp: 0.1,
+        waves: 3.1,
+        phase: 2.1,
+        hex: 0xc9a227
+      })
+    ];
     var t0 = performance.now();
     function frame(now) {
       var t = (now - t0) / 1000;
-      uvA.update(t);
-      uvB.update(t);
-      xrayOut.update(t);
+      uvA.userData.update(t);
+      uvB.userData.update(t);
+      xrayOut.forEach(function (g) { g.userData.update(t); });
       eC.forEach(function (m, idx) {
         var u = (t * 0.7 + idx * 0.18) % 1;
         m.position.set(1.35, lerp(1.15, -0.2, u), 0);

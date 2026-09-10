@@ -393,6 +393,11 @@ tr.on td { background: #dff3ee; }
   width: 100%;
   height: 280px;
   background: #fffaf1;
+  cursor: grab;
+  touch-action: none;
+}
+.stage canvas.scene-canvas:active {
+  cursor: grabbing;
 }
 .stage canvas.scene-canvas.tall {
   height: 340px;
