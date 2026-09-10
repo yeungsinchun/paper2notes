@@ -892,12 +892,17 @@ chromeTest("chapter map, summary, and concept-check scoring are the public notes
       otherH: otherCanvas.getBoundingClientRect().height,
       hudH: hud.getBoundingClientRect().height
     };
+    document.querySelector('[data-replay="imaging-vis"]').click();
+    var afterReplay = {
+      scale: getComputedStyle(imaging).getPropertyValue("--box-scale").trim(),
+      canvasH: canvas.getBoundingClientRect().height
+    };
     minus.click();
     var after = {
       scale: getComputedStyle(imaging).getPropertyValue("--box-scale").trim(),
       canvasH: canvas.getBoundingClientRect().height
     };
-    return { before: before, mid: mid, after: after };
+    return { before: before, mid: mid, afterReplay: afterReplay, after: after };
   })()`);
   assert.equal(scaled.before.scale, "1");
   assert.equal(scaled.before.otherScale, "1");
@@ -906,6 +911,8 @@ chromeTest("chapter map, summary, and concept-check scoring are the public notes
   assert.ok(scaled.mid.canvasH > scaled.before.canvasH * 1.08, "plus should enlarge that diagram");
   near(scaled.mid.otherH, scaled.before.otherH, 1);
   near(scaled.mid.canvasH / scaled.before.canvasH, scaled.mid.hudH / scaled.before.hudH, 0.08);
+  assert.equal(scaled.afterReplay.scale, "1.15");
+  near(scaled.afterReplay.canvasH, scaled.mid.canvasH, 1);
   assert.equal(scaled.after.scale, "1");
 
   await cdp.goto(pageUrl("25-2.html"));

@@ -73,9 +73,6 @@
   }
 
   function replay(el) {
-    el.classList.remove("play");
-    void el.offsetWidth;
-    el.classList.add("play");
     el.dispatchEvent(new Event("notes-replay"));
   }
 
