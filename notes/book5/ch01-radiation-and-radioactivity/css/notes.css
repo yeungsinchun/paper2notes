@@ -385,6 +385,25 @@ table.compact tbody td:first-child:nth-last-child(n + 3) {
   align-items: center;
 }
 
+#spectrum table.spectrum-bands {
+  width: 100%;
+  table-layout: fixed;
+}
+
+#spectrum table.spectrum-bands th {
+  font-size: 0.78rem;
+  padding: 0.3rem 0.2rem;
+  word-break: break-word;
+}
+
+#spectrum table.spectrum-bands col.band-radio { width: 16%; }
+#spectrum table.spectrum-bands col.band-micro { width: 14%; }
+#spectrum table.spectrum-bands col.band-ir { width: 15%; }
+#spectrum table.spectrum-bands col.band-vis { width: 6%; }
+#spectrum table.spectrum-bands col.band-uv { width: 13%; }
+#spectrum table.spectrum-bands col.band-xray { width: 17%; }
+#spectrum table.spectrum-bands col.band-gamma { width: 19%; }
+
 .flow {
   display: grid;
   grid-template-columns: minmax(280px, 1.15fr) minmax(240px, 0.9fr);

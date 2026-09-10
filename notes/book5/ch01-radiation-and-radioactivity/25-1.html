@@ -108,13 +108,23 @@
         <canvas class="scene-canvas" width="960" height="280" aria-label="EM spectrum: ionizing barrier on the low-frequency side of UV"></canvas>
         <span class="hud-label" data-hud="nonion">non-ionizing</span>
         <span class="hud-label" data-hud="ion">ionizing</span>
+        <span class="hud-label" data-hud="gamma">Gamma ray</span>
       </div>
-      <table class="compact">
-        <thead><tr><th>radio</th><th>micro</th><th>IR</th><th>vis</th><th>UV</th><th>X-rays</th><th>γ</th></tr></thead>
+      <table class="compact spectrum-bands">
+        <colgroup>
+          <col class="band-radio">
+          <col class="band-micro">
+          <col class="band-ir">
+          <col class="band-vis">
+          <col class="band-uv">
+          <col class="band-xray">
+          <col class="band-gamma">
+        </colgroup>
+        <thead><tr><th>radio</th><th>micro</th><th>IR</th><th>vis</th><th>UV</th><th>X-rays</th><th>Gamma ray</th></tr></thead>
         <tbody>
           <tr>
             <td colspan="4">non-ionizing</td>
-            <td>~1/10 non-ionizing, most ionizing</td>
+            <td>split</td>
             <td colspan="2">ionizing EM</td>
           </tr>
         </tbody>
@@ -123,14 +133,14 @@
         <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
         <tbody>
           <tr><td>Higher frequency on the bar (to the right)</td><td>More energy per photon</td></tr>
-          <tr><td>Barrier far on the low-frequency side of UV</td><td>About one-tenth of UV is non-ionizing; most UV, X-rays and γ are ionizing</td></tr>
+          <tr><td>Barrier far on the low-frequency side of UV</td><td>About one-tenth of UV is non-ionizing; most UV, X-rays and Gamma rays are ionizing</td></tr>
         </tbody>
       </table>
       <div class="check" data-check="mc" data-answer="B">
         <h3>Concept check</h3>
         <p>On the EM spectrum, where does ionizing radiation begin?</p>
         <div class="choices">
-          <button type="button" data-choice="A">All ultraviolet is non-ionizing; only X-rays and γ ionize.</button>
+          <button type="button" data-choice="A">All ultraviolet is non-ionizing; only X-rays and Gamma rays ionize.</button>
           <button type="button" data-choice="B">The barrier is far on the low-frequency side of UV: most of UV is ionizing, about one-tenth is not.</button>
           <button type="button" data-choice="C">Infrared is already ionizing.</button>
           <button type="button" data-choice="D">Visible light is ionizing.</button>

@@ -186,7 +186,11 @@ test("25.1 spectrum is static with the ionizing barrier in UV", async () => {
       title: spec ? spec.querySelector("h2").textContent : "",
       body: spec ? spec.textContent : "",
       nonion: spec && spec.querySelector('[data-hud="nonion"]') && spec.querySelector('[data-hud="nonion"]').textContent,
-      ion: spec && spec.querySelector('[data-hud="ion"]') && spec.querySelector('[data-hud="ion"]').textContent
+      ion: spec && spec.querySelector('[data-hud="ion"]') && spec.querySelector('[data-hud="ion"]').textContent,
+      gammaHud: spec && spec.querySelector('#spectrum-vis [data-hud="gamma"]') && spec.querySelector('#spectrum-vis [data-hud="gamma"]').textContent,
+      headers: spec ? Array.from(spec.querySelectorAll("table.spectrum-bands thead th")).map(function (th) { return th.textContent.trim(); }) : [],
+      headerWidths: spec ? Array.from(spec.querySelectorAll("table.spectrum-bands thead th")).map(function (th) { return th.getBoundingClientRect().width; }) : [],
+      uvCell: spec && spec.querySelector("table.spectrum-bands tbody tr td:nth-child(2)") && spec.querySelector("table.spectrum-bands tbody tr td:nth-child(2)").textContent.trim()
     };
   })()`);
   assert.equal(spec.slider, false);
@@ -203,8 +207,20 @@ test("25.1 spectrum is static with the ionizing barrier in UV", async () => {
   assert.match(spec.ion, /ionizing/);
   assert.match(spec.body, /X-rays/);
   assert.match(spec.body, /one-tenth|1\/10|most of UV/i);
-  assert.doesNotMatch(spec.body, /book cut/i);
   assert.doesNotMatch(spec.title, /where the EM cut sits/i);
+  assert.doesNotMatch(spec.body, /book cut/i);
+  assert.deepEqual(spec.headers, ["radio", "micro", "IR", "vis", "UV", "X-rays", "Gamma ray"]);
+  assert.equal(spec.gammaHud.trim(), "Gamma ray");
+  assert.equal(spec.snap.gammaName, "Gamma ray");
+  assert.equal(spec.snap.gammaHud, "Gamma ray");
+  assert.doesNotMatch(spec.headers.join(" "), /γ/);
+  assert.ok(spec.uvCell.length < 12, "UV band cell should stay short, got " + spec.uvCell);
+  assert.doesNotMatch(spec.uvCell, /1\/10|one-tenth|most ionizing/i);
+  const visW = spec.headerWidths[3];
+  const radioW = spec.headerWidths[0];
+  const gammaW = spec.headerWidths[6];
+  assert.ok(visW < radioW * 0.6, "vis column should be narrower than radio, vis=" + visW + " radio=" + radioW);
+  assert.ok(gammaW > visW * 1.8, "Gamma ray column should be wider than vis, gamma=" + gammaW + " vis=" + visW);
 
   if (evidenceDir) {
     await cdp.screenshot(path.join(evidenceDir, "25-1-knockout-animation.png"), "#knockout");

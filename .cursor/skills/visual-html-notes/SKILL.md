@@ -45,7 +45,7 @@ placeHud(hudE, canvas, gfx.camera, eFieldAnchor);
 
 ## Worked title (Fig. 25.5)
 
-Name the physics, not a private nickname. Bad: "where the EM cut sits". Good: "Non-ionizing and ionizing EM waves". The ionizing barrier sits far on the low-frequency side of UV: about one-tenth of UV is non-ionizing, most of UV plus X-rays and γ are ionizing. No frequency slider or mark.
+Name the physics, not a private nickname. Bad: "where the EM cut sits". Good: "Non-ionizing and ionizing EM waves". The ionizing barrier sits far on the low-frequency side of UV: about one-tenth of UV is non-ionizing, most of UV plus X-rays and Gamma rays are ionizing. Label that last band **Gamma ray**, not γ. The table under the bar uses the same names, with column widths in proportion to the drawn bands. Keep the UV header cell short; put the ~1/10 split in the observation table or the concept check. No frequency slider or mark.
 
 ## Worked concept check
 
@@ -86,7 +86,7 @@ Teach identification as a steppable directed graph (paper / Al / Pb, then E or B
 | Orbit: drag-rotate only; Fig. 25.11 atom nucleus slider stays | Wheel / pinch / radius zoom on the apparatus |
 | Top-bar + / − scales diagrams and labels together; default Fig. 25.7 fills the canvas | Tiny apparatus in empty space, clipped film, or orbit dolly for size |
 | Tables: columns sized to content; pair tables give the long prose column more width | Equal-width 100% slabs that squash short headers or stretch empty columns |
-| Spectrum: static barrier in UV (~1/10 of UV still non-ionizing) | A frequency mark, slider, or "cut after all UV" |
+| Spectrum: static barrier in UV (~1/10 of UV still non-ionizing); "Gamma ray" on the bar and table; column widths follow the bands | A frequency mark, slider, γ as the Fig. 25.5 header, equal-width slabs, or a paragraph in the UV cell |
 | Follow `outline.md`; flag gaps | Invent Ch.26 half-life / sievert / dating |
 | Concept check after each idea (`problems.md`) | Dumping the whole HKDSE/QB set, or nonsense options |
 | Redraw from `_source/.../images/` in SVG/CSS/canvas/three.js | Embedding crop PNGs as final art |

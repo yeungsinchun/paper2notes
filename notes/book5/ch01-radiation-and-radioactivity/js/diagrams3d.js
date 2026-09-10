@@ -2139,6 +2139,7 @@
     gfx.camera.lookAt(0, 0.1, 0);
     var hudNI = host.querySelector('[data-hud="nonion"]');
     var hudI = host.querySelector('[data-hud="ion"]');
+    var hudGamma = host.querySelector('[data-hud="gamma"]');
     var bands = [
       { name: "radio", hex: 0xd9e4f0, w: 1.4, x: -5.05 },
       { name: "micro", hex: 0xcfe0c8, w: 1.25, x: -3.65 },
@@ -2146,7 +2147,7 @@
       { name: "vis", hex: 0xf1c40f, w: 0.48, x: -1.35 },
       { name: "UV", hex: 0xb8a4d4, w: 1.15, x: -0.48 },
       { name: "X-rays", hex: 0x455a64, w: 1.45, x: 0.9 },
-      { name: "γ", hex: 0x1c2430, w: 1.7, x: 2.55 }
+      { name: "Gamma ray", hex: 0x1c2430, w: 1.7, x: 2.55 }
     ];
     bands.forEach(function (b) {
       var m = new THREE.Mesh(
@@ -2178,9 +2179,11 @@
     cut.name = "ionizing-cut";
     gfx.scene.add(cut);
     var xrayMesh = bands[5].mesh;
+    var gammaBand = bands[6];
     function frame() {
       placeHud(hudNI, canvas, gfx.camera, new THREE.Vector3(-3.2, 1.2, 0));
       placeHud(hudI, canvas, gfx.camera, new THREE.Vector3(1.85, 1.2, 0));
+      placeHud(hudGamma, canvas, gfx.camera, new THREE.Vector3(gammaBand.x, 0.82, 0));
       gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
     }
@@ -2201,7 +2204,10 @@
           nonIonizingUVFrac: (cut.position.x - uvLeft) / uv.w,
           mostUVionizing: (uvRight - cut.position.x) / uv.w > 0.75,
           cutAfterUV: cut.position.x > uvRight,
-          xrayAfterCut: xrayMesh.position.x > cut.position.x
+          xrayAfterCut: xrayMesh.position.x > cut.position.x,
+          gammaName: gammaBand.name,
+          gammaHud: hudGamma ? hudGamma.textContent.trim() : "",
+          bandWidths: bands.map(function (b) { return b.w; })
         };
       }
     };
