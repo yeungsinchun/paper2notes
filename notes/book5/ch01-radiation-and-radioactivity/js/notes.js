@@ -533,7 +533,50 @@
     });
   }
 
+  var VIEW_SCALES = [0.85, 1, 1.15, 1.3, 1.5];
+  var VIEW_SCALE_KEY = "notes-view-scale";
+
+  function nearestViewScale(s) {
+    var best = VIEW_SCALES[0];
+    var i;
+    for (i = 0; i < VIEW_SCALES.length; i += 1) {
+      if (Math.abs(VIEW_SCALES[i] - s) < Math.abs(best - s)) best = VIEW_SCALES[i];
+    }
+    return best;
+  }
+
+  function applyViewScale(s) {
+    var scale = nearestViewScale(s);
+    document.documentElement.style.setProperty("--view-scale", String(scale));
+    try { sessionStorage.setItem(VIEW_SCALE_KEY, String(scale)); } catch (err) { /* ignore */ }
+    var down = document.querySelector('[data-view-scale="down"]');
+    var up = document.querySelector('[data-view-scale="up"]');
+    if (down) down.disabled = scale <= VIEW_SCALES[0];
+    if (up) up.disabled = scale >= VIEW_SCALES[VIEW_SCALES.length - 1];
+    window.dispatchEvent(new Event("resize"));
+  }
+
+  function initViewScale() {
+    var saved = 1;
+    try {
+      saved = Number(sessionStorage.getItem(VIEW_SCALE_KEY) || "1");
+    } catch (err) { saved = 1; }
+    applyViewScale(saved);
+    document.addEventListener("click", function (ev) {
+      var btn = ev.target.closest("[data-view-scale]");
+      if (!btn) return;
+      var dir = btn.getAttribute("data-view-scale");
+      var cur = nearestViewScale(Number(document.documentElement.style.getPropertyValue("--view-scale") || "1"));
+      var idx = VIEW_SCALES.indexOf(cur);
+      if (idx < 0) idx = VIEW_SCALES.indexOf(1);
+      if (dir === "up") idx = Math.min(VIEW_SCALES.length - 1, idx + 1);
+      if (dir === "down") idx = Math.max(0, idx - 1);
+      applyViewScale(VIEW_SCALES[idx]);
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
+    initViewScale();
     initMc();
     initTf();
     initReplays();

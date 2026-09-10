@@ -1879,7 +1879,7 @@
     if (!THREE) return;
     var canvas = host.querySelector("canvas");
     var gfx = stage(canvas, {
-      persp: { fov: 32, x: 3.2, y: 5.4, z: 6.8, lookX: 0.05, lookY: 0.2, lookZ: 0.25 }
+      persp: { fov: 36, x: 2.25, y: 3.75, z: 4.95, lookX: 0.12, lookY: 0.08, lookZ: 0.3 }
     });
     var hudX = host.querySelector('[data-hud="xrays"]');
     var hudBone = host.querySelector('[data-hud="bone"]');
@@ -1889,10 +1889,10 @@
     lift.position.set(2, 8, 4);
     gfx.scene.add(lift);
 
-    var filmW = 5.0;
-    var filmD = 5.6;
-    var filmY = -1.52;
-    var startY = 2.42;
+    var filmW = 3.4;
+    var filmD = 3.8;
+    var filmY = -1.05;
+    var startY = 1.92;
     var specs = [
       { x: 0.95, z: -0.15, absorb: false },
       { x: 0.55, z: -0.48, absorb: false },
@@ -2041,10 +2041,10 @@
       rays.forEach(function (g, i) {
         if (g.userData.update) g.userData.update(sec + i);
       });
-      placeHud(hudX, canvas, gfx.camera, new THREE.Vector3(0.15, 2.28, 0.3));
+      placeHud(hudX, canvas, gfx.camera, new THREE.Vector3(0.15, 1.78, 0.3));
       placeHud(hudBone, canvas, gfx.camera, new THREE.Vector3(0.0, 0.95, 1.35));
       placeHud(hudFlesh, canvas, gfx.camera, new THREE.Vector3(0.95, 0.55, -0.15));
-      placeHud(hudFilm, canvas, gfx.camera, new THREE.Vector3(0.15, filmY - 0.02, 2.35));
+      placeHud(hudFilm, canvas, gfx.camera, new THREE.Vector3(0.12, filmY - 0.02, 1.85));
     }
     function lumAt(x, z) {
       var p = xzToPx(x, z);
@@ -2066,6 +2066,23 @@
       var boneLum = boneSpec.reduce(function (a, s) { return a + lumAt(s.x, s.z); }, 0) / Math.max(1, boneSpec.length);
       gfx.scene.updateMatrixWorld(true);
       var live = imagingFromScene(gfx.scene, filmY);
+      var minNX = 1;
+      var maxNX = -1;
+      var minNY = 1;
+      var maxNY = -1;
+      function addNdc(world) {
+        var v = world.clone().project(gfx.camera);
+        if (v.x < minNX) minNX = v.x;
+        if (v.x > maxNX) maxNX = v.x;
+        if (v.y < minNY) minNY = v.y;
+        if (v.y > maxNY) maxNY = v.y;
+      }
+      hand.traverse(function (obj) {
+        if (obj.isMesh) addNdc(obj.getWorldPosition(new THREE.Vector3()));
+      });
+      addNdc(new THREE.Vector3(0.15, startY, 0.3));
+      addNdc(film.position.clone());
+      addNdc(new THREE.Vector3(film.position.x, filmY, film.position.z + filmD * 0.45));
       return {
         oneHand: live.oneHand,
         twoSlabs: live.twoSlabs,
@@ -2081,6 +2098,13 @@
         throughFlesh: live.throughFlesh,
         reachFilm: fleshSpec.length,
         raysDown: live.raysDown,
+        fillX: (maxNX - minNX) / 2,
+        fillY: (maxNY - minNY) / 2,
+        fillMinX: minNX,
+        fillMaxX: maxNX,
+        fillMinY: minNY,
+        fillMaxY: maxNY,
+        clipped: minNX < -1.02 || maxNX > 1.02 || minNY < -1.02 || maxNY > 1.02,
         t: lastT
       };
     }

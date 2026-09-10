@@ -245,6 +245,9 @@ test("25.1 imaging is X-rays down through a hand onto film that starts white", a
   assert.ok(img.stopInBone >= 3, "some X-rays should stop in bone");
   assert.ok(img.throughFlesh >= 3, "transmitting X-rays should go through flesh, n=" + img.throughFlesh);
   assert.ok(img.reachFilm >= 3, "some X-rays should reach the film");
+  assert.ok(img.fillY > 0.48, "hand and film should fill the canvas, fillY=" + img.fillY);
+  assert.ok(img.fillY < 0.96, "hand and film should not be clipped, fillY=" + img.fillY);
+  assert.equal(img.clipped, false, "Fig 25.7 should stay inside the canvas, ndc x=" + img.fillMinX + ".." + img.fillMaxX + " y=" + img.fillMinY + ".." + img.fillMaxY);
   assert.equal(img.raysDown, true);
   assert.equal(img.replay, true);
   assert.ok(img.labels.includes("X-rays"));
@@ -660,6 +663,33 @@ test("chapter map, summary, and concept-check scoring are the public notes surfa
   assert.doesNotMatch(map.lede, /book cut/i);
   assert.deepEqual(map.links, ["25-1.html", "25-2.html", "25-3.html", "summary.html"]);
 
+  for (const page of ["index.html", "25-1.html", "25-2.html", "25-3.html", "summary.html"]) {
+    await cdp.goto(pageUrl(page));
+    const chrome = await cdp.evaluate(`(function () {
+      var bar = document.querySelector(".topbar");
+      var plus = document.querySelector(".topbar [data-view-scale='up']");
+      var minus = document.querySelector(".topbar [data-view-scale='down']");
+      if (!bar || !plus || !minus) return { ok: false };
+      var br = bar.getBoundingClientRect();
+      var pr = plus.getBoundingClientRect();
+      var mr = minus.getBoundingClientRect();
+      return {
+        ok: true,
+        plusText: plus.textContent.trim(),
+        minusText: minus.textContent.trim(),
+        plusAfterMinus: pr.left > mr.left,
+        rightGap: br.right - pr.right,
+        inBar: pr.top >= br.top - 1 && pr.bottom <= br.bottom + 1
+      };
+    })()`);
+    assert.equal(chrome.ok, true, "scale buttons missing on " + page);
+    assert.equal(chrome.plusText, "+");
+    assert.equal(chrome.minusText, "−");
+    assert.equal(chrome.plusAfterMinus, true);
+    assert.ok(chrome.rightGap < 48, "scale buttons should sit at the top right on " + page);
+    assert.equal(chrome.inBar, true);
+  }
+
   await cdp.goto(pageUrl("summary.html"));
   const summary = await cdp.evaluate(`({
     isotopeItem: /which are isotopes/i.test(document.body.innerText),
@@ -714,6 +744,35 @@ test("chapter map, summary, and concept-check scoring are the public notes surfa
   assert.equal(replay25_1.knockout, 1, "knockout ejection should stay replayable");
   assert.equal(replay25_1.tube, 0, "X-ray tube loop should not have Replay");
   assert.equal(replay25_1.imaging, 1, "film blackening is a finite clip");
+
+  const scaled = await cdp.evaluate(`(function () {
+    var canvas = document.querySelector("#imaging-vis canvas");
+    var hud = document.querySelector("#imaging-vis [data-hud='flesh']");
+    var plus = document.querySelector("[data-view-scale='up']");
+    var minus = document.querySelector("[data-view-scale='down']");
+    var before = {
+      scale: getComputedStyle(document.documentElement).getPropertyValue("--view-scale").trim(),
+      canvasH: canvas.getBoundingClientRect().height,
+      hudH: hud.getBoundingClientRect().height
+    };
+    plus.click();
+    var mid = {
+      scale: getComputedStyle(document.documentElement).getPropertyValue("--view-scale").trim(),
+      canvasH: canvas.getBoundingClientRect().height,
+      hudH: hud.getBoundingClientRect().height
+    };
+    minus.click();
+    var after = {
+      scale: getComputedStyle(document.documentElement).getPropertyValue("--view-scale").trim(),
+      canvasH: canvas.getBoundingClientRect().height
+    };
+    return { before: before, mid: mid, after: after };
+  })()`);
+  assert.equal(scaled.before.scale, "1");
+  assert.equal(scaled.mid.scale, "1.15");
+  assert.ok(scaled.mid.canvasH > scaled.before.canvasH * 1.08, "plus should enlarge diagrams");
+  near(scaled.mid.canvasH / scaled.before.canvasH, scaled.mid.hudH / scaled.before.hudH, 0.08);
+  assert.equal(scaled.after.scale, "1");
 
   await cdp.goto(pageUrl("25-2.html"));
   const replay25_2 = await cdp.evaluate("document.querySelectorAll('[data-replay]').length");
