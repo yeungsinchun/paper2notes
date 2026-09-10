@@ -186,6 +186,21 @@
     };
   }
 
+  function pointInPoly(x, y, pts) {
+    var inside = false;
+    var i;
+    var j;
+    for (i = 0, j = pts.length - 1; i < pts.length; j = i, i += 1) {
+      var xi = pts[i].x;
+      var yi = pts[i].y;
+      var xj = pts[j].x;
+      var yj = pts[j].y;
+      var crosses = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / ((yj - yi) || 1e-12) + xi);
+      if (crosses) inside = !inside;
+    }
+    return inside;
+  }
+
   function arrowMesh(hex) {
     var group = new THREE.Group();
     var mat = new THREE.MeshStandardMaterial({
@@ -361,6 +376,32 @@
       omega: opts.omega,
       origin: origin
     };
+  }
+
+  function sceneHasEmTrain(scene) {
+    var lineCount = 0;
+    var arrowCount = 0;
+    scene.traverse(function (obj) {
+      if (obj.isLine) {
+        lineCount += 1;
+        return;
+      }
+      if (!obj.isGroup) return;
+      var hasCyl = false;
+      var hasCone = false;
+      var hasTube = false;
+      var i;
+      for (i = 0; i < obj.children.length; i += 1) {
+        var geo = obj.children[i].geometry;
+        if (!geo) continue;
+        var t = geo.type;
+        if (t === "CylinderGeometry" || t === "CylinderBufferGeometry") hasCyl = true;
+        if (t === "ConeGeometry" || t === "ConeBufferGeometry") hasCone = true;
+        if (t === "TubeGeometry" || t === "TubeBufferGeometry") hasTube = true;
+      }
+      if (hasCyl && hasCone && !hasTube) arrowCount += 1;
+    });
+    return lineCount >= 2 || arrowCount >= 6;
   }
 
   function hostReplay(host, restart) {
@@ -1007,7 +1048,7 @@
         originAtHit: xrayGlyphs.every(function (g) {
           return g.userData.origin.distanceTo(hit) < 0.04;
         }),
-        hasEmTrain: false
+        hasEmTrain: sceneHasEmTrain(gfx.scene)
       };
     }
     hostReplay(host, restart);
@@ -2464,12 +2505,29 @@
       );
       gfx.scene.add(mesh);
       var mid = start + sweep / 2;
+      s.start = start;
       s.mid = mid;
       s.sweepDeg = sweep * 180 / Math.PI;
       s.anchor = new THREE.Vector3(Math.cos(mid) * 0.85, 0.28, Math.sin(mid) * 0.85);
       if (s.frac === 0.2) art = s;
       start += sweep;
     });
+    function sliceScreenPoly(slice) {
+      var y = slice.anchor.y;
+      var pts = [projectXY(gfx.camera, canvas, new THREE.Vector3(0, y, 0))];
+      var sweep = slice.sweepDeg * Math.PI / 180;
+      var steps = 12;
+      var i;
+      for (i = 0; i <= steps; i += 1) {
+        var th = slice.start + sweep * (i / steps);
+        pts.push(projectXY(
+          gfx.camera,
+          canvas,
+          new THREE.Vector3(Math.sin(th) * 1.55, y, Math.cos(th) * 1.55)
+        ));
+      }
+      return pts;
+    }
     function frame() {
       placeHud(hud20, canvas, gfx.camera, art.anchor);
       gfx.renderer.render(gfx.scene, gfx.camera);
@@ -2478,13 +2536,17 @@
     requestAnimationFrame(frame);
     scenes.pie = {
       snapshot: function () {
-        var a = art.anchor.clone().project(gfx.camera);
+        gfx.camera.updateMatrixWorld();
+        placeHud(hud20, canvas, gfx.camera, art.anchor);
+        var hud = hudXY(hud20);
+        var proj = projectXY(gfx.camera, canvas, art.anchor);
+        var inside = isFinite(hud.x) && isFinite(hud.y) && pointInPoly(hud.x, hud.y, sliceScreenPoly(art));
         return {
           sweepDeg: art.sweepDeg,
           label: hud20 ? hud20.textContent.trim() : "",
-          labelInside: true,
-          hudX: hud20 ? parseFloat(hud20.style.left) : null,
-          projX: (a.x * 0.5 + 0.5) * (canvas.clientWidth || 1)
+          labelInside: inside,
+          hudX: hud.x,
+          projX: proj.x
         };
       }
     };
