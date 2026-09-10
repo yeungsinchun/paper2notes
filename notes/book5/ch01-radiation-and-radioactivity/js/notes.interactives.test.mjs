@@ -669,6 +669,13 @@ test("chapter map, summary, and concept-check scoring are the public notes surfa
   })()`);
   assert.equal(check.ok, true);
   assert.equal(check.text, "Yes.");
+  const radiationCopy = await cdp.evaluate("document.querySelector('#radiation').innerText");
+  assert.doesNotMatch(radiationCopy, /does not become an electron beam/i);
+  assert.doesNotMatch(radiationCopy, /Two carriers, one class/i);
+  assert.doesNotMatch(radiationCopy, /becomes the electron beam/i);
+  const knockoutCopy = await cdp.evaluate("document.querySelector('#knockout').innerText");
+  assert.doesNotMatch(knockoutCopy, /turns a light beam into an electron beam/i);
+  assert.match(knockoutCopy, /knocks protons out of the nucleus/i);
 
   const replay25_1 = await cdp.evaluate(`({
     all: Array.from(document.querySelectorAll("[data-replay]")).map(function (b) { return b.getAttribute("data-replay"); }),

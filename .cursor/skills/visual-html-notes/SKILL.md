@@ -20,7 +20,7 @@ Same table style elsewhere: `What you see` / `Therefore`, for example "Both tran
 
 ## Worked figure (Fig. 25.2 light beam)
 
-An EM wave is the combination of the E field and the B field. In three.js that is a traveling train of arrows: E along y, B along z, both `sin(kx - ωt)`, Poynting along +x. That full E+B animation belongs only here, on its own canvas. The electron beam is a moving KE particle stream on a second canvas beside it, not a conversion of the wave and not a second object in the same scene. The HTML heading already names the class ("Two types of radiation"). Do not glue the two types with a divider, floor, rail, 3D title plane, or class HUD. Each pane has its own `stage()`, orbit, and `placeHud`.
+An EM wave is the combination of the E field and the B field. In three.js that is a traveling train of arrows: E along y, B along z, both `sin(kx - ωt)`, Poynting along +x. That full E+B animation belongs only here, on its own canvas. The electron beam is a moving KE particle stream on a second canvas beside it. The HTML heading already names the class ("Two types of radiation"). Do not glue the two types with a divider, floor, rail, 3D title plane, or class HUD. Each pane has its own `stage()`, orbit, and `placeHud`. Student pages teach that physics; they do not recant earlier diagram mistakes.
 
 ```javascript
 var train = emTrain(scene, {
@@ -55,10 +55,10 @@ Worked item after Fig. 25.3 (QB PHY15011101 idea): "What does ionizing radiation
 
 | A | It is made of ions. |
 | B | It knocks electrons out of atoms or molecules, turning them into ions. |
-| C | It turns a light beam into an electron beam. |
+| C | It knocks protons out of the nucleus. |
 | D | It has too little energy to knock electrons out. |
 
-Answer B. A is "radiation made of ions". C keeps EM wave and electron beam as two types. D is non-ionizing. None of those is off-topic filler.
+Answer B. A is "radiation made of ions". C confuses ionization with a nuclear change. D is non-ionizing. None of those is off-topic filler.
 
 ## Worked replay
 
