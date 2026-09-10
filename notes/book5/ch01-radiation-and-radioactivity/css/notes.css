@@ -402,6 +402,16 @@ tr.on td { background: #dff3ee; }
 .stage canvas.scene-canvas.tall {
   height: 340px;
 }
+.pane-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+}
+@media (max-width: 720px) {
+  .pane-pair {
+    grid-template-columns: 1fr;
+  }
+}
 .trap-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

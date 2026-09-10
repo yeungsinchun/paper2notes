@@ -706,8 +706,21 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
 
   await cdp.goto(pageUrl("25-1.html"));
   await cdp.evaluate("new Promise((r) => requestAnimationFrame(() => setTimeout(r, 80)))");
+  await waitFor(async () => {
+    const ready = await cdp.evaluate("!!(window.NotesScenes && window.NotesScenes['beams-em'] && window.NotesScenes['beams-e'])");
+    if (!ready) throw new Error("pane scenes not booted");
+    return true;
+  }, 2500, "two pane scenes");
+  const panes = await cdp.evaluate(`({
+    nCanvas: document.querySelectorAll("#radiation canvas").length,
+    nClassHud: document.querySelectorAll("#radiation [data-hud='class']").length,
+    heading: document.querySelector("#radiation h2").textContent.trim()
+  })`);
+  assert.equal(panes.nCanvas, 2, "Fig 25.2 should be two canvases, n=" + panes.nCanvas);
+  assert.equal(panes.nClassHud, 0, "class HUD belongs on the HTML heading, not in a scene");
+  assert.match(panes.heading, /Two types of radiation/i);
   const beamA = await waitFor(async () => {
-    const snap = await cdp.evaluate("window.NotesScenes.beams.snapshot()");
+    const snap = await cdp.evaluate("window.NotesScenes['beams-em'].snapshot()");
     if (!(snap.eLen > 0.2 && snap.bLen > 0.12)) throw new Error("E and B not on screen yet");
     return snap;
   }, 2500, "traveling E+B wave");
@@ -722,25 +735,43 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
   near(beamA.waveHud, beamA.waveProj, 14);
   near(beamA.eHud, beamA.eProj, 16);
   near(beamA.bHud, beamA.bProj, 18);
-  assert.equal(beamA.hasDivider, false);
-  assert.match(beamA.classLabel, /two types of radiation/i);
   assert.match(beamA.waveLabel, /EM wave/);
-  assert.match(beamA.electronLabel, /particles/);
+  assert.equal(beamA.paneCount, 2);
   await cdp.evaluate("new Promise((r) => setTimeout(r, 350))");
-  const beamB = await cdp.evaluate("window.NotesScenes.beams.snapshot()");
+  const beamB = await cdp.evaluate("window.NotesScenes['beams-em'].snapshot()");
   assert.ok(Math.abs(beamB.crestX - beamA.crestX) > 0.15 || Math.abs(beamB.eAtProbe - beamA.eAtProbe) > 0.15,
     "E and B should travel, E " + beamA.eAtProbe + " -> " + beamB.eAtProbe
   );
-  const cam0 = await cdp.evaluate("window.NotesScenes.beams.snapshot()");
-  await cdp.evaluate("window.NotesScenes.beams.orbitBy(40, 6)");
+  const electronsA = await cdp.evaluate("window.NotesScenes['beams-e'].snapshot()");
+  assert.equal(electronsA.n, 8);
+  assert.match(electronsA.label, /particles/);
+  near(electronsA.hudX, electronsA.projX, 14);
+  await cdp.evaluate("new Promise((r) => setTimeout(r, 350))");
+  const electronsB = await cdp.evaluate("window.NotesScenes['beams-e'].snapshot()");
+  const moved = electronsA.xs.some((x, i) => Math.abs(x - electronsB.xs[i]) > 0.08);
+  assert.ok(moved, "electron stream should keep moving");
+  const cam0 = await cdp.evaluate("window.NotesScenes['beams-em'].snapshot()");
+  const eCam0 = await cdp.evaluate("window.NotesScenes['beams-e'].snapshot()");
+  await cdp.evaluate("window.NotesScenes['beams-em'].orbitBy(40, 6)");
   await cdp.evaluate("new Promise((r) => setTimeout(r, 250))");
-  const cam1 = await cdp.evaluate("window.NotesScenes.beams.snapshot()");
+  const cam1 = await cdp.evaluate("window.NotesScenes['beams-em'].snapshot()");
+  const eCam1 = await cdp.evaluate("window.NotesScenes['beams-e'].snapshot()");
   assert.ok(
     Math.abs(cam1.camX - cam0.camX) > 0.12 || Math.abs(cam1.camZ - cam0.camZ) > 0.12,
-    "drag-orbit should move the camera around the apparatus"
+    "drag-orbit should move the light-beam camera"
   );
+  near(eCam1.camX, eCam0.camX, 0.02);
+  near(eCam1.camZ, eCam0.camZ, 0.02);
   near(cam1.eHud, cam1.eProj, 18);
   near(cam1.bHud, cam1.bProj, 20);
+  await cdp.evaluate("window.NotesScenes['beams-e'].orbitBy(40, 6)");
+  await cdp.evaluate("new Promise((r) => setTimeout(r, 250))");
+  const eCam2 = await cdp.evaluate("window.NotesScenes['beams-e'].snapshot()");
+  assert.ok(
+    Math.abs(eCam2.camX - eCam1.camX) > 0.12 || Math.abs(eCam2.camZ - eCam1.camZ) > 0.12,
+    "drag-orbit should move the electron-beam camera"
+  );
+  near(eCam2.hudX, eCam2.projX, 16);
 
   const tube = await cdp.evaluate("window.NotesScenes.tube.snapshot()");
   near(tube.gunHud, tube.gunProj, 10);

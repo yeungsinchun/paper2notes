@@ -26,15 +26,22 @@
         <h2>Two types of radiation</h2>
         <span class="stamp">Fig. 25.2</span>
       </header>
-      <div class="visual play stage" id="beam-vis" data-autoplay data-scene="beams">
-        <canvas class="scene-canvas tall" width="960" height="480" aria-label="Two types of radiation: a traveling electromagnetic wave beside a stream of electrons"></canvas>
-        <span class="hud-label" data-hud="class">two types of radiation</span>
-        <span class="hud-label" data-hud="wave">light beam · EM wave</span>
-        <span class="hud-label" data-hud="e">E</span>
-        <span class="hud-label" data-hud="b">B</span>
-        <span class="hud-label" data-hud="electrons">electron beam · particles</span>
+      <div class="pane-pair">
+        <div class="visual play stage" id="beam-em-vis" data-autoplay data-scene="beams-em">
+          <canvas class="scene-canvas" width="480" height="360" aria-label="Traveling electromagnetic wave: oscillating E with a perpendicular oscillating B"></canvas>
+          <span class="hud-label" data-hud="wave">light beam · EM wave</span>
+          <span class="hud-label" data-hud="e">E</span>
+          <span class="hud-label" data-hud="b">B</span>
+        </div>
+        <div class="visual play stage" id="beam-e-vis" data-autoplay data-scene="beams-e">
+          <canvas class="scene-canvas" width="480" height="360" aria-label="Stream of electrons with kinetic energy"></canvas>
+          <span class="hud-label" data-hud="electrons">electron beam · particles</span>
+        </div>
       </div>
-      <div class="row"><button type="button" data-replay="beam-vis">Replay</button></div>
+      <div class="row">
+        <button type="button" data-replay="beam-em-vis">Replay light</button>
+        <button type="button" data-replay="beam-e-vis">Replay electrons</button>
+      </div>
       <table class="compact pair">
         <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
         <tbody>

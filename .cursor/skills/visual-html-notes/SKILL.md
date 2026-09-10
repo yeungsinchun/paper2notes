@@ -20,15 +20,15 @@ Same table style elsewhere: `What you see` / `Therefore`, for example "Both tran
 
 ## Worked figure (Fig. 25.2 light beam)
 
-An EM wave is the combination of the E field and the B field. In three.js that is a traveling train of arrows: E along y, B along z, both `sin(kx − ωt)`, Poynting along +x. That full E+B animation belongs only here. The electron beam is a moving KE particle stream beside it, not a conversion of the wave. Do not put a wall between them. A shared title or frame names the class: "two types of radiation" (electromagnetic / particle). Labels sit on the objects with `placeHud`.
+An EM wave is the combination of the E field and the B field. In three.js that is a traveling train of arrows: E along y, B along z, both `sin(kx - ωt)`, Poynting along +x. That full E+B animation belongs only here, on its own canvas. The electron beam is a moving KE particle stream on a second canvas beside it, not a conversion of the wave and not a second object in the same scene. The HTML heading already names the class ("Two types of radiation"). Do not glue the two types with a divider, floor, rail, 3D title plane, or class HUD. Each pane has its own `stage()`, orbit, and `placeHud`.
 
 ```javascript
 var train = emTrain(scene, {
-  origin: new THREE.Vector3(-5.35, 0, 0),
+  origin: new THREE.Vector3(-2.2, 0, 0),
   dir: new THREE.Vector3(1, 0, 0),
   eHat: new THREE.Vector3(0, 1, 0),
   bHat: new THREE.Vector3(0, 0, 1),
-  length: 4.55, n: 20, eAmp: 1.22, bAmp: 0.92, k: 2.55, omega: 3.1
+  length: 4.4, n: 20, eAmp: 1.22, bAmp: 0.92, k: 2.55, omega: 3.1
 });
 placeHud(hudE, canvas, camera, eTip);
 placeHud(hudB, canvas, camera, bTip);
@@ -68,6 +68,7 @@ Teach identification as a steppable directed graph (paper / Al / Pb, then E or B
 
 | Do this | Not this |
 | --- | --- |
+| Fig 25.2: two canvases (E+B wave and electron stream); the heading names the class | One scene with floor, rail, divider, or class HUD |
 | Knockout: the same bound electron leaves the shell | An electron that fades in beside the atom |
 | X-rays leave the electron impact on the angled target face as a wide fan | Tight gold stubs plus a cramped E+B train on one axis |
 | Imaging: X-rays down onto bone beside flesh; film white under bone, dark under flesh | Sideways beams or toggles that hide the textbook layout |

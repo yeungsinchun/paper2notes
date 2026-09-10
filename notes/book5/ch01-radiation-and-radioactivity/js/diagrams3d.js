@@ -398,24 +398,6 @@
     return mesh;
   }
 
-  function labelPlane(text, w, h, fill) {
-    var c = document.createElement("canvas");
-    c.width = 1024;
-    c.height = 160;
-    var ctx = c.getContext("2d");
-    ctx.clearRect(0, 0, 1024, 160);
-    ctx.fillStyle = fill || "#163038";
-    ctx.font = "700 54px sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(text, 512, 84);
-    var tex = new THREE.CanvasTexture(c);
-    return new THREE.Mesh(
-      new THREE.PlaneGeometry(w, h),
-      new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, side: THREE.DoubleSide })
-    );
-  }
-
   function knockout(host) {
     if (!THREE) return;
     var canvas = host.querySelector("canvas");
@@ -614,22 +596,20 @@
     scenes.ionpair = { snapshot: snapshot, replay: restart };
   }
 
-  function beams(host) {
+  function beamsEm(host) {
     if (!THREE) return;
     var canvas = host.querySelector("canvas");
     var gfx = stage(canvas, {
-      persp: { fov: 30, x: 5.4, y: 3.35, z: 9.6, lookX: -0.15, lookY: 0.15, lookZ: 0 }
+      persp: { fov: 32, x: 0.15, y: 2.55, z: 8.2, lookX: 0, lookY: 0.1, lookZ: 0 }
     });
     var hudWave = host.querySelector('[data-hud="wave"]');
     var hudE = host.querySelector('[data-hud="e"]');
     var hudB = host.querySelector('[data-hud="b"]');
-    var hudElectrons = host.querySelector('[data-hud="electrons"]');
-    var hudClass = host.querySelector('[data-hud="class"]');
-    var origin = new THREE.Vector3(-5.35, 0, 0);
+    var origin = new THREE.Vector3(-2.2, 0, 0);
     var dir = new THREE.Vector3(1, 0, 0);
     var eHat = new THREE.Vector3(0, 1, 0);
     var bHat = new THREE.Vector3(0, 0, 1);
-    var length = 4.55;
+    var length = 4.4;
     var train = emTrain(gfx.scene, {
       origin: origin,
       dir: dir,
@@ -642,45 +622,9 @@
       k: 2.55,
       omega: 3.1
     });
-    var frameMat = new THREE.MeshStandardMaterial({ color: 0x6a767c, roughness: 0.45, metalness: 0.12 });
-    function bar(w, h, d) {
-      return new THREE.Mesh(new THREE.BoxGeometry(w, h, d), frameMat);
-    }
-    var floor = new THREE.Mesh(
-      new THREE.BoxGeometry(11.6, 0.08, 3.4),
-      new THREE.MeshStandardMaterial({ color: 0xe7eee8, roughness: 0.88 })
-    );
-    floor.position.set(0, -1.62, 0);
-    var rail = bar(11.6, 0.07, 0.07);
-    rail.position.set(0, 2.08, -1.15);
-    var postL = bar(0.07, 3.7, 0.07);
-    postL.position.set(-5.76, 0.23, -1.15);
-    var postR = bar(0.07, 3.7, 0.07);
-    postR.position.set(5.76, 0.23, -1.15);
-    var typeEM = labelPlane("electromagnetic", 3.3, 0.36, "#0e5f56");
-    typeEM.position.set(-2.7, -1.36, 0.15);
-    var typeP = labelPlane("particle", 2.5, 0.36, "#1d4f91");
-    typeP.position.set(2.9, -1.36, 0.15);
-    gfx.scene.add(floor, rail, postL, postR, typeEM, typeP);
-    var classAnchor = new THREE.Vector3(0, 2.48, -1.02);
-    var electrons = [];
-    var i;
-    for (i = 0; i < 8; i += 1) {
-      var e = ball(0.13, 0x2a62a8);
-      electrons.push(e);
-      gfx.scene.add(e);
-    }
-    var eTrack = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.016, 0.016, 4.5, 8),
-      new THREE.MeshBasicMaterial({ color: 0x8aa3ad })
-    );
-    eTrack.rotation.z = Math.PI / 2;
-    eTrack.position.set(2.85, 0, 0);
-    gfx.scene.add(eTrack);
-    var waveAnchor = new THREE.Vector3(-3.05, 1.55, 0);
-    var eFieldAnchor = new THREE.Vector3(-3.4, 1.35, 0);
-    var bFieldAnchor = new THREE.Vector3(-3.4, 0.12, 1.05);
-    var eBeamAnchor = new THREE.Vector3(2.85, 0.85, 0);
+    var waveAnchor = new THREE.Vector3(0, 1.55, 0);
+    var eFieldAnchor = new THREE.Vector3(-0.4, 1.35, 0);
+    var bFieldAnchor = new THREE.Vector3(-0.4, 0.12, 1.05);
     var t0 = performance.now();
     var lastT = 0;
     function restart() { t0 = performance.now(); }
@@ -692,39 +636,17 @@
       eFieldAnchor.copy(mid.p).add(mid.eVec).add(new THREE.Vector3(0.12, 0.18, 0));
       bFieldAnchor.copy(mid.p).add(mid.bVec).add(new THREE.Vector3(0.12, 0.08, 0.12));
       waveAnchor.copy(origin).addScaledVector(dir, length * 0.5).add(new THREE.Vector3(0, 1.55, 0));
-      electrons.forEach(function (mesh, idx) {
-        var u = (t * 0.55 + idx * 0.125) % 1;
-        mesh.position.set(lerp(0.7, 5.05, u), 0, 0);
-      });
       placeHud(hudWave, canvas, gfx.camera, waveAnchor);
       placeHud(hudE, canvas, gfx.camera, eFieldAnchor);
       placeHud(hudB, canvas, gfx.camera, bFieldAnchor);
-      placeHud(hudElectrons, canvas, gfx.camera, eBeamAnchor);
-      placeHud(hudClass, canvas, gfx.camera, classAnchor);
       gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
-    }
-    function hasMidWall() {
-      var found = false;
-      var size = new THREE.Vector3();
-      var center = new THREE.Vector3();
-      gfx.scene.updateMatrixWorld(true);
-      gfx.scene.traverse(function (obj) {
-        if (found || !obj.isMesh || !obj.geometry || obj.geometry.type !== "BoxGeometry") return;
-        var box = new THREE.Box3().setFromObject(obj);
-        box.getSize(size);
-        box.getCenter(center);
-        if (Math.abs(center.x) < 0.65 && size.y > 1.2 && size.x < 1.2) found = true;
-      });
-      return found;
     }
     function snapshot() {
       gfx.camera.updateMatrixWorld();
       placeHud(hudWave, canvas, gfx.camera, waveAnchor);
       placeHud(hudE, canvas, gfx.camera, eFieldAnchor);
       placeHud(hudB, canvas, gfx.camera, bFieldAnchor);
-      placeHud(hudElectrons, canvas, gfx.camera, eBeamAnchor);
-      placeHud(hudClass, canvas, gfx.camera, classAnchor);
       var probeS = length * 0.4;
       var sm = train.sample(probeS, lastT);
       var eVec = sm.eVec;
@@ -767,16 +689,76 @@
         camX: gfx.camera.position.x,
         camY: gfx.camera.position.y,
         camZ: gfx.camera.position.z,
-        hasDivider: hasMidWall(),
-        classLabel: hudClass ? hudClass.textContent.trim() : "",
         waveLabel: hudWave ? hudWave.textContent.trim() : "",
-        electronLabel: hudElectrons ? hudElectrons.textContent.trim() : ""
+        paneCount: document.querySelectorAll("#radiation canvas").length
       };
     }
     hostReplay(host, restart);
     train.update(0);
     requestAnimationFrame(frame);
-    scenes.beams = {
+    scenes["beams-em"] = {
+      replay: restart,
+      snapshot: snapshot,
+      orbitBy: function (dx, dy) { gfx.orbit.nudge(dx, dy); }
+    };
+  }
+
+  function beamsE(host) {
+    if (!THREE) return;
+    var canvas = host.querySelector("canvas");
+    var gfx = stage(canvas, {
+      persp: { fov: 32, x: 0.2, y: 1.6, z: 7.4, lookX: 0, lookY: 0, lookZ: 0 }
+    });
+    var hudElectrons = host.querySelector('[data-hud="electrons"]');
+    var electrons = [];
+    var i;
+    for (i = 0; i < 8; i += 1) {
+      var e = ball(0.13, 0x2a62a8);
+      electrons.push(e);
+      gfx.scene.add(e);
+    }
+    var eTrack = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.016, 0.016, 4.6, 8),
+      new THREE.MeshBasicMaterial({ color: 0x8aa3ad })
+    );
+    eTrack.rotation.z = Math.PI / 2;
+    eTrack.position.set(0, 0, 0);
+    gfx.scene.add(eTrack);
+    var eBeamAnchor = new THREE.Vector3(0, 0.7, 0);
+    var t0 = performance.now();
+    var lastT = 0;
+    function restart() { t0 = performance.now(); }
+    function frame(now) {
+      var t = (now - t0) / 1000;
+      lastT = t;
+      electrons.forEach(function (mesh, idx) {
+        var u = (t * 0.55 + idx * 0.125) % 1;
+        mesh.position.set(lerp(-2.2, 2.2, u), 0, 0);
+      });
+      eBeamAnchor.set(0, 0.7, 0);
+      placeHud(hudElectrons, canvas, gfx.camera, eBeamAnchor);
+      gfx.renderer.render(gfx.scene, gfx.camera);
+      requestAnimationFrame(frame);
+    }
+    function snapshot() {
+      gfx.camera.updateMatrixWorld();
+      placeHud(hudElectrons, canvas, gfx.camera, eBeamAnchor);
+      var hud = hudXY(hudElectrons);
+      var proj = projectXY(gfx.camera, canvas, eBeamAnchor);
+      return {
+        n: electrons.length,
+        xs: electrons.map(function (m) { return m.position.x; }),
+        hudX: hud.x,
+        projX: proj.x,
+        camX: gfx.camera.position.x,
+        camZ: gfx.camera.position.z,
+        label: hudElectrons ? hudElectrons.textContent.trim() : "",
+        t: lastT
+      };
+    }
+    hostReplay(host, restart);
+    requestAnimationFrame(frame);
+    scenes["beams-e"] = {
       replay: restart,
       snapshot: snapshot,
       orbitBy: function (dx, dy) { gfx.orbit.nudge(dx, dy); }
@@ -2544,7 +2526,8 @@
   var builders = {
     knockout: knockout,
     ionpair: ionpair2d,
-    beams: beams,
+    "beams-em": beamsEm,
+    "beams-e": beamsE,
     atom: atom,
     tube: tube,
     "decay-a": decayAlpha,
