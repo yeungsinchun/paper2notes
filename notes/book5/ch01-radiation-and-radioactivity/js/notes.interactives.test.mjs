@@ -174,29 +174,25 @@ test("25.1 spectrum is static with the ionizing cut after UV", async () => {
   await cdp.evaluate("new Promise((r) => setTimeout(r, 250))");
   const spec = await cdp.evaluate(`(function () {
     var spec = document.getElementById("spectrum");
-    var svg = spec && spec.querySelector("svg");
-    var texts = svg ? Array.from(svg.querySelectorAll("text")).map(function (t) { return t.textContent.trim(); }) : [];
-    var xrays = svg ? Array.from(svg.querySelectorAll("rect")).find(function (r) {
-      var n = r.nextElementSibling;
-      return n && n.textContent.trim() === "X-rays";
-    }) : null;
+    var snap = window.NotesScenes && window.NotesScenes.spectrum && window.NotesScenes.spectrum.snapshot();
     return {
       slider: !!document.querySelector("#spectrum-slider"),
       mark: !!document.querySelector("#spectrum-mark"),
       pointer: !!document.querySelector("#spectrum-pointer"),
-      cut: !!document.querySelector("#ionizing-cut"),
-      texts: texts,
-      xrayX: xrays && xrays.getAttribute("x"),
-      body: spec ? spec.textContent : ""
+      snap: snap,
+      body: spec ? spec.textContent : "",
+      nonion: spec && spec.querySelector('[data-hud="nonion"]') && spec.querySelector('[data-hud="nonion"]').textContent,
+      ion: spec && spec.querySelector('[data-hud="ion"]') && spec.querySelector('[data-hud="ion"]').textContent
     };
   })()`);
   assert.equal(spec.slider, false);
   assert.equal(spec.mark, false);
   assert.equal(spec.pointer, false);
-  assert.equal(spec.cut, true);
-  assert.ok(spec.texts.includes("non-ionizing"));
-  assert.ok(spec.texts.includes("ionizing"));
-  assert.equal(spec.xrayX, "390");
+  assert.equal(spec.snap.cut, true);
+  assert.equal(spec.snap.cutAfterUV, true);
+  assert.equal(spec.snap.xrayAfterCut, true);
+  assert.match(spec.nonion, /non-ionizing/);
+  assert.match(spec.ion, /ionizing/);
   assert.match(spec.body, /X-rays/);
   assert.doesNotMatch(spec.body, /book cut/i);
 
@@ -210,62 +206,15 @@ test("25.1 imaging is X-rays down onto bone beside flesh, white film under bone"
   await cdp.goto(pageUrl("25-1.html"));
   await cdp.evaluate("new Promise((r) => setTimeout(r, 1400))");
   const img = await cdp.evaluate(`(function () {
-    function box(el) {
-      return {
-        x: Number(el.getAttribute("x")),
-        y: Number(el.getAttribute("y")),
-        w: Number(el.getAttribute("width")),
-        h: Number(el.getAttribute("height")),
-        fill: el.getAttribute("fill")
-      };
-    }
-    function rgb(fill) {
-      var hex = /^#([0-9a-f]{6})$/i.exec(fill || "");
-      if (hex) {
-        var n = parseInt(hex[1], 16);
-        return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
-      }
-      var m = /rgb\\((\\d+),\\s*(\\d+),\\s*(\\d+)\\)/.exec(fill || "");
-      return m ? { r: Number(m[1]), g: Number(m[2]), b: Number(m[3]) } : { r: 0, g: 0, b: 0 };
-    }
-    function lum(c) { return 0.3 * c.r + 0.6 * c.g + 0.1 * c.b; }
-    var bone = box(document.getElementById("slab-bone"));
-    var flesh = box(document.getElementById("slab-flesh"));
-    var filmB = box(document.getElementById("film-under-bone"));
-    var filmF = box(document.getElementById("film-under-flesh"));
-    var rays = Array.from(document.querySelectorAll("#imaging-vis [data-xray]"));
-    function inRect(pt, box) {
-      return pt.x >= box.x && pt.x <= box.x + box.w && pt.y >= box.y && pt.y <= box.y + box.h;
-    }
-    var ends = rays.map(function (p) {
-      var pt = p.getPointAtLength(p.getTotalLength());
-      return { x: pt.x, y: pt.y };
-    });
-    return {
-      bone: bone,
-      flesh: flesh,
-      filmB: filmB,
-      filmF: filmF,
-      boneLum: lum(rgb(filmB.fill)),
-      fleshLum: lum(rgb(filmF.fill)),
-      rayCount: rays.length,
-      stopInBone: ends.filter(function (pt) { return inRect(pt, bone); }).length,
-      stopInFlesh: ends.filter(function (pt) { return inRect(pt, flesh); }).length,
-      reachFilm: ends.filter(function (pt) { return pt.y >= filmB.y - 1; }).length,
-      raysDown: rays.every(function (p) {
-        var b = p.getBBox();
-        return b.height > b.width * 1.2;
-      }),
-      toggles: document.querySelectorAll("[data-tissue]").length,
-      texts: Array.from(document.querySelectorAll("#imaging-vis text")).map(function (t) { return t.textContent.trim(); })
-    };
+    var snap = window.NotesScenes.imaging.snapshot();
+    var host = document.getElementById("imaging-vis");
+    snap.toggles = document.querySelectorAll("[data-tissue]").length;
+    snap.labels = Array.from(host.querySelectorAll(".hud-label")).map(function (t) { return t.textContent.trim(); });
+    return snap;
   })()`);
   assert.equal(img.toggles, 0);
-  assert.ok(img.bone.x + img.bone.w <= img.flesh.x + 1, "bone slab should sit left of flesh");
-  assert.ok(img.bone.y + img.bone.h <= img.filmB.y + 1, "film should sit under the slabs");
-  near(img.filmB.x, img.bone.x, 1);
-  near(img.filmB.w, img.bone.w, 1);
-  near(img.filmF.x, img.flesh.x, 1);
+  assert.equal(img.boneLeftOfFlesh, true, "bone slab should sit left of flesh");
+  assert.equal(img.filmUnder, true, "film should sit under the slabs");
   assert.ok(img.boneLum > 180, "film under bone should stay white");
   assert.ok(img.fleshLum < 80, "film under flesh should blacken");
   assert.equal(img.rayCount, 5);
@@ -273,8 +222,8 @@ test("25.1 imaging is X-rays down onto bone beside flesh, white film under bone"
   assert.equal(img.stopInBone, 3, "three X-rays should stop inside bone");
   assert.equal(img.reachFilm, 2, "both flesh rays should reach the film");
   assert.equal(img.raysDown, true);
-  assert.ok(img.texts.includes("X-rays"));
-  assert.ok(img.texts.includes("photographic film"));
+  assert.ok(img.labels.includes("X-rays"));
+  assert.ok(img.labels.includes("photographic film"));
 
   if (evidenceDir) {
     await cdp.screenshot(path.join(evidenceDir, "25-1-xray-imaging.png"), "#imaging");
@@ -283,36 +232,12 @@ test("25.1 imaging is X-rays down onto bone beside flesh, white film under bone"
 
 test("25.2 pie wedge is 20% and Pu-239 bookkeeping is static n_α=8", async () => {
   await cdp.goto(pageUrl("25-2.html"));
+  await cdp.evaluate("new Promise((r) => setTimeout(r, 200))");
   const pie = await cdp.evaluate(`(function () {
-    var paths = Array.from(document.querySelectorAll('.pie path'));
-    var path = paths[paths.length - 1];
-    var label = Array.from(document.querySelectorAll('.pie text')).find(function (t) {
-      return t.textContent.trim() === "20%";
-    });
-    var d = path.getAttribute("d");
-    var m = /M\\s*([\\d.]+)\\s+([\\d.]+)\\s+L\\s*([\\d.]+)\\s+([\\d.]+)\\s+A\\s*([\\d.]+)\\s+[\\d.]+\\s+0\\s+0\\s+1\\s+([\\d.]+)\\s+([\\d.]+)/.exec(d);
-    var cx = Number(m[1]);
-    var cy = Number(m[2]);
-    var endX = Number(m[6]);
-    var endY = Number(m[7]);
-    var startAngle = Math.atan2(Number(m[3]) - cx, cy - Number(m[4]));
-    var endAngle = Math.atan2(endX - cx, cy - endY);
-    var sweepDeg = (endAngle - startAngle) * 180 / Math.PI;
-    if (sweepDeg < 0) sweepDeg += 360;
-    var lx = Number(label.getAttribute("x"));
-    var ly = Number(label.getAttribute("y"));
-    var labelDeg = Math.atan2(lx - cx, cy - ly) * 180 / Math.PI;
-    if (labelDeg < 0) labelDeg += 360;
-    var startDeg = startAngle * 180 / Math.PI;
-    if (startDeg < 0) startDeg += 360;
-    var labelFromStart = (labelDeg - startDeg + 360) % 360;
-    return {
-      sweepDeg: sweepDeg,
-      label: label.textContent,
-      labelInside: labelFromStart >= 0 && labelFromStart <= sweepDeg,
-      puRanges: document.querySelectorAll("#pu239 input[type=range]").length,
-      puText: document.querySelector("#pu239").innerText
-    };
+    var snap = window.NotesScenes.pie.snapshot();
+    snap.puRanges = document.querySelectorAll("#pu239 input[type=range]").length;
+    snap.puText = document.querySelector("#pu239").innerText;
+    return snap;
   })()`);
   near(pie.sweepDeg, 72, 2);
   assert.equal(pie.label, "20%");
@@ -754,19 +679,25 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
   await cdp.evaluate("new Promise((r) => requestAnimationFrame(() => setTimeout(r, 80)))");
   const beamA = await waitFor(async () => {
     const snap = await cdp.evaluate("window.NotesScenes.beams.snapshot()");
-    if (!(snap.peakA > 0.25 && snap.span > 0.4)) throw new Error("packet not on screen yet");
+    if (!(snap.eLen > 0.2 && snap.bLen > 0.12)) throw new Error("E and B not on screen yet");
     return snap;
-  }, 2500, "localized EM wave packet");
-  assert.ok(
-    beamA.span < beamA.track * 0.62,
-    "light beam should be a localized packet, span=" + beamA.span + " track=" + beamA.track
-  );
-  near(beamA.waveHud, beamA.waveProj, 12);
+  }, 2500, "traveling E+B wave");
+  near(beamA.dotEB, 0, 0.05);
+  near(beamA.eDotK, 0, 0.05);
+  near(beamA.bDotK, 0, 0.05);
+  near(beamA.eX, 0, 0.08);
+  near(beamA.eZ, 0, 0.08);
+  near(beamA.bX, 0, 0.08);
+  near(beamA.bY, 0, 0.08);
+  assert.ok(Math.abs(beamA.poyntingX) > 0.02, "E × B should point along the travel axis");
+  near(beamA.waveHud, beamA.waveProj, 14);
+  near(beamA.eHud, beamA.eProj, 16);
+  near(beamA.bHud, beamA.bProj, 18);
   await cdp.evaluate("new Promise((r) => setTimeout(r, 350))");
   const beamB = await cdp.evaluate("window.NotesScenes.beams.snapshot()");
   assert.ok(
-    Math.abs(beamB.centroidX - beamA.centroidX) > 0.2 || Math.abs(beamB.peakX - beamA.peakX) > 0.2,
-    "wave packet should travel, " + beamA.centroidX + " -> " + beamB.centroidX
+    Math.abs(beamB.eAtProbe - beamA.eAtProbe) > 0.15 || Math.abs(beamB.crestX - beamA.crestX) > 0.15,
+    "E and B should travel, E " + beamA.eAtProbe + " -> " + beamB.eAtProbe
   );
 
   const tube = await cdp.evaluate("window.NotesScenes.tube.snapshot()");

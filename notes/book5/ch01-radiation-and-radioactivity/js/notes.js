@@ -92,158 +92,27 @@
   }
 
   function initImaging() {
-    var host = $("#imaging-vis");
-    if (!host) return;
-    var rays = $all("[data-xray]", host);
-    var filmFlesh = $("#film-under-flesh");
-    var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    var t0 = performance.now();
-    var lengths = rays.map(function (ray) {
-      try {
-        return ray.getTotalLength();
-      } catch (err) {
-        return 140;
-      }
-    });
-    function apply(sec) {
-      rays.forEach(function (ray, i) {
-        var len = lengths[i];
-        var dur = 0.5 + len / 260;
-        var u = reduced ? 1 : Math.max(0, Math.min(1, sec / dur));
-        ray.style.strokeDasharray = String(len);
-        ray.style.strokeDashoffset = String(len * (1 - u));
-      });
-      if (filmFlesh) {
-        var develop = reduced ? 1 : Math.max(0, Math.min(1, (sec - 0.65) / 0.45));
-        var r = Math.round(244 - develop * 218);
-        var g = Math.round(239 - develop * 217);
-        var b = Math.round(224 - develop * 208);
-        filmFlesh.setAttribute("fill", "rgb(" + r + "," + g + "," + b + ")");
-      }
-    }
-    host.addEventListener("notes-replay", function () {
-      t0 = performance.now();
-    });
-    function frame(now) {
-      apply((now - t0) / 1000);
-      requestAnimationFrame(frame);
-    }
-    apply(reduced ? 8 : 0);
-    requestAnimationFrame(frame);
-  }
-
-  function honeycomb(count) {
-    var coords = [];
-    var span = 4;
-    var q;
-    for (q = -span; q <= span; q += 1) {
-      var r;
-      for (r = -span; r <= span; r += 1) {
-        var s = -q - r;
-        if (Math.max(Math.abs(q), Math.abs(r), Math.abs(s)) <= span) {
-          coords.push({
-            x: q + r / 2,
-            y: r * Math.sqrt(3) / 2,
-            order: q * q + r * r + s * s
-          });
-        }
-      }
-    }
-    coords.sort(function (a, b) { return a.order - b.order; });
-    return coords.slice(0, count);
-  }
-
-  function drawCluster(parent, cx, cy, protons, neutrons, spacing) {
-    var items = [];
-    var i;
-    for (i = 0; i < protons; i += 1) items.push("#c0392b");
-    for (i = 0; i < neutrons; i += 1) items.push("#2f7a4a");
-    var pts = honeycomb(items.length);
-    pts.forEach(function (pt, idx) {
-      parent.appendChild(svgEl("circle", {
-        cx: cx + pt.x * spacing,
-        cy: cy + pt.y * spacing,
-        r: spacing * 0.42,
-        fill: items[idx]
-      }));
-    });
-  }
-
-  function drawShells(parent, cx, cy, electrons) {
-    var inner = Math.min(2, electrons);
-    var outer = Math.max(0, electrons - 2);
-    function place(n, radius) {
-      var i;
-      for (i = 0; i < n; i += 1) {
-        var angle = -Math.PI / 2 + (i * 2 * Math.PI) / n;
-        parent.appendChild(svgEl("circle", {
-          cx: cx + radius * Math.cos(angle),
-          cy: cy + radius * Math.sin(angle),
-          r: 6,
-          fill: "#2a62a8"
-        }));
-      }
-    }
-    if (inner) {
-      parent.appendChild(svgEl("circle", {
-        cx: cx, cy: cy, r: 28, fill: "none", stroke: "#9bb6c4"
-      }));
-      place(inner, 28);
-    }
-    if (outer) {
-      parent.appendChild(svgEl("circle", {
-        cx: cx, cy: cy, r: 48, fill: "none", stroke: "#9bb6c4"
-      }));
-      place(outer, 48);
-    }
+    /* imaging is a three.js scene; replay is handled by data-scene + notes-replay */
   }
 
   function initIsotopes() {
-    var nucleus = $("#iso-nucleus");
-    var label = $("#iso-label");
-    if (!nucleus) return;
-    function draw(nNeutrons) {
-      nucleus.innerHTML = "";
-      drawCluster(nucleus, 200, 108, 1, nNeutrons, 14);
-      var names = ["¹H  protium  N = 0", "²H  deuterium  N = 1", "³H  tritium  N = 2"];
-      if (label) label.textContent = names[nNeutrons] + "  ·  Z = 1";
-    }
     $all("[data-iso]").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        draw(Number(btn.getAttribute("data-iso")));
+        if (window.NotesScenes && window.NotesScenes.hydrogen) {
+          window.NotesScenes.hydrogen.setN(Number(btn.getAttribute("data-iso")));
+        }
       });
     });
-    draw(0);
   }
 
   function initNuclides() {
-    var stage = $("#nuclide-stage");
-    var counts = $("#nuclide-counts");
-    if (!stage) return;
-    var data = {
-      H: { a: 1, z: 1, n: 0, e: 1, name: "H" },
-      He: { a: 4, z: 2, n: 2, e: 2, name: "He" },
-      Li: { a: 7, z: 3, n: 4, e: 3, name: "Li" },
-      C: { a: 12, z: 6, n: 6, e: 6, name: "C" }
-    };
-    function draw(key) {
-      var d = data[key];
-      stage.innerHTML = "";
-      drawCluster(stage, 430, 100, d.z, d.n, 11);
-      drawShells(stage, 430, 100, d.e);
-      if (counts) {
-        counts.innerHTML =
-          '<span class="nuc"><span class="az"><span>' + d.a + "</span><span>" + d.z +
-          "</span></span>" + d.name + "</span>   A = " + d.a +
-          "   Z = " + d.z + "   N = " + d.n + "   electrons = " + d.e;
-      }
-    }
     $all("[data-nuclide]").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        draw(btn.getAttribute("data-nuclide"));
+        if (window.NotesScenes && window.NotesScenes.nuclide) {
+          window.NotesScenes.nuclide.setKey(btn.getAttribute("data-nuclide"));
+        }
       });
     });
-    draw("C");
   }
 
   var series = [
@@ -411,84 +280,13 @@
   }
 
   function initTracks() {
-    var canvas = $("#track-canvas");
-    if (!canvas || !canvas.getContext) return;
-    var ctx = canvas.getContext("2d");
-    var kind = "alpha";
-    var t = 0;
-    var running = true;
-
-    function drawAlpha() {
-      ctx.lineWidth = 6;
-      ctx.strokeStyle = "#f4f0e4";
-      ctx.lineCap = "round";
-      var i;
-      for (i = 0; i < 5; i += 1) {
-        var y = 36 + i * 32;
-        var length = 90 + (i % 3) * 18;
-        var grow = Math.min(length, (t * 3 + i * 12) % (length + 40));
-        ctx.beginPath();
-        ctx.moveTo(28, y);
-        ctx.lineTo(28 + grow, y);
-        ctx.stroke();
-      }
-    }
-
-    function drawBeta() {
-      ctx.lineWidth = 1.5;
-      ctx.strokeStyle = "#dfe7f2";
-      var i;
-      for (i = 0; i < 6; i += 1) {
-        ctx.beginPath();
-        var x = 28;
-        var y = 30 + i * 26;
-        ctx.moveTo(x, y);
-        var s;
-        for (s = 0; s < 22; s += 1) {
-          x += 12;
-          y += Math.sin(s * 1.65 + i * 0.7 + t * 0.12) * 9;
-          ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-      }
-    }
-
-    function drawGamma() {
-      ctx.fillStyle = "#f4f0e4";
-      var i;
-      for (i = 0; i < 9; i += 1) {
-        var x = 50 + ((i * 53 + t * 2) % 520);
-        var y = 28 + ((i * 71) % 150);
-        ctx.beginPath();
-        ctx.arc(x, y, 1.6, 0, Math.PI * 2);
-        ctx.fill();
-        if (i % 3 === 0) {
-          ctx.strokeStyle = "rgba(244,240,228,0.45)";
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(x, y);
-          ctx.lineTo(x + 18, y + 10);
-          ctx.stroke();
-        }
-      }
-    }
-
-    function frame() {
-      ctx.fillStyle = "#11150f";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      if (kind === "alpha") drawAlpha();
-      else if (kind === "beta") drawBeta();
-      else drawGamma();
-      t += 1;
-      if (running) requestAnimationFrame(frame);
-    }
-
     $all("[data-track]").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        kind = btn.getAttribute("data-track");
+        if (window.NotesScenes && window.NotesScenes.tracks) {
+          window.NotesScenes.tracks.setKind(btn.getAttribute("data-track"));
+        }
       });
     });
-    frame();
   }
 
   var sources = {

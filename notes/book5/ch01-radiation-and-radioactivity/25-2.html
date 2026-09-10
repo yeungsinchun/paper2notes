@@ -41,10 +41,14 @@
         <span><i class="swatch n"></i>neutron</span>
         <span><i class="swatch e"></i>electron</span>
       </div>
-      <div class="one-liners">
-        <p>Nucleus = protons + neutrons (nucleons). Neutral atom: Z electrons = Z protons.</p>
-        <p>A = Z + N. The nucleus is like a grain of sand on a football field.</p>
-      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>Nucleus of protons + neutrons</td><td>Nucleons; A = Z + N</td></tr>
+          <tr><td>Neutral atom</td><td>Z electrons = Z protons</td></tr>
+          <tr><td>Nucleus vs atom size</td><td>Nucleus is like a grain of sand on a football field</td></tr>
+        </tbody>
+      </table>
       <table class="compact" aria-label="Table 25.1">
         <thead><tr><th></th><th>relative mass</th><th>relative charge</th></tr></thead>
         <tbody>
@@ -60,16 +64,9 @@
         <h2>Nuclide notation</h2>
         <span class="stamp">Fig. 25.12 · Table 25.2</span>
       </header>
-      <div class="visual">
-        <svg viewBox="0 0 640 210" role="img" aria-label="A over Z beside element symbol">
-          <text x="52" y="78" font-size="22" font-family="Palatino, serif" text-anchor="end">A</text>
-          <text x="52" y="128" font-size="22" font-family="Palatino, serif" text-anchor="end">Z</text>
-          <text x="64" y="112" font-size="64" font-family="Palatino, serif">X</text>
-          <text x="160" y="58" font-size="14">A = mass / nucleon number</text>
-          <text x="160" y="84" font-size="14">Z = atomic / proton number</text>
-          <text x="160" y="110" font-size="14">N = A − Z</text>
-          <g id="nuclide-stage"></g>
-        </svg>
+      <div class="visual play stage" id="nuclide-vis" data-scene="nuclide">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Nuclide with nucleons and electron shells"></canvas>
+        <span class="hud-label" data-hud="nuclide">A over Z beside X</span>
       </div>
       <p class="caption" id="nuclide-counts"></p>
       <div class="row">
@@ -78,10 +75,14 @@
         <button type="button" data-nuclide="Li">Li-7</button>
         <button type="button" data-nuclide="C">C-12</button>
       </div>
-      <div class="one-liners">
-        <p>Nuclide = given A and Z. Isotopes: same Z, different N.</p>
-        <p>Strong nuclear force: short range; Z &gt; 83 unstable.</p>
-      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>Given A and Z</td><td>That species is a nuclide</td></tr>
+          <tr><td>Same Z, different N</td><td>Isotopes</td></tr>
+          <tr><td>Strong force is short range; Z &gt; 83</td><td>Those nuclei are unstable</td></tr>
+        </tbody>
+      </table>
     </section>
 
     <section class="idea" id="hydrogen">
@@ -89,12 +90,9 @@
         <h2>Add neutrons, Z stays 1</h2>
         <span class="stamp">Fig. 25.13</span>
       </header>
-      <div class="visual">
-        <svg viewBox="0 0 400 210" role="img" aria-label="Hydrogen isotopes">
-          <circle cx="200" cy="108" r="58" fill="none" stroke="#9bb6c4"/>
-          <circle cx="200" cy="50" r="8" fill="#2a62a8"/>
-          <g id="iso-nucleus"></g>
-        </svg>
+      <div class="visual play stage" id="iso-vis" data-scene="hydrogen">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Hydrogen isotopes"></canvas>
+        <span class="hud-label" data-hud="iso">¹H</span>
       </div>
       <p class="caption" id="iso-label">¹H  protium  N = 0  ·  Z = 1</p>
       <div class="row">
@@ -209,10 +207,13 @@
           + γ
         </p>
       </div>
-      <div class="one-liners">
-        <p>β electron comes from a neutron in the nucleus, not from an orbit.</p>
-        <p>Conservation: ΣA and ΣZ match on both sides.</p>
-      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>β electron leaves the nucleus</td><td>It came from a neutron, not from an orbit</td></tr>
+          <tr><td>ΣA and ΣZ match on both sides</td><td>Nucleon number and charge are conserved</td></tr>
+        </tbody>
+      </table>
     </section>
 
     <section class="idea" id="series">
@@ -340,9 +341,13 @@
           <tr><td>Co-60</td><td>γ</td></tr>
         </tbody>
       </table>
-      <div class="one-liners">
-        <p>Forceps. Do not point at anyone. Lead box, locked. Wash hands. Warning signs.</p>
-      </div>
+      <table class="compact pair">
+        <thead><tr><th>Do</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>Forceps; do not point at anyone</td><td>Keep distance and aim away from people</td></tr>
+          <tr><td>Lead box, locked; wash hands; warning signs</td><td>Store, decontaminate, and mark the source</td></tr>
+        </tbody>
+      </table>
     </section>
 
     <section class="idea" id="background">
@@ -351,22 +356,28 @@
         <span class="stamp">Fig. 25.21-25.23</span>
       </header>
       <div class="visual pie">
-        <svg viewBox="0 0 240 240" role="img" aria-label="Background pie">
-          <path d="M110 110 L110 22 A88 88 0 0 1 152.39 187.11 Z" fill="#c47a12"/>
-          <path d="M110 110 L152.39 187.11 A88 88 0 0 1 67.61 187.11 Z" fill="#8d6e3f"/>
-          <path d="M110 110 L67.61 187.11 A88 88 0 0 1 24.76 131.88 Z" fill="#5c7a6a"/>
-          <path d="M110 110 L24.76 131.88 A88 88 0 0 1 26.31 82.81 Z" fill="#7aa39a"/>
-          <path d="M110 110 L26.31 82.81 A88 88 0 0 1 110 22 Z" fill="#0e5f56"/>
-          <text x="168" y="90" font-size="11" fill="#fff" text-anchor="middle">42%</text>
-          <text x="110" y="188" font-size="11" fill="#fff" text-anchor="middle">16%</text>
-          <text x="48" y="168" font-size="11" fill="#fff" text-anchor="middle">13%</text>
-          <text x="36" y="108" font-size="11" fill="#fff" text-anchor="middle">9%</text>
-          <text x="58" y="48" font-size="11" fill="#fff" text-anchor="middle">20%</text>
-        </svg>
+        <div class="visual play stage" id="pie-vis" data-scene="pie">
+          <canvas class="scene-canvas" width="480" height="420" aria-label="Background pie"></canvas>
+          <span class="hud-label" data-hud="art">20%</span>
+        </div>
         <div>
-          <p>Natural ~80%: radon 42% (largest slice), rock/soil 16%, cosmic 13%, food/drink 9%.</p>
-          <p>Artificial ~20%, almost all from medicine.</p>
-          <p>Irradiation does not make an object radioactive; contamination does.</p>
+          <table class="compact">
+            <thead><tr><th>slice</th><th>share</th></tr></thead>
+            <tbody>
+              <tr><td>radon (natural)</td><td>42%</td></tr>
+              <tr><td>rock / soil</td><td>16%</td></tr>
+              <tr><td>cosmic</td><td>13%</td></tr>
+              <tr><td>food / drink</td><td>9%</td></tr>
+              <tr><td>artificial (almost all medicine)</td><td>20%</td></tr>
+            </tbody>
+          </table>
+          <table class="compact pair">
+            <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+            <tbody>
+              <tr><td>Natural ~80%, artificial ~20%</td><td>Most background is natural; radon is the largest slice</td></tr>
+              <tr><td>Irradiation vs contamination</td><td>Irradiation does not make an object radioactive; contamination does</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
       <!-- HKDSE 2021/33 -->

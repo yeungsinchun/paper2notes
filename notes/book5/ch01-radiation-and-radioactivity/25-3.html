@@ -32,10 +32,13 @@
         <span class="hud-label" data-hud="b">atom</span>
       </div>
       <div class="row"><button type="button" data-replay="pair-vis">Replay</button></div>
-      <div class="one-liners">
-        <p>Knocked electron is captured by another atom → always a pair.</p>
-        <p>Lower speed, larger mass, larger charge → more ion-pairs per cm.</p>
-      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>Knocked electron is captured by another atom</td><td>Always a pair, not a lone positive ion</td></tr>
+          <tr><td>Lower speed, larger mass, larger charge</td><td>More ion-pairs per cm</td></tr>
+        </tbody>
+      </table>
     </section>
 
     <section class="idea" id="ionizing-power">
@@ -43,27 +46,11 @@
         <h2>α leaves a dense trail of pairs</h2>
         <span class="stamp">Fig. 25.25 · Table 25.4</span>
       </header>
-      <div class="visual">
-        <svg viewBox="0 0 640 170" role="img" aria-label="Ion pairs along alpha beta gamma paths">
-          <text x="10" y="40">α</text>
-          <line x1="40" y1="36" x2="600" y2="36" stroke="#c0392b" stroke-width="3"/>
-          <g fill="#d35400">
-            <circle cx="56" cy="36" r="3"/><circle cx="72" cy="36" r="3"/><circle cx="88" cy="36" r="3"/>
-            <circle cx="104" cy="36" r="3"/><circle cx="120" cy="36" r="3"/><circle cx="136" cy="36" r="3"/>
-            <circle cx="152" cy="36" r="3"/><circle cx="168" cy="36" r="3"/><circle cx="184" cy="36" r="3"/>
-            <circle cx="200" cy="36" r="3"/><circle cx="216" cy="36" r="3"/><circle cx="232" cy="36" r="3"/>
-          </g>
-          <text x="10" y="90">β</text>
-          <line x1="40" y1="86" x2="600" y2="86" stroke="#1d4f91" stroke-width="2"/>
-          <circle cx="80" cy="86" r="3" fill="#d35400"/>
-          <circle cx="170" cy="86" r="3" fill="#d35400"/>
-          <circle cx="280" cy="86" r="3" fill="#d35400"/>
-          <circle cx="410" cy="86" r="3" fill="#d35400"/>
-          <text x="10" y="140">γ</text>
-          <path d="M40 136 C 60 112, 80 112, 100 136 S 140 160, 160 136 S 200 112, 220 136 S 260 160, 280 136"
-                fill="none" stroke="#c9a227" stroke-width="2"/>
-          <circle cx="200" cy="136" r="3" fill="#d35400"/>
-        </svg>
+      <div class="visual play stage" id="ionpower-vis" data-scene="ionpower">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Ion pairs along alpha beta gamma paths"></canvas>
+        <span class="hud-label" data-hud="alpha">α</span>
+        <span class="hud-label" data-hud="beta">β</span>
+        <span class="hud-label" data-hud="gamma">γ</span>
       </div>
       <table class="compact">
         <thead><tr><th></th><th>speed</th><th>rel. mass</th><th>rel. charge</th><th>ion-pairs / cm in air</th></tr></thead>
@@ -103,10 +90,13 @@
         <button type="button" data-current="alpha">α source</button>
         <button type="button" data-current="beta">swap to β (current smaller)</button>
       </div>
-      <div class="one-liners">
-        <p>+ ions to the negative plate, − ions to the positive plate → current.</p>
-        <p>A charged sphere of either sign can discharge, because ion-pairs exist.</p>
-      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>+ ions to the negative plate, − ions to the positive plate</td><td>The gas conducts; a current flows</td></tr>
+          <tr><td>A charged sphere of either sign nearby</td><td>It can discharge, because ion-pairs exist</td></tr>
+        </tbody>
+      </table>
       <div class="check" data-check="mc" data-answer="C">
         <h3>Concept check</h3>
         <p>(1) α is heavier than β. (2) α has stronger penetrating power than β. (3) An α source can discharge a positively charged metal sphere nearby.</p>
@@ -125,18 +115,21 @@
         <h2>Cloud-chamber tracks</h2>
         <span class="stamp">Fig. 25.27 · Table 25.5</span>
       </header>
-      <div class="visual">
-        <canvas id="track-canvas" width="640" height="200" aria-label="Animated tracks"></canvas>
+      <div class="visual play stage" id="track-vis" data-scene="tracks">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Animated cloud-chamber tracks"></canvas>
       </div>
       <div class="row">
         <button type="button" data-track="alpha">α thick straight</button>
         <button type="button" data-track="beta">β thin irregular</button>
         <button type="button" data-track="gamma">γ faint / scattered</button>
       </div>
-      <div class="one-liners">
-        <p>Droplets condense on ions. Evacuate the vapour → no tracks.</p>
-        <p>Massive → straighter. Stronger ionizing → thicker.</p>
-      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>Droplets condense on ions</td><td>Evacuate the vapour → no tracks</td></tr>
+          <tr><td>Massive / strongly ionizing</td><td>Straighter / thicker tracks</td></tr>
+        </tbody>
+      </table>
       <div class="check" data-check="mc" data-answer="B">
         <h3>Concept check</h3>
         <div class="choices">
@@ -164,9 +157,13 @@
         <button type="button" data-badge="beta">shine β</button>
         <button type="button" data-badge="gamma">shine γ</button>
       </div>
-      <div class="one-liners">
-        <p>Blackening ≈ dose. α never seen if paper/plastic wraps the film.</p>
-      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>Blackening of the film</td><td>≈ dose</td></tr>
+          <tr><td>Paper/plastic wrap over the film</td><td>α is never seen</td></tr>
+        </tbody>
+      </table>
     </section>
 
     <section class="idea" id="gm">
@@ -193,9 +190,14 @@
         <button type="button" id="gm-grid" aria-pressed="true">plastic grid on (blocks α)</button>
       </div>
       <p class="eq">corrected count rate = recorded − background</p>
-      <div class="one-liners">
-        <p>Better for α, β than γ. Count rate fluctuates (random). Hong Kong ~ 1 count s⁻¹.</p>
-      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>Better counts for α, β than γ</td><td>γ ionizes too weakly for a thick pulse trail</td></tr>
+          <tr><td>Count rate fluctuates</td><td>Decay is random; always subtract background</td></tr>
+          <tr><td>Hong Kong typical background</td><td>~ 1 count s⁻¹</td></tr>
+        </tbody>
+      </table>
     </section>
 
     <section class="idea" id="range">
@@ -312,7 +314,7 @@
           </div>
         </div>
         <div>
-          <p class="one-liners" id="flow-talk"></p>
+          <p class="caption" id="flow-talk"></p>
           <p class="eq">air 700 → paper 700 → Al 315 → Pb 190 &nbsp; (bg ≈ 61 cpm)</p>
         </div>
       </div>

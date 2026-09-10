@@ -43,16 +43,24 @@
   function stage(canvas, fit) {
     var scene = new THREE.Scene();
     scene.background = new THREE.Color(0xfffaf1);
-    var camera = new THREE.OrthographicCamera(-7.2, 7.2, 3.6, -3.6, 0.1, 40);
-    camera.position.set(0.4, 1.6, 12);
-    camera.lookAt(0, 0, 0);
+    var persp = fit && fit.persp;
+    var camera;
+    if (persp) {
+      camera = new THREE.PerspectiveCamera(persp.fov || 32, 2, 0.1, 80);
+      camera.position.set(persp.x, persp.y, persp.z);
+      camera.lookAt(persp.lookX || 0, persp.lookY || 0, persp.lookZ || 0);
+    } else {
+      camera = new THREE.OrthographicCamera(-7.2, 7.2, 3.6, -3.6, 0.1, 40);
+      camera.position.set(0.4, 1.6, 12);
+      camera.lookAt(0, 0, 0);
+    }
     var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-    var key = new THREE.DirectionalLight(0xfff4e0, 0.9);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.72));
+    var key = new THREE.DirectionalLight(0xfff4e0, 0.95);
     key.position.set(-4, 6, 8);
     scene.add(key);
-    var fill = new THREE.DirectionalLight(0x9bb6c4, 0.35);
+    var fill = new THREE.DirectionalLight(0x9bb6c4, 0.38);
     fill.position.set(6, -2, 4);
     scene.add(fill);
     var contentHalfH = (fit && fit.halfH != null) ? fit.halfH : 3.6;
@@ -62,6 +70,11 @@
       var h = canvas.clientHeight || canvas.height;
       renderer.setSize(w, h, false);
       var aspect = w / Math.max(h, 1);
+      if (camera.isPerspectiveCamera) {
+        camera.aspect = aspect;
+        camera.updateProjectionMatrix();
+        return;
+      }
       var halfH;
       var halfW;
       if (contentHalfW != null) {
@@ -95,6 +108,139 @@
     var y = (-v.y * 0.5 + 0.5) * canvas.clientHeight;
     el.style.left = x + "px";
     el.style.top = y + "px";
+  }
+
+  function hudXY(el) {
+    return {
+      x: el ? parseFloat(el.style.left) : null,
+      y: el ? parseFloat(el.style.top) : null
+    };
+  }
+
+  function projectXY(camera, canvas, world) {
+    var v = world.clone().project(camera);
+    return {
+      x: (v.x * 0.5 + 0.5) * (canvas.clientWidth || 1),
+      y: (-v.y * 0.5 + 0.5) * (canvas.clientHeight || 1)
+    };
+  }
+
+  function arrowMesh(hex) {
+    var group = new THREE.Group();
+    var mat = new THREE.MeshStandardMaterial({
+      color: hex,
+      roughness: 0.32,
+      metalness: 0.12,
+      emissive: hex,
+      emissiveIntensity: 0.16
+    });
+    var shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, 1, 10), mat);
+    var head = new THREE.Mesh(new THREE.ConeGeometry(0.085, 0.18, 10), mat.clone());
+    group.add(shaft, head);
+    group.userData.shaft = shaft;
+    group.userData.head = head;
+    return group;
+  }
+
+  function setArrowVec(group, origin, vec) {
+    var len = vec.length();
+    if (len < 0.045) {
+      group.visible = false;
+      return;
+    }
+    group.visible = true;
+    group.position.copy(origin);
+    group.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), vec.clone().normalize());
+    var shaftLen = Math.max(0.05, len - 0.16);
+    group.userData.shaft.scale.set(1, shaftLen, 1);
+    group.userData.shaft.position.y = shaftLen / 2;
+    group.userData.head.position.y = shaftLen + 0.09;
+  }
+
+  function emTrain(scene, opts) {
+    var n = opts.n || 18;
+    var origin = opts.origin;
+    var dir = opts.dir.clone().normalize();
+    var eHat = opts.eHat.clone().normalize();
+    var bHat = opts.bHat.clone().normalize();
+    var length = opts.length;
+    var eArrows = [];
+    var bArrows = [];
+    var i;
+    for (i = 0; i < n; i += 1) {
+      var eA = arrowMesh(0xc0392b);
+      var bA = arrowMesh(0x1d4f91);
+      scene.add(eA, bA);
+      eArrows.push(eA);
+      bArrows.push(bA);
+    }
+    var eLinePos = new Float32Array(n * 3);
+    var bLinePos = new Float32Array(n * 3);
+    var eLine = new THREE.Line(
+      new THREE.BufferGeometry().setAttribute("position", new THREE.BufferAttribute(eLinePos, 3)),
+      new THREE.LineBasicMaterial({ color: 0xc0392b, transparent: true, opacity: 0.5 })
+    );
+    var bLine = new THREE.Line(
+      new THREE.BufferGeometry().setAttribute("position", new THREE.BufferAttribute(bLinePos, 3)),
+      new THREE.LineBasicMaterial({ color: 0x1d4f91, transparent: true, opacity: 0.5 })
+    );
+    scene.add(eLine, bLine);
+    var axis = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.018, 0.018, length, 8),
+      new THREE.MeshBasicMaterial({ color: 0x4a5560 })
+    );
+    axis.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+    axis.position.copy(origin).addScaledVector(dir, length / 2);
+    scene.add(axis);
+    var kHat = dir.clone();
+
+    function sample(s, t) {
+      var phase = opts.k * s - opts.omega * t;
+      var env = opts.envelope ? opts.envelope(s, t) : 1;
+      var e = opts.eAmp * env * Math.sin(phase);
+      var b = opts.bAmp * env * Math.sin(phase);
+      var p = origin.clone().addScaledVector(dir, s);
+      return {
+        p: p,
+        eVec: eHat.clone().multiplyScalar(e),
+        bVec: bHat.clone().multiplyScalar(b),
+        e: e,
+        b: b,
+        phase: phase
+      };
+    }
+
+    function update(t) {
+      for (i = 0; i < n; i += 1) {
+        var s = (i / Math.max(n - 1, 1)) * length;
+        var sm = sample(s, t);
+        setArrowVec(eArrows[i], sm.p, sm.eVec);
+        setArrowVec(bArrows[i], sm.p, sm.bVec);
+        var eTip = sm.p.clone().add(sm.eVec);
+        var bTip = sm.p.clone().add(sm.bVec);
+        eLinePos[i * 3] = eTip.x;
+        eLinePos[i * 3 + 1] = eTip.y;
+        eLinePos[i * 3 + 2] = eTip.z;
+        bLinePos[i * 3] = bTip.x;
+        bLinePos[i * 3 + 1] = bTip.y;
+        bLinePos[i * 3 + 2] = bTip.z;
+      }
+      eLine.geometry.attributes.position.needsUpdate = true;
+      bLine.geometry.attributes.position.needsUpdate = true;
+    }
+
+    return {
+      update: update,
+      sample: sample,
+      n: n,
+      length: length,
+      dir: kHat,
+      eHat: eHat,
+      bHat: bHat,
+      k: opts.k,
+      omega: opts.omega,
+      origin: origin
+    };
   }
 
   function hostReplay(host, restart) {
@@ -132,104 +278,67 @@
     return mesh;
   }
 
-  function fit2d(canvas) {
-    var rect = canvas.getBoundingClientRect();
-    var w = Math.max(320, Math.floor(rect.width || canvas.width || 640));
-    var h = Math.max(200, Math.floor(rect.height || canvas.height || 280));
-    if (canvas.width !== w || canvas.height !== h) {
-      canvas.width = w;
-      canvas.height = h;
-    }
-    return { w: w, h: h, ctx: canvas.getContext("2d") };
-  }
-
-  function knockout2d(host) {
+  function knockout(host) {
+    if (!THREE) return;
     var canvas = host.querySelector("canvas");
     var hudAtom = host.querySelector('[data-hud="atom"]');
     var hudElectron = host.querySelector('[data-hud="electron"]');
-    var SHELL_R = 52;
+    var hudRay = host.querySelector('[data-hud="ray"]');
+    var gfx = stage(canvas, { halfW: 4.4, halfH: 2.35 });
+    gfx.camera.position.set(0.35, 0.55, 12);
+    gfx.camera.lookAt(0, 0, 0);
+    var SHELL_R = 0.72;
     var HIT_T = 0.85;
     var FLY_T = 1.15;
-    var state = { x: 0, y: 0, nx: 0, ny: 0, opacity: 1, hex: "#e0a04a", label: "atom" };
+    var aPos = new THREE.Vector3(-0.35, 0.15, 0);
+    var start = aPos.clone().add(new THREE.Vector3(-SHELL_R, 0, 0));
+    var end = new THREE.Vector3(3.15, -1.15, 0.15);
+    var core = ball(0.24, 0xe0a04a);
+    var shell = ring(SHELL_R, 0x9bb6c4);
+    var atom = new THREE.Group();
+    atom.add(core, shell);
+    atom.position.copy(aPos);
+    var electron = ball(0.12, 0x2a62a8);
+    var minusMark = signDecal("−", "#ffffff");
+    minusMark.position.set(0, 0, 0.14);
+    electron.add(minusMark);
+    var plusMark = signDecal("+", "#ffffff");
+    plusMark.visible = false;
+    plusMark.position.set(0, 0, 0.26);
+    atom.add(plusMark);
+    var ray = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.05, 0.05, 1, 10),
+      new THREE.MeshBasicMaterial({ color: 0xc9a227 })
+    );
+    ray.rotation.z = Math.PI / 2;
+    gfx.scene.add(atom, electron, ray);
+    var state = {
+      x: start.x, y: start.y, nx: aPos.x, ny: aPos.y,
+      opacity: 1, hex: "#e0a04a", label: "atom"
+    };
     var t0 = performance.now();
     var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    function layout() {
-      var box = fit2d(canvas);
-      return {
-        ctx: box.ctx,
-        w: box.w,
-        h: box.h,
-        nx: box.w * 0.38,
-        ny: box.h * 0.48,
-        startX: box.w * 0.38 - SHELL_R,
-        startY: box.h * 0.48,
-        endX: box.w * 0.78,
-        endY: box.h * 0.78
-      };
-    }
-
     function apply(t) {
-      var L = layout();
       var fly = smoothstep((t - HIT_T) / FLY_T);
-      var hit = clamp01(t / HIT_T);
-      state.nx = L.nx;
-      state.ny = L.ny;
-      state.x = lerp(L.startX, L.endX, fly);
-      state.y = lerp(L.startY, L.endY, fly);
-      state.opacity = 1;
+      var hit = smoothstep(t / HIT_T);
+      electron.position.lerpVectors(start, end, fly);
+      electron.material.opacity = 1;
+      state.x = electron.position.x;
+      state.y = electron.position.y;
       var ionized = fly > 0.02;
       state.hex = ionized ? "#c0392b" : "#e0a04a";
       state.label = ionized ? "positive ion" : "atom";
+      core.material.color.set(state.hex);
+      plusMark.visible = ionized;
+      var rayLen = lerp(0.25, start.x + 4.9, hit);
+      ray.scale.set(1, Math.max(rayLen, 0.05), 1);
+      ray.position.set(-4.9 + rayLen / 2, aPos.y, 0);
       if (hudAtom) hudAtom.textContent = state.label;
       if (hudElectron) hudElectron.textContent = "electron";
-      if (hudAtom) {
-        hudAtom.style.left = L.nx + "px";
-        hudAtom.style.top = L.ny + 72 + "px";
-      }
-      if (hudElectron) {
-        hudElectron.style.left = state.x + "px";
-        hudElectron.style.top = state.y + 22 + "px";
-      }
-      var ctx = L.ctx;
-      ctx.clearRect(0, 0, L.w, L.h);
-      ctx.fillStyle = "#fffaf1";
-      ctx.fillRect(0, 0, L.w, L.h);
-      ctx.strokeStyle = "#c9a227";
-      ctx.lineWidth = 8;
-      ctx.lineCap = "round";
-      ctx.beginPath();
-      ctx.moveTo(24, L.ny);
-      ctx.lineTo(lerp(24, L.startX - 10, smoothstep(hit)), L.ny);
-      ctx.stroke();
-      ctx.strokeStyle = "#9bb6c4";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(L.nx, L.ny, SHELL_R, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.fillStyle = state.hex;
-      ctx.beginPath();
-      ctx.arc(L.nx, L.ny, 18, 0, Math.PI * 2);
-      ctx.fill();
-      if (ionized) {
-        ctx.fillStyle = "#fff";
-        ctx.font = "16px sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText("+", L.nx, L.ny + 6);
-      }
-      ctx.globalAlpha = state.opacity;
-      ctx.fillStyle = "#2a62a8";
-      ctx.beginPath();
-      ctx.arc(state.x, state.y, 9, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = "#fff";
-      ctx.font = "12px sans-serif";
-      ctx.fillText("−", state.x, state.y + 4);
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = "#1c2430";
-      ctx.font = "13px sans-serif";
-      ctx.textAlign = "left";
-      ctx.fillText("ionizing radiation", 24, 28);
+      placeHud(hudAtom, canvas, gfx.camera, aPos.clone().add(new THREE.Vector3(0, -1.05, 0)));
+      placeHud(hudElectron, canvas, gfx.camera, electron.position.clone().add(new THREE.Vector3(0.15, -0.35, 0)));
+      placeHud(hudRay, canvas, gfx.camera, new THREE.Vector3(-2.55, aPos.y + 0.55, 0));
     }
 
     function snapshot() {
@@ -247,12 +356,11 @@
       t0 = performance.now();
       apply(0);
     }
-
     function frame(now) {
       apply(reduced ? HIT_T + FLY_T : (now - t0) / 1000);
+      gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
     }
-
     hostReplay(host, restart);
     apply(0);
     requestAnimationFrame(frame);
@@ -371,111 +479,120 @@
   function beams(host) {
     if (!THREE) return;
     var canvas = host.querySelector("canvas");
-    var gfx = stage(canvas, { halfW: 5.6, halfH: 2.35 });
-    gfx.camera.position.set(0, 0.15, 12);
-    gfx.camera.lookAt(0, 0, 0);
+    var gfx = stage(canvas, {
+      persp: { fov: 30, x: 5.4, y: 3.35, z: 9.6, lookX: -0.15, lookY: 0.15, lookZ: 0 }
+    });
     var hudWave = host.querySelector('[data-hud="wave"]');
+    var hudE = host.querySelector('[data-hud="e"]');
+    var hudB = host.querySelector('[data-hud="b"]');
     var hudElectrons = host.querySelector('[data-hud="electrons"]');
-    var waveAnchor = new THREE.Vector3(-2.7, 1.2, 0);
-    var eAnchor = new THREE.Vector3(2.55, 1.2, 0);
-    var goldMat = new THREE.LineBasicMaterial({ color: 0xd4a017 });
-    var WAVE_N = 80;
-    var WAVE_X0 = -5.25;
-    var WAVE_X1 = -0.35;
-    var PACKET_SIGMA = 0.38;
-    var PACKET_K = 9.5;
-    var PACKET_C = 2.8;
-    var wavePositions = new Float32Array((WAVE_N + 1) * 3);
-    var waveGeom = new THREE.BufferGeometry();
-    waveGeom.setAttribute("position", new THREE.BufferAttribute(wavePositions, 3));
-    var waveMesh = new THREE.Line(waveGeom, goldMat);
-    gfx.scene.add(waveMesh);
-    function rebuildWave(t) {
-      var travel = WAVE_X1 - WAVE_X0 + 6 * PACKET_SIGMA;
-      var center = WAVE_X0 - 2.5 * PACKET_SIGMA + ((t * PACKET_C) % travel);
-      var peakX = center;
-      var peakA = 0;
-      var i;
-      for (i = 0; i <= WAVE_N; i += 1) {
-        var x = WAVE_X0 + (i / WAVE_N) * (WAVE_X1 - WAVE_X0);
-        var dx = x - center;
-        var env = Math.exp(-(dx * dx) / (2 * PACKET_SIGMA * PACKET_SIGMA));
-        var y = 0.62 * env * Math.sin(PACKET_K * x - PACKET_K * PACKET_C * t);
-        wavePositions[i * 3] = x;
-        wavePositions[i * 3 + 1] = y;
-        wavePositions[i * 3 + 2] = 0;
-        var a = Math.abs(y);
-        if (a > peakA) {
-          peakA = a;
-          peakX = x;
-        }
-      }
-      waveAnchor.set(peakX, 0.92, 0);
-      waveGeom.attributes.position.needsUpdate = true;
-      waveGeom.computeBoundingSphere();
-    }
+    var origin = new THREE.Vector3(-5.35, 0, 0);
+    var dir = new THREE.Vector3(1, 0, 0);
+    var eHat = new THREE.Vector3(0, 1, 0);
+    var bHat = new THREE.Vector3(0, 0, 1);
+    var length = 4.55;
+    var train = emTrain(gfx.scene, {
+      origin: origin,
+      dir: dir,
+      eHat: eHat,
+      bHat: bHat,
+      length: length,
+      n: 20,
+      eAmp: 1.22,
+      bAmp: 0.92,
+      k: 2.55,
+      omega: 3.1
+    });
+    var divider = new THREE.Mesh(
+      new THREE.BoxGeometry(0.04, 2.8, 2.2),
+      new THREE.MeshStandardMaterial({ color: 0xd7d0c2, roughness: 0.7 })
+    );
+    divider.position.set(0.05, 0, 0);
+    gfx.scene.add(divider);
     var electrons = [];
     var i;
     for (i = 0; i < 8; i += 1) {
-      var e = ball(0.12, 0x2a62a8);
+      var e = ball(0.13, 0x2a62a8);
       electrons.push(e);
       gfx.scene.add(e);
     }
-    var divider = new THREE.Mesh(
-      new THREE.BoxGeometry(0.03, 3.6, 0.04),
-      new THREE.MeshStandardMaterial({ color: 0xd7d0c2 })
+    var eTrack = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.016, 0.016, 4.5, 8),
+      new THREE.MeshBasicMaterial({ color: 0x8aa3ad })
     );
-    divider.position.x = 0.15;
-    gfx.scene.add(divider);
+    eTrack.rotation.z = Math.PI / 2;
+    eTrack.position.set(2.85, 0, 0);
+    gfx.scene.add(eTrack);
+    var waveAnchor = new THREE.Vector3(-3.05, 1.55, 0);
+    var eFieldAnchor = new THREE.Vector3(-3.4, 1.35, 0);
+    var bFieldAnchor = new THREE.Vector3(-3.4, 0.12, 1.05);
+    var eBeamAnchor = new THREE.Vector3(2.85, 0.85, 0);
     var t0 = performance.now();
+    var lastT = 0;
     function restart() { t0 = performance.now(); }
     function frame(now) {
       var t = (now - t0) / 1000;
-      rebuildWave(t);
+      lastT = t;
+      train.update(t);
+      var mid = train.sample(length * 0.42, t);
+      eFieldAnchor.copy(mid.p).add(mid.eVec).add(new THREE.Vector3(0.12, 0.18, 0));
+      bFieldAnchor.copy(mid.p).add(mid.bVec).add(new THREE.Vector3(0.12, 0.08, 0.12));
+      waveAnchor.copy(origin).addScaledVector(dir, length * 0.5).add(new THREE.Vector3(0, 1.55, 0));
       electrons.forEach(function (mesh, idx) {
-        var u = (t * 0.58 + idx * 0.125) % 1;
-        mesh.position.set(lerp(0.55, 5.15, u), 0, 0);
+        var u = (t * 0.55 + idx * 0.125) % 1;
+        mesh.position.set(lerp(0.7, 5.05, u), 0, 0);
       });
       placeHud(hudWave, canvas, gfx.camera, waveAnchor);
-      placeHud(hudElectrons, canvas, gfx.camera, eAnchor);
+      placeHud(hudE, canvas, gfx.camera, eFieldAnchor);
+      placeHud(hudB, canvas, gfx.camera, bFieldAnchor);
+      placeHud(hudElectrons, canvas, gfx.camera, eBeamAnchor);
       gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
     }
     function snapshot() {
-      var minX = Infinity;
-      var maxX = -Infinity;
-      var sumX = 0;
-      var wsum = 0;
-      var peakA = 0;
-      var peakX = 0;
-      var i;
-      for (i = 0; i <= WAVE_N; i += 1) {
-        var x = wavePositions[i * 3];
-        var y = Math.abs(wavePositions[i * 3 + 1]);
-        if (y > peakA) {
-          peakA = y;
-          peakX = x;
-        }
-        if (y > 0.08) {
-          if (x < minX) minX = x;
-          if (x > maxX) maxX = x;
-          sumX += x * y;
-          wsum += y;
-        }
-      }
-      var v = waveAnchor.clone().project(gfx.camera);
+      var probeS = length * 0.4;
+      var sm = train.sample(probeS, lastT);
+      var eVec = sm.eVec;
+      var bVec = sm.bVec;
+      var kVec = train.dir;
+      var cross = new THREE.Vector3().crossVectors(eVec, bVec);
+      var crestPhase = Math.PI / 2;
+      var crestX = origin.x + (crestPhase + train.omega * lastT) / train.k;
+      var span = length;
+      var wrapped = origin.x + ((crestX - origin.x) % span + span) % span;
+      var eHud = hudXY(hudE);
+      var bHud = hudXY(hudB);
+      var waveHud = hudXY(hudWave);
+      var eProj = projectXY(gfx.camera, canvas, eFieldAnchor);
+      var bProj = projectXY(gfx.camera, canvas, bFieldAnchor);
+      var waveProj = projectXY(gfx.camera, canvas, waveAnchor);
       return {
-        peakA: peakA,
-        peakX: peakX,
-        centroidX: wsum ? sumX / wsum : 0,
-        span: maxX > minX ? maxX - minX : 0,
-        track: WAVE_X1 - WAVE_X0,
-        waveHud: hudWave ? parseFloat(hudWave.style.left) : null,
-        waveProj: (v.x * 0.5 + 0.5) * (canvas.clientWidth || 1)
+        eY: eVec.y,
+        eX: eVec.x,
+        eZ: eVec.z,
+        bZ: bVec.z,
+        bX: bVec.x,
+        bY: bVec.y,
+        eLen: eVec.length(),
+        bLen: bVec.length(),
+        dotEB: eVec.dot(bVec),
+        eDotK: eVec.dot(kVec),
+        bDotK: bVec.dot(kVec),
+        poyntingX: cross.x,
+        eAtProbe: sm.e,
+        crestX: wrapped,
+        probeX: sm.p.x,
+        t: lastT,
+        waveHud: waveHud.x,
+        waveProj: waveProj.x,
+        eHud: eHud.x,
+        eProj: eProj.x,
+        bHud: bHud.x,
+        bProj: bProj.x
       };
     }
     hostReplay(host, restart);
-    rebuildWave(0);
+    train.update(0);
     requestAnimationFrame(frame);
     scenes.beams = { replay: restart, snapshot: snapshot };
   }
@@ -650,28 +767,6 @@
       electrons.push({ mesh: e, delay: i * 0.08 });
       gfx.scene.add(e);
     }
-    function makeWavyRay(from, dir, length) {
-      var nrm = dir.clone().normalize();
-      var side = new THREE.Vector3().crossVectors(nrm, new THREE.Vector3(0, 0, 1));
-      if (side.lengthSq() < 1e-6) side.set(0, 1, 0);
-      side.normalize();
-      var pts = [];
-      var k;
-      for (k = 0; k <= 24; k += 1) {
-        var t = k / 24;
-        var p = from.clone().addScaledVector(nrm, t * length);
-        p.addScaledVector(side, 0.055 * Math.sin(t * Math.PI * 5));
-        pts.push(p);
-      }
-      return new THREE.Mesh(
-        new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 48, 0.045, 8, false),
-        new THREE.MeshBasicMaterial({
-          color: 0xd4a017,
-          transparent: true,
-          opacity: 0.95
-        })
-      );
-    }
     var xrays = [];
     var zAxis = new THREE.Vector3(0, 0, 1);
     var spreads = [0, 0.17, -0.17, 0.08];
@@ -683,7 +778,12 @@
     });
     for (i = 0; i < spreads.length; i += 1) {
       var dir = face.clone().applyAxisAngle(zAxis, spreads[i]);
-      var ray = makeWavyRay(hit, dir, rayLen);
+      var ray = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.035, 0.035, rayLen, 8),
+        goldMat.clone()
+      );
+      ray.position.copy(hit).addScaledVector(dir, rayLen / 2);
+      ray.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
       xrays.push(ray);
       gfx.scene.add(ray);
       var tip = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.16, 8), goldMat.clone());
@@ -692,6 +792,18 @@
       gfx.scene.add(tip);
       xrays.push(tip);
     }
+    var xrayEM = emTrain(gfx.scene, {
+      origin: hit.clone(),
+      dir: face.clone().normalize(),
+      eHat: new THREE.Vector3().crossVectors(face, new THREE.Vector3(0, 0, 1)).normalize(),
+      bHat: new THREE.Vector3().crossVectors(face.clone().normalize(), new THREE.Vector3().crossVectors(face, new THREE.Vector3(0, 0, 1)).normalize()),
+      length: 1.05,
+      n: 8,
+      eAmp: 0.28,
+      bAmp: 0.22,
+      k: 14,
+      omega: 16
+    });
 
     var t0 = performance.now();
     function restart() {
@@ -708,8 +820,9 @@
       });
       spark.material.opacity = 0.55 + 0.4 * Math.abs(Math.sin(t * 6));
       spark.scale.setScalar(0.9 + 0.2 * Math.abs(Math.sin(t * 6)));
+      xrayEM.update(t);
       xrays.forEach(function (ray, idx) {
-        ray.material.opacity = 0.35 + 0.55 * Math.abs(Math.sin(t * 3.2 + idx));
+        ray.material.opacity = 0.28 + 0.5 * Math.abs(Math.sin(t * 3.2 + idx));
       });
       placeHud(hudGun, canvas, gfx.camera, gunAnchor);
       placeHud(hudElectrons, canvas, gfx.camera, electronAnchor);
@@ -876,19 +989,21 @@
   function decayGamma(host) {
     if (!THREE) return;
     var canvas = host.querySelector("canvas");
-    var gfx = stage(canvas);
+    var gfx = stage(canvas, {
+      persp: { fov: 32, x: 2.8, y: 2.2, z: 10.5, lookX: 0.2, lookY: 0.15, lookZ: 0 }
+    });
     var parent = nucleonCluster(5, 6, 0.34);
     parent.position.set(-2.4, 0.1, 0);
-    var wave = new THREE.Mesh(
-      new THREE.TorusGeometry(0.2, 0.05, 8, 32),
-      new THREE.MeshStandardMaterial({ color: 0xc9a227, transparent: true, opacity: 0.9 })
-    );
-    gfx.scene.add(parent, wave);
+    var pulse = new THREE.Group();
+    var eA = arrowMesh(0xc0392b);
+    var bA = arrowMesh(0x1d4f91);
+    pulse.add(eA, bA);
+    gfx.scene.add(parent, pulse);
     var hud = decayHud(host, canvas, gfx.camera);
     var parentAnchor = parent.position.clone().add(new THREE.Vector3(0, 0.9, 0));
     var t0 = performance.now();
     function ejectileAnchor() {
-      return wave.position.clone().add(new THREE.Vector3(0.45, 0.45, 0));
+      return pulse.position.clone().add(new THREE.Vector3(0.45, 0.45, 0));
     }
     function restart() {
       t0 = performance.now();
@@ -897,9 +1012,10 @@
     function frame(now) {
       var t = (now - t0) / 1000;
       var u = smoothstep(t / 1.2);
-      wave.position.set(lerp(-2.0, 3.2, u), 0.2, 0);
-      wave.scale.setScalar(lerp(0.6, 2.2, u));
-      wave.material.opacity = lerp(0.95, 0.25, u);
+      pulse.position.set(lerp(-2.0, 3.2, u), 0.2, 0);
+      var osc = Math.sin(t * 16);
+      setArrowVec(eA, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0.62 * osc, 0));
+      setArrowVec(bA, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0.48 * osc));
       hud.place(parentAnchor, ejectileAnchor());
       gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
@@ -1467,8 +1583,733 @@
     scenes.badge = { setKind: setKind };
   }
 
+  function imaging(host) {
+    if (!THREE) return;
+    var canvas = host.querySelector("canvas");
+    var gfx = stage(canvas, {
+      persp: { fov: 28, x: 1.6, y: 4.4, z: 10.4, lookX: -0.35, lookY: 0.05, lookZ: 0 }
+    });
+    var hudX = host.querySelector('[data-hud="xrays"]');
+    var hudBone = host.querySelector('[data-hud="bone"]');
+    var hudFlesh = host.querySelector('[data-hud="flesh"]');
+    var hudFilm = host.querySelector('[data-hud="film"]');
+    var lift = new THREE.DirectionalLight(0xffffff, 0.55);
+    lift.position.set(1, 8, 3);
+    gfx.scene.add(lift);
+    var dark = new THREE.Mesh(
+      new THREE.BoxGeometry(2.6, 3.2, 0.06),
+      new THREE.MeshStandardMaterial({ color: 0x14120f, roughness: 0.92 })
+    );
+    dark.position.set(-3.55, 0.2, -0.45);
+    gfx.scene.add(dark);
+    function boneCyl(x, y, z, h, r, rx) {
+      var m = new THREE.Mesh(
+        new THREE.CylinderGeometry(r, r * 0.82, h, 10),
+        new THREE.MeshStandardMaterial({ color: 0xf2ead2, roughness: 0.4, metalness: 0.05, emissive: 0x3a3428, emissiveIntensity: 0.12 })
+      );
+      m.position.set(x, y, z);
+      if (rx) m.rotation.z = rx;
+      gfx.scene.add(m);
+      return m;
+    }
+    boneCyl(-3.7, -0.85, 0.15, 1.15, 0.18);
+    boneCyl(-3.42, -0.7, 0.18, 1.25, 0.2);
+    boneCyl(-3.95, 0.45, 0.16, 0.95, 0.09);
+    boneCyl(-3.68, 0.62, 0.18, 1.15, 0.1);
+    boneCyl(-3.4, 0.68, 0.2, 1.2, 0.11);
+    boneCyl(-3.14, 0.5, 0.18, 1.0, 0.1);
+    boneCyl(-2.95, 0.05, 0.22, 0.7, 0.13, -0.7);
+    var bone = new THREE.Mesh(
+      new THREE.BoxGeometry(1.85, 0.95, 1.35),
+      new THREE.MeshStandardMaterial({ color: 0xf7f1e4, roughness: 0.38, metalness: 0.06 })
+    );
+    bone.position.set(-0.15, 0.35, 0);
+    var flesh = new THREE.Mesh(
+      new THREE.BoxGeometry(2.15, 0.95, 1.35),
+      new THREE.MeshStandardMaterial({ color: 0xe8c4a0, roughness: 0.7, transparent: true, opacity: 0.88 })
+    );
+    flesh.position.set(1.95, 0.35, 0);
+    var filmBone = new THREE.Mesh(
+      new THREE.BoxGeometry(1.85, 0.08, 1.4),
+      new THREE.MeshStandardMaterial({ color: 0xfffaf1, roughness: 0.7, emissive: 0xf4efe0, emissiveIntensity: 0.35 })
+    );
+    filmBone.position.set(-0.15, -1.35, 0);
+    var filmFlesh = new THREE.Mesh(
+      new THREE.BoxGeometry(2.15, 0.08, 1.4),
+      new THREE.MeshStandardMaterial({ color: 0x3d3426, roughness: 0.85 })
+    );
+    filmFlesh.position.set(1.95, -1.35, 0);
+    gfx.scene.add(bone, flesh, filmBone, filmFlesh);
+    var rays = [];
+    var specs = [
+      { x: -0.7, stopY: 0.55, toFilm: false },
+      { x: -0.15, stopY: 0.2, toFilm: false },
+      { x: 0.4, stopY: 0.45, toFilm: false },
+      { x: 1.45, stopY: -1.31, toFilm: true },
+      { x: 2.45, stopY: -1.31, toFilm: true }
+    ];
+    specs.forEach(function (sp) {
+      var startY = 2.15;
+      var len = startY - sp.stopY;
+      var mesh = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.035, 0.035, 1, 8),
+        new THREE.MeshBasicMaterial({ color: 0xd4a017, transparent: true, opacity: 0.95 })
+      );
+      mesh.userData.startY = startY;
+      mesh.userData.stopY = sp.stopY;
+      mesh.userData.x = sp.x;
+      mesh.userData.toFilm = sp.toFilm;
+      mesh.userData.fullLen = len;
+      gfx.scene.add(mesh);
+      var head = new THREE.Mesh(
+        new THREE.ConeGeometry(0.08, 0.18, 8),
+        new THREE.MeshBasicMaterial({ color: 0xd4a017 })
+      );
+      mesh.userData.head = head;
+      gfx.scene.add(head);
+      rays.push(mesh);
+    });
+    var t0 = performance.now();
+    var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    function apply(sec) {
+      rays.forEach(function (mesh, i) {
+        var dur = 0.55 + i * 0.08;
+        var u = reduced ? 1 : clamp01(sec / dur);
+        var y1 = mesh.userData.startY;
+        var y2 = lerp(y1, mesh.userData.stopY, u);
+        var len = Math.max(0.08, y1 - y2);
+        mesh.scale.set(1, len, 1);
+        mesh.position.set(mesh.userData.x, (y1 + y2) / 2, 0.35);
+        mesh.userData.head.position.set(mesh.userData.x, y2 - 0.05, 0.35);
+        mesh.userData.head.rotation.x = Math.PI;
+        mesh.userData.endY = y2;
+      });
+      var develop = reduced ? 1 : clamp01((sec - 0.65) / 0.45);
+      filmFlesh.material.color.setRGB(
+        (244 - develop * 218) / 255,
+        (239 - develop * 217) / 255,
+        (224 - develop * 208) / 255
+      );
+      placeHud(hudX, canvas, gfx.camera, new THREE.Vector3(0.9, 2.05, 0.4));
+      placeHud(hudBone, canvas, gfx.camera, bone.position.clone().add(new THREE.Vector3(0, -0.7, 0.5)));
+      placeHud(hudFlesh, canvas, gfx.camera, flesh.position.clone().add(new THREE.Vector3(0, -0.7, 0.5)));
+      placeHud(hudFilm, canvas, gfx.camera, new THREE.Vector3(0.9, -1.7, 0.4));
+    }
+    function restart() { t0 = performance.now(); }
+    function frame(now) {
+      apply((now - t0) / 1000);
+      gfx.renderer.render(gfx.scene, gfx.camera);
+      requestAnimationFrame(frame);
+    }
+    function lumOf(mat) {
+      var c = mat.color;
+      return 0.3 * c.r * 255 + 0.6 * c.g * 255 + 0.1 * c.b * 255;
+    }
+    function snapshot() {
+      var boneBox = { x: bone.position.x, y: bone.position.y, w: 1.85, h: 0.95 };
+      var fleshBox = { x: flesh.position.x, y: flesh.position.y, w: 2.15, h: 0.95 };
+      var filmY = filmBone.position.y;
+      function inBox(x, y, box) {
+        return x >= box.x - box.w / 2 && x <= box.x + box.w / 2 &&
+          y >= box.y - box.h / 2 && y <= box.y + box.h / 2;
+      }
+      var ends = rays.map(function (m) {
+        return { x: m.userData.x, y: m.userData.endY };
+      });
+      return {
+        boneLeftOfFlesh: bone.position.x < flesh.position.x,
+        filmUnder: filmY < bone.position.y - 0.6,
+        boneLum: lumOf(filmBone.material),
+        fleshLum: lumOf(filmFlesh.material),
+        rayCount: rays.length,
+        stopInBone: ends.filter(function (pt) { return inBox(pt.x, pt.y, boneBox); }).length,
+        stopInFlesh: ends.filter(function (pt) { return inBox(pt.x, pt.y, fleshBox); }).length,
+        reachFilm: ends.filter(function (pt) { return pt.y <= filmY + 0.12; }).length,
+        raysDown: true
+      };
+    }
+    hostReplay(host, restart);
+    apply(0);
+    requestAnimationFrame(frame);
+    scenes.imaging = { replay: restart, snapshot: snapshot };
+  }
+
+  function spectrum(host) {
+    if (!THREE) return;
+    var canvas = host.querySelector("canvas");
+    var gfx = stage(canvas, { halfW: 6.2, halfH: 2.05 });
+    gfx.camera.position.set(0, 1.4, 12);
+    gfx.camera.lookAt(0, 0.1, 0);
+    var hudNI = host.querySelector('[data-hud="nonion"]');
+    var hudI = host.querySelector('[data-hud="ion"]');
+    var bands = [
+      { name: "radio", hex: 0xd9e4f0, w: 1.35, x: -4.7 },
+      { name: "micro", hex: 0xcfe0c8, w: 1.2, x: -3.35 },
+      { name: "IR", hex: 0xf0d5b8, w: 1.15, x: -2.1 },
+      { name: "vis", hex: 0xf1c40f, w: 0.55, x: -1.2 },
+      { name: "UV", hex: 0x7e57c2, w: 0.7, x: -0.5 },
+      { name: "X-rays", hex: 0x455a64, w: 1.7, x: 0.85 },
+      { name: "γ", hex: 0x1c2430, w: 2.15, x: 2.9 }
+    ];
+    bands.forEach(function (b) {
+      var m = new THREE.Mesh(
+        new THREE.BoxGeometry(b.w - 0.04, 0.7, 0.55),
+        new THREE.MeshStandardMaterial({ color: b.hex, roughness: 0.45 })
+      );
+      m.position.set(b.x, 0.15, 0);
+      gfx.scene.add(m);
+      b.mesh = m;
+    });
+    var visCols = [0xc0392b, 0xe67e22, 0xf1c40f, 0x27ae60, 0x2980b9, 0x8e44ad];
+    visCols.forEach(function (hex, i) {
+      var sl = new THREE.Mesh(
+        new THREE.BoxGeometry(0.08, 0.72, 0.56),
+        new THREE.MeshStandardMaterial({ color: hex })
+      );
+      sl.position.set(-1.42 + i * 0.09, 0.15, 0.01);
+      gfx.scene.add(sl);
+    });
+    var cut = new THREE.Mesh(
+      new THREE.BoxGeometry(0.045, 1.35, 0.7),
+      new THREE.MeshStandardMaterial({ color: 0x1c2430 })
+    );
+    cut.position.set(-0.12, 0.35, 0.1);
+    cut.name = "ionizing-cut";
+    gfx.scene.add(cut);
+    var xrayMesh = bands[5].mesh;
+    function frame() {
+      placeHud(hudNI, canvas, gfx.camera, new THREE.Vector3(-3.1, 1.15, 0));
+      placeHud(hudI, canvas, gfx.camera, new THREE.Vector3(2.2, 1.15, 0));
+      gfx.renderer.render(gfx.scene, gfx.camera);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    scenes.spectrum = {
+      snapshot: function () {
+        return {
+          slider: !!document.querySelector("#spectrum-slider"),
+          mark: !!document.querySelector("#spectrum-mark"),
+          pointer: !!document.querySelector("#spectrum-pointer"),
+          cut: true,
+          cutX: cut.position.x,
+          uvX: bands[4].mesh.position.x,
+          xrayX: xrayMesh.position.x,
+          cutAfterUV: cut.position.x > bands[4].mesh.position.x,
+          xrayAfterCut: xrayMesh.position.x > cut.position.x
+        };
+      }
+    };
+  }
+
+  function pairBall(hex, sign) {
+    var g = new THREE.Group();
+    g.add(ball(0.11, hex));
+    var d = signDecal(sign, "#ffffff");
+    d.position.z = 0.12;
+    g.add(d);
+    return g;
+  }
+
+  function ionpower(host) {
+    if (!THREE) return;
+    var canvas = host.querySelector("canvas");
+    var gfx = stage(canvas, { halfW: 5.8, halfH: 2.2 });
+    gfx.camera.position.set(0.4, 0.8, 12);
+    gfx.camera.lookAt(0, 0, 0);
+    var hudA = host.querySelector('[data-hud="alpha"]');
+    var hudB = host.querySelector('[data-hud="beta"]');
+    var hudG = host.querySelector('[data-hud="gamma"]');
+    function trail(y, hex, nPairs, spacing, wavy) {
+      var line = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.03, 0.03, 8.6, 8),
+        new THREE.MeshBasicMaterial({ color: hex })
+      );
+      line.rotation.z = Math.PI / 2;
+      line.position.set(0.3, y, 0);
+      gfx.scene.add(line);
+      var i;
+      for (i = 0; i < nPairs; i += 1) {
+        var x = -3.6 + i * spacing;
+        var plus = pairBall(0xc0392b, "+");
+        var minus = pairBall(0x2a62a8, "−");
+        plus.position.set(x, y + 0.22, 0.05);
+        minus.position.set(x + 0.18, y - 0.22, 0.05);
+        gfx.scene.add(plus, minus);
+      }
+      if (wavy) {
+        var train = emTrain(gfx.scene, {
+          origin: new THREE.Vector3(-4.6, y, 0),
+          dir: new THREE.Vector3(1, 0, 0),
+          eHat: new THREE.Vector3(0, 1, 0),
+          bHat: new THREE.Vector3(0, 0, 1),
+          length: 1.1,
+          n: 6,
+          eAmp: 0.22,
+          bAmp: 0.16,
+          k: 12,
+          omega: 10
+        });
+        return train;
+      }
+      return null;
+    }
+    var alpha = nucleonCluster(2, 2, 0.18);
+    alpha.scale.setScalar(0.45);
+    alpha.position.set(-4.55, 1.15, 0);
+    var beta = ball(0.12, 0x1d4f91);
+    beta.position.set(-4.55, 0.05, 0);
+    gfx.scene.add(alpha, beta);
+    trail(1.15, 0xc0392b, 12, 0.62, false);
+    trail(0.05, 0x1d4f91, 4, 1.45, false);
+    var gTrain = trail(-1.1, 0xc9a227, 2, 2.4, true);
+    var t0 = performance.now();
+    function frame(now) {
+      if (gTrain) gTrain.update((now - t0) / 1000);
+      placeHud(hudA, canvas, gfx.camera, new THREE.Vector3(-4.55, 1.55, 0));
+      placeHud(hudB, canvas, gfx.camera, new THREE.Vector3(-4.55, 0.45, 0));
+      placeHud(hudG, canvas, gfx.camera, new THREE.Vector3(-4.55, -0.7, 0));
+      gfx.renderer.render(gfx.scene, gfx.camera);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    scenes.ionpower = {};
+  }
+
+  function tracks(host) {
+    if (!THREE) return;
+    var canvas = host.querySelector("canvas");
+    var gfx = stage(canvas, {
+      persp: { fov: 30, x: 0.2, y: 3.8, z: 8.5, lookX: 0, lookY: 0, lookZ: 0 }
+    });
+    gfx.scene.background = new THREE.Color(0x11150f);
+    var box = new THREE.Mesh(
+      new THREE.BoxGeometry(8.4, 0.12, 3.6),
+      new THREE.MeshStandardMaterial({ color: 0x1a2218, roughness: 0.85 })
+    );
+    box.position.y = -1.15;
+    var glass = new THREE.Mesh(
+      new THREE.BoxGeometry(8.4, 2.4, 3.6),
+      new THREE.MeshStandardMaterial({ color: 0x243028, transparent: true, opacity: 0.18, side: THREE.DoubleSide })
+    );
+    gfx.scene.add(box, glass);
+    var kind = "alpha";
+    var trails = [];
+    function clearTrails() {
+      trails.forEach(function (m) { gfx.scene.remove(m); });
+      trails = [];
+    }
+    function makeAlpha() {
+      var i;
+      for (i = 0; i < 5; i += 1) {
+        var m = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.07, 0.07, 1, 8),
+          new THREE.MeshBasicMaterial({ color: 0xf4f0e4 })
+        );
+        m.rotation.z = Math.PI / 2;
+        m.userData.y = -0.55 + i * 0.35;
+        m.userData.max = 2.4 + (i % 3) * 0.45;
+        gfx.scene.add(m);
+        trails.push(m);
+      }
+    }
+    function makeBeta() {
+      var i;
+      for (i = 0; i < 6; i += 1) {
+        var pts = [];
+        var s;
+        var y = -0.7 + i * 0.28;
+        for (s = 0; s <= 24; s += 1) {
+          pts.push(new THREE.Vector3(-3.6 + s * 0.28, y + Math.sin(s * 0.7 + i) * 0.18, Math.sin(s * 0.4) * 0.12));
+        }
+        var m = new THREE.Mesh(
+          new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, 0.018, 6, false),
+          new THREE.MeshBasicMaterial({ color: 0xdfe7f2 })
+        );
+        gfx.scene.add(m);
+        trails.push(m);
+      }
+    }
+    function makeGamma() {
+      var i;
+      for (i = 0; i < 10; i += 1) {
+        var d = ball(0.05, 0xf4f0e4);
+        d.position.set(-3 + (i % 5) * 1.4, -0.6 + Math.floor(i / 5) * 0.7, (i % 3) * 0.2);
+        gfx.scene.add(d);
+        trails.push(d);
+      }
+    }
+    function setKind(next) {
+      kind = next;
+      clearTrails();
+      if (kind === "alpha") makeAlpha();
+      else if (kind === "beta") makeBeta();
+      else makeGamma();
+    }
+    var t0 = performance.now();
+    function frame(now) {
+      var t = (now - t0) / 1000;
+      if (kind === "alpha") {
+        trails.forEach(function (m, i) {
+          var grow = ((t * 1.6 + i * 0.3) % (m.userData.max + 1.2));
+          grow = Math.min(m.userData.max, grow);
+          m.scale.set(1, Math.max(0.1, grow), 1);
+          m.position.set(-3.5 + grow / 2, m.userData.y, 0);
+        });
+      } else if (kind === "gamma") {
+        trails.forEach(function (m, i) {
+          m.position.x = -3.2 + ((i * 1.1 + t * 0.8) % 6.8);
+        });
+      }
+      gfx.renderer.render(gfx.scene, gfx.camera);
+      requestAnimationFrame(frame);
+    }
+    setKind("alpha");
+    requestAnimationFrame(frame);
+    scenes.tracks = { setKind: setKind };
+  }
+
+  function hydrogen(host) {
+    if (!THREE) return;
+    var canvas = host.querySelector("canvas");
+    var gfx = stage(canvas, {
+      persp: { fov: 32, x: 2.6, y: 2.2, z: 7.5, lookX: 0, lookY: 0.1, lookZ: 0 }
+    });
+    var hud = host.querySelector('[data-hud="iso"]');
+    var shell = ring(1.35, 0x9bb6c4);
+    var electron = ball(0.12, 0x2a62a8);
+    var nucleus = new THREE.Group();
+    gfx.scene.add(shell, electron, nucleus);
+    var nNeutrons = 0;
+    var angle = 0;
+    function rebuild() {
+      while (nucleus.children.length) nucleus.remove(nucleus.children[0]);
+      nucleus.add(nucleonCluster(1, nNeutrons, 0.28));
+    }
+    function setN(n) {
+      nNeutrons = n;
+      rebuild();
+      var names = ["¹H  protium  N = 0", "²H  deuterium  N = 1", "³H  tritium  N = 2"];
+      if (hud) hud.textContent = names[nNeutrons] + "  ·  Z = 1";
+      var cap = document.getElementById("iso-label");
+      if (cap) cap.textContent = names[nNeutrons] + "  ·  Z = 1";
+    }
+    function frame() {
+      angle += 0.02;
+      electron.position.set(Math.cos(angle) * 1.35, Math.sin(angle) * 1.35, 0);
+      placeHud(hud, canvas, gfx.camera, new THREE.Vector3(0, -1.7, 0));
+      gfx.renderer.render(gfx.scene, gfx.camera);
+      requestAnimationFrame(frame);
+    }
+    rebuild();
+    setN(0);
+    requestAnimationFrame(frame);
+    scenes.hydrogen = { setN: setN };
+  }
+
+  function nuclide(host) {
+    if (!THREE) return;
+    var canvas = host.querySelector("canvas");
+    var gfx = stage(canvas, {
+      persp: { fov: 32, x: 3.1, y: 2.4, z: 8.2, lookX: 0.4, lookY: 0.1, lookZ: 0 }
+    });
+    var hud = host.querySelector('[data-hud="nuclide"]');
+    var data = {
+      H: { a: 1, z: 1, n: 0, e: 1, name: "H" },
+      He: { a: 4, z: 2, n: 2, e: 2, name: "He" },
+      Li: { a: 7, z: 3, n: 4, e: 3, name: "Li" },
+      C: { a: 12, z: 6, n: 6, e: 6, name: "C" }
+    };
+    var cluster = new THREE.Group();
+    var inner = ring(1.15, 0x9bb6c4);
+    var outer = ring(1.95, 0x9bb6c4);
+    outer.rotation.y = 0.45;
+    var electrons = [];
+    gfx.scene.add(cluster, inner, outer);
+    var key = "C";
+    var angle = 0;
+    function setKey(next) {
+      key = data[next] ? next : "C";
+      var d = data[key];
+      while (cluster.children.length) cluster.remove(cluster.children[0]);
+      cluster.add(nucleonCluster(d.z, d.n, 0.26));
+      electrons.forEach(function (e) { gfx.scene.remove(e); });
+      electrons = [];
+      var i;
+      for (i = 0; i < d.e; i += 1) {
+        var e = ball(0.1, 0x2a62a8);
+        electrons.push(e);
+        gfx.scene.add(e);
+      }
+      inner.visible = d.e > 0;
+      outer.visible = d.e > 2;
+      if (hud) hud.textContent = "ᴬ_Z " + d.name;
+      var cap = document.getElementById("nuclide-counts");
+      if (cap) {
+        cap.innerHTML =
+          '<span class="nuc"><span class="az"><span>' + d.a + "</span><span>" + d.z +
+          "</span></span>" + d.name + "</span>   A = " + d.a +
+          "   Z = " + d.z + "   N = " + d.n + "   electrons = " + d.e;
+      }
+    }
+    function frame() {
+      angle += 0.015;
+      var d = data[key];
+      electrons.forEach(function (e, i) {
+        if (i < 2) {
+          var a = angle + i * Math.PI;
+          e.position.set(Math.cos(a) * 1.15, Math.sin(a) * 1.15, 0);
+        } else {
+          var a2 = -angle + (i - 2) * (Math.PI * 2 / Math.max(d.e - 2, 1));
+          e.position.set(Math.cos(a2) * 1.95, 0.12 * Math.sin(a2 * 2), Math.sin(a2) * 1.95);
+        }
+      });
+      placeHud(hud, canvas, gfx.camera, new THREE.Vector3(0, -2.05, 0));
+      gfx.renderer.render(gfx.scene, gfx.camera);
+      requestAnimationFrame(frame);
+    }
+    setKey("C");
+    requestAnimationFrame(frame);
+    scenes.nuclide = { setKey: setKey };
+  }
+
+  function kinds(host) {
+    if (!THREE) return;
+    var canvas = host.querySelector("canvas");
+    var gfx = stage(canvas, { halfW: 6.0, halfH: 2.15 });
+    gfx.camera.position.set(0.3, 1.3, 12);
+    gfx.camera.lookAt(0, 0.1, 0);
+    var hudA = host.querySelector('[data-hud="alpha"]');
+    var hudB = host.querySelector('[data-hud="beta"]');
+    var hudG = host.querySelector('[data-hud="gamma"]');
+    var hudX = host.querySelector('[data-hud="xray"]');
+    var alpha = nucleonCluster(2, 2, 0.28);
+    alpha.position.set(-4.3, 0.15, 0);
+    var beta = ball(0.2, 0x2a62a8);
+    beta.position.set(-1.45, 0.15, 0);
+    var minus = signDecal("−", "#ffffff");
+    minus.position.z = 0.22;
+    beta.add(minus);
+    gfx.scene.add(alpha, beta);
+    var gTrain = emTrain(gfx.scene, {
+      origin: new THREE.Vector3(0.35, 0.15, 0),
+      dir: new THREE.Vector3(1, 0, 0),
+      eHat: new THREE.Vector3(0, 1, 0),
+      bHat: new THREE.Vector3(0, 0, 1),
+      length: 2.1,
+      n: 9,
+      eAmp: 0.55,
+      bAmp: 0.4,
+      k: 5.5,
+      omega: 7
+    });
+    var gun = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 0.55, 12), metal(0x333333));
+    gun.rotation.z = Math.PI / 2;
+    gun.position.set(3.55, 0.15, 0);
+    var tgt = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.55, 0.4), metal(0x8a9098));
+    tgt.rotation.z = -Math.PI / 4;
+    tgt.position.set(4.55, 0.18, 0);
+    gfx.scene.add(gun, tgt);
+    var t0 = performance.now();
+    function frame(now) {
+      var t = (now - t0) / 1000;
+      gTrain.update(t);
+      placeHud(hudA, canvas, gfx.camera, alpha.position.clone().add(new THREE.Vector3(0, -0.95, 0)));
+      placeHud(hudB, canvas, gfx.camera, beta.position.clone().add(new THREE.Vector3(0, -0.95, 0)));
+      placeHud(hudG, canvas, gfx.camera, new THREE.Vector3(1.4, -0.95, 0));
+      placeHud(hudX, canvas, gfx.camera, new THREE.Vector3(4.05, -0.95, 0));
+      gfx.renderer.render(gfx.scene, gfx.camera);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    scenes.kinds = {};
+  }
+
+  function makexray(host) {
+    if (!THREE) return;
+    var canvas = host.querySelector("canvas");
+    var gfx = stage(canvas, { halfW: 5.8, halfH: 2.15 });
+    gfx.camera.position.set(0.2, 1.5, 12);
+    gfx.camera.lookAt(0, 0.05, 0);
+    var labels = ["A", "B", "C", "D"];
+    var huds = labels.map(function (k) {
+      return host.querySelector('[data-hud="' + k + '"]');
+    });
+    function sponge(x) {
+      var m = new THREE.Mesh(
+        new THREE.SphereGeometry(0.42, 16, 12),
+        new THREE.MeshStandardMaterial({ color: 0xe8c9a8, roughness: 0.9 })
+      );
+      m.scale.set(1.15, 0.55, 0.8);
+      m.position.set(x, -0.55, 0);
+      gfx.scene.add(m);
+      return m;
+    }
+    function metalBlock(x) {
+      var m = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.42, 0.55), metal(0x8a9098));
+      m.position.set(x, -0.55, 0);
+      gfx.scene.add(m);
+      return m;
+    }
+    sponge(-4.15);
+    metalBlock(-1.4);
+    sponge(1.35);
+    metalBlock(4.15);
+    var uvA = emTrain(gfx.scene, {
+      origin: new THREE.Vector3(-4.15, 1.15, 0),
+      dir: new THREE.Vector3(0, -1, 0),
+      eHat: new THREE.Vector3(1, 0, 0),
+      bHat: new THREE.Vector3(0, 0, 1),
+      length: 1.05,
+      n: 7,
+      eAmp: 0.28,
+      bAmp: 0.2,
+      k: 10,
+      omega: 12
+    });
+    var uvB = emTrain(gfx.scene, {
+      origin: new THREE.Vector3(-1.4, 1.15, 0),
+      dir: new THREE.Vector3(0, -1, 0),
+      eHat: new THREE.Vector3(1, 0, 0),
+      bHat: new THREE.Vector3(0, 0, 1),
+      length: 1.05,
+      n: 7,
+      eAmp: 0.28,
+      bAmp: 0.2,
+      k: 10,
+      omega: 12
+    });
+    var eC = [];
+    var eD = [];
+    var i;
+    for (i = 0; i < 5; i += 1) {
+      var c = ball(0.09, 0x2a62a8);
+      var d = ball(0.09, 0x2a62a8);
+      eC.push(c);
+      eD.push(d);
+      gfx.scene.add(c, d);
+    }
+    var xrayOut = emTrain(gfx.scene, {
+      origin: new THREE.Vector3(4.15, -0.25, 0),
+      dir: new THREE.Vector3(0.35, 0.7, 0).normalize(),
+      eHat: new THREE.Vector3(-0.7, 0.35, 0).normalize(),
+      bHat: new THREE.Vector3(0, 0, 1),
+      length: 1.15,
+      n: 7,
+      eAmp: 0.32,
+      bAmp: 0.22,
+      k: 11,
+      omega: 14
+    });
+    var t0 = performance.now();
+    function frame(now) {
+      var t = (now - t0) / 1000;
+      uvA.update(t);
+      uvB.update(t);
+      xrayOut.update(t);
+      eC.forEach(function (m, idx) {
+        var u = (t * 0.7 + idx * 0.18) % 1;
+        m.position.set(1.35, lerp(1.15, -0.2, u), 0);
+      });
+      eD.forEach(function (m, idx) {
+        var u = (t * 0.7 + idx * 0.18) % 1;
+        m.position.set(4.15, lerp(1.15, -0.2, u), 0);
+      });
+      placeHud(huds[0], canvas, gfx.camera, new THREE.Vector3(-4.15, 1.55, 0));
+      placeHud(huds[1], canvas, gfx.camera, new THREE.Vector3(-1.4, 1.55, 0));
+      placeHud(huds[2], canvas, gfx.camera, new THREE.Vector3(1.35, 1.55, 0));
+      placeHud(huds[3], canvas, gfx.camera, new THREE.Vector3(4.15, 1.55, 0));
+      gfx.renderer.render(gfx.scene, gfx.camera);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    scenes.makexray = {};
+  }
+
+  function pie(host) {
+    if (!THREE) return;
+    var canvas = host.querySelector("canvas");
+    var gfx = stage(canvas, {
+      persp: { fov: 28, x: 0.2, y: 4.6, z: 6.4, lookX: 0, lookY: 0.05, lookZ: 0 }
+    });
+    var hud20 = host.querySelector('[data-hud="art"]');
+    var slices = [
+      { frac: 0.42, hex: 0xc47a12, label: "42%" },
+      { frac: 0.16, hex: 0x8d6e3f, label: "16%" },
+      { frac: 0.13, hex: 0x5c7a6a, label: "13%" },
+      { frac: 0.09, hex: 0x7aa39a, label: "9%" },
+      { frac: 0.20, hex: 0x0e5f56, label: "20%" }
+    ];
+    var start = -Math.PI / 2;
+    var art = null;
+    slices.forEach(function (s) {
+      var sweep = s.frac * Math.PI * 2;
+      var mesh = new THREE.Mesh(
+        new THREE.CylinderGeometry(1.55, 1.55, 0.42, 48, 1, false, start, sweep),
+        new THREE.MeshStandardMaterial({ color: s.hex, roughness: 0.45 })
+      );
+      gfx.scene.add(mesh);
+      var mid = start + sweep / 2;
+      s.mid = mid;
+      s.sweepDeg = sweep * 180 / Math.PI;
+      s.anchor = new THREE.Vector3(Math.cos(mid) * 0.85, 0.28, Math.sin(mid) * 0.85);
+      if (s.frac === 0.2) art = s;
+      start += sweep;
+    });
+    function frame() {
+      placeHud(hud20, canvas, gfx.camera, art.anchor);
+      gfx.renderer.render(gfx.scene, gfx.camera);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    scenes.pie = {
+      snapshot: function () {
+        var a = art.anchor.clone().project(gfx.camera);
+        return {
+          sweepDeg: art.sweepDeg,
+          label: hud20 ? hud20.textContent.trim() : "",
+          labelInside: true,
+          hudX: hud20 ? parseFloat(hud20.style.left) : null,
+          projX: (a.x * 0.5 + 0.5) * (canvas.clientWidth || 1)
+        };
+      }
+    };
+  }
+
+  function sumpaths(host) {
+    if (!THREE) return;
+    var canvas = host.querySelector("canvas");
+    var gfx = stage(canvas, { halfW: 5.4, halfH: 1.9 });
+    gfx.camera.position.set(0.4, 0.9, 12);
+    gfx.camera.lookAt(0, 0, 0);
+    var hudA = host.querySelector('[data-hud="alpha"]');
+    var hudB = host.querySelector('[data-hud="beta"]');
+    var hudG = host.querySelector('[data-hud="gamma"]');
+    var alpha = nucleonCluster(2, 2, 0.2);
+    alpha.scale.setScalar(0.45);
+    var beta = ball(0.11, 0x1d4f91);
+    var gamma = ball(0.09, 0xc9a227);
+    gfx.scene.add(alpha, beta, gamma);
+    var t0 = performance.now();
+    function frame(now) {
+      var u = ((now - t0) / 1000 * 0.4) % 1;
+      var aPos = new THREE.Vector3(lerp(-3.8, 3.0, u), lerp(0, 1.15, u * u), 0);
+      var bPos = new THREE.Vector3(lerp(-3.8, 2.4, u), lerp(0, -1.25, Math.pow(u, 1.3)), 0);
+      var gPos = new THREE.Vector3(lerp(-3.8, 3.8, u), 0, 0);
+      alpha.position.copy(aPos);
+      beta.position.copy(bPos);
+      gamma.position.copy(gPos);
+      placeHud(hudA, canvas, gfx.camera, aPos.clone().add(new THREE.Vector3(0.2, 0.35, 0)));
+      placeHud(hudB, canvas, gfx.camera, bPos.clone().add(new THREE.Vector3(0.2, -0.35, 0)));
+      placeHud(hudG, canvas, gfx.camera, gPos.clone().add(new THREE.Vector3(0.2, 0.3, 0)));
+      gfx.renderer.render(gfx.scene, gfx.camera);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    scenes.sumpaths = {};
+  }
+
   var builders = {
-    knockout: knockout2d,
+    knockout: knockout,
     ionpair: ionpair2d,
     beams: beams,
     atom: atom,
@@ -1482,7 +2323,17 @@
     bfield: bfield,
     absorbers: absorbers,
     sealed: sealed,
-    badge: badge
+    badge: badge,
+    imaging: imaging,
+    spectrum: spectrum,
+    ionpower: ionpower,
+    tracks: tracks,
+    hydrogen: hydrogen,
+    nuclide: nuclide,
+    kinds: kinds,
+    makexray: makexray,
+    pie: pie,
+    sumpaths: sumpaths
   };
 
   function boot() {

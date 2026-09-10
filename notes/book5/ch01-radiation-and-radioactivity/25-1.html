@@ -27,17 +27,19 @@
         <span class="stamp">Fig. 25.2</span>
       </header>
       <div class="visual play stage" id="beam-vis" data-autoplay data-scene="beams">
-        <canvas class="scene-canvas" width="960" height="420" aria-label="Traveling EM wave beside a stream of electrons"></canvas>
-        <span class="hud-label" data-hud="wave">EM wave · light beam</span>
-        <span class="hud-label" data-hud="electrons">particles · electron beam</span>
+        <canvas class="scene-canvas tall" width="960" height="480" aria-label="Traveling electromagnetic wave: oscillating E field and a perpendicular oscillating B field, beside a stream of electrons"></canvas>
+        <span class="hud-label" data-hud="wave">light beam</span>
+        <span class="hud-label" data-hud="e">E</span>
+        <span class="hud-label" data-hud="b">B</span>
+        <span class="hud-label" data-hud="electrons">electron beam</span>
       </div>
       <div class="row"><button type="button" data-replay="beam-vis">Replay</button></div>
       <table class="compact pair">
         <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
         <tbody>
-          <tr><td>Light: a traveling transverse EM wave packet</td><td>Energy is carried by an oscillating field</td></tr>
+          <tr><td>Light: oscillating E with a perpendicular oscillating B, traveling together</td><td>Energy is carried by the electromagnetic field</td></tr>
           <tr><td>Electrons: a stream of particles with kinetic energy</td><td>Energy is carried by moving mass</td></tr>
-          <tr><td>Both transfer energy from one place to another</td><td>Both are forms of radiation</td></tr>
+          <tr><td>Both transfer energy from one place to another</td><td>Both of them are forms of radiation</td></tr>
         </tbody>
       </table>
     </section>
@@ -49,16 +51,20 @@
       </header>
       <div class="visual play stage" id="knock-vis" data-autoplay data-scene="knockout">
         <canvas class="scene-canvas" width="960" height="420" aria-label="Radiation knocks a bound electron out of an atom"></canvas>
+        <span class="hud-label" data-hud="ray">ionizing radiation</span>
         <span class="hud-label" data-hud="atom">atom</span>
         <span class="hud-label" data-hud="electron">electron</span>
       </div>
       <div class="row">
         <button type="button" data-replay="knock-vis">Replay knockout</button>
       </div>
-      <div class="one-liners">
-        <p>Ionizing radiation has enough energy to knock an electron out of an atom or molecule.</p>
-        <p>Hazard: damaged tissue / DNA.</p>
-      </div>
+      <table class="compact pair">
+        <thead><tr><th></th><th>ionizing</th><th>non-ionizing</th></tr></thead>
+        <tbody>
+          <tr><td>Energy</td><td>enough to knock an electron out of an atom or molecule</td><td>not enough for knockout</td></tr>
+          <tr><td>Hazard</td><td>damaged tissue / DNA</td><td>not this ionizing hazard</td></tr>
+        </tbody>
+      </table>
       <!-- QB PHY15011101 -->
       <div class="check" data-check="mc" data-answer="B">
         <h3>Concept check</h3>
@@ -77,36 +83,15 @@
         <h2>Where the EM cut sits</h2>
         <span class="stamp">Fig. 25.5</span>
       </header>
-      <div class="visual">
-        <svg viewBox="0 0 720 170" role="img" aria-label="EM spectrum with ionizing cut after UV">
-          <text x="20" y="22">non-ionizing</text>
-          <text x="520" y="22">ionizing</text>
-          <rect x="20" y="40" width="88" height="40" fill="#d9e4f0"/>
-          <text x="42" y="64" font-size="12">radio</text>
-          <rect x="108" y="40" width="88" height="40" fill="#cfe0c8"/>
-          <text x="124" y="64" font-size="12">micro</text>
-          <rect x="196" y="40" width="88" height="40" fill="#f0d5b8"/>
-          <text x="230" y="64" font-size="12">IR</text>
-          <rect x="284" y="40" width="12" height="40" fill="#c0392b"/>
-          <rect x="296" y="40" width="12" height="40" fill="#e67e22"/>
-          <rect x="308" y="40" width="12" height="40" fill="#f1c40f"/>
-          <rect x="320" y="40" width="12" height="40" fill="#27ae60"/>
-          <rect x="332" y="40" width="12" height="40" fill="#2980b9"/>
-          <rect x="344" y="40" width="12" height="40" fill="#8e44ad"/>
-          <rect x="356" y="40" width="34" height="40" fill="#7e57c2"/>
-          <text x="360" y="64" font-size="11" fill="#fff">UV</text>
-          <rect x="390" y="40" width="120" height="40" fill="#455a64"/>
-          <text x="424" y="64" font-size="12" fill="#fff">X-rays</text>
-          <rect x="510" y="40" width="180" height="40" fill="#1c2430"/>
-          <text x="588" y="64" font-size="12" fill="#fff">γ</text>
-          <line id="ionizing-cut" x1="390" y1="34" x2="390" y2="88" stroke="#1c2430" stroke-width="2"/>
-          <text x="20" y="148" font-size="11">10⁸ Hz</text>
-          <text x="196" y="148" font-size="11">10¹²</text>
-          <text x="348" y="148" font-size="11">vis</text>
-          <text x="390" y="148" font-size="11">10¹⁶</text>
-          <text x="640" y="148" font-size="11">→</text>
-        </svg>
+      <div class="visual play stage" id="spectrum-vis" data-scene="spectrum">
+        <canvas class="scene-canvas" width="960" height="280" aria-label="EM spectrum with ionizing cut after UV"></canvas>
+        <span class="hud-label" data-hud="nonion">non-ionizing</span>
+        <span class="hud-label" data-hud="ion">ionizing</span>
       </div>
+      <table class="compact">
+        <thead><tr><th>radio</th><th>micro</th><th>IR</th><th>vis</th><th>UV</th><th>X-rays</th><th>γ</th></tr></thead>
+        <tbody><tr><td colspan="5">non-ionizing here</td><td colspan="2">ionizing EM</td></tr></tbody>
+      </table>
       <table class="compact pair">
         <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
         <tbody>
@@ -170,71 +155,12 @@
         <h2>Flesh transmits, bone absorbs</h2>
         <span class="stamp">Fig. 25.7</span>
       </header>
-      <div class="visual play" id="imaging-vis" data-autoplay>
-        <svg viewBox="0 0 760 300" role="img" aria-label="Hand radiograph beside X-rays coming down onto bone next to flesh, then photographic film">
-          <defs>
-            <marker id="xray-head" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-              <path d="M0 0 L8 4 L0 8 Z" fill="#c9a227"/>
-            </marker>
-          </defs>
-          <g id="hand-radiograph">
-            <rect x="14" y="16" width="270" height="268" rx="5" fill="#10100e"/>
-            <path fill="#2f2c28" d="M128 276 C 76 258 40 218 34 172 C 28 128 52 104 74 90 C 60 68 46 44 52 30 C 58 16 78 16 86 32 L 100 20 C 112 8 128 10 132 26 L 144 16 C 158 6 174 10 176 26 L 192 34 C 208 50 224 82 234 116 C 248 160 250 204 208 244 C 182 268 154 276 128 276 Z"/>
-            <g fill="none" stroke="#f0e6d0" stroke-linecap="round">
-              <line x1="116" y1="272" x2="120" y2="230" stroke-width="12"/>
-              <line x1="142" y1="274" x2="150" y2="228" stroke-width="15"/>
-              <line x1="104" y1="214" x2="82" y2="156" stroke-width="8"/>
-              <line x1="122" y1="210" x2="110" y2="148" stroke-width="10"/>
-              <line x1="140" y1="208" x2="140" y2="144" stroke-width="11"/>
-              <line x1="158" y1="210" x2="168" y2="150" stroke-width="10"/>
-              <line x1="164" y1="222" x2="204" y2="184" stroke-width="12"/>
-              <line x1="82" y1="156" x2="70" y2="108" stroke-width="7"/>
-              <line x1="110" y1="148" x2="102" y2="96" stroke-width="8"/>
-              <line x1="140" y1="144" x2="140" y2="90" stroke-width="9"/>
-              <line x1="168" y1="150" x2="180" y2="98" stroke-width="8"/>
-              <line x1="204" y1="184" x2="228" y2="158" stroke-width="9"/>
-              <line x1="70" y1="108" x2="62" y2="74" stroke-width="6"/>
-              <line x1="102" y1="96" x2="96" y2="60" stroke-width="6.5"/>
-              <line x1="140" y1="90" x2="140" y2="52" stroke-width="7"/>
-              <line x1="180" y1="98" x2="190" y2="64" stroke-width="6.5"/>
-              <line x1="62" y1="74" x2="56" y2="48" stroke-width="5"/>
-              <line x1="96" y1="60" x2="92" y2="34" stroke-width="5.5"/>
-              <line x1="140" y1="52" x2="140" y2="24" stroke-width="6"/>
-              <line x1="190" y1="64" x2="198" y2="40" stroke-width="5.5"/>
-              <line x1="228" y1="158" x2="246" y2="140" stroke-width="7"/>
-            </g>
-            <g fill="#f0e6d0">
-              <ellipse cx="112" cy="220" rx="8" ry="7"/>
-              <ellipse cx="128" cy="216" rx="8" ry="7"/>
-              <ellipse cx="146" cy="216" rx="8" ry="7"/>
-              <ellipse cx="160" cy="222" rx="8" ry="7"/>
-              <ellipse cx="120" cy="232" rx="7" ry="6"/>
-              <ellipse cx="138" cy="230" rx="8" ry="6"/>
-              <ellipse cx="154" cy="234" rx="7" ry="6"/>
-            </g>
-          </g>
-          <text x="530" y="28" text-anchor="middle" font-size="15">X-rays</text>
-          <g id="xray-body">
-            <rect id="slab-bone" x="356" y="96" width="120" height="58" fill="#f4efe4" fill-opacity="0.92" stroke="#8a8580"/>
-            <rect id="slab-flesh" x="476" y="96" width="148" height="58" fill="#e8c4a0" fill-opacity="0.9"/>
-          </g>
-          <path data-xray="bone-short" fill="none" stroke="#c9a227" stroke-width="2.6" marker-end="url(#xray-head)"
-                d="M378.0 38.0 L383.1 42.0 L384.3 46.0 L380.8 50.0 L375.2 54.0 L371.7 58.0 L372.9 62.0 L378.0 66.0 L383.1 70.0 L384.3 74.0 L380.8 78.0 L375.2 82.0 L371.7 86.0 L372.9 90.0 L378.0 94.0 L383.1 98.0 L384.3 102.0 L380.8 106.0 L375.2 110.0 L371.7 114.0 L372.9 118.0"/>
-          <path data-xray="bone-mid" fill="none" stroke="#c9a227" stroke-width="2.6" marker-end="url(#xray-head)"
-                d="M424.0 38.0 L429.2 42.1 L430.3 46.2 L426.5 50.2 L420.8 54.3 L417.6 58.4 L419.4 62.5 L424.8 66.6 L429.6 70.6 L430.0 74.7 L425.7 78.8 L420.1 82.9 L417.5 87.0 L420.0 91.0 L425.6 95.1 L430.0 99.2 L429.7 103.3 L424.9 107.4 L419.5 111.4 L417.5 115.5 L420.7 119.6 L426.4 123.7 L430.2 127.8 L429.2 131.8 L424.1 135.9 L418.9 140.0"/>
-          <path data-xray="bone-half" fill="none" stroke="#c9a227" stroke-width="2.6" marker-end="url(#xray-head)"
-                d="M401.0 38.0 L406.1 42.0 L407.3 46.0 L403.8 50.0 L398.2 54.0 L394.7 58.0 L395.9 62.0 L401.0 66.0 L406.1 70.0 L407.3 74.0 L403.8 78.0 L398.2 82.0 L394.7 86.0 L395.9 90.0 L401.0 94.0 L406.1 98.0 L407.3 102.0 L403.8 106.0 L398.2 110.0 L394.7 114.0 L395.9 118.0 L401.0 122.0 L406.1 126.0 L407.3 130.0"/>
-          <path data-xray="flesh-thru1" fill="none" stroke="#c9a227" stroke-width="2.6" marker-end="url(#xray-head)"
-                d="M548.0 38.0 L553.1 42.0 L554.3 46.0 L550.8 50.0 L545.2 54.0 L541.7 58.0 L542.9 62.0 L548.0 66.0 L553.1 70.0 L554.3 74.0 L550.8 78.0 L545.2 82.0 L541.7 86.0 L542.9 90.0 L548.0 94.0 L553.1 98.0 L554.3 102.0 L550.8 106.0 L545.2 110.0 L541.7 114.0 L542.9 118.0 L548.0 122.0 L553.1 126.0 L554.3 130.0 L550.8 134.0 L545.2 138.0 L541.7 142.0 L542.9 146.0 L548.0 150.0 L553.1 154.0 L554.3 158.0 L550.8 162.0 L545.2 166.0 L541.7 170.0 L542.9 174.0 L548.0 178.0 L553.1 182.0 L554.3 186.0 L550.8 190.0 L545.2 194.0 L541.7 198.0 L542.9 202.0 L548.0 206.0"/>
-          <path data-xray="flesh-thru2" fill="none" stroke="#c9a227" stroke-width="2.6" marker-end="url(#xray-head)"
-                d="M596.0 38.0 L601.1 42.0 L602.3 46.0 L598.8 50.0 L593.2 54.0 L589.7 58.0 L590.9 62.0 L596.0 66.0 L601.1 70.0 L602.3 74.0 L598.8 78.0 L593.2 82.0 L589.7 86.0 L590.9 90.0 L596.0 94.0 L601.1 98.0 L602.3 102.0 L598.8 106.0 L593.2 110.0 L589.7 114.0 L590.9 118.0 L596.0 122.0 L601.1 126.0 L602.3 130.0 L598.8 134.0 L593.2 138.0 L589.7 142.0 L590.9 146.0 L596.0 150.0 L601.1 154.0 L602.3 158.0 L598.8 162.0 L593.2 166.0 L589.7 170.0 L590.9 174.0 L596.0 178.0 L601.1 182.0 L602.3 186.0 L598.8 190.0 L593.2 194.0 L589.7 198.0 L590.9 202.0 L596.0 206.0"/>
-          <rect id="xray-film" x="348" y="206" width="284" height="34" fill="#3d3426"/>
-          <rect id="film-under-bone" x="356" y="206" width="120" height="34" fill="#f4efe0"/>
-          <rect id="film-under-flesh" x="476" y="206" width="148" height="34" fill="#1a1610"/>
-          <text x="416" y="172" text-anchor="middle" font-size="14">bone</text>
-          <text x="550" y="172" text-anchor="middle" font-size="14">flesh</text>
-          <text x="490" y="262" text-anchor="middle" font-size="13">photographic film</text>
-        </svg>
+      <div class="visual play stage" id="imaging-vis" data-autoplay data-scene="imaging">
+        <canvas class="scene-canvas tall" width="960" height="480" aria-label="Hand radiograph beside X-rays coming down onto bone next to flesh, then photographic film"></canvas>
+        <span class="hud-label" data-hud="xrays">X-rays</span>
+        <span class="hud-label" data-hud="bone">bone</span>
+        <span class="hud-label" data-hud="flesh">flesh</span>
+        <span class="hud-label" data-hud="film">photographic film</span>
       </div>
       <div class="row"><button type="button" data-replay="imaging-vis">Replay</button></div>
       <table class="compact pair">
@@ -263,33 +189,12 @@
         <h2>Which hit makes X-rays?</h2>
         <span class="stamp">Exercise after 25.1</span>
       </header>
-      <div class="visual">
-        <svg viewBox="0 0 640 190" role="img" aria-label="Four setups: UV or electrons on sponge or metal">
-          <g>
-            <text x="40" y="24">A  UV → sponge</text>
-            <path d="M40 70 C 51 48, 62 48, 73 70 S 95 92, 106 70" fill="none" stroke="#7e57c2" stroke-width="2.5"/>
-            <ellipse cx="118" cy="118" rx="30" ry="16" fill="#e8c9a8" stroke="#b08968"/>
-          </g>
-          <g>
-            <text x="200" y="24">B  UV → metal</text>
-            <path d="M200 70 C 211 48, 222 48, 233 70 S 255 92, 266 70" fill="none" stroke="#7e57c2" stroke-width="2.5"/>
-            <rect x="250" y="102" width="44" height="28" fill="#8a9098" stroke="#333"/>
-          </g>
-          <g>
-            <text x="360" y="24">C  e⁻ → sponge</text>
-            <circle cx="378" cy="70" r="6" fill="#2a62a8"/>
-            <circle cx="400" cy="70" r="6" fill="#2a62a8"/>
-            <polygon points="422,70 410,64 410,76" fill="#2a62a8"/>
-            <ellipse cx="438" cy="118" rx="30" ry="16" fill="#e8c9a8" stroke="#b08968"/>
-          </g>
-          <g>
-            <text x="500" y="24">D  e⁻ → metal</text>
-            <circle cx="518" cy="70" r="6" fill="#2a62a8"/>
-            <circle cx="540" cy="70" r="6" fill="#2a62a8"/>
-            <polygon points="562,70 550,64 550,76" fill="#2a62a8"/>
-            <rect x="560" y="102" width="44" height="28" fill="#8a9098" stroke="#333"/>
-          </g>
-        </svg>
+      <div class="visual play stage" id="makexray-vis" data-scene="makexray">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Four setups: UV or electrons on sponge or metal"></canvas>
+        <span class="hud-label" data-hud="A">A  UV → sponge</span>
+        <span class="hud-label" data-hud="B">B  UV → metal</span>
+        <span class="hud-label" data-hud="C">C  e⁻ → sponge</span>
+        <span class="hud-label" data-hud="D">D  e⁻ → metal</span>
       </div>
       <div class="check" data-check="mc" data-answer="D">
         <h3>Concept check</h3>
@@ -309,32 +214,12 @@
         <h2>Nuclear radiation vs an X-ray switch</h2>
         <span class="stamp">25.1 C</span>
       </header>
-      <div class="visual">
-        <svg viewBox="0 0 720 180" role="img" aria-label="Alpha helium nucleus, beta electron, gamma wave, X-ray tube">
-          <g>
-            <circle cx="64" cy="78" r="12" fill="#c0392b"/>
-            <circle cx="86" cy="78" r="12" fill="#c0392b"/>
-            <circle cx="64" cy="100" r="12" fill="#2f7a4a"/>
-            <circle cx="86" cy="100" r="12" fill="#2f7a4a"/>
-            <text x="36" y="150">α  He nucleus</text>
-          </g>
-          <g>
-            <circle cx="250" cy="90" r="11" fill="#2a62a8"/>
-            <text x="246" y="94" fill="#fff" font-size="14">−</text>
-            <text x="198" y="150">β  fast electron</text>
-          </g>
-          <g>
-            <path d="M400 90 C 414 54, 428 54, 442 90 S 470 126, 484 90 S 512 54, 526 90"
-                  fill="none" stroke="#c9a227" stroke-width="3"/>
-            <text x="420" y="150">γ  high-f EM</text>
-          </g>
-          <g>
-            <rect x="600" y="48" width="72" height="72" rx="8" fill="#dfe7ea" stroke="#333"/>
-            <line x1="612" y1="84" x2="648" y2="84" stroke="#2a62a8" stroke-width="3"/>
-            <polygon points="658,70 678,84 658,98" fill="#8a9098"/>
-            <text x="592" y="150" font-size="12">X-ray: switched</text>
-          </g>
-        </svg>
+      <div class="visual play stage" id="kinds-vis" data-scene="kinds">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Alpha helium nucleus, beta electron, gamma EM wave, X-ray tube"></canvas>
+        <span class="hud-label" data-hud="alpha">α  He nucleus</span>
+        <span class="hud-label" data-hud="beta">β  fast electron</span>
+        <span class="hud-label" data-hud="gamma">γ  high-f EM</span>
+        <span class="hud-label" data-hud="xray">X-ray: switched</span>
       </div>
       <table class="compact pair">
         <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
