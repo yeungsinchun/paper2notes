@@ -869,14 +869,13 @@ chromeTest("chapter map, summary, and concept-check scoring are the public notes
   assert.equal(replay25_1.tube, 0, "X-ray tube loop should not have Replay");
   assert.equal(replay25_1.imaging, 1, "film blackening is a finite clip");
 
-  const scaled = await cdp.evaluate(`(function () {
+  const scaledBefore = await cdp.evaluate(`(function () {
     var imaging = document.querySelector("#imaging-vis");
     var other = document.querySelector("#knock-vis");
     var canvas = imaging.querySelector("canvas");
     var otherCanvas = other.querySelector("canvas");
     var hud = imaging.querySelector("[data-hud='flesh']");
     var plus = imaging.querySelector("[data-box-scale='up']");
-    var minus = imaging.querySelector("[data-box-scale='down']");
     var before = {
       scale: getComputedStyle(imaging).getPropertyValue("--box-scale").trim(),
       otherScale: getComputedStyle(other).getPropertyValue("--box-scale").trim(),
@@ -892,28 +891,46 @@ chromeTest("chapter map, summary, and concept-check scoring are the public notes
       otherH: otherCanvas.getBoundingClientRect().height,
       hudH: hud.getBoundingClientRect().height
     };
-    document.querySelector('[data-replay="imaging-vis"]').click();
-    var afterReplay = {
-      scale: getComputedStyle(imaging).getPropertyValue("--box-scale").trim(),
-      canvasH: canvas.getBoundingClientRect().height
-    };
-    minus.click();
-    var after = {
-      scale: getComputedStyle(imaging).getPropertyValue("--box-scale").trim(),
-      canvasH: canvas.getBoundingClientRect().height
-    };
-    return { before: before, mid: mid, afterReplay: afterReplay, after: after };
+    return { before: before, mid: mid };
   })()`);
-  assert.equal(scaled.before.scale, "1");
-  assert.equal(scaled.before.otherScale, "1");
-  assert.equal(scaled.mid.scale, "1.15");
-  assert.equal(scaled.mid.otherScale, "1", "plus on one box must not scale another");
-  assert.ok(scaled.mid.canvasH > scaled.before.canvasH * 1.08, "plus should enlarge that diagram");
-  near(scaled.mid.otherH, scaled.before.otherH, 1);
-  near(scaled.mid.canvasH / scaled.before.canvasH, scaled.mid.hudH / scaled.before.hudH, 0.08);
-  assert.equal(scaled.afterReplay.scale, "1.15");
-  near(scaled.afterReplay.canvasH, scaled.mid.canvasH, 1);
-  assert.equal(scaled.after.scale, "1");
+  assert.equal(scaledBefore.before.scale, "1");
+  assert.equal(scaledBefore.before.otherScale, "1");
+  assert.equal(scaledBefore.mid.scale, "1.15");
+  assert.equal(scaledBefore.mid.otherScale, "1", "plus on one box must not scale another");
+  assert.ok(scaledBefore.mid.canvasH > scaledBefore.before.canvasH * 1.08, "plus should enlarge that diagram");
+  near(scaledBefore.mid.otherH, scaledBefore.before.otherH, 1);
+  near(scaledBefore.mid.canvasH / scaledBefore.before.canvasH, scaledBefore.mid.hudH / scaledBefore.before.hudH, 0.08);
+  if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "25-1-imaging-plus-zoom.png"), "#imaging");
+  }
+
+  const afterReplay = await cdp.evaluate(`(function () {
+    var imaging = document.querySelector("#imaging-vis");
+    var canvas = imaging.querySelector("canvas");
+    document.querySelector('[data-replay="imaging-vis"]').click();
+    return {
+      scale: getComputedStyle(imaging).getPropertyValue("--box-scale").trim(),
+      canvasH: canvas.getBoundingClientRect().height,
+      hasPlay: imaging.classList.contains("play")
+    };
+  })()`);
+  assert.equal(afterReplay.scale, "1.15");
+  near(afterReplay.canvasH, scaledBefore.mid.canvasH, 1);
+  assert.equal(afterReplay.hasPlay, true);
+  if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "25-1-imaging-plus-replay-zoom.png"), "#imaging");
+  }
+
+  const afterMinus = await cdp.evaluate(`(function () {
+    var imaging = document.querySelector("#imaging-vis");
+    var canvas = imaging.querySelector("canvas");
+    imaging.querySelector("[data-box-scale='down']").click();
+    return {
+      scale: getComputedStyle(imaging).getPropertyValue("--box-scale").trim(),
+      canvasH: canvas.getBoundingClientRect().height
+    };
+  })()`);
+  assert.equal(afterMinus.scale, "1");
 
   await cdp.goto(pageUrl("25-2.html"));
   const replay25_2 = await cdp.evaluate("document.querySelectorAll('[data-replay]').length");
