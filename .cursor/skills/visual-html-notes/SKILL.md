@@ -20,7 +20,7 @@ Same table style elsewhere: `What you see` / `Therefore`, for example "Both tran
 
 ## Worked figure (Fig. 25.2 light beam)
 
-An EM wave is the combination of the E field and the B field. In three.js that is a traveling train of arrows: E along y, B along z, both `sin(kx − ωt)`, Poynting along +x. That full E+B animation belongs only here. The electron beam is a moving KE particle stream beside it, not a conversion of the wave. Labels sit on the objects with `placeHud`.
+An EM wave is the combination of the E field and the B field. In three.js that is a traveling train of arrows: E along y, B along z, both `sin(kx − ωt)`, Poynting along +x. That full E+B animation belongs only here. The electron beam is a moving KE particle stream beside it, not a conversion of the wave. Do not put a wall between them. A shared title or frame names the class: "two types of radiation" (electromagnetic / particle). Labels sit on the objects with `placeHud`.
 
 ```javascript
 var train = emTrain(scene, {

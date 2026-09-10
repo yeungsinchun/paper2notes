@@ -722,6 +722,10 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
   near(beamA.waveHud, beamA.waveProj, 14);
   near(beamA.eHud, beamA.eProj, 16);
   near(beamA.bHud, beamA.bProj, 18);
+  assert.equal(beamA.hasDivider, false);
+  assert.match(beamA.classLabel, /two types of radiation/i);
+  assert.match(beamA.waveLabel, /EM wave/);
+  assert.match(beamA.electronLabel, /particles/);
   await cdp.evaluate("new Promise((r) => setTimeout(r, 350))");
   const beamB = await cdp.evaluate("window.NotesScenes.beams.snapshot()");
   assert.ok(Math.abs(beamB.crestX - beamA.crestX) > 0.15 || Math.abs(beamB.eAtProbe - beamA.eAtProbe) > 0.15,

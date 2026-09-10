@@ -398,6 +398,24 @@
     return mesh;
   }
 
+  function labelPlane(text, w, h, fill) {
+    var c = document.createElement("canvas");
+    c.width = 1024;
+    c.height = 160;
+    var ctx = c.getContext("2d");
+    ctx.clearRect(0, 0, 1024, 160);
+    ctx.fillStyle = fill || "#163038";
+    ctx.font = "700 54px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(text, 512, 84);
+    var tex = new THREE.CanvasTexture(c);
+    return new THREE.Mesh(
+      new THREE.PlaneGeometry(w, h),
+      new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, side: THREE.DoubleSide })
+    );
+  }
+
   function knockout(host) {
     if (!THREE) return;
     var canvas = host.querySelector("canvas");
@@ -606,6 +624,7 @@
     var hudE = host.querySelector('[data-hud="e"]');
     var hudB = host.querySelector('[data-hud="b"]');
     var hudElectrons = host.querySelector('[data-hud="electrons"]');
+    var hudClass = host.querySelector('[data-hud="class"]');
     var origin = new THREE.Vector3(-5.35, 0, 0);
     var dir = new THREE.Vector3(1, 0, 0);
     var eHat = new THREE.Vector3(0, 1, 0);
@@ -623,12 +642,29 @@
       k: 2.55,
       omega: 3.1
     });
-    var divider = new THREE.Mesh(
-      new THREE.BoxGeometry(0.04, 2.8, 2.2),
-      new THREE.MeshStandardMaterial({ color: 0xd7d0c2, roughness: 0.7 })
+    var frameMat = new THREE.MeshStandardMaterial({ color: 0x6a767c, roughness: 0.45, metalness: 0.12 });
+    function bar(w, h, d) {
+      return new THREE.Mesh(new THREE.BoxGeometry(w, h, d), frameMat);
+    }
+    var floor = new THREE.Mesh(
+      new THREE.BoxGeometry(11.6, 0.08, 3.4),
+      new THREE.MeshStandardMaterial({ color: 0xe7eee8, roughness: 0.88 })
     );
-    divider.position.set(0.05, 0, 0);
-    gfx.scene.add(divider);
+    floor.position.set(0, -1.62, 0);
+    var rail = bar(11.6, 0.07, 0.07);
+    rail.position.set(0, 2.08, -1.15);
+    var postL = bar(0.07, 3.7, 0.07);
+    postL.position.set(-5.76, 0.23, -1.15);
+    var postR = bar(0.07, 3.7, 0.07);
+    postR.position.set(5.76, 0.23, -1.15);
+    var title = labelPlane("two types of radiation", 6.6, 0.52);
+    title.position.set(0, 2.48, -1.02);
+    var typeEM = labelPlane("electromagnetic", 3.3, 0.36, "#0e5f56");
+    typeEM.position.set(-2.7, -1.36, 0.15);
+    var typeP = labelPlane("particle", 2.5, 0.36, "#1d4f91");
+    typeP.position.set(2.9, -1.36, 0.15);
+    gfx.scene.add(floor, rail, postL, postR, title, typeEM, typeP);
+    var classAnchor = new THREE.Vector3(0, 2.48, -1.02);
     var electrons = [];
     var i;
     for (i = 0; i < 8; i += 1) {
@@ -666,6 +702,7 @@
       placeHud(hudE, canvas, gfx.camera, eFieldAnchor);
       placeHud(hudB, canvas, gfx.camera, bFieldAnchor);
       placeHud(hudElectrons, canvas, gfx.camera, eBeamAnchor);
+      placeHud(hudClass, canvas, gfx.camera, classAnchor);
       gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
     }
@@ -675,6 +712,7 @@
       placeHud(hudE, canvas, gfx.camera, eFieldAnchor);
       placeHud(hudB, canvas, gfx.camera, bFieldAnchor);
       placeHud(hudElectrons, canvas, gfx.camera, eBeamAnchor);
+      placeHud(hudClass, canvas, gfx.camera, classAnchor);
       var probeS = length * 0.4;
       var sm = train.sample(probeS, lastT);
       var eVec = sm.eVec;
@@ -716,7 +754,11 @@
         bProj: bProj.x,
         camX: gfx.camera.position.x,
         camY: gfx.camera.position.y,
-        camZ: gfx.camera.position.z
+        camZ: gfx.camera.position.z,
+        hasDivider: false,
+        classLabel: hudClass ? hudClass.textContent.trim() : "",
+        waveLabel: hudWave ? hudWave.textContent.trim() : "",
+        electronLabel: hudElectrons ? hudElectrons.textContent.trim() : ""
       };
     }
     hostReplay(host, restart);
