@@ -19,7 +19,6 @@
   --lead: #2d3038;
   --al: #c5ccd4;
   --shadow: 0 10px 30px rgba(28, 36, 48, 0.08);
-  --view-scale: 1;
   font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
 }
 
@@ -81,48 +80,10 @@ nav a:hover { border-bottom-color: var(--ochre); }
   margin-left: auto;
 }
 
-.view-scale {
-  display: inline-flex;
-  gap: 0.28rem;
-  flex: 0 0 auto;
-  margin-left: 0.35rem;
-}
-
-.view-scale button {
-  width: 1.85rem;
-  height: 1.85rem;
-  padding: 0;
-  border: 1px solid rgba(244, 239, 228, 0.45);
-  background: transparent;
-  color: #f4efe4;
-  font-size: 1.2rem;
-  line-height: 1;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.view-scale button:hover:not(:disabled) {
-  background: rgba(244, 239, 228, 0.12);
-  border-color: var(--ochre);
-}
-
-.view-scale button:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-
 main {
   max-width: 1080px;
   margin: 0 auto;
   padding: 1.4rem 1.1rem 4rem;
-  zoom: var(--view-scale);
-}
-
-@supports not (zoom: 1) {
-  main {
-    transform: scale(var(--view-scale));
-    transform-origin: top center;
-  }
 }
 
 h1, h2, h3 {
@@ -469,6 +430,44 @@ tr.on td { background: #dff3ee; }
 .stage {
   position: relative;
   overflow: hidden;
+}
+.visual.play.stage {
+  --box-scale: 1;
+  zoom: var(--box-scale);
+}
+@supports not (zoom: 1) {
+  .visual.play.stage {
+    transform: scale(var(--box-scale));
+    transform-origin: top center;
+  }
+}
+.box-scale {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  z-index: 6;
+  display: inline-flex;
+  gap: 0.28rem;
+}
+.box-scale button {
+  width: 1.85rem;
+  height: 1.85rem;
+  padding: 0;
+  border: 1px solid var(--rule);
+  background: rgba(255, 250, 241, 0.94);
+  color: var(--ink);
+  font-size: 1.2rem;
+  line-height: 1;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.box-scale button:hover:not(:disabled) {
+  border-color: var(--teal);
+  background: #fff;
+}
+.box-scale button:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 .stage canvas.scene-canvas {
   display: block;

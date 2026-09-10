@@ -769,27 +769,49 @@ chromeTest("chapter map, summary, and concept-check scoring are the public notes
     await cdp.goto(pageUrl(page));
     const chrome = await cdp.evaluate(`(function () {
       var bar = document.querySelector(".topbar");
-      var plus = document.querySelector(".topbar [data-view-scale='up']");
-      var minus = document.querySelector(".topbar [data-view-scale='down']");
-      if (!bar || !plus || !minus) return { ok: false };
-      var br = bar.getBoundingClientRect();
-      var pr = plus.getBoundingClientRect();
-      var mr = minus.getBoundingClientRect();
+      var pageWide = document.querySelector(".view-scale, [data-view-scale], .topbar [data-box-scale]");
+      var stages = Array.from(document.querySelectorAll(".visual.play.stage"));
+      var boxes = stages.map(function (stage) {
+        var plus = stage.querySelector("[data-box-scale='up']");
+        var minus = stage.querySelector("[data-box-scale='down']");
+        if (!plus || !minus) return { ok: false, id: stage.id };
+        var hidden = stage.hasAttribute("hidden") || getComputedStyle(stage).display === "none";
+        var sr = stage.getBoundingClientRect();
+        var pr = plus.getBoundingClientRect();
+        var mr = minus.getBoundingClientRect();
+        return {
+          ok: true,
+          id: stage.id,
+          hidden: hidden,
+          plusText: plus.textContent.trim(),
+          minusText: minus.textContent.trim(),
+          plusAfterMinus: hidden ? true : pr.left > mr.left,
+          rightGap: hidden ? 0 : sr.right - pr.right,
+          inBox: hidden ? true : pr.top >= sr.top - 1 && pr.bottom <= sr.bottom + 1
+        };
+      });
       return {
-        ok: true,
-        plusText: plus.textContent.trim(),
-        minusText: minus.textContent.trim(),
-        plusAfterMinus: pr.left > mr.left,
-        rightGap: br.right - pr.right,
-        inBar: pr.top >= br.top - 1 && pr.bottom <= br.bottom + 1
+        hasBar: !!bar,
+        noPageWide: !pageWide,
+        stageCount: stages.length,
+        boxes: boxes
       };
     })()`);
-    assert.equal(chrome.ok, true, "scale buttons missing on " + page);
-    assert.equal(chrome.plusText, "+");
-    assert.equal(chrome.minusText, "−");
-    assert.equal(chrome.plusAfterMinus, true);
-    assert.ok(chrome.rightGap < 48, "scale buttons should sit at the top right on " + page);
-    assert.equal(chrome.inBar, true);
+    assert.equal(chrome.hasBar, true, "top bar missing on " + page);
+    assert.equal(chrome.noPageWide, true, "page-wide scale chrome still on " + page);
+    if (page === "index.html") {
+      assert.equal(chrome.stageCount, 0);
+    } else {
+      assert.ok(chrome.stageCount > 0, "expected animation boxes on " + page);
+    }
+    chrome.boxes.forEach(function (box) {
+      assert.equal(box.ok, true, "scale buttons missing on " + page + " #" + box.id);
+      assert.equal(box.plusText, "+");
+      assert.equal(box.minusText, "−");
+      assert.equal(box.plusAfterMinus, true, "plus should sit to the right of minus on #" + box.id);
+      assert.ok(box.rightGap < 48, "scale buttons should sit at the top right of #" + box.id);
+      assert.equal(box.inBox, true, "scale buttons should stay on #" + box.id);
+    });
   }
 
   await cdp.goto(pageUrl("summary.html"));
@@ -848,31 +870,41 @@ chromeTest("chapter map, summary, and concept-check scoring are the public notes
   assert.equal(replay25_1.imaging, 1, "film blackening is a finite clip");
 
   const scaled = await cdp.evaluate(`(function () {
-    var canvas = document.querySelector("#imaging-vis canvas");
-    var hud = document.querySelector("#imaging-vis [data-hud='flesh']");
-    var plus = document.querySelector("[data-view-scale='up']");
-    var minus = document.querySelector("[data-view-scale='down']");
+    var imaging = document.querySelector("#imaging-vis");
+    var other = document.querySelector("#knock-vis");
+    var canvas = imaging.querySelector("canvas");
+    var otherCanvas = other.querySelector("canvas");
+    var hud = imaging.querySelector("[data-hud='flesh']");
+    var plus = imaging.querySelector("[data-box-scale='up']");
+    var minus = imaging.querySelector("[data-box-scale='down']");
     var before = {
-      scale: getComputedStyle(document.documentElement).getPropertyValue("--view-scale").trim(),
+      scale: getComputedStyle(imaging).getPropertyValue("--box-scale").trim(),
+      otherScale: getComputedStyle(other).getPropertyValue("--box-scale").trim(),
       canvasH: canvas.getBoundingClientRect().height,
+      otherH: otherCanvas.getBoundingClientRect().height,
       hudH: hud.getBoundingClientRect().height
     };
     plus.click();
     var mid = {
-      scale: getComputedStyle(document.documentElement).getPropertyValue("--view-scale").trim(),
+      scale: getComputedStyle(imaging).getPropertyValue("--box-scale").trim(),
+      otherScale: getComputedStyle(other).getPropertyValue("--box-scale").trim(),
       canvasH: canvas.getBoundingClientRect().height,
+      otherH: otherCanvas.getBoundingClientRect().height,
       hudH: hud.getBoundingClientRect().height
     };
     minus.click();
     var after = {
-      scale: getComputedStyle(document.documentElement).getPropertyValue("--view-scale").trim(),
+      scale: getComputedStyle(imaging).getPropertyValue("--box-scale").trim(),
       canvasH: canvas.getBoundingClientRect().height
     };
     return { before: before, mid: mid, after: after };
   })()`);
   assert.equal(scaled.before.scale, "1");
+  assert.equal(scaled.before.otherScale, "1");
   assert.equal(scaled.mid.scale, "1.15");
-  assert.ok(scaled.mid.canvasH > scaled.before.canvasH * 1.08, "plus should enlarge diagrams");
+  assert.equal(scaled.mid.otherScale, "1", "plus on one box must not scale another");
+  assert.ok(scaled.mid.canvasH > scaled.before.canvasH * 1.08, "plus should enlarge that diagram");
+  near(scaled.mid.otherH, scaled.before.otherH, 1);
   near(scaled.mid.canvasH / scaled.before.canvasH, scaled.mid.hudH / scaled.before.hudH, 0.08);
   assert.equal(scaled.after.scale, "1");
 
