@@ -657,13 +657,11 @@
     postL.position.set(-5.76, 0.23, -1.15);
     var postR = bar(0.07, 3.7, 0.07);
     postR.position.set(5.76, 0.23, -1.15);
-    var title = labelPlane("two types of radiation", 6.6, 0.52);
-    title.position.set(0, 2.48, -1.02);
     var typeEM = labelPlane("electromagnetic", 3.3, 0.36, "#0e5f56");
     typeEM.position.set(-2.7, -1.36, 0.15);
     var typeP = labelPlane("particle", 2.5, 0.36, "#1d4f91");
     typeP.position.set(2.9, -1.36, 0.15);
-    gfx.scene.add(floor, rail, postL, postR, title, typeEM, typeP);
+    gfx.scene.add(floor, rail, postL, postR, typeEM, typeP);
     var classAnchor = new THREE.Vector3(0, 2.48, -1.02);
     var electrons = [];
     var i;
@@ -705,6 +703,20 @@
       placeHud(hudClass, canvas, gfx.camera, classAnchor);
       gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
+    }
+    function hasMidWall() {
+      var found = false;
+      var size = new THREE.Vector3();
+      var center = new THREE.Vector3();
+      gfx.scene.updateMatrixWorld(true);
+      gfx.scene.traverse(function (obj) {
+        if (found || !obj.isMesh || !obj.geometry || obj.geometry.type !== "BoxGeometry") return;
+        var box = new THREE.Box3().setFromObject(obj);
+        box.getSize(size);
+        box.getCenter(center);
+        if (Math.abs(center.x) < 0.65 && size.y > 1.2 && size.x < 1.2) found = true;
+      });
+      return found;
     }
     function snapshot() {
       gfx.camera.updateMatrixWorld();
@@ -755,7 +767,7 @@
         camX: gfx.camera.position.x,
         camY: gfx.camera.position.y,
         camZ: gfx.camera.position.z,
-        hasDivider: false,
+        hasDivider: hasMidWall(),
         classLabel: hudClass ? hudClass.textContent.trim() : "",
         waveLabel: hudWave ? hudWave.textContent.trim() : "",
         electronLabel: hudElectrons ? hudElectrons.textContent.trim() : ""
