@@ -2205,7 +2205,6 @@
           mostUVionizing: (uvRight - cut.position.x) / uv.w > 0.75,
           cutAfterUV: cut.position.x > uvRight,
           xrayAfterCut: xrayMesh.position.x > cut.position.x,
-          gammaName: gammaBand.name,
           gammaHud: hudGamma ? hudGamma.textContent.trim() : "",
           bandWidths: bands.map(function (b) { return b.w; })
         };

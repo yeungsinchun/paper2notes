@@ -211,7 +211,6 @@ test("25.1 spectrum is static with the ionizing barrier in UV", async () => {
   assert.doesNotMatch(spec.body, /book cut/i);
   assert.deepEqual(spec.headers, ["radio", "micro", "IR", "vis", "UV", "X-rays", "Gamma ray"]);
   assert.equal(spec.gammaHud.trim(), "Gamma ray");
-  assert.equal(spec.snap.gammaName, "Gamma ray");
   assert.equal(spec.snap.gammaHud, "Gamma ray");
   assert.doesNotMatch(spec.headers.join(" "), /γ/);
   assert.ok(spec.uvCell.length < 12, "UV band cell should stay short, got " + spec.uvCell);
