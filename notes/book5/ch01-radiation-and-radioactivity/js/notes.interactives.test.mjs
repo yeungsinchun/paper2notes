@@ -118,6 +118,9 @@ before(async () => {
       "--no-first-run",
       "--no-default-browser-check",
       "--disable-extensions",
+      "--disable-background-timer-throttling",
+      "--disable-backgrounding-occluded-windows",
+      "--disable-renderer-backgrounding",
       "--allow-file-access-from-files",
       "--remote-debugging-port=" + port,
       "--user-data-dir=" + profileDir,
@@ -746,10 +749,12 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
   assert.equal(electronsA.n, 8);
   assert.match(electronsA.label, /particles/);
   near(electronsA.hudX, electronsA.projX, 14);
-  await cdp.evaluate("new Promise((r) => setTimeout(r, 350))");
-  const electronsB = await cdp.evaluate("window.NotesScenes['beams-e'].snapshot()");
-  const moved = electronsA.xs.some((x, i) => Math.abs(x - electronsB.xs[i]) > 0.08);
-  assert.ok(moved, "electron stream should keep moving");
+  await waitFor(async () => {
+    const snap = await cdp.evaluate("window.NotesScenes['beams-e'].snapshot()");
+    const moved = electronsA.xs.some((x, i) => Math.abs(x - snap.xs[i]) > 0.08);
+    if (!moved) throw new Error("electron stream not yet moved, t=" + snap.t);
+    return snap;
+  }, 2500, "moving electron stream");
   const cam0 = await cdp.evaluate("window.NotesScenes['beams-em'].snapshot()");
   const eCam0 = await cdp.evaluate("window.NotesScenes['beams-e'].snapshot()");
   await cdp.evaluate("window.NotesScenes['beams-em'].orbitBy(40, 6)");

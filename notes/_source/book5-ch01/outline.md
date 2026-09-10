@@ -10,7 +10,7 @@ Source gap: this PDF starts at printed p.4 (25.1). Printed pp.1–3 (chapter ope
 
 ### A. What counts as radiation, and what is ionizing
 
-- **Visual:** Fig. 25.2 light vs electron beam (EM wave vs particle KE). Fig. 25.3 knockout animation. Fig. 25.5 spectrum with ionizing cut after UV.
+- **Visual:** Fig. 25.2 light vs electron beam (EM wave vs particle KE). Fig. 25.3 knockout animation. Fig. 25.5 spectrum with ionizing barrier in UV.
 - **Text (minimal):** Radiation = energy flow (waves or particles). Ionizing = energy high enough to knock electrons out. X-rays and γ are ionizing EM. Hazard: tissue / DNA damage (Fig. 25.4 is optional still).
 - **Check:** Textbook Checkpoint 1 Q1 T/F (X-ray is not a beam of electrons; production is electrons on metal, not EM on metal). QB `PHY15011101`.
 
