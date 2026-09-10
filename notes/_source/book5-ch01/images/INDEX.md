@@ -2,7 +2,7 @@
 
 Crops from `active-physics/Book 5.pdf` (Chapter 25 only). Page = printed page on the scan (PDF page + 3). Source scans are ~72 ppi; crops are 3x upscales for later redraw, not publication masters.
 
-Prefer redrawing these as SVG / animation in the HTML notes. Photos of people, ads, and uranium ore were skipped.
+Prefer redrawing these as diagrams / animation in the HTML notes. Photos of people, ads, and uranium ore were skipped.
 
 | File | Printed p. | Caption / topic | Notes use |
 | --- | --- | --- | --- |
@@ -20,20 +20,20 @@ Prefer redrawing these as SVG / animation in the HTML notes. Photos of people, a
 | `fig25-16-beta-decay-co60.png` | 17 | Fig. 25.16 β decay of ⁶⁰Co → ⁶⁰Ni + e⁻ | **Animate:** n → p + e⁻; A unchanged, Z + 1 |
 | `fig25-17-gamma-emission-ni60.png` | 18 | Fig. 25.17 γ emission of excited ⁶⁰Ni* | **Animate:** A, Z unchanged; not a transmutation |
 | `fig25-18-u238-decay-series.png` | 19 | Fig. 25.18 U-238 series on A–Z and N–Z plots | **Interactive:** step α (red) vs β (blue); γ invisible on these axes |
-| `fig25-19-sealed-source.png` | 21 | Fig. 25.19 Sealed source (metal case, mesh) | Static lab-safety diagram |
+| `fig25-19-sealed-source.png` | 21 | Fig. 25.19 Sealed source (metal case, mesh) | 3D sealed source (metal case, mesh) |
 | `fig25-24-ion-pair.png` | 27 | Fig. 25.24 Formation of an ion-pair | **Animate:** knock-out then capture → + and − ions |
 | `table25-04-radiation-properties.png` | 27 | Table 25.4 Speed, mass, charge of α, β, γ | Static comparison; seed for later property table |
-| `fig25-25-ionizing-power.png` | 28 | Fig. 25.25 Ionizing power α > β > γ (not to scale) | **Animate:** ion-pairs per cm of path |
+| `fig25-25-ionizing-power.png` | 28 | Fig. 25.25 Ionizing power α > β > γ (not to scale) | **Static:** ion-pairs per cm of path |
 | `fig25-26-ionized-gas-current.png` | 28 | Fig. 25.26 Ionized gas conducts | **Animate:** ion current between plates (Example 25.5) |
-| `fig25-27-cloud-chamber.png` | 30 | Fig. 25.27 Diffusion cloud chamber | Static apparatus; tracks belong in the table crop |
-| `table25-05-cloud-chamber-tracks.png` | 31 | Table 25.5 Track appearance of α, β, γ | Static; **animate later:** thick straight vs thin irregular vs faint |
+| `fig25-27-cloud-chamber.png` | 30 | Fig. 25.27 Diffusion cloud chamber | Combined with Table 25.5: **animate** tracks (no still of the chamber) |
+| `table25-05-cloud-chamber-tracks.png` | 31 | Table 25.5 Track appearance of α, β, γ | **Animate:** thick straight vs thin irregular vs faint |
 | `fig25-29-film-badge.png` | 32 | Fig. 25.29 Film badge internals (window, Al, Pb) | **Interactive:** which absorber blackens for α / β / γ |
 | `fig25-30-gm-counter.png` | 33 | Fig. 25.30 GM tube + scaler, and how it works | **Animate:** argon ion-pairs → pulses → count rate |
-| `fig25-31-range-in-air.png` | 35 | Fig. 25.31 Ranges ~5 cm / ~5 m / ~100 m | Static scale bar; not to scale in the book |
+| `fig25-31-range-in-air.png` | 35 | Fig. 25.31 Ranges ~5 cm / ~5 m / ~100 m | Range numbers live with Fig. 25.32 (3D absorber stack); no separate scale bar |
 | `fig25-32-penetrating-power.png` | 37 | Fig. 25.32 Paper / 5 mm Al / 25 mm Pb | **Interactive:** toggle absorbers; γ strength halved in 25 mm Pb |
 | `fig25-33-electric-deflection.png` | 40 | Fig. 25.33 α, β, γ in an electric field | **Animate:** + to − plate, − to + plate, γ straight; β bends more |
 | `fig25-34-magnetic-deflection.png` | 41 | Fig. 25.34 α, β, γ in B (into page) | **Animate:** Fleming left-hand rule; β opposite to I |
-| `table25-06-properties-summary.png` | 42 | Table 25.6 Full α / β / γ property summary | End-of-section static cheat sheet; redraw cleaner |
+| `table25-06-properties-summary.png` | 42 | Table 25.6 Full α / β / γ property summary | **Interactive:** end-of-section α / β / γ comparison (toggle rows) |
 
 ## Skipped on purpose
 

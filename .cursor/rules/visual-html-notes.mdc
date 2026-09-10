@@ -21,7 +21,7 @@ Prioritize diagrams (static or interactive). Keep prose short: labels, one-line 
 ## Page recipe
 
 1. One idea per screen: a visual, then at most a few lines of text.
-2. Rebuild textbook figures as SVG/CSS/canvas. Use `_source/.../images/` only as redraw references, not as the final art.
+2. Rebuild textbook figures as SVG/CSS/canvas or three.js (no build). Use `_source/.../images/` only as redraw references, not as the final art.
 3. Animate processes (ionization, X-ray tube, α/β/γ decay, ion-pairs, GM pulses, E/B deflection, absorber stacks). Keep comparison tables static or toggleable.
 4. After each idea, add a concept check (T/F, pick-the-diagram, one calculation). Prefer items tagged `concept-check` in `problems.md`.
 5. At most one worked example per section, from `problems.md` (`worked-example`). Do not paste the whole HKDSE/QB set.
