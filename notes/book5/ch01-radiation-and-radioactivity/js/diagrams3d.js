@@ -1879,7 +1879,7 @@
     if (!THREE) return;
     var canvas = host.querySelector("canvas");
     var gfx = stage(canvas, {
-      persp: { fov: 36, x: 2.25, y: 3.75, z: 4.95, lookX: 0.12, lookY: 0.08, lookZ: 0.3 }
+      persp: { fov: 36, x: 2.9, y: 5.1, z: 6.9, lookX: 0.1, lookY: -0.2, lookZ: 0.2 }
     });
     var hudX = host.querySelector('[data-hud="xrays"]');
     var hudBone = host.querySelector('[data-hud="bone"]');
@@ -2077,12 +2077,28 @@
         if (v.y < minNY) minNY = v.y;
         if (v.y > maxNY) maxNY = v.y;
       }
+      function addBoxCorners(box) {
+        var ix;
+        var iy;
+        var iz;
+        for (ix = 0; ix < 2; ix += 1) {
+          for (iy = 0; iy < 2; iy += 1) {
+            for (iz = 0; iz < 2; iz += 1) {
+              addNdc(new THREE.Vector3(
+                ix ? box.max.x : box.min.x,
+                iy ? box.max.y : box.min.y,
+                iz ? box.max.z : box.min.z
+              ));
+            }
+          }
+        }
+      }
       hand.traverse(function (obj) {
         if (obj.isMesh) addNdc(obj.getWorldPosition(new THREE.Vector3()));
       });
       addNdc(new THREE.Vector3(0.15, startY, 0.3));
-      addNdc(film.position.clone());
-      addNdc(new THREE.Vector3(film.position.x, filmY, film.position.z + filmD * 0.45));
+      addBoxCorners(meshWorldBox(film));
+      addBoxCorners(meshWorldBox(cassette));
       return {
         oneHand: live.oneHand,
         twoSlabs: live.twoSlabs,
