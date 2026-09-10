@@ -243,6 +243,7 @@ test("25.1 imaging is X-rays down through a hand onto film that starts white", a
   assert.ok(img.rayCount >= 8, "several X-rays should pass through the hand, n=" + img.rayCount);
   assert.equal(img.stopInFlesh, 0, "flesh must transmit, not absorb, an X-ray");
   assert.ok(img.stopInBone >= 3, "some X-rays should stop in bone");
+  assert.ok(img.throughFlesh >= 3, "transmitting X-rays should go through flesh, n=" + img.throughFlesh);
   assert.ok(img.reachFilm >= 3, "some X-rays should reach the film");
   assert.equal(img.raysDown, true);
   assert.equal(img.replay, true);
@@ -817,6 +818,15 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
   }, 2500, "moving electron stream");
   const cam0 = await cdp.evaluate("window.NotesScenes['beams-em'].snapshot()");
   const eCam0 = await cdp.evaluate("window.NotesScenes['beams-e'].snapshot()");
+  await cdp.evaluate(`(function () {
+    var c = document.querySelector("#beam-em-vis canvas");
+    c.dispatchEvent(new WheelEvent("wheel", { deltaY: -240, bubbles: true, cancelable: true }));
+  })()`);
+  const camWheel = await cdp.evaluate("window.NotesScenes['beams-em'].snapshot()");
+  near(camWheel.camZoom, cam0.camZoom, 0.01);
+  near(camWheel.camR, cam0.camR, 0.02);
+  near(camWheel.camX, cam0.camX, 0.02);
+  near(camWheel.camZ, cam0.camZ, 0.02);
   await cdp.evaluate("window.NotesScenes['beams-em'].orbitBy(40, 6)");
   await cdp.evaluate("new Promise((r) => setTimeout(r, 250))");
   const cam1 = await cdp.evaluate("window.NotesScenes['beams-em'].snapshot()");
@@ -847,7 +857,7 @@ test("3d scenes magnify, label the tube, keep β drift, and pulse radially", asy
   assert.ok(tube.electronsHud < tube.targetHud, "electrons label should sit left of the target");
   assert.ok(tube.faceNx < -0.4 && tube.faceNy > 0.4, "target face still points toward the gun and up");
   assert.equal(tube.hasEmTrain, false);
-  assert.ok(tube.nRays >= 4, "X-rays should leave as several rays, n=" + tube.nRays);
+  assert.equal(tube.nRays, 3, "X-rays should leave as three glyphs, n=" + tube.nRays);
   assert.ok(tube.fanSpreadDeg > 55, "X-ray fan should be wide, spread=" + tube.fanSpreadDeg);
   assert.equal(tube.originAtHit, true);
   assert.equal(tube.xrayAboveHit, true);
