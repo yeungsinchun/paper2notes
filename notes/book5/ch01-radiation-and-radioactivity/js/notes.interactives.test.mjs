@@ -263,7 +263,6 @@ chromeTest("25.1 spectrum is static with the ionizing barrier in UV", async () =
   assert.equal(spec.slider, false);
   assert.equal(spec.mark, false);
   assert.equal(spec.pointer, false);
-  assert.equal(spec.snap.cut, true);
   assert.equal(spec.snap.cutInUV, true);
   assert.equal(spec.snap.cutAfterUV, false);
   assert.ok(spec.snap.nonIonizingUVFrac > 0.05 && spec.snap.nonIonizingUVFrac < 0.18);

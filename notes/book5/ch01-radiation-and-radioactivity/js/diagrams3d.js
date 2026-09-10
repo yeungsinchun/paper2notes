@@ -430,11 +430,16 @@
     var slabs = 0;
     var glyphs = [];
     var hands = 0;
+    var films = 0;
     scene.traverse(function (obj) {
       if (obj.isGroup && obj.userData && obj.userData.dir && obj.userData.tip) {
         glyphs.push(obj);
       }
       if (!obj.isMesh) return;
+      if (geoKind(obj, "Plane")) {
+        var y = obj.getWorldPosition(new THREE.Vector3()).y;
+        if (Math.abs(y - filmY) < 0.35) films += 1;
+      }
       if (geoKind(obj, "Box")) {
         var hy = obj.geometry.parameters
           ? obj.geometry.parameters.height * Math.abs(obj.scale.y)
@@ -498,6 +503,7 @@
     return {
       oneHand: hands === 1,
       twoSlabs: slabs >= 2,
+      filmCount: films,
       raysDown: down,
       stopInFlesh: stopInFlesh,
       stopInBone: stopInBone,
@@ -2102,7 +2108,7 @@
       return {
         oneHand: live.oneHand,
         twoSlabs: live.twoSlabs,
-        filmCount: 1,
+        filmCount: live.filmCount,
         filmUnder: filmY < 0,
         nBone: nBone,
         nFlesh: nFlesh,
@@ -2194,7 +2200,6 @@
           slider: !!document.querySelector("#spectrum-slider"),
           mark: !!document.querySelector("#spectrum-mark"),
           pointer: !!document.querySelector("#spectrum-pointer"),
-          cut: true,
           cutX: cut.position.x,
           uvX: uv.x,
           uvLeft: uvLeft,
