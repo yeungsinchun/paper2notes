@@ -7,6 +7,8 @@ Thumbs.db
 # Local source materials (keep on disk; do not publish)
 active-physics/
 QB_501/
+QB_502/
+QB_503/
 dse-classified/
 
 # Python / tooling
@@ -17,3 +19,4 @@ __pycache__/
 
 # Generated scratch
 *.tmp
+notes/_source/**/_scratch/

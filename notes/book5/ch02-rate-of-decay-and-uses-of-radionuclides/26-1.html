@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>26.1 Rate of radioactive decay</title>
+  <link rel="stylesheet" href="css/notes.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../index.html">Book 5 · Ch.2<small>26.1 Rate of radioactive decay</small></a>
+    <nav>
+      <a href="index.html">Map</a>
+      <a href="26-1.html" aria-current="page">26.1</a>
+      <a href="26-2.html">26.2</a>
+      <a href="26-3.html">26.3</a>
+      <a href="summary.html">Summary</a>
+    </nav>
+  </header>
+  <main>
+    <p class="kicker">26.1</p>
+    <h1>Rate of radioactive decay</h1>
+
+    <section class="idea" id="random">
+      <header>
+        <h2>Decay is random, a sample is not chaos</h2>
+        <span class="stamp">Fig. 26.1–26.3</span>
+      </header>
+      <div class="visual play stage" id="decay-vis" data-autoplay data-scene="dice">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="One hundred nuclei. Each throw, about one in six decay and are removed."></canvas>
+        <span class="hud-label" data-hud="live">100 undecayed</span>
+      </div>
+      <div class="row">
+        <button type="button" data-replay="decay-vis">Replay throws</button>
+      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>You cannot name which nucleus decays on the next throw</td><td>Radioactive decay is a random process</td></tr>
+          <tr><td>Each nucleus has the same chance (here 1 in 6) each throw</td><td>A large sample still has a predictable pattern</td></tr>
+          <tr><td>Fewer live nuclei remain, so fewer decay on the next throw</td><td>The rate falls as N falls</td></tr>
+        </tbody>
+      </table>
+      <div class="check" data-check="mc" data-answer="D">
+        <h3>Concept check</h3>
+        <p>Radioactive decay is random in nature. This means that</p>
+        <div class="choices">
+          <button type="button" data-choice="A">the activity of a sample depends on the number of undecayed nuclei.</button>
+          <button type="button" data-choice="B">the rate of decay increases with temperature.</button>
+          <button type="button" data-choice="C">the type of radiation emitted by the sample is unknown.</button>
+          <button type="button" data-choice="D">we can never tell which nucleus in the sample will decay first.</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+      <div class="check" data-check="mc" data-answer="D">
+        <h3>Concept check</h3>
+        <p>Four one-minute background counts are taken. Which set is the most probable?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">5, 62, 8, 69</button>
+          <button type="button" data-choice="B">40, 40, 40, 40</button>
+          <button type="button" data-choice="C">60, 50, 30, 20</button>
+          <button type="button" data-choice="D">29, 26, 31, 35</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+    </section>
+
+    <section class="idea" id="halflife">
+      <header>
+        <h2>Half-life: N halves on a fixed clock</h2>
+        <span class="stamp">Fig. 26.4</span>
+      </header>
+      <div class="visual play stage" id="halfn-vis" data-autoplay data-scene="halfN">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Iodine-131: number of undecayed nuclei against time, with remaining and decayed stacks"></canvas>
+        <span class="hud-label" data-hud="n">N</span>
+        <span class="hud-label" data-hud="t">t</span>
+      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>After 8 d, 20 billion remain and 20 billion have decayed</td><td>Half-life of I-131 is 8 days</td></tr>
+          <tr><td>The orange + grey stack still totals 40 billion</td><td>Decayed nuclei become a daughter; they do not vanish</td></tr>
+          <tr><td>The same halving repeats at 16 d and 24 d</td><td>N = N₀ (1/2)ⁿ after n half-lives</td></tr>
+        </tbody>
+      </table>
+      <p class="eq">N = N<sub>0</sub> (½)<sup>n</sup></p>
+      <table class="compact">
+        <thead><tr><th>nuclide</th><th>half-life</th></tr></thead>
+        <tbody>
+          <tr><td>iodine-131</td><td>8 d</td></tr>
+          <tr><td>carbon-14</td><td>5700 y</td></tr>
+          <tr><td>uranium-238</td><td>4.47 × 10<sup>9</sup> y</td></tr>
+        </tbody>
+      </table>
+      <div class="one-liners">
+        <p>Each radionuclide has a characteristic half-life. Heating or chemistry does not change it.</p>
+      </div>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3>Concept check</h3>
+        <p>Which statements about the half-life of a source are correct?</p>
+        <p>(1) Time for the activity to fall to half. (2) Time left for the source to remain radioactive. (3) Time for the number of undecayed nuclei to drop to half.</p>
+        <div class="choices">
+          <button type="button" data-choice="A">(1) only</button>
+          <button type="button" data-choice="B">(1) and (3) only</button>
+          <button type="button" data-choice="C">(2) and (3) only</button>
+          <button type="button" data-choice="D">(1), (2) and (3)</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+      <div class="check" data-check="mc" data-answer="C">
+        <h3>Concept check</h3>
+        <p>A source contains only radioactive X, which decays to stable Y. After one half-life of X:</p>
+        <p>(1) The number of X nuclei is about half. (2) The number of Y nuclei is about twice its initial value. (3) The activity of the source is about half.</p>
+        <div class="choices">
+          <button type="button" data-choice="A">(1) only</button>
+          <button type="button" data-choice="B">(2) only</button>
+          <button type="button" data-choice="C">(1) and (3) only</button>
+          <button type="button" data-choice="D">(2) and (3) only</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+    </section>
+
+    <section class="idea" id="activity">
+      <header>
+        <h2>Activity halves on the same clock</h2>
+        <span class="stamp">Fig. 26.5–26.6</span>
+      </header>
+      <div class="pane-pair">
+        <div class="visual play stage" id="activityn-vis" data-autoplay data-scene="activityN">
+          <canvas class="scene-canvas" width="480" height="360" aria-label="Undecayed nuclei drop by half, so activity drops by half"></canvas>
+          <span class="hud-label" data-hud="a">A</span>
+          <span class="hud-label" data-hud="n">N</span>
+        </div>
+        <div class="visual play stage" id="activitya-vis" data-autoplay data-scene="activityA">
+          <canvas class="scene-canvas" width="480" height="360" aria-label="Activity against time for iodine-131"></canvas>
+          <span class="hud-label" data-hud="a">A</span>
+        </div>
+      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>Activity is the number of nuclei decaying per unit time</td><td>Unit: becquerel. 1 Bq = 1 s⁻¹</td></tr>
+          <tr><td>Fewer undecayed nuclei left</td><td>Lower activity. A ∝ N</td></tr>
+          <tr><td>A halves when N halves</td><td>A = A₀ (½)ⁿ as well</td></tr>
+        </tbody>
+      </table>
+      <p class="eq">A ∝ N &nbsp; so &nbsp; A = A<sub>0</sub> (½)<sup>n</sup></p>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3>Concept check</h3>
+        <p>A source undergoes decay such that 300 nuclides have decayed in 1 minute. Its activity is</p>
+        <div class="choices">
+          <button type="button" data-choice="A">0.2 Bq</button>
+          <button type="button" data-choice="B">5 Bq</button>
+          <button type="button" data-choice="C">300 Bq</button>
+          <button type="button" data-choice="D">18000 Bq</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+      <div class="check" data-check="mc" data-answer="D">
+        <h3>Concept check</h3>
+        <p>The activity of a sample is 18 MBq. What was it 3 half-lives earlier?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">6 MBq</button>
+          <button type="button" data-choice="B">54 MBq</button>
+          <button type="button" data-choice="C">72 MBq</button>
+          <button type="button" data-choice="D">144 MBq</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+      <div class="check" data-check="mc" data-answer="D">
+        <h3>Concept check</h3>
+        <p>On which of the following does the activity of a radioactive source depend?</p>
+        <p>(1) the nature of the nuclear radiation emitted (2) the half-life of the source (3) the number of active nuclei</p>
+        <div class="choices">
+          <button type="button" data-choice="A">(1) only</button>
+          <button type="button" data-choice="B">(3) only</button>
+          <button type="button" data-choice="C">(1) and (2) only</button>
+          <button type="button" data-choice="D">(2) and (3) only</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+    </section>
+
+    <section class="idea" id="background">
+      <header>
+        <h2>Read half-life from corrected counts</h2>
+        <span class="stamp">Example 26.1</span>
+      </header>
+      <div class="visual play stage" id="countbg-vis" data-autoplay data-scene="countbg">
+        <canvas class="scene-canvas" width="960" height="420" aria-label="Recorded count rate falls toward a background floor"></canvas>
+        <span class="hud-label" data-hud="rec">recorded</span>
+        <span class="hud-label" data-hud="bg">background</span>
+      </div>
+      <div class="row">
+        <button type="button" data-replay="countbg-vis">Replay fall to background</button>
+      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>The graph flattens above zero</td><td>The leftover count is background, not “activity never reaches zero”</td></tr>
+          <tr><td>Initial recorded ≈ 840 min⁻¹, floor ≈ 40 min⁻¹</td><td>Corrected start = 800 min⁻¹</td></tr>
+          <tr><td>Corrected halves to 400 at t = 10 h; recorded then = 440</td><td>T½ = 10 h from the corrected curve</td></tr>
+        </tbody>
+      </table>
+      <div class="check" data-check="mc" data-answer="D">
+        <h3>Concept check</h3>
+        <p>It takes 2.0 years for the activity of a sample to drop from 800 Bq to 600 Bq. How long will it take to drop from 600 Bq to 300 Bq?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">2.0 years</button>
+          <button type="button" data-choice="B">2.5 years</button>
+          <button type="button" data-choice="C">3.0 years</button>
+          <button type="button" data-choice="D">4.8 years</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+    </section>
+
+    <section class="idea" id="longer">
+      <header>
+        <h2>A longer half-life is not automatically weaker</h2>
+        <span class="stamp">Amy &amp; Bob</span>
+      </header>
+      <table class="compact">
+        <thead><tr><th></th><th>initial A / Bq</th><th>half-life / y</th></tr></thead>
+        <tbody>
+          <tr><td>Amy</td><td>8000</td><td>2</td></tr>
+          <tr><td>Bob</td><td>16000</td><td>1</td></tr>
+        </tbody>
+      </table>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>The device needs A &gt; 1000 Bq</td><td>Compare remaining A, not T½ alone</td></tr>
+          <tr><td>Amy: 8000 → 4000 (2 y) → 2000 (4 y) → 1000 (6 y)</td><td>Amy lasts about 6 y</td></tr>
+          <tr><td>Bob: 16000 → 8000 (1 y) → 1000 after 4 halvings = 4 y</td><td>Bob dies first even though A started higher</td></tr>
+        </tbody>
+      </table>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3>Concept check</h3>
+        <p>Half-lives: C-11 20.3 min; P-32 14.3 d; Na-22 2.60 y. Which is/are correct?</p>
+        <p>(1) The activity of C-11 must be the highest. (2) The decay constant of P-32 is larger than that of C-11. (3) If Na-22 starts at 1520 Bq, after 6 y its activity is lower than 380 Bq.</p>
+        <div class="choices">
+          <button type="button" data-choice="A">(1) only</button>
+          <button type="button" data-choice="B">(3) only</button>
+          <button type="button" data-choice="C">(1) and (2) only</button>
+          <button type="button" data-choice="D">(2) and (3) only</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+      <div class="check" data-check="mc" data-answer="C">
+        <h3>Concept check</h3>
+        <p>A radioactive isotope X has a half-life of 20 hours. After 10 hours, the remaining fraction f of X satisfies</p>
+        <div class="choices">
+          <button type="button" data-choice="A">¼ ≤ f ≤ ½</button>
+          <button type="button" data-choice="B">f = ½</button>
+          <button type="button" data-choice="C">¾ &gt; f &gt; ½</button>
+          <button type="button" data-choice="D">f &gt; ¾</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+    </section>
+
+    <section class="idea" id="constant">
+      <header>
+        <h2>Decay constant</h2>
+        <span class="stamp">Extension · Fig. 26.7</span>
+      </header>
+      <p class="eq">A = kN</p>
+      <table class="compact pair">
+        <thead><tr><th>What k is</th><th>What that means</th></tr></thead>
+        <tbody>
+          <tr><td>nuclei decaying per unit time / undecayed nuclei</td><td>probability of decay per unit time</td></tr>
+          <tr><td>k = ln 2 / T½</td><td>k is characteristic of the nuclide, like T½</td></tr>
+          <tr><td>N = N₀ e<sup>−kt</sup> and A = A₀ e<sup>−kt</sup></td><td>both fall exponentially with t</td></tr>
+        </tbody>
+      </table>
+      <div class="one-liners">
+        <p>Splitting a sample, changing temperature, or interrupting a chain reaction does not change T½ or k.</p>
+      </div>
+      <div class="check" data-check="mc" data-answer="D">
+        <h3>Concept check</h3>
+        <p>The decay constant of a radioisotope of an element</p>
+        <div class="choices">
+          <button type="button" data-choice="A">is random.</button>
+          <button type="button" data-choice="B">depends on pressure and temperature.</button>
+          <button type="button" data-choice="C">is directly proportional to the number of nucleons in the isotope.</button>
+          <button type="button" data-choice="D">is an identifying characteristic of that isotope.</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+    </section>
+  </main>
+  <script src="js/lib/three.min.js"></script>
+  <script src="js/diagrams3d.js"></script>
+  <script src="js/notes.js"></script>
+</body>
+</html>

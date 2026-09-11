@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Book 5 Ch.2 summary</title>
+  <link rel="stylesheet" href="css/notes.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../index.html">Book 5 · Ch.2<small>Summary</small></a>
+    <nav>
+      <a href="index.html">Map</a>
+      <a href="26-1.html">26.1</a>
+      <a href="26-2.html">26.2</a>
+      <a href="26-3.html">26.3</a>
+      <a href="summary.html" aria-current="page">Summary</a>
+    </nav>
+  </header>
+  <main>
+    <p class="kicker">Close</p>
+    <h1>Summary</h1>
+
+    <section class="idea">
+      <header>
+        <h2>N and A share the same half-life clock</h2>
+      </header>
+      <p class="eq">N = N<sub>0</sub> (½)<sup>n</sup> &nbsp; and &nbsp; A = A<sub>0</sub> (½)<sup>n</sup></p>
+      <p class="eq">A = kN &nbsp; with &nbsp; T<sub>½</sub> = ln 2 / k &nbsp; (extension)</p>
+      <table class="compact pair">
+        <thead><tr><th>Quantity</th><th>After one half-life</th></tr></thead>
+        <tbody>
+          <tr><td>Undecayed nuclei N</td><td>halves</td></tr>
+          <tr><td>Activity A</td><td>halves</td></tr>
+          <tr><td>Probability of decay of one nucleus</td><td>unchanged</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="idea">
+      <header>
+        <h2>Uses at a glance</h2>
+      </header>
+      <table class="compact pair">
+        <thead><tr><th></th><th>Typical choice</th></tr></thead>
+        <tbody>
+          <tr><td>Medical tracer</td><td>γ, hours</td></tr>
+          <tr><td>External radiotherapy</td><td>γ, years</td></tr>
+          <tr><td>Internal radiotherapy</td><td>β, days to weeks</td></tr>
+          <tr><td>Pipe leak</td><td>γ, hours</td></tr>
+          <tr><td>Thickness gauge</td><td>β, long T½</td></tr>
+          <tr><td>Smoke detector</td><td>α, long T½</td></tr>
+          <tr><td>Food sterilization</td><td>γ; food is not activated</td></tr>
+          <tr><td>C-14 dating</td><td>once-living carbon, ~60 y to 60 000 y</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="idea">
+      <header>
+        <h2>Dose</h2>
+      </header>
+      <table class="compact pair">
+        <thead><tr><th></th><th></th></tr></thead>
+        <tbody>
+          <tr><td>Activity</td><td>radiation emitted, Bq</td></tr>
+          <tr><td>Effective dose</td><td>biological effect on the whole body, Sv</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="trap-grid">
+      <div class="trap">
+        <h3>Decayed nuclei are still there</h3>
+        <p>They become a daughter nuclide. Mass does not vanish after one half-life.</p>
+      </div>
+      <div class="trap">
+        <h3>Subtract background first</h3>
+        <p>Half-life is read from corrected count rate, not from a graph that still includes background.</p>
+      </div>
+      <div class="trap">
+        <h3>Long T½ is not “weak”</h3>
+        <p>Activity also depends on how many nuclei you have. Compare A, not T½ alone.</p>
+      </div>
+    </div>
+
+    <section class="idea">
+      <header>
+        <h2>Close checks</h2>
+      </header>
+      <div class="check" data-check="mc" data-answer="D">
+        <h3>Two activity graphs</h3>
+        <p>X falls from 100 Bq to 50 Bq in 60 s. Y falls from 100 Bq to 25 Bq in 30 s. Ratio of half-lives T<sub>X</sub> : T<sub>Y</sub> is</p>
+        <div class="choices">
+          <button type="button" data-choice="A">1 : 1</button>
+          <button type="button" data-choice="B">1 : 2</button>
+          <button type="button" data-choice="C">2 : 1</button>
+          <button type="button" data-choice="D">4 : 1</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+      <div class="check" data-check="mc" data-answer="C">
+        <h3>Which is not an application of radioactivity?</h3>
+        <div class="choices">
+          <button type="button" data-choice="A">Killing bacteria in food</button>
+          <button type="button" data-choice="B">Monitoring the thickness of a metal sheet</button>
+          <button type="button" data-choice="C">Transmitting signals overseas</button>
+          <button type="button" data-choice="D">Estimating the age of ancient remains</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+      <div class="check" data-check="mc" data-answer="C">
+        <h3>External brain diagnostic imaging</h3>
+        <div class="choices">
+          <button type="button" data-choice="A">α and β · 433 years</button>
+          <button type="button" data-choice="B">γ · 13.5 years</button>
+          <button type="button" data-choice="C">γ · 6.01 hours</button>
+          <button type="button" data-choice="D">β · 3.14 days</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+    </section>
+  </main>
+  <script src="js/notes.js"></script>
+</body>
+</html>

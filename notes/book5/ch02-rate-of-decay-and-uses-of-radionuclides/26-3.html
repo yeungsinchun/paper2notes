@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>26.3 Radiation safety</title>
+  <link rel="stylesheet" href="css/notes.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../index.html">Book 5 · Ch.2<small>26.3 Radiation safety</small></a>
+    <nav>
+      <a href="index.html">Map</a>
+      <a href="26-1.html">26.1</a>
+      <a href="26-2.html">26.2</a>
+      <a href="26-3.html" aria-current="page">26.3</a>
+      <a href="summary.html">Summary</a>
+    </nav>
+  </header>
+  <main>
+    <p class="kicker">26.3</p>
+    <h1>Radiation safety</h1>
+
+    <section class="idea" id="inside">
+      <header>
+        <h2>Outside vs inside the body</h2>
+        <span class="stamp">Fig. 26.21</span>
+      </header>
+      <table class="compact pair">
+        <thead><tr><th></th><th>Outside the body</th><th>Inhaled or swallowed</th></tr></thead>
+        <tbody>
+          <tr><td>α</td><td>Stopped by skin / air; low external risk</td><td>Strong ionizing damage to nearby tissue</td></tr>
+          <tr><td>γ</td><td>Most dangerous of the three: it reaches every organ</td><td>Still irradiates the whole body</td></tr>
+        </tbody>
+      </table>
+      <div class="check" data-check="tf">
+        <h3>Concept check</h3>
+        <div class="tf-item" data-answer="true">
+          <p>An α source such as Po-210 is not a serious external hazard if it stays outside the body.</p>
+          <div class="row"><button type="button" data-tf="true">True</button><button type="button" data-tf="false">False</button></div>
+          <p class="feedback"></p>
+        </div>
+        <div class="tf-item" data-answer="true">
+          <p>The same α source is deadly if it is ingested.</p>
+          <div class="row"><button type="button" data-tf="true">True</button><button type="button" data-tf="false">False</button></div>
+          <p class="feedback"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="idea" id="dose">
+      <header>
+        <h2>Activity is emitted; dose is absorbed</h2>
+        <span class="stamp">Fig. 26.22–26.24</span>
+      </header>
+      <div class="visual play stage" id="dose-vis" data-autoplay data-scene="dose">
+        <canvas class="scene-canvas" width="960" height="360" aria-label="A source emits radiation; a body absorbs some of it"></canvas>
+        <span class="hud-label" data-hud="act">activity · emitted · Bq</span>
+        <span class="hud-label" data-hud="dose">dose · absorbed · Sv</span>
+      </div>
+      <table class="compact pair">
+        <thead><tr><th>Factor</th><th>Why it matters</th></tr></thead>
+        <tbody>
+          <tr><td>Energy absorbed</td><td>More energy deposited, larger absorbed dose</td></tr>
+          <tr><td>Type of radiation</td><td>Weighting: α 20; β, γ, X-ray 1</td></tr>
+          <tr><td>Tissue or organ</td><td>Some organs are more sensitive</td></tr>
+        </tbody>
+      </table>
+      <p class="eq">effective dose (Sv) folds in amount, type, and tissue</p>
+      <div class="check" data-check="mc" data-answer="A">
+        <h3>Concept check</h3>
+        <p>Which unit measures the radiation equivalent dose of a patient receiving radiotherapy?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">sievert (Sv)</button>
+          <button type="button" data-choice="B">becquerel (Bq)</button>
+          <button type="button" data-choice="C">joule (J)</button>
+          <button type="button" data-choice="D">watt per square metre (W m⁻²)</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+      <div class="check" data-check="tf">
+        <h3>Concept check</h3>
+        <div class="tf-item" data-answer="false">
+          <p>The biological effect of radiation depends only on the amount absorbed, not on the type or the organ.</p>
+          <div class="row"><button type="button" data-tf="true">True</button><button type="button" data-tf="false">False</button></div>
+          <p class="feedback"></p>
+        </div>
+        <div class="tf-item" data-answer="false">
+          <p>A person receives about 2 Sv of effective dose from the environment in a year.</p>
+          <div class="row"><button type="button" data-tf="true">True</button><button type="button" data-tf="false">False</button></div>
+          <p class="feedback"></p>
+        </div>
+        <div class="tf-item" data-answer="false">
+          <p>1 Sv from an α source and 1 Sv from a γ source produce different biological effects, because α is more ionizing.</p>
+          <div class="row"><button type="button" data-tf="true">True</button><button type="button" data-tf="false">False</button></div>
+          <p class="feedback"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="idea" id="alara">
+      <header>
+        <h2>Time, distance, shielding</h2>
+        <span class="stamp">26.3 D</span>
+      </header>
+      <table class="compact pair">
+        <thead><tr><th>Move</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>Shorter handling time</td><td>Dose accumulates</td></tr>
+          <tr><td>Greater distance</td><td>Intensity falls off rapidly from a small source</td></tr>
+          <tr><td>Shielding (lead, concrete)</td><td>Stops or weakens the radiation that would reach you</td></tr>
+        </tbody>
+      </table>
+      <div class="one-liners">
+        <p>Hong Kong background is about 2.4 mSv per year. Public limit 1 mSv; radiation workers 20 mSv (those limits exclude natural background and medical procedures).</p>
+      </div>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3>Concept check</h3>
+        <p>When performing an experiment, can radiation exposure be reduced by</p>
+        <p>(a) planning so the handling time is shorter? (b) storing sources in lead when not in use? (c) wearing a film badge?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">(a) only</button>
+          <button type="button" data-choice="B">(a) and (b) only</button>
+          <button type="button" data-choice="C">(b) and (c) only</button>
+          <button type="button" data-choice="D">(a), (b) and (c)</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+    </section>
+  </main>
+  <script src="js/lib/three.min.js"></script>
+  <script src="js/diagrams3d.js"></script>
+  <script src="js/notes.js"></script>
+</body>
+</html>

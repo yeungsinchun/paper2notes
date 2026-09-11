@@ -6,9 +6,9 @@ This file is the project's committed home for project-intrinsic agent knowledge:
 
 ## Notes
 
-HTML notes live under `notes/`. Open a chapter `index.html` in a browser (no build). Intake for each chapter is `notes/_source/<book-ch>/`. Pedagogy: `.cursor/skills/visual-html-notes/SKILL.md` (rule `.cursor/rules/visual-html-notes.mdc` points there). Local textbooks and banks (`active-physics/`, `dse-classified/`, `QB_501/`) are gitignored. Student pages must not show intake/OCR/QB provenance; keep that in `_source` or HTML comments.
+HTML notes live under `notes/`. Open a chapter `index.html` in a browser (no build). Book 5 entry is `notes/book5/index.html` (Ch.1 / Ch.2 picker). Intake for each chapter is `notes/_source/<book-ch>/`. Pedagogy: `.cursor/skills/visual-html-notes/SKILL.md` (rule `.cursor/rules/visual-html-notes.mdc` points there). Local textbooks and banks (`active-physics/`, `dse-classified/`, `QB_501/`, `QB_502/`, `QB_503/`) are gitignored. Student pages must not show intake/OCR/QB provenance; keep that in `_source` or HTML comments.
 
-Book 5 Ch.1 first draft: `notes/book5/ch01-radiation-and-radioactivity/`. Motion figures use local three.js (`js/lib/three.min.js`, no build). Browser interactives are covered by `js/notes.interactives.test.mjs` (needs Google Chrome).
+Book 5 drafts: `notes/book5/ch01-radiation-and-radioactivity/` and `notes/book5/ch02-rate-of-decay-and-uses-of-radionuclides/`. Motion figures use local three.js (`js/lib/three.min.js`, no build). Browser interactives are covered by each chapter's `js/notes.interactives.test.mjs` (needs Google Chrome).
 
 ## Maintaining this file
 

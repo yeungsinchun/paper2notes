@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>26.2 Uses of radionuclides</title>
+  <link rel="stylesheet" href="css/notes.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../index.html">Book 5 · Ch.2<small>26.2 Uses of radionuclides</small></a>
+    <nav>
+      <a href="index.html">Map</a>
+      <a href="26-1.html">26.1</a>
+      <a href="26-2.html" aria-current="page">26.2</a>
+      <a href="26-3.html">26.3</a>
+      <a href="summary.html">Summary</a>
+    </nav>
+  </header>
+  <main>
+    <p class="kicker">26.2</p>
+    <h1>Uses of radionuclides</h1>
+
+    <section class="idea" id="chooser">
+      <header>
+        <h2>Choose type and half-life</h2>
+        <span class="stamp">26.2 opener</span>
+      </header>
+      <div class="use-grid">
+        <button type="button" data-use="tracer" aria-pressed="true">Medical tracer</button>
+        <button type="button" data-use="knife">External γ therapy</button>
+        <button type="button" data-use="internal">Internal β therapy</button>
+        <button type="button" data-use="leak">Pipe leak</button>
+        <button type="button" data-use="thick">Thickness gauge</button>
+        <button type="button" data-use="smoke">Smoke detector</button>
+        <button type="button" data-use="plant">Plant tracer</button>
+        <button type="button" data-use="food">Food irradiation</button>
+      </div>
+      <table class="compact pair use-table">
+        <thead><tr><th>Use</th><th>Radiation</th><th>Half-life band</th></tr></thead>
+        <tbody>
+          <tr data-use-row="tracer" class="on"><td>Medical tracer</td><td>γ (to leave the body)</td><td>hours</td></tr>
+          <tr data-use-row="knife"><td>External radiotherapy</td><td>γ</td><td>years (Co-60 ≈ 5.27 y)</td></tr>
+          <tr data-use-row="internal"><td>Internal radiotherapy</td><td>β (not α, not γ)</td><td>days to weeks</td></tr>
+          <tr data-use-row="leak"><td>Buried leak</td><td>γ (through soil)</td><td>hours</td></tr>
+          <tr data-use-row="thick"><td>Thickness gauge</td><td>β (α stopped, γ ignores thickness)</td><td>years, stable A</td></tr>
+          <tr data-use-row="smoke"><td>Smoke detector</td><td>α (ionizing, short range)</td><td>years (Am-241)</td></tr>
+          <tr data-use-row="plant"><td>Nutrient tracer</td><td>β (P-32)</td><td>hours</td></tr>
+          <tr data-use-row="food"><td>Sterilization</td><td>γ (Co-60)</td><td>years; food is not made radioactive</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="idea" id="knife">
+      <header>
+        <h2>External radiotherapy</h2>
+        <span class="stamp">Fig. 26.8</span>
+      </header>
+      <div class="visual play stage" id="knife-vis" data-autoplay data-scene="gammaknife">
+        <canvas class="scene-canvas" width="960" height="360" aria-label="Gamma rays from a helmet converge on a target"></canvas>
+        <span class="hud-label" data-hud="gamma">γ source · long half-life</span>
+        <span class="hud-label" data-hud="target">target</span>
+      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>γ reaches a target inside the body</td><td>Need high penetrating power</td></tr>
+          <tr><td>The machine should not need a new source every week</td><td>Need a long half-life (years)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="idea" id="leak">
+      <header>
+        <h2>Industrial tracer: find a leak</h2>
+        <span class="stamp">Fig. 26.11</span>
+      </header>
+      <div class="visual play stage" id="pipeline-vis" data-autoplay data-scene="pipeline">
+        <canvas class="scene-canvas" width="960" height="360" aria-label="Gamma tracer leaking from a buried pipe to a detector above ground"></canvas>
+        <span class="hud-label" data-hud="count">count</span>
+        <span class="hud-label" data-hud="leak">γ leak</span>
+      </div>
+      <div class="row">
+        <button type="button" data-leak="on" aria-pressed="true">Leak on</button>
+        <button type="button" data-leak="off">Leak off</button>
+      </div>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3>Concept check</h3>
+        <p>A radioisotope is added to water in an underground pipe so a leak can be found from above ground. Which is most suitable?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">P · 66 h · β</button>
+          <button type="button" data-choice="B">Q · 36 h · γ</button>
+          <button type="button" data-choice="C">R · 7.2 h · α</button>
+          <button type="button" data-choice="D">S · 45 min · α, β</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+    </section>
+
+    <section class="idea" id="thick">
+      <header>
+        <h2>Thickness gauge: β, not γ</h2>
+        <span class="stamp">Fig. 26.12</span>
+      </header>
+      <div class="visual play stage" id="thickness-vis" data-autoplay data-scene="thickness">
+        <canvas class="scene-canvas" width="960" height="360" aria-label="Beta particles through a sheet to a detector; thicker sheet, lower count"></canvas>
+        <span class="hud-label" data-hud="count">count</span>
+      </div>
+      <div class="row">
+        <label>Sheet thickness <input id="thick-slider" type="range" min="1" max="3" step="0.1" value="1"></label>
+      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>Thicker sheet, lower count</td><td>The radiation must be sensitive to thickness</td></tr>
+          <tr><td>α is stopped by the sheet</td><td>No useful count</td></tr>
+          <tr><td>γ goes through almost unchanged</td><td>Count ignores thickness</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="idea" id="smoke">
+      <header>
+        <h2>Smoke detector: α ion current</h2>
+        <span class="stamp">Fig. 26.14</span>
+      </header>
+      <div class="visual play stage" id="smoke-vis" data-autoplay data-scene="smoke">
+        <canvas class="scene-canvas" width="960" height="360" aria-label="Alpha source ionizes air; smoke kills the current and trips the alarm"></canvas>
+        <span class="hud-label" data-hud="i">current</span>
+        <span class="hud-label" data-hud="alarm">alarm</span>
+      </div>
+      <div class="row">
+        <button type="button" data-fire="off" aria-pressed="true">Clear air</button>
+        <button type="button" data-fire="on">Smoke</button>
+      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>α makes ion pairs; a small current flows</td><td>Alarm stays off</td></tr>
+          <tr><td>Smoke attaches to the ions; current drops</td><td>Alarm on</td></tr>
+          <tr><td>α has a short range in air</td><td>Only a tiny chamber is affected</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="idea" id="food">
+      <header>
+        <h2>Irradiation does not make food radioactive</h2>
+        <span class="stamp">Fig. 26.16</span>
+      </header>
+      <div class="visual play stage" id="sterile-vis" data-autoplay data-scene="sterile">
+        <canvas class="scene-canvas" width="960" height="360" aria-label="Packaged food passing under a gamma source"></canvas>
+        <span class="hud-label" data-hud="food">packaged food · not radioactive</span>
+      </div>
+      <div class="check" data-check="tf">
+        <h3>Concept check</h3>
+        <div class="tf-item" data-answer="false">
+          <p>Strawberries labelled “treated by irradiation” are contaminated with radioactive sources.</p>
+          <div class="row"><button type="button" data-tf="true">True</button><button type="button" data-tf="false">False</button></div>
+          <p class="feedback"></p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="D">
+        <h3>Concept check</h3>
+        <p>Which is best as a tracer for medical imaging?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">α · 432 years</button>
+          <button type="button" data-choice="B">β · 7.4 seconds</button>
+          <button type="button" data-choice="C">β, γ · 4.5 months</button>
+          <button type="button" data-choice="D">γ · 8 days</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+    </section>
+
+    <section class="idea" id="dating">
+      <header>
+        <h2>Carbon-14 dating</h2>
+        <span class="stamp">Fig. 26.18–26.19</span>
+      </header>
+      <div class="visual play stage" id="dating-vis" data-autoplay data-scene="dating">
+        <canvas class="scene-canvas" width="960" height="380" aria-label="Carbon-14 activity stays A0 while alive, then halves after death"></canvas>
+        <span class="hud-label" data-hud="a">A</span>
+      </div>
+      <div class="row">
+        <button type="button" data-age="0" aria-pressed="true">Alive</button>
+        <button type="button" data-age="1">Just dead</button>
+        <button type="button" data-age="2">1 half-life</button>
+        <button type="button" data-age="3">2 half-lives</button>
+      </div>
+      <table class="compact pair">
+        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+        <tbody>
+          <tr><td>Atmosphere and living things keep a steady C-14 fraction</td><td>Activity while alive is A₀</td></tr>
+          <tr><td>Just after death the activity is still A₀</td><td>Clock starts at death, not at “becoming radioactive”</td></tr>
+          <tr><td>After one half-life (~5730 y) activity is ½ A₀</td><td>Age from remaining C-14</td></tr>
+          <tr><td>Reliable about 60 y to 60 000 y</td><td>Not rock, not metal, not a living person</td></tr>
+        </tbody>
+      </table>
+      <div class="check" data-check="mc" data-answer="D">
+        <h3>Concept check</h3>
+        <p>Ancient wood: 11.0 min⁻¹ corrected. Fresh wood of the same kind: 15.6 min⁻¹. T½ of C-14 = 5730 y. Approximate age?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">890 years</button>
+          <button type="button" data-choice="B">1300 years</button>
+          <button type="button" data-choice="C">2000 years</button>
+          <button type="button" data-choice="D">2900 years</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+      <div class="check" data-check="mc" data-answer="D">
+        <h3>Concept check</h3>
+        <p>Which object can be dated by carbon-14?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">Rock</button>
+          <button type="button" data-choice="B">Old coin</button>
+          <button type="button" data-choice="C">Metal knife</button>
+          <button type="button" data-choice="D">Wooden chair</button>
+        </div>
+        <p class="feedback"></p>
+      </div>
+    </section>
+  </main>
+  <script src="js/lib/three.min.js"></script>
+  <script src="js/diagrams3d.js"></script>
+  <script src="js/notes.js"></script>
+</body>
+</html>
