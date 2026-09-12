@@ -87,6 +87,6 @@ Teach identification as a steppable directed graph (paper / Al / Pb, then E or B
 | Per-box + / − scales that stage; default Fig. 25.7 fills the canvas | Page-wide `--view-scale`, tiny apparatus in empty space, clipped film, or orbit dolly for size |
 | Tables: columns sized to content; pair tables give the long prose column more width | Equal-width 100% slabs that squash short headers or stretch empty columns |
 | Spectrum: static barrier in UV (~1/10 of UV still non-ionizing); "Gamma ray" on the bar and table; column widths follow the bands | A frequency mark, slider, γ as the Fig. 25.5 header, equal-width slabs, or a paragraph in the UV cell |
-| Follow `outline.md`; flag gaps | Invent Ch.26 half-life / sievert / dating |
+| Follow that chapter's `outline.md`; flag gaps | Invent another chapter's topics |
 | Concept check after each idea (`problems.md`) | Dumping the whole HKDSE/QB set, or nonsense options |
 | Redraw from `_source/.../images/` in SVG/CSS/canvas/three.js | Embedding crop PNGs as final art |

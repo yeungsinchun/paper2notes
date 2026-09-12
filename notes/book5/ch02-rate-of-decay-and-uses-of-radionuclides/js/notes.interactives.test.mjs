@@ -158,6 +158,20 @@ class Cdp {
       // Multi-canvas notes pages can starve rAF while WebGL boots; tests wait on scenes.
     }
   }
+
+  async screenshot(filePath, selector) {
+    if (selector) {
+      await this.evaluate(
+        "(function () { var el = document.querySelector(" +
+          JSON.stringify(selector) +
+          "); if (el) { el.scrollIntoView({ block: 'start' }); window.scrollBy(0, -72); } })()"
+      );
+      await this.evaluate("new Promise((r) => setTimeout(r, 180))");
+    }
+    const shot = await this.send("Page.captureScreenshot", { format: "png" });
+    if (evidenceDir) fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(filePath, Buffer.from(shot.data, "base64"));
+  }
 }
 
 let chromeProc;
@@ -248,15 +262,45 @@ chromeTest("Book 5 picker lists both textbook chapter titles", async () => {
   assert.match(menu.text, /Rate of Decay and Uses of Radionuclides/);
   assert.doesNotMatch(menu.text, /PHY150/);
   assert.doesNotMatch(menu.text, /printed p/);
+  if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "book5-chapter-picker.png"));
+  }
+  await cdp.evaluate(`document.querySelector('.chapter-cards a[href*="ch02"]').click()`);
+  await waitFor(async () => {
+    const href = await cdp.evaluate("location.href");
+    if (!/ch02-rate-of-decay-and-uses-of-radionuclides/.test(href)) throw new Error(href);
+    return true;
+  }, 8000, "picker to Ch.2");
+  const landed = await cdp.evaluate(`({
+    title: document.querySelector("h1") && document.querySelector("h1").textContent,
+    hrefs: Array.from(document.querySelectorAll(".toc a")).map((a) => a.getAttribute("href"))
+  })`);
+  assert.match(landed.title, /Rate of Decay and Uses of Radionuclides/);
+  assert.deepEqual(landed.hrefs, ["26-1.html", "26-2.html", "26-3.html", "summary.html"]);
+  if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "ch02-chapter-map.png"));
+  }
 });
 
 chromeTest("Ch.1 and Ch.2 top bars link back to the Book 5 menu", async () => {
   await cdp.goto(ch1Url("25-1.html"));
   const ch1 = await cdp.evaluate(`document.querySelector(".brand").getAttribute("href")`);
   assert.equal(ch1, "../index.html");
+  if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "ch01-25-1-from-book5-menu.png"));
+  }
   await cdp.goto(pageUrl("26-1.html"));
   const ch2 = await cdp.evaluate(`document.querySelector(".brand").getAttribute("href")`);
   assert.equal(ch2, "../index.html");
+  if (evidenceDir) {
+    await cdp.evaluate(`document.querySelector(".brand").click()`);
+    await waitFor(async () => {
+      const title = await cdp.evaluate("document.querySelector('h1') && document.querySelector('h1').textContent");
+      if (!/Radiation chapters/i.test(title || "")) throw new Error(title || "no h1");
+      return true;
+    }, 8000, "Ch.2 brand back to picker");
+    await cdp.screenshot(path.join(evidenceDir, "ch02-brand-back-to-picker.png"));
+  }
 });
 
 chromeTest("26.1 dice remaining falls and N+decayed stays 40 billion", async () => {
@@ -266,6 +310,8 @@ chromeTest("26.1 dice remaining falls and N+decayed stays 40 billion", async () 
     if (!ok) throw new Error("scenes missing");
     return true;
   }, 8000, "ch2 scenes");
+  const replayLabel = await cdp.evaluate(`document.querySelector('[data-replay="decay-vis"]').textContent.trim()`);
+  assert.equal(replayLabel, "Replay");
   await cdp.evaluate("window.NotesScenes.dice.replay()");
   const start = await cdp.evaluate("window.NotesScenes.dice.snapshot()");
   assert.equal(start.nTotal, 100);
@@ -289,6 +335,15 @@ chromeTest("26.1 dice remaining falls and N+decayed stays 40 billion", async () 
   assert.equal(n.deadVisible, false);
   assert.equal(n.deadHeight, 0);
   assert.ok(Math.abs(n.remaining + n.decayed - 40) < 1e-6);
+  if (evidenceDir) {
+    await cdp.evaluate("window.NotesScenes.halfN.setT(0)");
+    await cdp.evaluate("new Promise((r) => setTimeout(r, 200))");
+    await cdp.screenshot(path.join(evidenceDir, "26-1-halfn-t0-no-grey-stack.png"), "#halfn-vis");
+    await cdp.evaluate("window.NotesScenes.halfN.setT(8)");
+    await cdp.evaluate("new Promise((r) => setTimeout(r, 200))");
+    await cdp.screenshot(path.join(evidenceDir, "26-1-halfn-one-half-life.png"), "#halfn-vis");
+    await cdp.screenshot(path.join(evidenceDir, "26-1-dice-replay.png"), "#decay-vis");
+  }
 });
 
 chromeTest("student pages hide intake chrome and keep per-box scale", async () => {
@@ -340,6 +395,9 @@ chromeTest("26.1 concept check marks the random-decay answer", async () => {
   })()`);
   assert.equal(result.ok, true);
   assert.match(result.feedback, /Yes/);
+  if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "26-1-concept-check.png"), "[data-check='mc']");
+  }
 });
 
 chromeTest("26.2 leak, smoke, and C-14 alive equals just-dead", async () => {
@@ -367,6 +425,15 @@ chromeTest("26.2 leak, smoke, and C-14 alive equals just-dead", async () => {
   await cdp.evaluate("window.NotesScenes.dating.setAge(2)");
   const half = await cdp.evaluate("window.NotesScenes.dating.snapshot()");
   assert.equal(half.frac, 0.5);
+  if (evidenceDir) {
+    await cdp.evaluate("window.NotesScenes.pipeline.setLeak(true)");
+    await cdp.evaluate("new Promise((r) => setTimeout(r, 250))");
+    await cdp.screenshot(path.join(evidenceDir, "26-2-pipeline-leak.png"), "#pipeline-vis");
+    await cdp.evaluate("window.NotesScenes.smoke.setFire(true)");
+    await cdp.evaluate("new Promise((r) => setTimeout(r, 250))");
+    await cdp.screenshot(path.join(evidenceDir, "26-2-smoke-alarm.png"), "#smoke-vis");
+    await cdp.screenshot(path.join(evidenceDir, "26-2-c14-dating.png"), "#dating-vis");
+  }
 });
 
 chromeTest("26.3 sievert check and activity vs dose labels", async () => {
@@ -387,5 +454,8 @@ chromeTest("26.3 sievert check and activity vs dose labels", async () => {
     return box.querySelector('[data-choice="A"]').classList.contains("correct");
   })()`);
   assert.equal(pick, true);
+  if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "26-3-activity-vs-dose.png"), "#dose-vis");
+  }
 });
 });
