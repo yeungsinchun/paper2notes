@@ -334,9 +334,10 @@
       var y = -2.4 + nLive * (4.8 / 40);
       marker.position.set(x, y, 0.2);
       var liveH = Math.max(0.12, nLive * (4.4 / 40));
-      var deadH = Math.max(0.12, nDead * (4.4 / 40));
+      var deadH = nDead * (4.4 / 40);
       remain.scale.set(1, liveH, 1);
       remain.position.set(x + 0.85, -2.4 + liveH / 2, 0);
+      decayed.visible = nDead > 0;
       decayed.scale.set(1, deadH, 1);
       decayed.position.set(x + 0.85, -2.4 + liveH + deadH / 2, 0);
       placeHud(hudN, canvas, gfx.camera, marker.position.clone().add(new THREE.Vector3(0, 0.35, 0)));
@@ -353,6 +354,7 @@
     }
     requestAnimationFrame(frame);
     scenes.halfN = {
+      setT: function (t) { place(t); },
       snapshot: function () {
         var nLive = 40 * Math.pow(0.5, tDays / 8);
         return {
@@ -360,7 +362,9 @@
           remaining: nLive,
           decayed: 40 - nLive,
           total: 40,
-          conserved: Math.abs(nLive + (40 - nLive) - 40) < 1e-9
+          conserved: Math.abs(nLive + (40 - nLive) - 40) < 1e-9,
+          deadVisible: decayed.visible,
+          deadHeight: decayed.scale.y
         };
       },
       orbitBy: function (dx, dy) { gfx.orbit.nudge(dx, dy); }

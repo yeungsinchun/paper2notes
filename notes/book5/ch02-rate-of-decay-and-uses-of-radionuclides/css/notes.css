@@ -339,83 +339,6 @@ table.compact tbody td:first-child:nth-last-child(n + 3) {
   text-align: left;
 }
 
-.pie {
-  display: grid;
-  grid-template-columns: minmax(220px, 240px) 1fr;
-  gap: 1rem;
-  align-items: center;
-}
-
-#spectrum table.spectrum-bands {
-  width: 100%;
-  table-layout: fixed;
-}
-
-#spectrum table.spectrum-bands th {
-  font-size: 0.78rem;
-  padding: 0.3rem 0.2rem;
-  word-break: break-word;
-}
-
-#spectrum table.spectrum-bands col.band-radio { width: 16%; }
-#spectrum table.spectrum-bands col.band-micro { width: 14%; }
-#spectrum table.spectrum-bands col.band-ir { width: 15%; }
-#spectrum table.spectrum-bands col.band-vis { width: 6%; }
-#spectrum table.spectrum-bands col.band-uv { width: 13%; }
-#spectrum table.spectrum-bands col.band-xray { width: 17%; }
-#spectrum table.spectrum-bands col.band-gamma { width: 19%; }
-
-.flow {
-  display: grid;
-  grid-template-columns: minmax(280px, 1.15fr) minmax(240px, 0.9fr);
-  gap: 0.8rem;
-}
-
-.node { cursor: pointer; }
-
-.node rect,
-.node ellipse {
-  stroke: var(--ink);
-  stroke-width: 1.5;
-  fill: #fff;
-}
-
-.node.active rect,
-.node.active ellipse {
-  fill: #dff3ee;
-  stroke: var(--teal);
-  stroke-width: 2.4;
-}
-
-.node.done rect,
-.node.done ellipse { fill: #f3e7c8; }
-
-.node text { pointer-events: none; }
-
-.edge {
-  stroke: #6b7380;
-  stroke-width: 1.7;
-  fill: none;
-  marker-end: url(#arrow);
-}
-
-.edge.lit {
-  stroke: var(--teal);
-  stroke-width: 2.5;
-  marker-end: url(#arrow-lit);
-}
-
-.edge-label { font-size: 11px; fill: #5b6573; }
-
-.badge-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.4rem;
-  text-align: center;
-  font-size: 0.82rem;
-}
-
-.compare td.sel { outline: 2px solid var(--teal); }
 tr.on td { background: #dff3ee; }
 
 .later {
@@ -508,16 +431,6 @@ tr.on td { background: #dff3ee; }
 }
 .trap h3 { margin: 0 0 0.35rem; font-size: 1rem; }
 .trap p { margin: 0; color: var(--muted); font-size: 0.92rem; }
-.pie .stage canvas.scene-canvas {
-  height: 260px;
-}
-#track-vis canvas.scene-canvas {
-  background: #11150f;
-}
-#track-vis .hud-label {
-  color: #f4f0e4;
-  text-shadow: 0 0 6px #11150f;
-}
 .stage .hud-label {
   position: absolute;
   font-size: 12px;
@@ -526,15 +439,6 @@ tr.on td { background: #dff3ee; }
   white-space: nowrap;
   transform: translate(-50%, 0);
   text-shadow: 0 0 6px #fffaf1;
-}
-
-#imaging-vis canvas.scene-canvas {
-  background: #fffaf1;
-  height: 480px;
-}
-
-@media (max-width: 760px) {
-  .flow, .pie { grid-template-columns: 1fr; }
 }
 
 #decay-vis canvas.scene-canvas,

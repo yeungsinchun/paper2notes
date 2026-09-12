@@ -277,9 +277,17 @@ chromeTest("26.1 dice remaining falls and N+decayed stays 40 billion", async () 
   }, 8000, "dice decay");
   assert.ok(later.remaining < 100);
   assert.ok(later.remaining >= 0);
-  const n = await cdp.evaluate("window.NotesScenes.halfN.snapshot()");
+  const n = await cdp.evaluate(`(function () {
+    window.NotesScenes.halfN.setT(0);
+    return window.NotesScenes.halfN.snapshot();
+  })()`);
   assert.equal(n.total, 40);
+  assert.equal(n.tDays, 0);
+  assert.equal(n.remaining, 40);
+  assert.equal(n.decayed, 0);
   assert.equal(n.conserved, true);
+  assert.equal(n.deadVisible, false);
+  assert.equal(n.deadHeight, 0);
   assert.ok(Math.abs(n.remaining + n.decayed - 40) < 1e-6);
 });
 
