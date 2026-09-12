@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>25.2 Origin of nuclear radiation</title>
   <link rel="stylesheet" href="css/notes.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="../css/lo.css">
 </head>
 <body>
   <header class="topbar">
@@ -20,6 +22,23 @@
   <main>
     <p class="kicker">25.2</p>
     <h1>Origin of nuclear radiation</h1>
+
+    <section class="lo-block" aria-labelledby="lo-heading">
+      <h2 id="lo-heading">Learning objectives</h2>
+      <p class="lo-stem">Students should be able to:</p>
+      <ul class="lo-list">
+        <li><p>describe the structure of an atom</p></li>
+        <li><p>define atomic number as the number of protons in the nucleus and mass number as the sum of the number of protons and neutrons in the nucleus of an atom</p><p class="dse-labels"><a href="summary.html#dse-mc-2012-36">2012/36 MC</a><a href="summary.html#dse-mc-2013-34">2013/34 MC</a><a href="summary.html#dse-mc-2021-31">2021/31 MC</a></p></li>
+        <li><p>use symbolic notations to represent nuclides</p><p class="dse-labels"><a href="summary.html#dse-mc-2013-34">2013/34 MC</a><a href="summary.html#dse-mc-2014-31">2014/31 MC</a><a href="summary.html#dse-mc-2020-31">2020/31 MC</a><a href="summary.html#dse-mc-2021-31">2021/31 MC</a><a href="summary.html#dse-mc-2025-32">2025/32 MC</a><a href="summary.html#dse-lq-2026-12">2026/12 LQ</a></p></li>
+        <li><p>define isotope</p><p class="dse-labels"><a href="summary.html#dse-mc-2012-36">2012/36 MC</a><a href="summary.html#dse-mc-2014-31">2014/31 MC</a><a href="summary.html#dse-mc-2020-31">2020/31 MC</a></p></li>
+        <li><p>realise the existence of radioactive isotopes in some elements</p><p class="dse-labels"><a href="summary.html#dse-mc-2021-33">2021/33 MC</a></p></li>
+        <li><p>represent radioactive transmutations in α, β and γ decays using equations</p><p class="dse-labels"><a href="summary.html#dse-mc-2013-34">2013/34 MC</a><a href="summary.html#dse-mc-2014-31">2014/31 MC</a><a href="summary.html#dse-mc-2020-31">2020/31 MC</a><a href="summary.html#dse-mc-2021-31">2021/31 MC</a><a href="summary.html#dse-mc-2025-32">2025/32 MC</a><a href="summary.html#dse-lq-2016-9">2016/9 LQ</a><a href="summary.html#dse-lq-2017-10">2017/10 LQ</a><a href="summary.html#dse-lq-2018-10">2018/10 LQ</a><a href="summary.html#dse-lq-2021-9">2021/9 LQ</a><a href="summary.html#dse-lq-2023-9">2023/9 LQ</a><a href="summary.html#dse-lq-2026-12">2026/12 LQ</a></p></li>
+        <li><p>realise the occurrence of radioactive decay in unstable nuclides</p><p class="dse-labels"><a href="summary.html#dse-mc-2015-31">2015/31 MC</a></p></li>
+        <li><p>realise the existence of background radiation</p><p class="dse-labels"><a href="summary.html#dse-mc-2021-33">2021/33 MC</a><a href="summary.html#dse-mc-2020-30">2020/30 MC</a></p></li>
+        <li><p>suggest safety precautions in handling radioactive sources</p><p class="dse-labels"><a href="summary.html#dse-mc-2015-32">2015/32 MC</a><a href="summary.html#dse-lq-2014-10">2014/10 LQ</a></p></li>
+      </ul>
+    </section>
+
 
     <section class="idea" id="atom">
       <header>
@@ -174,38 +193,21 @@
         <span class="hud-label" data-hud="parent">²⁰⁸₈₄Po</span>
         <span class="hud-label" data-hud="ejectile">²⁰⁴₈₂Pb + ⁴₂He</span>
         <span class="hud-label" style="left:72%;top:78%">A − 4 · Z − 2</span>
-        <p class="eq">
-          <span class="nuc"><span class="az"><span>A</span><span>Z</span></span>X</span>
-          →
-          <span class="nuc"><span class="az"><span>A−4</span><span>Z−2</span></span>Y</span>
-          +
-          <span class="nuc"><span class="az"><span>4</span><span>2</span></span>He</span>
-        </p>
+        <div class="eq">\[ {}^{A}_{Z}\mathrm{X} \rightarrow {}^{A-4}_{Z-2}\mathrm{Y} + {}^{4}_{2}\mathrm{He} \]</div>
       </div>
       <div class="visual play stage" id="decay-b" data-decay-panel="b" hidden data-scene="decay-b">
         <canvas class="scene-canvas" width="960" height="420" aria-label="Beta electron leaves the cobalt-60 nucleus"></canvas>
         <span class="hud-label" data-hud="parent">⁶⁰₂₇Co</span>
         <span class="hud-label" data-hud="ejectile">⁶⁰₂₈Ni + ⁰₋₁e</span>
         <span class="hud-label" style="left:72%;top:78%">n → p + e⁻ inside the nucleus</span>
-        <p class="eq">
-          <span class="nuc"><span class="az"><span>A</span><span>Z</span></span>X</span>
-          →
-          <span class="nuc"><span class="az"><span>A</span><span>Z+1</span></span>Y</span>
-          +
-          <span class="nuc"><span class="az"><span>0</span><span>−1</span></span>e</span>
-        </p>
+        <div class="eq">\[ {}^{A}_{Z}\mathrm{X} \rightarrow {}^{A}_{Z+1}\mathrm{Y} + {}^{0}_{-1}e \]</div>
       </div>
       <div class="visual play stage" id="decay-g" data-decay-panel="g" hidden data-scene="decay-g">
         <canvas class="scene-canvas" width="960" height="420" aria-label="Gamma pulse leaves excited nickel-60"></canvas>
         <span class="hud-label" data-hud="parent">⁶⁰₂₈Ni*</span>
         <span class="hud-label" data-hud="ejectile">⁶⁰₂₈Ni + γ</span>
         <span class="hud-label" style="left:72%;top:78%">not a transmutation · A, Z unchanged</span>
-        <p class="eq">
-          <span class="nuc"><span class="az"><span>A</span><span>Z</span></span>X*</span>
-          →
-          <span class="nuc"><span class="az"><span>A</span><span>Z</span></span>X</span>
-          + γ
-        </p>
+        <div class="eq">\[ {}^{A}_{Z}\mathrm{X}^{*} \rightarrow {}^{A}_{Z}\mathrm{X} + \gamma \]</div>
       </div>
       <table class="compact pair">
         <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
@@ -262,14 +264,10 @@
         <h2>Worked example · count α then β</h2>
         <span class="stamp">Worked example</span>
       </header>
-      <p class="eq">
-        <span class="nuc"><span class="az"><span>239</span><span>94</span></span>Pu</span>
-        →
-        <span class="nuc"><span class="az"><span>207</span><span>82</span></span>Pb</span>
-      </p>
-      <p class="eq">ΔA = 239 − 207 = 32 → n<sub>α</sub> = 32 / 4 = 8</p>
-      <p class="eq">Z after only α: 94 − 2×8 = 78</p>
-      <p class="eq">Need Z = 82, so n<sub>β</sub> = 82 − 78 = 4</p>
+      <div class="eq">\[ {}^{239}_{94}\mathrm{Pu} \rightarrow {}^{207}_{82}\mathrm{Pb} \]</div>
+      <p class="eq">\(\Delta A = 239 - 207 = 32\) → n<sub>α</sub> = 32 / 4 = 8</p>
+      <p class="eq">Z after only \(\alpha\): \(94 - 2 \times 8 = 78\)</p>
+      <p class="eq">Need \(Z = 82\), so n<sub>β</sub> = 82 − 78 = 4</p>
       <div class="check" data-check="mc" data-answer="B">
         <h3>How many β decays?</h3>
         <div class="choices">
@@ -420,6 +418,9 @@
 
     <p class="lede"><a href="25-3.html">Next: 25.3 Properties, including the α/β/γ decision graph →</a></p>
   </main>
+  <script src="../vendor/katex/katex.min.js"></script>
+  <script src="../vendor/katex/auto-render.min.js"></script>
+  <script src="../js/math.js"></script>
   <script src="js/lib/three.min.js"></script>
   <script src="js/diagrams3d.js"></script>
   <script src="js/notes.js"></script>

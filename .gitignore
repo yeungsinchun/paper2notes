@@ -10,6 +10,13 @@ QB_501/
 QB_502/
 QB_503/
 dse-classified/
+ch1.pdf
+ch2.pdf
+ch3.pdf
+ch4.pdf
+ch5.pdf
+notes/_local/
+notes/**/_local/
 
 # Python / tooling
 .venv/

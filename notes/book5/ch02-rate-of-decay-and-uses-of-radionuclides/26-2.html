@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>26.2 Uses of radionuclides</title>
   <link rel="stylesheet" href="css/notes.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="../css/lo.css">
 </head>
 <body>
   <header class="topbar">
@@ -20,6 +22,18 @@
   <main>
     <p class="kicker">26.2</p>
     <h1>Uses of radionuclides</h1>
+
+    <section class="lo-block" aria-labelledby="lo-heading">
+      <h2 id="lo-heading">Learning objectives</h2>
+      <p class="lo-stem">Students should be able to:</p>
+      <ul class="lo-list">
+        <li><p>discuss uses of radioactive isotopes</p><p class="dse-labels"><a href="summary.html#dse-mc-2024-33">2024/33 MC</a><a href="summary.html#dse-mc-2015-33">2015/33 MC</a><a href="summary.html#dse-lq-2014-10">2014/10 LQ</a><a href="summary.html#dse-lq-2017-10">2017/10 LQ</a><a href="summary.html#dse-lq-2018-10">2018/10 LQ</a><a href="summary.html#dse-lq-2021-9">2021/9 LQ</a><a href="summary.html#dse-lq-2026-12">2026/12 LQ</a></p></li>
+        <li><p>realise the existence of radioactive isotopes in some elements</p><p class="dse-labels"><a href="summary.html#dse-mc-2021-33">2021/33 MC</a></p></li>
+        <li><p>determine the half-life of a radioisotope from its decay graph or from numerical data</p><p class="dse-labels"><a href="summary.html#dse-mc-2015-33">2015/33 MC</a><a href="summary.html#dse-lq-2013-9">2013/9 LQ</a><a href="summary.html#dse-lq-2025-12">2025/12 LQ</a></p></li>
+        <li><p>solve problems involving radioactive decay</p><p class="dse-labels"><a href="summary.html#dse-mc-2015-33">2015/33 MC</a><a href="summary.html#dse-lq-2013-9">2013/9 LQ</a><a href="summary.html#dse-lq-2025-12">2025/12 LQ</a></p></li>
+      </ul>
+    </section>
+
 
     <section class="idea" id="chooser">
       <header>
@@ -191,15 +205,15 @@
       <table class="compact pair">
         <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
         <tbody>
-          <tr><td>Atmosphere and living things keep a steady C-14 fraction</td><td>Activity while alive is A₀</td></tr>
-          <tr><td>Just after death the activity is still A₀</td><td>Clock starts at death, not at “becoming radioactive”</td></tr>
-          <tr><td>After one half-life (~5730 y) activity is ½ A₀</td><td>Age from remaining C-14</td></tr>
+          <tr><td>Atmosphere and living things keep a steady C-14 fraction</td><td>Activity while alive is \( A_0 \)</td></tr>
+          <tr><td>Just after death the activity is still \( A_0 \)</td><td>Clock starts at death, not at “becoming radioactive”</td></tr>
+          <tr><td>After one half-life (~5730 y) activity is \( \tfrac{1}{2} A_0 \)</td><td>Age from remaining C-14</td></tr>
           <tr><td>Reliable about 60 y to 60 000 y</td><td>Not rock, not metal, not a living person</td></tr>
         </tbody>
       </table>
       <div class="check" data-check="mc" data-answer="D">
         <h3>Concept check</h3>
-        <p>Ancient wood: 11.0 min⁻¹ corrected. Fresh wood of the same kind: 15.6 min⁻¹. T½ of C-14 = 5730 y. Approximate age?</p>
+        <p>Ancient wood: \( 11.0\,\mathrm{min}^{-1} \) corrected. Fresh wood of the same kind: \( 15.6\,\mathrm{min}^{-1} \). \( T_{1/2} \) of C-14 = 5730 y. Approximate age?</p>
         <div class="choices">
           <button type="button" data-choice="A">890 years</button>
           <button type="button" data-choice="B">1300 years</button>
@@ -221,6 +235,9 @@
       </div>
     </section>
   </main>
+  <script src="../vendor/katex/katex.min.js"></script>
+  <script src="../vendor/katex/auto-render.min.js"></script>
+  <script src="../js/math.js"></script>
   <script src="js/lib/three.min.js"></script>
   <script src="js/diagrams3d.js"></script>
   <script src="js/notes.js"></script>

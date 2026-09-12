@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>25.3 Properties of nuclear radiation</title>
   <link rel="stylesheet" href="css/notes.css">
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="../css/lo.css">
 </head>
 <body>
   <header class="topbar">
@@ -20,6 +22,17 @@
   <main>
     <p class="kicker">25.3</p>
     <h1>Properties of nuclear radiation</h1>
+
+    <section class="lo-block" aria-labelledby="lo-heading">
+      <h2 id="lo-heading">Learning objectives</h2>
+      <p class="lo-stem">Students should be able to:</p>
+      <ul class="lo-list">
+        <li><p>compare α, β and γ radiations in terms of their penetrating power, ranges, ionizing power, behaviour in electric field and magnetic field, and cloud chamber tracks</p><p class="dse-labels"><a href="summary.html#dse-mc-2014-32">2014/32 MC</a><a href="summary.html#dse-mc-2016-32">2016/32 MC</a><a href="summary.html#dse-mc-2017-31">2017/31 MC</a><a href="summary.html#dse-mc-2017-32">2017/32 MC</a><a href="summary.html#dse-mc-2019-31">2019/31 MC</a><a href="summary.html#dse-mc-pp-34">PP/34 MC</a><a href="summary.html#dse-mc-pp-35">PP/35 MC</a><a href="summary.html#dse-mc-sap-36">SAP/36 MC</a><a href="summary.html#dse-lq-2014-10">2014/10 LQ</a></p></li>
+        <li><p>detect radiation with a photographic film and GM counter</p><p class="dse-labels"><a href="summary.html#dse-mc-2017-32">2017/32 MC</a><a href="summary.html#dse-mc-2014-32">2014/32 MC</a><a href="summary.html#dse-mc-2015-32">2015/32 MC</a><a href="summary.html#dse-mc-pp-35">PP/35 MC</a><a href="summary.html#dse-mc-sap-36">SAP/36 MC</a></p></li>
+        <li><p>detect radiation in terms of count rate using a GM counter</p><p class="dse-labels"><a href="summary.html#dse-mc-2014-32">2014/32 MC</a><a href="summary.html#dse-mc-2019-31">2019/31 MC</a><a href="summary.html#dse-mc-2020-30">2020/30 MC</a><a href="summary.html#dse-mc-pp-35">PP/35 MC</a><a href="summary.html#dse-mc-sap-36">SAP/36 MC</a></p></li>
+      </ul>
+    </section>
+
 
     <section class="idea" id="ion-pair">
       <header>
@@ -193,13 +206,13 @@
         <button type="button" data-gm-src="20" data-need-grid="off">α (needs grid off)</button>
         <button type="button" id="gm-grid" aria-pressed="true">plastic grid on (blocks α)</button>
       </div>
-      <p class="eq">corrected count rate = recorded − background</p>
+      <div class="eq">\[ \text{corrected count rate} = \text{recorded} - \text{background} \]</div>
       <table class="compact pair">
         <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
         <tbody>
           <tr><td>Better counts for α, β than γ</td><td>γ ionizes too weakly for a thick pulse trail</td></tr>
           <tr><td>Count rate fluctuates</td><td>Decay is random; always subtract background</td></tr>
-          <tr><td>Hong Kong typical background</td><td>~ 1 count s⁻¹</td></tr>
+          <tr><td>Hong Kong typical background</td><td>~ \( 1 \) count \( \mathrm{s}^{-1} \)</td></tr>
         </tbody>
       </table>
     </section>
@@ -409,6 +422,9 @@
 
     <p class="lede"><a href="summary.html">Close with the comparison table and common mistakes →</a></p>
   </main>
+  <script src="../vendor/katex/katex.min.js"></script>
+  <script src="../vendor/katex/auto-render.min.js"></script>
+  <script src="../js/math.js"></script>
   <script src="js/lib/three.min.js"></script>
   <script src="js/diagrams3d.js"></script>
   <script src="js/notes.js"></script>

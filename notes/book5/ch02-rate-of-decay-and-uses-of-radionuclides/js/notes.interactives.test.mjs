@@ -458,4 +458,86 @@ chromeTest("26.3 sievert check and activity vs dose labels", async () => {
     await cdp.screenshot(path.join(evidenceDir, "26-3-activity-vs-dose.png"), "#dose-vis");
   }
 });
+
+chromeTest("Ch.2 pages show syllabus LOs, KaTeX, and summary DSE embeds", async () => {
+  for (const page of ["index.html", "26-1.html", "26-2.html", "26-3.html", "summary.html"]) {
+    await cdp.goto(pageUrl(page));
+    const info = await cdp.evaluate(`(function () {
+      var lo = document.querySelector(".lo-block");
+      var scripts = Array.from(document.querySelectorAll("script[src]")).map(function (s) {
+        return s.getAttribute("src") || "";
+      });
+      return {
+        heading: lo && lo.querySelector("h2") && lo.querySelector("h2").textContent,
+        stem: lo && lo.innerText,
+        remote: scripts.some(function (src) { return /^https?:\\/\\//.test(src); }),
+        katexJs: scripts.some(function (src) { return /vendor\\/katex\\/katex\\.min\\.js$/.test(src); })
+      };
+    })()`);
+    assert.match(info.heading, /Learning objectives/i);
+    assert.match(info.stem, /Students should be able to/);
+    assert.equal(info.remote, false, "no remote scripts on " + page);
+    assert.equal(info.katexJs, true, "local KaTeX missing on " + page);
+  }
+
+  await cdp.goto(pageUrl("26-1.html"));
+  const decay = await waitFor(async () => {
+    const info = await cdp.evaluate(`(function () {
+      var lo = document.querySelector(".lo-block");
+      return {
+        katex: !!document.querySelector(".katex"),
+        exp: lo && lo.innerText
+      };
+    })()`);
+    if (!info.katex) throw new Error("katex not rendered");
+    return info;
+  }, 8000, "KaTeX on 26.1");
+  assert.match(decay.exp, /exponential law of decay/);
+  assert.match(decay.exp, /N\s*=\s*N/);
+
+  await cdp.goto(pageUrl("summary.html"));
+  const bank = await cdp.evaluate(`(function () {
+    var papers = Array.from(document.querySelectorAll(".dse-paper"));
+    var loaded = papers.filter(function (fig) {
+      var img = fig.querySelector("img");
+      return img && img.complete && img.naturalWidth > 0;
+    }).length;
+    return { n: papers.length, loaded: loaded, has2013: !!document.getElementById("dse-lq-2013-9") };
+  })()`);
+  assert.ok(bank.n >= 18, "expected Ch.2 DSE embeds, n=" + bank.n);
+  assert.equal(bank.has2013, true);
+  assert.ok(bank.loaded >= 1, "localhost DSE images should load, loaded=" + bank.loaded);
+});
+
+chromeTest("Book 5 menu keeps two chapter cards and hosts nuclear-energy LOs with papers", async () => {
+  await cdp.goto(book5Url("index.html"));
+  const menu = await cdp.evaluate(`(function () {
+    var cards = Array.from(document.querySelectorAll(".chapter-cards a"));
+    var papers = Array.from(document.querySelectorAll(".dse-paper"));
+    var loaded = papers.filter(function (fig) {
+      var img = fig.querySelector("img");
+      return img && img.complete && img.naturalWidth > 0;
+    }).length;
+    var lo = document.querySelector("#nuclear-energy");
+    return {
+      nCards: cards.length,
+      title: document.querySelector("h1") && document.querySelector("h1").textContent,
+      loText: lo && lo.innerText,
+      nPapers: papers.length,
+      loaded: loaded,
+      katex: !!document.querySelector(".katex"),
+      remote: Array.from(document.querySelectorAll("script[src]")).some(function (s) {
+        return /^https?:\\/\\//.test(s.getAttribute("src") || "");
+      })
+    };
+  })()`);
+  assert.equal(menu.nCards, 2);
+  assert.match(menu.title, /Radiation chapters/i);
+  assert.match(menu.loText, /Students should be able to/);
+  assert.match(menu.loText, /realise the release of energy in nuclear fission and fusion/);
+  assert.equal(menu.remote, false);
+  assert.equal(menu.katex, true);
+  assert.ok(menu.nPapers >= 10, "expected nuclear DSE embeds, n=" + menu.nPapers);
+  assert.ok(menu.loaded >= 1, "nuclear DSE images should load, loaded=" + menu.loaded);
+});
 });

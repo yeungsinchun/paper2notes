@@ -1206,4 +1206,58 @@ chromeTest("3d scenes magnify, label the tube, keep β drift, and pulse radially
     await cdp.screenshot(path.join(evidenceDir, "25-3-eb-deflection.png"), "#fields");
   }
 });
+
+chromeTest("every Ch.1 page shows syllabus LOs and the summary embeds DSE papers", async () => {
+  for (const page of ["index.html", "25-1.html", "25-2.html", "25-3.html", "summary.html"]) {
+    await cdp.goto(pageUrl(page));
+    const info = await cdp.evaluate(`(function () {
+      var lo = document.querySelector(".lo-block");
+      var scripts = Array.from(document.querySelectorAll("script[src]")).map(function (s) {
+        return s.getAttribute("src") || "";
+      });
+      return {
+        heading: lo && lo.querySelector("h2") && lo.querySelector("h2").textContent,
+        stem: lo && lo.innerText,
+        firstAfterTitle: (function () {
+          var h1 = document.querySelector("h1");
+          var n = h1 && h1.nextElementSibling;
+          while (n && n.tagName === "P" && n.classList.contains("lede")) n = n.nextElementSibling;
+          return n && n.classList.contains("lo-block");
+        })(),
+        remote: scripts.some(function (src) { return /^https?:\\/\\//.test(src); }),
+        katex: scripts.some(function (src) { return /vendor\\/katex\\/katex\\.min\\.js$/.test(src); })
+      };
+    })()`);
+    assert.match(info.heading, /Learning objectives/i);
+    assert.match(info.stem, /Students should be able to/);
+    assert.equal(info.firstAfterTitle, true, "LO block should sit after the title on " + page);
+    assert.equal(info.remote, false, "no remote scripts on " + page);
+    assert.equal(info.katex, true, "local KaTeX missing on " + page);
+  }
+
+  await cdp.goto(pageUrl("25-1.html"));
+  const xray = await cdp.evaluate("document.querySelector('.lo-block').innerText");
+  assert.match(xray, /realise X-rays as ionizing electromagnetic radiations of short wavelengths with high penetrating power/);
+  assert.match(xray, /2022\/31 MC/);
+
+  await cdp.goto(pageUrl("summary.html"));
+  const bank = await cdp.evaluate(`(function () {
+    var papers = Array.from(document.querySelectorAll(".dse-paper"));
+    var loaded = papers.filter(function (fig) {
+      var img = fig.querySelector("img");
+      return img && img.complete && img.naturalWidth > 0;
+    }).length;
+    return {
+      n: papers.length,
+      loaded: loaded,
+      has2022: !!document.getElementById("dse-mc-2022-31"),
+      has2026: !!document.getElementById("dse-lq-2026-12"),
+      katex: !!document.querySelector(".katex")
+    };
+  })()`);
+  assert.ok(bank.n >= 20, "expected Ch.1 DSE embeds, n=" + bank.n);
+  assert.equal(bank.has2022, true);
+  assert.equal(bank.has2026, true);
+  assert.ok(bank.loaded >= 1, "localhost DSE images should load, loaded=" + bank.loaded);
+});
 });
