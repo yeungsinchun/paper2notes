@@ -502,10 +502,20 @@ chromeTest("Ch.2 pages show syllabus LOs, KaTeX, and summary DSE embeds", async 
       var img = fig.querySelector("img");
       return img && img.complete && img.naturalWidth > 0;
     }).length;
-    return { n: papers.length, loaded: loaded, has2013: !!document.getElementById("dse-lq-2013-9") };
+    var fig2021 = document.getElementById("dse-mc-2021-33");
+    var img2021 = fig2021 && fig2021.querySelector("img");
+    return {
+      n: papers.length,
+      loaded: loaded,
+      has2013: !!document.getElementById("dse-lq-2013-9"),
+      has2021_33: !!fig2021,
+      src2021_33: img2021 && img2021.getAttribute("src")
+    };
   })()`);
   assert.ok(bank.n >= 18, "expected Ch.2 DSE embeds, n=" + bank.n);
   assert.equal(bank.has2013, true);
+  assert.equal(bank.has2021_33, true);
+  assert.match(bank.src2021_33 || "", /mc\/25\/2021_q33\.png$/);
   assert.ok(bank.loaded >= 1, "localhost DSE images should load, loaded=" + bank.loaded);
 });
 
