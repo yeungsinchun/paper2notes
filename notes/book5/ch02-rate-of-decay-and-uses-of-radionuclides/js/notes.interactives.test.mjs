@@ -517,6 +517,83 @@ chromeTest("Ch.2 pages show syllabus LOs, KaTeX, and summary DSE embeds", async 
   assert.equal(bank.has2021_33, true);
   assert.match(bank.src2021_33 || "", /mc\/25\/2021_q33\.png$/);
   assert.ok(bank.loaded >= 1, "localhost DSE images should load, loaded=" + bank.loaded);
+  if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "ch02-summary-lo-block.png"), ".lo-block");
+    await cdp.screenshot(path.join(evidenceDir, "ch02-summary-dse-mc-2021-33.png"), "#dse-mc-2021-33");
+  }
+
+  await cdp.goto(pageUrl("26-1.html"));
+  await waitFor(async () => {
+    const ok = await cdp.evaluate("!!document.querySelector('.lo-block .katex')");
+    if (!ok) throw new Error("KaTeX missing in 26.1 LO");
+    return true;
+  }, 8000, "26.1 LO KaTeX");
+  if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "ch02-26-1-lo-katex.png"), ".lo-block");
+  }
+
+  for (const page of ["index.html", "26-2.html"]) {
+    await cdp.goto(pageUrl(page));
+    if (evidenceDir) {
+      await cdp.evaluate(`(function () {
+        var a = document.querySelector('a[href="summary.html#dse-mc-2021-33"]');
+        if (a && a.closest("li")) a.closest("li").scrollIntoView({ block: "center" });
+      })()`);
+      await cdp.evaluate("new Promise((r) => setTimeout(r, 180))");
+      const chipName = page === "index.html" ? "ch02-index-lo-2021-33-chip.png" : "ch02-26-2-lo-2021-33-chip.png";
+      await cdp.screenshot(path.join(evidenceDir, chipName));
+    }
+    await cdp.evaluate(`document.querySelector('a[href="summary.html#dse-mc-2021-33"]').click()`);
+    const land = await waitFor(async () => {
+      const info = await cdp.evaluate(`(function () {
+        var fig = document.getElementById("dse-mc-2021-33");
+        var img = fig && fig.querySelector("img");
+        var cap = fig && fig.querySelector("figcaption");
+        return {
+          href: location.href,
+          hash: location.hash,
+          caption: cap && cap.textContent,
+          loaded: !!(img && img.complete && img.naturalWidth > 0),
+          width: img && img.naturalWidth,
+          alt: img && img.alt
+        };
+      })()`);
+      if (!/summary\.html#dse-mc-2021-33$/.test(info.href)) {
+        throw new Error("wrong land href=" + info.href + " hash=" + info.hash);
+      }
+      if (!info.loaded) throw new Error("2021/33 image not loaded");
+      return info;
+    }, 10000, page + " chip to 2021/33");
+    assert.equal(land.hash, "#dse-mc-2021-33");
+    assert.match(land.caption || "", /2021\/33 MC/);
+    assert.ok(land.loaded);
+    if (evidenceDir) {
+      const paperName = page === "index.html"
+        ? "ch02-index-chip-lands-on-2021-33.png"
+        : "ch02-26-2-chip-lands-on-2021-33.png";
+      await cdp.screenshot(path.join(evidenceDir, paperName), "#dse-mc-2021-33");
+    }
+  }
+
+  await cdp.goto(ch1Url("summary.html"));
+  const ch1 = await waitFor(async () => {
+    const info = await cdp.evaluate(`(function () {
+      var fig = document.getElementById("dse-mc-2021-33");
+      var img = fig && fig.querySelector("img");
+      return {
+        src: img && img.getAttribute("src"),
+        loaded: !!(img && img.complete && img.naturalWidth > 0),
+        caption: fig && fig.querySelector("figcaption") && fig.querySelector("figcaption").textContent
+      };
+    })()`);
+    if (!info.loaded) throw new Error("Ch.1 2021/33 not loaded");
+    return info;
+  }, 8000, "Ch.1 2021/33 still embedded");
+  assert.match(ch1.src || "", /mc\/25\/2021_q33\.png$/);
+  assert.match(ch1.caption || "", /2021\/33 MC/);
+  if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "ch01-summary-dse-mc-2021-33-unchanged.png"), "#dse-mc-2021-33");
+  }
 });
 
 chromeTest("Book 5 menu keeps two chapter cards and hosts nuclear-energy LOs with papers", async () => {
@@ -549,5 +626,9 @@ chromeTest("Book 5 menu keeps two chapter cards and hosts nuclear-energy LOs wit
   assert.equal(menu.katex, true);
   assert.ok(menu.nPapers >= 10, "expected nuclear DSE embeds, n=" + menu.nPapers);
   assert.ok(menu.loaded >= 1, "nuclear DSE images should load, loaded=" + menu.loaded);
+  if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "book5-nuclear-energy-lo-block.png"), "#nuclear-energy");
+    await cdp.screenshot(path.join(evidenceDir, "book5-nuclear-energy-dse-bank.png"), ".dse-bank");
+  }
 });
 });

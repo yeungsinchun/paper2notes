@@ -1259,5 +1259,9 @@ chromeTest("every Ch.1 page shows syllabus LOs and the summary embeds DSE papers
   assert.equal(bank.has2022, true);
   assert.equal(bank.has2026, true);
   assert.ok(bank.loaded >= 1, "localhost DSE images should load, loaded=" + bank.loaded);
+  if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "ch01-summary-lo-block.png"), ".lo-block");
+    await cdp.screenshot(path.join(evidenceDir, "ch01-summary-dse-bank.png"), ".dse-bank");
+  }
 });
 });
