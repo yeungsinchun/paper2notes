@@ -1308,29 +1308,36 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
   for (const [page, expectedIds] of Object.entries(expected)) {
     await cdp.goto(pageUrl(page));
     const practice = await cdp.evaluate(`(function () {
-      var section = document.querySelector(".section-dse");
-      var slides = section ? Array.from(section.querySelectorAll(".quiz-slide")) : [];
-        var visible = slides.filter(function (s) { return s.classList.contains("is-current"); });
-      var firstImg = visible[0] && visible[0].querySelector("img");
+      var mc = document.querySelector('[data-quiz="mc"]');
+      var lq = document.querySelector('[data-quiz="lq"]');
+      var slides = Array.from(document.querySelectorAll(".quiz-slide"));
+      var visibleMc = mc ? Array.from(mc.querySelectorAll(".quiz-slide.is-current")) : [];
+      var firstImg = visibleMc[0] && visibleMc[0].querySelector("img");
+      var nav = mc && mc.querySelector(".quiz-nav");
+      var slidesBox = mc && mc.querySelector(".quiz-slides");
       return {
-        heading: section && section.querySelector("h2") && section.querySelector("h2").textContent,
+        heading: mc && mc.querySelector("h2") && mc.querySelector("h2").textContent,
         slides: slides.map(function (s) { return s.id; }),
-        visible: visible.length,
+        visible: visibleMc.length,
         paper: !!(firstImg && firstImg.complete && firstImg.naturalWidth > 0),
-        hasPrev: !!(section && section.querySelector("[data-quiz-prev]")),
-        hasNext: !!(section && section.querySelector("[data-quiz-next]")),
-        letters: section ? section.querySelectorAll("[data-quiz-choice]").length : 0,
-        exportHref: section && section.querySelector("[data-quiz-export]") && section.querySelector("[data-quiz-export]").getAttribute("href"),
-        status: section && section.querySelector(".quiz-status") && section.querySelector(".quiz-status").textContent
+        hasPrev: !!(mc && mc.querySelector("[data-quiz-prev]")),
+        hasNext: !!(mc && mc.querySelector("[data-quiz-next]")),
+        navAfterSlides: !!(nav && slidesBox && (nav.compareDocumentPosition(slidesBox) & Node.DOCUMENT_POSITION_PRECEDING)),
+        letters: mc ? mc.querySelectorAll("[data-quiz-choice]").length : 0,
+        hasLq: !!(lq && lq.querySelector(".quiz-slide")),
+        exportHref: mc && mc.querySelector("[data-quiz-export]") && mc.querySelector("[data-quiz-export]").getAttribute("href"),
+        lo: document.querySelector(".quiz-lo") && document.querySelector(".quiz-lo").textContent.trim()
       };
     })()`);
     assert.match(practice.heading || "", /check the learning objectives/i);
     assert.equal(practice.hasPrev, true, page + " needs Prev");
     assert.equal(practice.hasNext, true, page + " needs Next");
+    assert.equal(practice.navAfterSlides, true, page + " Prev/Next must sit under the question");
     assert.ok(practice.letters >= 4, page + " needs A B C D options");
     assert.match(practice.exportHref || "", /combined\.pdf$/);
-    assert.match(await cdp.evaluate("document.querySelector('.quiz-lo') && document.querySelector('.quiz-lo').textContent.trim()"), /^LO \d+$/, page + " needs an LO number at the top of the quiz");
-    assert.equal(practice.visible, 1, page + " must show one quiz item");
+    assert.match(practice.lo || "", /^LO \d+/, page + " needs an LO number and description at the top of the quiz");
+    assert.equal(practice.hasLq, true, page + " needs a separate LQ section");
+    assert.equal(practice.visible, 1, page + " must show one MC quiz item");
     assert.ok(practice.paper, page + " should include a topic-matched DSE paper");
     for (const id of expectedIds) {
       assert.ok(practice.slides.includes(id), page + " missing " + id);
@@ -1339,22 +1346,23 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
 
   await cdp.goto(pageUrl("25-1.html"));
   const rotated = await cdp.evaluate(`(function () {
-    var first = document.querySelector(".quiz-slide.is-current");
+    var mc = document.querySelector('[data-quiz="mc"]');
+    var first = mc.querySelector(".quiz-slide.is-current");
     var before = first && first.id;
-    document.querySelector("[data-quiz-next]").click();
-    var after = document.querySelector(".quiz-slide.is-current");
-    document.querySelector("[data-quiz-prev]").click();
-    var back = document.querySelector(".quiz-slide.is-current");
-    var letter = document.querySelector("[data-quiz-choice='B']");
+    mc.querySelector("[data-quiz-next]").click();
+    var after = mc.querySelector(".quiz-slide.is-current");
+    mc.querySelector("[data-quiz-prev]").click();
+    var back = mc.querySelector(".quiz-slide.is-current");
+    var letter = mc.querySelector("[data-quiz-choice='B']");
     if (letter) letter.click();
-    var pct = document.querySelector(".quiz-slide.is-current .quiz-pct");
+    var pct = mc.querySelector(".quiz-slide.is-current .quiz-pct");
     return {
       before: before,
       after: after && after.id,
       back: back && back.id,
       marked: !!(letter && (letter.classList.contains("correct") || letter.classList.contains("wrong"))),
       pct: pct && !pct.hidden && pct.textContent,
-      visible: document.querySelectorAll(".quiz-slide.is-current").length
+      visible: mc.querySelectorAll(".quiz-slide.is-current").length
     };
   })()`);
   assert.notEqual(rotated.after, rotated.before);
@@ -1366,7 +1374,7 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
   await cdp.goto(pageUrl("25-3.html"));
   const target = await waitFor(async () => {
     const found = await cdp.evaluate(`(function () {
-      var next = document.querySelector("[data-quiz-next]");
+      var next = document.querySelector('[data-quiz="mc"] [data-quiz-next]');
       var paper = document.getElementById("dse-mc-2019-31");
       if (paper && !paper.classList.contains("is-current") && next) next.click();
       paper = document.getElementById("dse-mc-2019-31");

@@ -101,15 +101,9 @@
       var h = $("h3", box);
       if (!h || h.getAttribute("data-numbered")) return;
       n += 1;
-      var src = h.getAttribute("data-src");
       var label = box.getAttribute("data-check") === "sa" ? "Write it out" : "Check";
       h.textContent = label + " " + n;
-      if (src) {
-        var s = document.createElement("span");
-        s.className = "src";
-        s.textContent = src;
-        h.appendChild(s);
-      }
+      h.removeAttribute("data-src");
       h.setAttribute("data-numbered", "true");
     });
   }
@@ -209,7 +203,7 @@
         slide.appendChild(pct);
       });
 
-      if (!$("[data-quiz-export]", deck)) {
+      if (deck.getAttribute("data-quiz") !== "lq" && !$("[data-quiz-export]", deck)) {
         var exp = document.createElement("a");
         exp.className = "quiz-export";
         exp.setAttribute("data-quiz-export", "true");
@@ -227,8 +221,8 @@
       if (!loLabel) {
         loLabel = document.createElement("p");
         loLabel.className = "quiz-lo";
-        var nav = $(".quiz-nav", deck);
-        if (nav) deck.insertBefore(loLabel, nav);
+        var headEl = $("header", deck);
+        if (headEl && headEl.nextSibling) deck.insertBefore(loLabel, headEl.nextSibling);
         else deck.insertBefore(loLabel, deck.firstChild);
       }
       var tabRow = $(".quiz-los", deck);
@@ -262,7 +256,8 @@
           if (on) slide.classList.add("is-current");
           else slide.classList.remove("is-current");
         });
-        loLabel.textContent = "LO " + current.primary;
+        var desc = loTexts[current.primary - 1] || "";
+        loLabel.textContent = desc ? ("LO " + current.primary + " · " + desc) : ("LO " + current.primary);
         $all("[data-quiz-lo]", tabRow).forEach(function (tab) {
           var on = tab.getAttribute("data-quiz-lo") === String(current.primary);
           tab.setAttribute("aria-selected", on ? "true" : "false");
