@@ -19,4 +19,4 @@ HTML notes live under `notes/`. Follow textbook order; prefer visual animation o
 
 ## Hosting
 
-Merges to `main` deploy `notes/` to a Compute Engine VM via `.github/workflows/deploy.yml`. Project, instance, access model, and cost are in `deploy/gcp/README.md`.
+Merges to `main` deploy `notes/` to Cloud Run via `.github/workflows/deploy.yml`. Live site: https://paper2notes-152505675251.asia-east1.run.app/. Project, service, access model, and cost are in `deploy/cloudrun/README.md`.

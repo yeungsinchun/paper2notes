@@ -1,0 +1,11 @@
+# Build context for deploy/cloudrun/Dockerfile: only the student-facing notes
+# and the nginx config go into the image.
+*
+!notes/
+!deploy/cloudrun/nginx.conf
+
+# Intake/OCR provenance and gitignored local material are never published.
+notes/_source/
+**/_local/
+**/*.test.mjs
+**/.DS_Store

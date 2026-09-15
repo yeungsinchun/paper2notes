@@ -1,22 +1,23 @@
 name: Deploy
 
-# Publishes notes/ to the paper2notes Compute Engine VM after every merge to
-# main. Authentication is Workload Identity Federation: GitHub's OIDC token is
-# exchanged for a short-lived token of the deployer service account, so the
-# repository holds no cloud keys. The two secrets are identifiers written by
-# deploy/gcp/provision.sh, not credentials.
+# Publishes notes/ to Cloud Run after every merge to main. Authentication is
+# Workload Identity Federation: GitHub's OIDC token is exchanged for a
+# short-lived token of the deployer service account, so the repository holds
+# no cloud keys. The two secrets are identifiers written by
+# deploy/cloudrun/provision.sh, not credentials.
 
 on:
   push:
     branches: [main]
     paths:
       - "notes/**"
-      - "deploy/gcp/**"
+      - "deploy/cloudrun/**"
+      - ".dockerignore"
       - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
 concurrency:
-  group: deploy-gcp
+  group: deploy-cloudrun
   cancel-in-progress: false
 
 permissions:
@@ -25,15 +26,16 @@ permissions:
 
 jobs:
   deploy:
-    name: Deploy to Compute Engine
+    name: Deploy to Cloud Run
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: http://${{ steps.site.outputs.ip }}/book5/
+      url: ${{ steps.site.outputs.url }}
     env:
       GCP_PROJECT_ID: paper2notes-site
-      GCP_ZONE: us-west1-b
-      GCP_INSTANCE: paper2notes-web
+      GCP_REGION: asia-east1
+      GCP_RUN_SERVICE: paper2notes
+      GCP_AR_REPOSITORY: paper2notes
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -47,12 +49,12 @@ jobs:
       - name: Set up gcloud
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Deploy notes/ to the VM
-        run: deploy/gcp/deploy.sh
+      - name: Build, push and roll out
+        run: deploy/cloudrun/deploy.sh
 
       - name: Record site address
         id: site
         run: |
-          ip="$(gcloud compute instances describe "$GCP_INSTANCE" --project "$GCP_PROJECT_ID" --zone "$GCP_ZONE" \
-            --format='value(networkInterfaces[0].accessConfigs[0].natIP)')"
-          echo "ip=$ip" >> "$GITHUB_OUTPUT"
+          url="$(gcloud run services describe "$GCP_RUN_SERVICE" --project "$GCP_PROJECT_ID" --region "$GCP_REGION" \
+            --format='value(status.url)')"
+          echo "url=$url/book5/" >> "$GITHUB_OUTPUT"
