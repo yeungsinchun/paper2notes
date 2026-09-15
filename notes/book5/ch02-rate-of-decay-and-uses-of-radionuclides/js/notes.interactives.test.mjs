@@ -640,7 +640,7 @@ chromeTest("Ch.2 pages show syllabus LOs, KaTeX, and summary DSE embeds", async 
   }
 });
 
-chromeTest("Book 5 menu keeps the hub limited to its two chapter cards", async () => {
+chromeTest("Book 5 hub and chapter maps keep objectives on subsection pages", async () => {
   await cdp.goto(book5Url("index.html"));
   const menu = await cdp.evaluate(`(function () {
     var cards = Array.from(document.querySelectorAll(".chapter-cards a"));
@@ -663,6 +663,21 @@ chromeTest("Book 5 menu keeps the hub limited to its two chapter cards", async (
   assert.equal(menu.nPapers, 0, "the hub must not embed DSE papers");
   assert.equal(menu.hasNuclearLink, false, "the hub must not link to an absent Chapter 3 section");
   assert.equal(menu.remote, false);
+
+  for (const [label, url] of [
+    ["Ch.1 map", ch1Url("index.html")],
+    ["Ch.2 map", pageUrl("index.html")]
+  ]) {
+    await cdp.goto(url);
+    const map = await cdp.evaluate(`({
+      hasLo: !!document.querySelector(".lo-block"),
+      hasDseBank: !!document.querySelector(".dse-bank"),
+      nPapers: document.querySelectorAll(".dse-paper").length
+    })`);
+    assert.equal(map.hasLo, false, label + " must leave learning objectives to its subsection pages");
+    assert.equal(map.hasDseBank, false, label + " must not become a DSE bank");
+    assert.equal(map.nPapers, 0, label + " must not embed DSE papers");
+  }
 });
 
 chromeTest("each Ch.2 subsection groups links to its own DSE practice", async () => {

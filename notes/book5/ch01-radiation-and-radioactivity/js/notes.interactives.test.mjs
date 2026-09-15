@@ -757,7 +757,8 @@ chromeTest("chapter map, summary, and concept-check scoring are the public notes
     title: document.querySelector('h1').textContent,
     brand: document.querySelector('.brand') && document.querySelector('.brand').textContent,
     lede: document.querySelector('.lede') && document.querySelector('.lede').textContent,
-    links: Array.from(document.querySelectorAll('.toc a')).map((a) => a.getAttribute('href'))
+    links: Array.from(document.querySelectorAll('.toc a')).map((a) => a.getAttribute('href')),
+    hasLo: !!document.querySelector(".lo-block")
   })`);
   assert.equal(map.title, "Radiation and Radioactivity");
   assert.match(map.brand, /Book 5/);
@@ -766,6 +767,7 @@ chromeTest("chapter map, summary, and concept-check scoring are the public notes
   assert.doesNotMatch(map.lede, /textbook order/i);
   assert.doesNotMatch(map.lede, /book cut/i);
   assert.deepEqual(map.links, ["25-1.html", "25-2.html", "25-3.html", "summary.html"]);
+  assert.equal(map.hasLo, false, "learning objectives belong on the 25.x pages, not the chapter map");
 
   for (const page of ["index.html", "25-1.html", "25-2.html", "25-3.html", "summary.html"]) {
     await cdp.goto(pageUrl(page));
@@ -1242,8 +1244,8 @@ chromeTest("3d scenes magnify, label the tube, keep β drift, and pulse radially
   }
 });
 
-chromeTest("every Ch.1 page shows syllabus LOs and the summary embeds DSE papers", async () => {
-  for (const page of ["index.html", "25-1.html", "25-2.html", "25-3.html", "summary.html"]) {
+chromeTest("every Ch.1 section page shows syllabus LOs and the summary embeds DSE papers", async () => {
+  for (const page of ["25-1.html", "25-2.html", "25-3.html", "summary.html"]) {
     await cdp.goto(pageUrl(page));
     const info = await cdp.evaluate(`(function () {
       var lo = document.querySelector(".lo-block");
