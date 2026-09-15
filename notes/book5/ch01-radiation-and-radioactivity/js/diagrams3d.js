@@ -1914,6 +1914,8 @@
     var filmW = 3.45;
     var filmD = 3.95;
     var filmY = -1.02;
+    var filmX = 0.04;
+    var filmZ = 0.12;
     /* The hand floats well above the film so its radiograph shows beside it from the
        3/4 camera instead of hiding directly underneath. */
     var handLift = 0.36;
@@ -1947,10 +1949,13 @@
     boneMask.height = PX;
     var filmTex = new THREE.CanvasTexture(filmCanvas);
     filmTex.anisotropy = 4;
+    /* The film plane is rotated -90 deg about x, so its texture's top row (v = 1)
+       lies at world -z and its left column at -x. Pixels are measured from the
+       film's own centre so the shadow lands directly under the hand. */
     function xzToPx(x, z) {
       return {
-        cx: ((x / filmW) + 0.5) * PX,
-        cy: (0.5 - (z / filmD)) * PX
+        cx: (((x - filmX) / filmW) + 0.5) * PX,
+        cy: (((z - filmZ) / filmD) + 0.5) * PX
       };
     }
     var segs = [];
@@ -2008,7 +2013,7 @@
       new THREE.BoxGeometry(filmW + 0.32, 0.1, filmD + 0.32),
       new THREE.MeshStandardMaterial({ color: 0x4b5058, roughness: 0.65, metalness: 0.15 })
     );
-    cassette.position.set(0.04, filmY - 0.08, 0.12);
+    cassette.position.set(filmX, filmY - 0.08, filmZ);
     var film = new THREE.Mesh(
       new THREE.PlaneGeometry(filmW, filmD),
       new THREE.MeshStandardMaterial({
@@ -2021,7 +2026,7 @@
       })
     );
     film.rotation.x = -Math.PI / 2;
-    film.position.set(0.04, filmY, 0.12);
+    film.position.set(filmX, filmY, filmZ);
     gfx.scene.add(cassette, film);
 
     var fleshMat = new THREE.MeshStandardMaterial({
