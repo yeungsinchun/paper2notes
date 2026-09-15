@@ -1,0 +1,9 @@
+/* Chapter 1 overrides. Shared rules live in ../../css/notes.css. */
+
+#spectrum-vis canvas.scene-canvas { height: 240px; }
+#pie-vis canvas.scene-canvas { height: 250px; }
+#kinds-vis canvas.scene-canvas,
+#makexray-vis canvas.scene-canvas { height: 320px; }
+#sum-paths canvas.scene-canvas { height: 260px; }
+
+#id-flow { width: 100%; height: auto; }

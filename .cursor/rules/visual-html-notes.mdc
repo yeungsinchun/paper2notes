@@ -1,0 +1,7 @@
+---
+description: Visual-first HTML notes. Follow the visual-html-notes skill.
+globs: notes/**
+alwaysApply: false
+---
+
+Read and follow `.cursor/skills/visual-html-notes/SKILL.md` when editing `notes/**`.

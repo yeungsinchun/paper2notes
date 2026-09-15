@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Book 5 notes overhaul - review</title>
+  <style>
+    :root {
+      --paper: #f7f3eb;
+      --panel: #fffdf8;
+      --ink: #1b2129;
+      --muted: #5d6673;
+      --rule: #d9d2c4;
+      --accent: #0f5c54;
+      --accent-deep: #0a413c;
+      --accent-soft: #e4efec;
+      --mark: #a8690a;
+      --mark-soft: #fbf1dc;
+      --serif: Palatino, "Palatino Linotype", "Iowan Old Style", "Book Antiqua", Georgia, serif;
+      --sans: "Avenir Next", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font: 16px/1.5 var(--sans);
+    }
+
+    a { color: var(--accent-deep); }
+    .frame { max-width: 1160px; margin: 0 auto; padding: 1.2rem; }
+
+    header.hero {
+      padding: 2.25rem 0 1.8rem;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .eyebrow {
+      margin: 0 0 0.35rem;
+      color: var(--mark);
+      font-size: 0.76rem;
+      font-weight: 750;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3 { font-family: var(--serif); line-height: 1.16; }
+    h1 { margin: 0; font-size: clamp(2rem, 4vw, 3.25rem); }
+    h2 { margin: 0; font-size: 1.5rem; }
+    h3 { margin: 0; font-size: 1.03rem; }
+    .lede { max-width: 48rem; margin: 0.7rem 0 0; color: var(--muted); font-size: 1.05rem; }
+
+    .status {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin-top: 1.2rem;
+    }
+
+    .status a, .chip {
+      display: inline-block;
+      padding: 0.28rem 0.5rem;
+      border: 1px solid #bfd4ce;
+      border-radius: 3px;
+      background: var(--accent-soft);
+      color: var(--accent-deep);
+      font-size: 0.84rem;
+      font-weight: 650;
+      text-decoration: none;
+    }
+
+    .status a:hover { border-color: var(--accent); }
+    main { padding: 1.8rem 0 3rem; }
+    section { margin: 0 0 2rem; }
+    .section-heading { display: flex; align-items: baseline; gap: 0.7rem; margin-bottom: 0.7rem; }
+    .section-heading .number { color: var(--mark); font-weight: 750; font-size: 0.82rem; letter-spacing: 0.1em; }
+
+    .review-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    .card {
+      min-width: 0;
+      padding: 1rem;
+      border: 1px solid var(--rule);
+      background: var(--panel);
+      border-radius: 4px;
+    }
+
+    .card p { margin: 0.4rem 0 0; color: var(--muted); font-size: 0.93rem; }
+    .card a.more { display: inline-block; margin-top: 0.8rem; font-weight: 700; }
+
+    .compare {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 42px minmax(0, 1fr);
+      gap: 0.8rem;
+      align-items: stretch;
+    }
+
+    .before, .after { min-width: 0; padding: 1rem; border: 1px solid var(--rule); }
+    .before { background: #f2eee4; }
+    .after { background: #eef5f2; border-color: #c9d9d4; }
+    .before > p, .after > p { margin: 0.4rem 0 0; color: var(--muted); }
+    .arrow { align-self: center; color: var(--accent); font-size: 1.8rem; text-align: center; }
+
+    .coverage {
+      display: grid;
+      grid-template-columns: minmax(250px, 0.8fr) minmax(0, 1.2fr);
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .coverage-map { padding: 1rem; background: var(--accent-deep); color: #f6f2e8; }
+    .coverage-map h3 { margin-bottom: 0.8rem; }
+    .path { display: grid; gap: 0.55rem; }
+    .path div { padding: 0.5rem 0.6rem; border-left: 3px solid #cf9c42; background: rgba(255,255,255,0.08); }
+    .path strong { display: block; font-size: 0.9rem; }
+    .path span { display: block; margin-top: 0.1rem; color: #d5dedb; font-size: 0.82rem; }
+
+    .coverage-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.65rem;
+    }
+
+    .coverage-list article { min-width: 0; padding: 0.8rem; border: 1px solid var(--rule); background: var(--panel); }
+    .coverage-list p { margin: 0.3rem 0 0; color: var(--muted); font-size: 0.88rem; }
+    .coverage-list .chip { margin-top: 0.55rem; }
+
+    .evidence {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.8rem;
+    }
+
+    figure {
+      min-width: 0;
+      margin: 0;
+      padding: 0.55rem;
+      border: 1px solid var(--rule);
+      background: var(--panel);
+    }
+
+    figure img { display: block; width: 100%; height: 280px; object-fit: cover; object-position: top; border: 1px solid var(--rule); }
+    figcaption { padding: 0.45rem 0.15rem 0.05rem; color: var(--muted); font-size: 0.85rem; }
+
+    .callout {
+      padding: 1rem;
+      border-left: 4px solid var(--mark);
+      background: var(--mark-soft);
+    }
+
+    .callout p { max-width: 56rem; margin: 0.4rem 0 0; }
+    .callout ul { margin: 0.6rem 0 0; padding-left: 1.2rem; }
+    .callout li { margin: 0.2rem 0; }
+
+    footer { border-top: 1px solid var(--rule); padding: 1rem 0 2rem; color: var(--muted); font-size: 0.9rem; }
+
+    @media (max-width: 760px) {
+      .frame { padding: 0.9rem; }
+      .review-grid, .coverage-list, .evidence { grid-template-columns: 1fr; }
+      .coverage, .compare { grid-template-columns: 1fr; }
+      .arrow { transform: rotate(90deg); }
+      figure img { height: 220px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <header class="hero">
+      <p class="eyebrow">Review surface · Active Physics Book 5</p>
+      <h1>Radiation notes, rebuilt for exam decisions</h1>
+      <p class="lede">A focused review of the Book 5 Ch.1 and Ch.2 overhaul: visual hierarchy, exam-grade checks, self-contained coverage and topic-matched DSE practice in every student subsection.</p>
+      <nav class="status" aria-label="Live local preview">
+        <a href="http://127.0.0.1:4173/notes/book5/index.html">Open Book 5 picker</a>
+        <a href="http://127.0.0.1:4173/notes/book5/ch01-radiation-and-radioactivity/index.html">Open Ch.1 map</a>
+        <a href="http://127.0.0.1:4173/notes/book5/ch02-rate-of-decay-and-uses-of-radionuclides/index.html">Open Ch.2 map</a>
+      </nav>
+    </header>
+
+    <main>
+      <section>
+        <div class="section-heading"><span class="number">01</span><h2>What now changes for a student</h2></div>
+        <div class="review-grid">
+          <article class="card">
+            <h3>One learning path per page</h3>
+            <p>Each 25.1 to 26.3 page starts with its syllabus objectives, then teaches a connected sequence of visual, definition, worked reasoning and check.</p>
+            <a class="more" href="http://127.0.0.1:4173/notes/book5/ch01-radiation-and-radioactivity/25-3.html">See 25.3</a>
+          </article>
+          <article class="card">
+            <h3>Checks expose misconceptions</h3>
+            <p>Questions distinguish activity from dose, X-rays from electron beams, background from source count, and α's internal and external risks.</p>
+            <a class="more" href="http://127.0.0.1:4173/notes/book5/ch02-rate-of-decay-and-uses-of-radionuclides/26-1.html">See 26.1</a>
+          </article>
+          <article class="card">
+            <h3>Past papers are in context</h3>
+            <p>Every student subsection ends with compact skill cards and one directly embedded, topic-matched paper. Related questions remain linked for a focused next step rather than a chapter-end dump.</p>
+            <a class="more" href="http://127.0.0.1:4173/notes/book5/ch02-rate-of-decay-and-uses-of-radionuclides/26-2.html">See 26.2</a>
+          </article>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-heading"><span class="number">02</span><h2>UI clean-up</h2></div>
+        <div class="compare">
+          <article class="before">
+            <h3>Before</h3>
+            <p>Role-selection controls above comparison tables encouraged clicking a label just to highlight the matching row. The visual action did not teach an exam decision and competed with the table itself.</p>
+          </article>
+          <div class="arrow" aria-hidden="true">→</div>
+          <article class="after">
+            <h3>After</h3>
+            <p>Tables are plain, scannable reference material and wide tables scroll cleanly on a narrow screen. Syllabus links are a quiet “Related DSE” line rather than a chip cloud. Controls remain only where they alter an observable process: an absorber sequence, a cloud-chamber track, a detector input or a finite animation replay.</p>
+          </article>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-heading"><span class="number">03</span><h2>Coverage closed</h2></div>
+        <div class="coverage">
+          <aside class="coverage-map">
+            <h3>Exam-revision path</h3>
+            <div class="path">
+              <div><strong>25.1</strong><span>Ionization, X-rays and spontaneous nuclear radiation</span></div>
+              <div><strong>25.2</strong><span>Nuclides, decay equations, series, handling and background</span></div>
+              <div><strong>25.3</strong><span>Detection, absorbers, count rate and fields</span></div>
+              <div><strong>26.1</strong><span>Randomness, half-life, activity, background correction and \( k \)</span></div>
+              <div><strong>26.2 - 26.3</strong><span>Application choice, dating, dose and safe handling</span></div>
+            </div>
+          </aside>
+          <div class="coverage-list">
+            <article>
+              <h3>Decay reasoning</h3>
+              <p>Nuclide notation, balanced α/β/γ equations, decay-series counting and the distinction between a daughter and a vanished atom.</p>
+              <span class="chip">25.2</span>
+            </article>
+            <article>
+              <h3>Evidence from detectors</h3>
+              <p>Film badge, GM count rate, cloud chamber, absorber logic, background floor and electric or magnetic deflection are connected as evidence.</p>
+              <span class="chip">25.3</span>
+            </article>
+            <article>
+              <h3>Quantitative decay</h3>
+              <p>Whole and fractional half-lives, corrected data, \( A = kN \), exponential decay, unit consistency and nuclei from mass.</p>
+              <span class="chip">26.1</span>
+            </article>
+            <article>
+              <h3>Applications and safety</h3>
+              <p>Radiation type, half-life and chemistry are justified for tracers, therapy, gauges, irradiation and C-14. Equivalent dose is separated from effective dose, with targeted α therapy treated as a purposeful exception to diagnostic tracers.</p>
+              <span class="chip">26.2 - 26.3</span>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-heading"><span class="number">04</span><h2>Rendered evidence</h2></div>
+        <div class="evidence">
+          <figure>
+            <img src="evidence/26-1-dse-practice.png" alt="Rendered 26.1 notes header and learning objectives">
+            <figcaption>26.1 shows the quieter hierarchy used throughout: a clear section title, readable syllabus objectives and compact linked DSE references instead of a dashboard-like chip cloud.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="callout">
+        <h2>Review focus</h2>
+        <p>Review the pages as an HKDSE student would: scan a table, explain a choice in a full sentence, then open the matching DSE item. In particular, check that:</p>
+        <ul>
+          <li>the application table in 26.2 is readable without clicking a decorative row selector;</li>
+          <li>each 25.1 to 26.3 page has an explicit, topic-matched DSE practice panel;</li>
+          <li>every interactive changes a physical condition or replays a process, rather than acting as decoration; and</li>
+          <li>the section maps, detailed pages and summaries feel like one quiet, printable set of notes.</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer>
+      Local review artifact. It uses the Book 5 paper palette and typography so the review surface reflects the notes it describes.
+    </footer>
+  </div>
+</body>
+</html>

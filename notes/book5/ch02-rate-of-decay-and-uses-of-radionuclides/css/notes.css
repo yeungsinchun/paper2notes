@@ -1,0 +1,16 @@
+/* Chapter 2 overrides. Shared rules live in ../../css/notes.css. */
+
+#decay-vis canvas.scene-canvas,
+#halfn-vis canvas.scene-canvas,
+#countbg-vis canvas.scene-canvas,
+#dating-vis canvas.scene-canvas { height: 340px; }
+
+#knife-vis canvas.scene-canvas,
+#pipeline-vis canvas.scene-canvas,
+#thickness-vis canvas.scene-canvas,
+#smoke-vis canvas.scene-canvas,
+#dose-vis canvas.scene-canvas,
+#sterile-vis canvas.scene-canvas { height: 300px; }
+
+table.uses th:first-child,
+table.uses td:first-child { white-space: nowrap; }
