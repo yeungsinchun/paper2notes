@@ -372,11 +372,19 @@ p { margin: 0.45rem 0; }
 }
 
 .quiz-slide > p.quiz-also,
-.quiz-slide > p.quiz-pct {
+.quiz-slide > p.quiz-pct,
+.quiz-slide > p.quiz-lq {
   display: block;
   margin: 0 0 0.55rem;
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+.quiz-lq {
+  display: inline-block;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--accent-deep);
 }
 
 .quiz-lo {

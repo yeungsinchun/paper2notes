@@ -180,7 +180,15 @@
           also.textContent = "also LO " + item.others.join(", ");
           slide.insertBefore(also, slide.firstChild);
         }
-        if (slide.id.indexOf("dse-lq-") === 0) return;
+        if (slide.id.indexOf("dse-lq-") === 0) {
+          if (!$(".quiz-lq", slide)) {
+            var tag = document.createElement("p");
+            tag.className = "quiz-lq";
+            tag.textContent = "LQ";
+            slide.insertBefore(tag, slide.firstChild);
+          }
+          return;
+        }
         if ($(".quiz-choices", slide)) return;
         var row = document.createElement("div");
         row.className = "quiz-choices";

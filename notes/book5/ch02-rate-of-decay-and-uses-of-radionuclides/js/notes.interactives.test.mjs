@@ -665,9 +665,9 @@ chromeTest("Book 5 hub and chapter maps keep objectives on subsection pages", as
 
 chromeTest("each Ch.2 subsection quizzes its DSE papers one at a time", async () => {
   const expected = {
-    "26-1.html": ["dse-mc-2020-30", "dse-mc-2012-35", "dse-mc-2023-31", "dse-mc-2024-32", "dse-mc-2019-32", "dse-mc-2025-31", "dse-mc-sap-35", "dse-mc-2020-32", "dse-mc-2016-33", "dse-lq-2021-9"],
-    "26-2.html": ["dse-mc-2024-33", "dse-mc-2015-33", "dse-lq-2014-10", "dse-lq-2017-10", "dse-lq-2018-10", "dse-lq-2026-12"],
-    "26-3.html": ["dse-mc-2026-32", "dse-lq-2021-9"]
+    "26-1.html": ["dse-mc-2020-30", "dse-mc-2012-35", "dse-mc-2023-31", "dse-mc-2024-32", "dse-mc-2019-32", "dse-mc-2025-31", "dse-mc-sap-35", "dse-mc-2020-32", "dse-mc-2016-33", "dse-lq-2021-9", "dse-lq-2013-9", "dse-lq-2016-9", "dse-lq-2018-10", "dse-lq-2023-9", "dse-lq-2025-12"],
+    "26-2.html": ["dse-mc-2024-33", "dse-mc-2015-33", "dse-lq-2014-10", "dse-lq-2017-10", "dse-lq-2018-10", "dse-lq-2026-12", "dse-lq-2021-9", "dse-lq-2013-9", "dse-lq-2025-12"],
+    "26-3.html": ["dse-mc-2026-32", "dse-lq-2021-9", "dse-lq-2014-10"]
   };
 
   for (const [page, expectedIds] of Object.entries(expected)) {
