@@ -116,50 +116,93 @@
 
   function initQuizDecks() {
     $all("[data-quiz]").forEach(function (deck) {
+      if (deck.getAttribute("data-quiz-ready")) return;
+      deck.setAttribute("data-quiz-ready", "true");
       var slides = $all(".quiz-slide", deck);
       if (!slides.length) return;
       var index = 0;
       var status = $(".quiz-status", deck);
-      var prev = $("[data-quiz-prev]", deck);
-      var next = $("[data-quiz-next]", deck);
+      slides.forEach(function (slide) {
+        if ($(".quiz-choices", slide)) return;
+        var row = document.createElement("div");
+        row.className = "quiz-choices";
+        row.setAttribute("role", "group");
+        row.setAttribute("aria-label", "Answer A B C D");
+        ["A", "B", "C", "D"].forEach(function (letter) {
+          var b = document.createElement("button");
+          b.type = "button";
+          b.className = "quiz-letter";
+          b.setAttribute("data-quiz-choice", letter);
+          b.textContent = letter;
+          row.appendChild(b);
+        });
+        slide.appendChild(row);
+      });
+      if (!$("[data-quiz-export]", deck)) {
+        var exp = document.createElement("a");
+        exp.className = "quiz-export";
+        exp.setAttribute("data-quiz-export", "true");
+        exp.href = /ch02-rate/.test(location.pathname)
+          ? "../_local/dse/mc/26/combined.pdf"
+          : "../_local/dse/mc/25/combined.pdf";
+        exp.download = "combined.pdf";
+        exp.textContent = "Export PDF";
+        var head = $("header", deck);
+        if (head) head.appendChild(exp);
+        else deck.insertBefore(exp, deck.firstChild);
+      }
 
       function show() {
+        if (index < 0) index = slides.length - 1;
+        if (index >= slides.length) index = 0;
         slides.forEach(function (slide, n) {
           var on = n === index;
           slide.hidden = !on;
           if (on) slide.classList.add("is-current");
           else slide.classList.remove("is-current");
         });
-        if (status) {
-          status.textContent = (index + 1) + " of " + slides.length;
-        }
-        if (prev) prev.disabled = index === 0;
-        if (next) next.disabled = index === slides.length - 1;
+        if (status) status.textContent = (index + 1) + " of " + slides.length;
       }
 
-      if (prev) {
-        prev.addEventListener("click", function () {
-          if (index === 0) return;
+      deck.addEventListener("click", function (ev) {
+        var prev = ev.target.closest("[data-quiz-prev]");
+        var next = ev.target.closest("[data-quiz-next]");
+        var letter = ev.target.closest("[data-quiz-choice]");
+        if (prev) {
+          ev.preventDefault();
           index -= 1;
           show();
-        });
-      }
-      if (next) {
-        next.addEventListener("click", function () {
-          if (index >= slides.length - 1) return;
+          return;
+        }
+        if (next) {
+          ev.preventDefault();
           index += 1;
           show();
-        });
-      }
+          return;
+        }
+        if (letter && deck.contains(letter)) {
+          var slide = letter.closest(".quiz-slide");
+          if (!slide) return;
+          $all("[data-quiz-choice]", slide).forEach(function (b) {
+            b.classList.toggle("is-picked", b === letter);
+          });
+        }
+      });
       show();
     });
   }
 
-  document.addEventListener("DOMContentLoaded", function () {
+  function bootChecks() {
     numberChecks();
     initMc();
     initTf();
     initSa();
     initQuizDecks();
-  });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bootChecks);
+  } else {
+    bootChecks();
+  }
 })();

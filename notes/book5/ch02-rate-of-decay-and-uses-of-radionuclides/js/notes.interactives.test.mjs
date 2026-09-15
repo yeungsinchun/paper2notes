@@ -574,7 +574,7 @@ chromeTest("Ch.2 pages show syllabus LOs without DSE chips; papers live in secti
     const info = await cdp.evaluate(`(function () {
       var next = document.querySelector("[data-quiz-next]");
       var fig = document.getElementById("dse-mc-2021-33");
-      if (fig && !fig.classList.contains("is-current") && next && !next.disabled) next.click();
+      if (fig && !fig.classList.contains("is-current") && next) next.click();
       fig = document.getElementById("dse-mc-2021-33");
       var img = fig && fig.querySelector("img");
       var cap = fig && fig.querySelector("figcaption");
@@ -603,7 +603,7 @@ chromeTest("Ch.2 pages show syllabus LOs without DSE chips; papers live in secti
     const info = await cdp.evaluate(`(function () {
       var next = document.querySelector("[data-quiz-next]");
       var fig = document.getElementById("dse-mc-2021-33");
-      if (fig && !fig.classList.contains("is-current") && next && !next.disabled) next.click();
+      if (fig && !fig.classList.contains("is-current") && next) next.click();
       fig = document.getElementById("dse-mc-2021-33");
       var img = fig && fig.querySelector("img");
       return {
@@ -695,7 +695,9 @@ chromeTest("each Ch.2 subsection quizzes its DSE papers one at a time", async ()
           visible: visible.length,
           paper: !!(firstImg && firstImg.complete && firstImg.naturalWidth > 0),
           hasPrev: !!(section && section.querySelector("[data-quiz-prev]")),
-          hasNext: !!(section && section.querySelector("[data-quiz-next]"))
+          hasNext: !!(section && section.querySelector("[data-quiz-next]")),
+          letters: section ? section.querySelectorAll("[data-quiz-choice]").length : 0,
+          exportHref: section && section.querySelector("[data-quiz-export]") && section.querySelector("[data-quiz-export]").getAttribute("href")
         };
       })()`);
     } catch (err) {
@@ -704,6 +706,8 @@ chromeTest("each Ch.2 subsection quizzes its DSE papers one at a time", async ()
     assert.match(practice.heading || "", /check the learning objectives/i);
     assert.equal(practice.hasPrev, true, page + " needs Prev");
     assert.equal(practice.hasNext, true, page + " needs Next");
+    assert.ok(practice.letters >= 4, page + " needs A B C D options");
+    assert.match(practice.exportHref || "", /combined\.pdf$/);
     assert.equal(practice.visible, 1, page + " must show one quiz item");
     assert.ok(practice.paper, page + " should include a topic-matched DSE paper");
     for (const id of expectedIds) {

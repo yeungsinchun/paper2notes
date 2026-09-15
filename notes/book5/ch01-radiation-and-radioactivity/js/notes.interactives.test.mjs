@@ -1319,12 +1319,16 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
         paper: !!(firstImg && firstImg.complete && firstImg.naturalWidth > 0),
         hasPrev: !!(section && section.querySelector("[data-quiz-prev]")),
         hasNext: !!(section && section.querySelector("[data-quiz-next]")),
+        letters: section ? section.querySelectorAll("[data-quiz-choice]").length : 0,
+        exportHref: section && section.querySelector("[data-quiz-export]") && section.querySelector("[data-quiz-export]").getAttribute("href"),
         status: section && section.querySelector(".quiz-status") && section.querySelector(".quiz-status").textContent
       };
     })()`);
     assert.match(practice.heading || "", /check the learning objectives/i);
     assert.equal(practice.hasPrev, true, page + " needs Prev");
     assert.equal(practice.hasNext, true, page + " needs Next");
+    assert.ok(practice.letters >= 4, page + " needs A B C D options");
+    assert.match(practice.exportHref || "", /combined\.pdf$/);
     assert.equal(practice.visible, 1, page + " must show one quiz item");
     assert.ok(practice.paper, page + " should include a topic-matched DSE paper");
     for (const id of expectedIds) {
@@ -1332,12 +1336,35 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
     }
   }
 
+  await cdp.goto(pageUrl("25-1.html"));
+  const rotated = await cdp.evaluate(`(function () {
+    var first = document.querySelector(".quiz-slide.is-current");
+    var before = first && first.id;
+    document.querySelector("[data-quiz-next]").click();
+    var after = document.querySelector(".quiz-slide.is-current");
+    document.querySelector("[data-quiz-prev]").click();
+    var back = document.querySelector(".quiz-slide.is-current");
+    var letter = document.querySelector("[data-quiz-choice='B']");
+    if (letter) letter.click();
+    return {
+      before: before,
+      after: after && after.id,
+      back: back && back.id,
+      picked: !!(letter && letter.classList.contains("is-picked")),
+      visible: document.querySelectorAll(".quiz-slide.is-current").length
+    };
+  })()`);
+  assert.notEqual(rotated.after, rotated.before);
+  assert.equal(rotated.back, rotated.before);
+  assert.equal(rotated.picked, true);
+  assert.equal(rotated.visible, 1);
+
   await cdp.goto(pageUrl("25-3.html"));
   const target = await waitFor(async () => {
     const found = await cdp.evaluate(`(function () {
       var next = document.querySelector("[data-quiz-next]");
       var paper = document.getElementById("dse-mc-2019-31");
-      if (paper && !paper.classList.contains("is-current") && next && !next.disabled) next.click();
+      if (paper && !paper.classList.contains("is-current") && next) next.click();
       paper = document.getElementById("dse-mc-2019-31");
       var img = paper && paper.querySelector("img");
       return {

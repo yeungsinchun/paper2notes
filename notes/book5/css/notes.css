@@ -233,10 +233,11 @@ p { margin: 0.45rem 0; }
 
 .section-dse {
   margin: 1.5rem 0 0;
-  padding: 1rem;
+  padding: 1.1rem 1.15rem 1.2rem;
   background: #eef5f2;
   border: 1px solid #c9d9d4;
   border-left: 4px solid var(--accent);
+  border-radius: 6px;
 }
 
 .section-dse > header {
@@ -244,6 +245,7 @@ p { margin: 0.45rem 0; }
   align-items: baseline;
   gap: 0.65rem;
   margin: 0 0 0.35rem;
+  flex-wrap: wrap;
 }
 
 .section-dse > header h2 {
@@ -270,28 +272,61 @@ p { margin: 0.45rem 0; }
 .quiz-nav {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.75rem;
-  margin: 0 0 0.85rem;
+  margin: 0 0 0.95rem;
+}
+
+.quiz-nav [data-quiz-prev],
+.quiz-nav [data-quiz-next] {
+  min-width: 6.2rem;
+  padding: 0.55rem 1rem;
+  font-weight: 700;
+  background: var(--accent-deep);
+  color: #f2ede2;
+  border-color: var(--accent-deep);
+}
+
+.quiz-nav [data-quiz-prev]:hover,
+.quiz-nav [data-quiz-next]:hover {
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .quiz-nav .quiz-status,
 .quiz-status {
   margin: 0;
-  min-width: 4.5rem;
+  min-width: 5rem;
   text-align: center;
   color: var(--muted);
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   font-variant-numeric: tabular-nums;
+  font-weight: 600;
 }
 
-.quiz-nav button:disabled {
-  opacity: 0.45;
-  cursor: default;
+.quiz-export {
+  margin-left: auto;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--accent-deep);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 0.25rem 0.55rem;
+  background: #fff;
 }
+
+.quiz-export:hover { background: var(--accent-soft); }
 
 .quiz-slides {
   min-height: 8rem;
   overflow: hidden;
+  background: var(--panel);
+  border: 1px solid #d3dfda;
+  border-radius: 6px;
+  padding: 0.85rem 0.9rem 1rem;
 }
 
 .quiz-slide {
@@ -300,6 +335,28 @@ p { margin: 0.45rem 0; }
 
 .quiz-slide.is-current {
   display: block;
+}
+
+.quiz-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.85rem 0 0;
+}
+
+.quiz-letter {
+  width: 3rem;
+  height: 3rem;
+  padding: 0;
+  font-weight: 800;
+  font-size: 1.05rem;
+  border-radius: 6px;
+}
+
+.quiz-letter.is-picked {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
 }
 
 .quiz-slide h3 {
