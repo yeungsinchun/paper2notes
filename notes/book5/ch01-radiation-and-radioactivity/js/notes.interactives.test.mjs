@@ -250,13 +250,12 @@ chromeTest("25.1 spectrum is a 2D strip with the ionizing threshold inside UV", 
     var spec = document.getElementById("spectrum");
     var svg = spec && spec.querySelector("svg.spectrum-svg");
     var names = svg ? Array.from(svg.querySelectorAll(".band-name")).map(function (t) { return t.textContent.trim(); }) : [];
-    var nonion = svg && svg.querySelector(".uv-nonion");
-    var ion = svg && svg.querySelector(".uv-ion");
+    var uv = svg && svg.querySelector(".uv");
     var cut = svg && svg.querySelector(".threshold");
     var xray = svg ? Array.from(svg.querySelectorAll(".bands rect"))[5] : null;
     var num = function (el, attr) { return el ? Number(el.getAttribute(attr)) : NaN; };
-    var uvLeft = num(nonion, "x");
-    var uvRight = num(ion, "x") + num(ion, "width");
+    var uvLeft = num(uv, "x");
+    var uvRight = num(uv, "x") + num(uv, "width");
     var cutX = num(cut, "x1");
     return {
       canvas: !!spec.querySelector("canvas"),
@@ -272,7 +271,7 @@ chromeTest("25.1 spectrum is a 2D strip with the ionizing threshold inside UV", 
       cutInUV: cutX > uvLeft && cutX < uvRight,
       nonIonizingUVFrac: (cutX - uvLeft) / (uvRight - uvLeft),
       xrayAfterCut: xray ? num(xray, "x") >= cutX : false,
-      nonionSliverLighter: nonion && ion ? nonion.getAttribute("fill") !== ion.getAttribute("fill") : false,
+      uvOneBand: !!uv && svg.querySelectorAll(".bands rect").length === 7 && !svg.querySelector(".uv-nonion"),
       bracketNonion: svg && svg.querySelector('[data-bracket="nonion"]') && svg.querySelector('[data-bracket="nonion"]').getAttribute("d"),
       bracketIon: svg && svg.querySelector('[data-bracket="ion"]') && svg.querySelector('[data-bracket="ion"]').getAttribute("d")
     };
@@ -287,7 +286,7 @@ chromeTest("25.1 spectrum is a 2D strip with the ionizing threshold inside UV", 
   assert.equal(spec.cutInUV, true);
   assert.ok(spec.nonIonizingUVFrac > 0.05 && spec.nonIonizingUVFrac < 0.18, "threshold near the low-frequency end of UV, frac=" + spec.nonIonizingUVFrac);
   assert.equal(spec.xrayAfterCut, true);
-  assert.equal(spec.nonionSliverLighter, true, "the non-ionizing sliver of UV is drawn in its own tint");
+  assert.equal(spec.uvOneBand, true, "ultraviolet is one band in one colour; only the dashed threshold marks the cut");
   assert.match(spec.bracketNonion || "", /^M40,/, "non-ionizing bracket starts at the radio end");
   assert.match(spec.bracketIon || "", /H920 /, "ionizing bracket runs to the gamma end");
   assert.match(spec.title, /spectrum becomes ionizing/i);
