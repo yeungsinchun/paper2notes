@@ -22,6 +22,7 @@ Access model:
 
 - Port 22 is reachable only from Google's IAP range (`35.235.240.0/20`); 80/443 are open. The VM runs with no service account of its own.
 - The deployer service account has `roles/compute.osLogin` (no sudo), `roles/iap.tunnelResourceAccessor`, and `roles/compute.viewer`. Only workflows from `yeungsinchun/paper2notes` can impersonate it.
-- To deploy from a laptop, any project Owner can run `deploy/gcp/deploy.sh` directly.
+- To deploy from a laptop, any project Owner can run `deploy/gcp/deploy.sh` directly. To exercise exactly the CI identity, prefix it with `CLOUDSDK_AUTH_IMPERSONATE_SERVICE_ACCOUNT=paper2notes-deployer@paper2notes-site.iam.gserviceaccount.com` (`provision.sh` grants the account that ran it `roles/iam.serviceAccountTokenCreator` on the deployer).
+- The deployer's OS Login POSIX user is `sa_<uniqueId>`; `provision.sh` creates that profile before the VM boots because `vm-startup.sh` needs to `chown` the release directory to it.
 
 Monthly cost (as of Sep 2026): the VM, disk, one attached IPv4 address, and the first 1 GB of egress are inside the Always Free tier for `e2-micro` in `us-west1`, so the expected bill is $0 while this is the only e2-micro on the billing account. Without the free tier it would be about $6.11 (e2-micro) + $0.40 (10 GB pd-standard) + $3.65 (IPv4) = ~$10/month plus egress at ~$0.12/GB.

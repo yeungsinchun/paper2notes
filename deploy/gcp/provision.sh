@@ -84,12 +84,45 @@ DEPLOYER_EMAIL="$DEPLOYER@$PROJECT_ID.iam.gserviceaccount.com"
 gcloud iam service-accounts describe "$DEPLOYER_EMAIL" --project "$PROJECT_ID" >/dev/null 2>&1 ||
   gcloud iam service-accounts create "$DEPLOYER" --project "$PROJECT_ID" \
     --display-name "paper2notes GitHub Actions deployer"
-DEPLOYER_UID="$(gcloud iam service-accounts describe "$DEPLOYER_EMAIL" --project "$PROJECT_ID" --format='value(uniqueId)')"
+# A freshly created service account can take a few seconds to become readable.
+DEPLOYER_UID=""
+for _ in 1 2 3 4 5 6; do
+  DEPLOYER_UID="$(gcloud iam service-accounts describe "$DEPLOYER_EMAIL" --project "$PROJECT_ID" --format='value(uniqueId)' 2>/dev/null || true)"
+  [ -n "$DEPLOYER_UID" ] && break
+  sleep 5
+done
+[ -n "$DEPLOYER_UID" ] || { echo "service account $DEPLOYER_EMAIL not readable" >&2; exit 1; }
 DEPLOY_USER="sa_$DEPLOYER_UID"
 for role in roles/compute.osLogin roles/iap.tunnelResourceAccessor roles/compute.viewer; do
   gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member "serviceAccount:$DEPLOYER_EMAIL" --role "$role" --condition=None --quiet >/dev/null
 done
+
+log "OS Login profile for $DEPLOY_USER"
+# The VM startup script chowns the release directory to $DEPLOY_USER, but OS
+# Login only materialises that POSIX account once the service account has
+# registered an SSH key. Do that here (as the account running this script,
+# impersonating the deployer) so the account exists before the VM boots. The
+# same impersonation grant lets a human run deploy.sh exactly as CI does.
+ME="$(gcloud config get-value account 2>/dev/null)"
+gcloud iam service-accounts add-iam-policy-binding "$DEPLOYER_EMAIL" --project "$PROJECT_ID" \
+  --member "user:$ME" --role roles/iam.serviceAccountTokenCreator --quiet >/dev/null
+if [ -z "$(gcloud compute os-login describe-profile --impersonate-service-account "$DEPLOYER_EMAIL" \
+  --format='value(posixAccounts[0].username)' 2>/dev/null)" ]; then
+  tmpkey="$(mktemp -d)"
+  ssh-keygen -q -t ed25519 -N '' -f "$tmpkey/key"
+  for _ in $(seq 1 12); do
+    if gcloud compute os-login ssh-keys add --impersonate-service-account "$DEPLOYER_EMAIL" \
+      --key-file "$tmpkey/key.pub" --ttl 1m --quiet >/dev/null 2>&1; then
+      break
+    fi
+    sleep 10 # IAM grants take a moment to propagate
+  done
+  rm -rf "$tmpkey"
+fi
+[ "$(gcloud compute os-login describe-profile --impersonate-service-account "$DEPLOYER_EMAIL" \
+  --format='value(posixAccounts[0].username)')" = "$DEPLOY_USER" ] ||
+  { echo "OS Login profile for $DEPLOYER_EMAIL is not $DEPLOY_USER" >&2; exit 1; }
 
 log "static address $ADDRESS"
 gcloud compute addresses describe "$ADDRESS" --project "$PROJECT_ID" --region "$REGION" >/dev/null 2>&1 ||
@@ -112,6 +145,9 @@ else
   gcloud compute instances add-metadata "$INSTANCE" --project "$PROJECT_ID" --zone "$ZONE" \
     --metadata "enable-oslogin=TRUE,deploy-user=$DEPLOY_USER" \
     --metadata-from-file "startup-script=$here/vm-startup.sh"
+  # Apply the (possibly changed) startup script now rather than at next boot.
+  gcloud compute ssh "$INSTANCE" --project "$PROJECT_ID" --zone "$ZONE" --tunnel-through-iap \
+    --quiet --strict-host-key-checking=no --command 'sudo google_metadata_script_runner startup'
 fi
 
 log "workload identity federation for GitHub Actions"

@@ -30,7 +30,8 @@ fi
 if [ -n "$DEPLOY_USER" ]; then
   # The deploy user is an OS Login account (sa_<uniqueId>), resolved through
   # the OS Login NSS module against the metadata server, so no local useradd.
-  for _ in 1 2 3 4 5 6; do
+  # A freshly created profile can take a minute or two to become resolvable.
+  for _ in $(seq 1 24); do
     if id "$DEPLOY_USER" >/dev/null 2>&1; then
       chown -R "$DEPLOY_USER" "$SITE_ROOT"
       break
@@ -50,7 +51,7 @@ server {
     index index.html;
 
     gzip on;
-    gzip_types text/html text/css application/javascript application/json image/svg+xml;
+    gzip_types text/css application/javascript application/json image/svg+xml;
     gzip_min_length 1024;
 
     # notes/ has no top-level index; Book 5 is the only book so far.

@@ -28,14 +28,24 @@ trap 'rm -f "$tarball"' EXIT
 
 # _source/ is intake/OCR provenance and _local/ is gitignored exam material;
 # neither belongs on the student-facing site.
-tar -czf "$tarball" -C "$notes_dir" \
+COPYFILE_DISABLE=1 tar --no-xattrs -czf "$tarball" -C "$notes_dir" \
   --exclude='./_source' --exclude='_local' --exclude='*.test.mjs' .
 echo "deploy: release $release ($(du -h "$tarball" | cut -f1)) -> $INSTANCE ($ZONE, $PROJECT_ID)"
 
 ssh_flags=(--project "$PROJECT_ID" --zone "$ZONE" --tunnel-through-iap --quiet
   --ssh-key-expire-after=1h --strict-host-key-checking=no)
 
-gcloud compute scp "${ssh_flags[@]}" "$tarball" "$INSTANCE:/tmp/paper2notes-$release.tgz"
+# IAP tunnels occasionally drop mid-transfer; the upload is small, so retry.
+uploaded=0
+for attempt in 1 2 3; do
+  if gcloud compute scp "${ssh_flags[@]}" "$tarball" "$INSTANCE:/tmp/paper2notes-$release.tgz"; then
+    uploaded=1
+    break
+  fi
+  echo "deploy: upload attempt $attempt failed, retrying" >&2
+  sleep 5
+done
+[ "$uploaded" = 1 ] || { echo "deploy: upload failed" >&2; exit 1; }
 
 gcloud compute ssh "$INSTANCE" "${ssh_flags[@]}" --command "set -euo pipefail
 rel='$SITE_ROOT/releases/$release'
