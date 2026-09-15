@@ -279,31 +279,61 @@
           <span class="hud-label" data-hud="flesh">flesh</span>
           <span class="hud-label" data-hud="film">photographic film</span>
         </div>
-        <figcaption><b>Fig. 25.7</b> Medical X-ray imaging. X-rays pass down through the hand onto a photographic film. Where flesh lets them through the film blackens; where bone absorbs them the film stays white.</figcaption>
+        <figcaption><b>Fig. 25.7</b> Medical radiography. X-rays pass down through one hand onto photographic film. Flesh lets most of them through, so those spots blacken; bone absorbs them, so those spots stay white.</figcaption>
       </figure>
       <div class="row"><button type="button" data-replay="imaging-vis">Replay film</button></div>
       <table class="notes">
-        <thead><tr><th>Use</th><th>Which property is used</th></tr></thead>
+        <thead><tr><th>What the X-rays meet</th><th>What the developed film shows</th></tr></thead>
         <tbody>
-          <tr><td>Medical radiography: bone fractures, teeth, chest; CT scans build a 3D image from many angles</td><td>Lower-frequency X-rays pass through flesh but are absorbed by bone and teeth, so bone appears white on the developed film and flesh dark</td></tr>
-          <tr><td>Industrial inspection of rails, welds, castings and pipes for hidden cracks; checking diamonds</td><td>Higher-frequency X-rays penetrate even bone and metal; a crack lets more through and shows as a darker line</td></tr>
-          <tr><td>Security screening of luggage and people at airports</td><td>Penetrating power differs with density: dense objects cast a shadow (some scanners image the reflected X-rays instead, so metal shows black)</td></tr>
-          <tr><td>Radiotherapy: killing cancer cells with a focused high-energy beam</td><td>Ionizing: X-rays damage the DNA of the cells they pass through</td></tr>
+          <tr><td>Soft tissue (flesh)</td><td>Mostly transmitted, so the film blackens (dark)</td></tr>
+          <tr><td>Bone or teeth</td><td>Mostly absorbed, so the film stays white</td></tr>
+          <tr><td>Metal (surgical pin, filling, steel blade)</td><td>Absorbed even more than bone, so the shadow is <em>whiter than the bone</em></td></tr>
         </tbody>
       </table>
-      <div class="worked">
-        <span class="tag">Reading an X-ray image</span>
-        <p>Everything follows from one rule: the film blackens where X-rays reach it. The more a material absorbs, the whiter its shadow.</p>
-        <ul class="points">
-          <li>A metal pin holding a broken bone appears <b>whiter than the bone</b>: metal absorbs even more X-rays than bone.</li>
-          <li>A decayed (hollow) part of a tooth appears <b>darker</b> than healthy tooth: less material, so more X-rays get through. A metal filling appears <b>white</b>.</li>
-          <li>A pair of scissors placed on a wrapped film: the bare film goes darkest, the plastic handles leave a grey shadow, the steel blades leave a white shadow.</li>
-        </ul>
-      </div>
+      <table class="notes">
+        <thead><tr><th>Use</th><th>Which X-rays, and why that works</th></tr></thead>
+        <tbody>
+          <tr><td>Medical radiography: fractures, teeth, chest. A CT scan is many such views, rebuilt into a 3D image</td><td><b>Lower-frequency</b> X-rays. They cross flesh but not bone, so the skeleton stands out white on the film</td></tr>
+          <tr><td>Airport security of luggage and passengers</td><td>Many scanners record X-rays <em>reflected</em> from the object, not those that pass through. Metal then appears <b>black</b> - the opposite of a medical film</td></tr>
+          <tr><td>Industrial inspection of rails, welds, castings, pipes and diamonds</td><td><b>Higher-frequency</b> X-rays, which do penetrate metal. A crack lets extra through and shows as a darker line</td></tr>
+        </tbody>
+      </table>
+      <aside class="tip">
+        <span class="tag">Exam tip: reading a film</span>
+        <p>One rule: the film blackens only where X-rays reach it. A hollow (decayed) part of a tooth is darker than healthy tooth; a metal filling is white. Scissors on wrapped film: uncovered film darkest, plastic handles grey, steel blades white.</p>
+      </aside>
       <aside class="tip">
         <span class="tag">Exam tip: safe use</span>
-        <p>Because X-rays are ionizing, every use comes with precautions and you may be asked for them: confirm the patient is not pregnant (a foetus is easily damaged; ultrasound is used instead); remove metal objects, which block X-rays and spoil the image; use the <b>lowest exposure and photon energy that still produce the required image</b>; cover other parts of the body with a lead apron; the radiographer stands behind a lead screen or leaves the room with the door closed, and only essential staff are present.</p>
+        <p>X-rays are ionizing, so a question may ask for precautions: confirm the patient is not pregnant (use ultrasound instead); take off metal that would block the image; use the lowest exposure that still gives the picture; lead apron on the rest of the body; the radiographer stands behind a lead screen or leaves the room.</p>
       </aside>
+      <div class="check" data-check="mc" data-answer="C">
+        <h3>Concept check</h3>
+        <p>An X-ray image of a broken bone includes a metal pin. The pin appears white because</p>
+        <div class="choices">
+          <button type="button" data-choice="A">X-rays ionize the metal pin.</button>
+          <button type="button" data-choice="B">X-rays penetrate metals but not flesh.</button>
+          <button type="button" data-choice="C">X-rays penetrate flesh but not metals.</button>
+          <button type="button" data-choice="D">the pin emits X-rays onto the film.</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p><b>C</b>. The film stays white where X-rays are stopped. Metal stops them even more effectively than bone, so the pin is the whitest mark. <b>B</b> reverses flesh and metal. <b>A</b> is true of X-rays in general but does not decide the colour. <b>D</b> confuses the source with the object being imaged.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3>Concept check</h3>
+        <p>Why can a metal object look black on an airport X-ray image but white on a medical radiograph?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">Airport X-rays are non-ionizing.</button>
+          <button type="button" data-choice="B">Airport scanners often record reflected X-rays; a medical film records those that pass through.</button>
+          <button type="button" data-choice="C">Medical X-rays cannot penetrate flesh.</button>
+          <button type="button" data-choice="D">Metal emits its own X-rays only at the airport.</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p><b>B</b> is the book distinction. Transmission film: metal blocks the beam, so that patch stays white. Reflection scanner: metal sends a strong return, so that patch is shown black. <b>A</b> is false: both uses are ionizing. <b>C</b> is the opposite of why medical imaging works. <b>D</b> invents a source that is not there.</p>
+        </div>
+      </div>
     </section>
 
     <section class="idea" id="make-xrays">
