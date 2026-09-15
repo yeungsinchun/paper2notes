@@ -508,7 +508,7 @@ chromeTest("26.3 sievert check and activity vs dose labels", async () => {
 });
 
 chromeTest("Ch.2 pages show syllabus LOs, KaTeX, and summary DSE embeds", async () => {
-  for (const page of ["index.html", "26-1.html", "26-2.html", "26-3.html", "summary.html"]) {
+  for (const page of ["26-1.html", "26-2.html", "26-3.html", "summary.html"]) {
     await cdp.goto(pageUrl(page));
     const info = await cdp.evaluate(`(function () {
       var lo = document.querySelector(".lo-block");
@@ -580,7 +580,7 @@ chromeTest("Ch.2 pages show syllabus LOs, KaTeX, and summary DSE embeds", async 
     await cdp.screenshot(path.join(evidenceDir, "ch02-26-1-lo-katex.png"), ".lo-block");
   }
 
-  for (const page of ["index.html", "26-2.html"]) {
+  for (const page of ["26-2.html"]) {
     await cdp.goto(pageUrl(page));
     if (evidenceDir) {
       await cdp.evaluate(`(function () {
@@ -588,8 +588,7 @@ chromeTest("Ch.2 pages show syllabus LOs, KaTeX, and summary DSE embeds", async 
         if (a && a.closest("li")) a.closest("li").scrollIntoView({ block: "center" });
       })()`);
       await cdp.evaluate("new Promise((r) => setTimeout(r, 180))");
-      const chipName = page === "index.html" ? "ch02-index-lo-2021-33-chip.png" : "ch02-26-2-lo-2021-33-chip.png";
-      await cdp.screenshot(path.join(evidenceDir, chipName));
+      await cdp.screenshot(path.join(evidenceDir, "ch02-26-2-lo-2021-33-chip.png"));
     }
     await cdp.evaluate(`document.querySelector('a[href="summary.html#dse-mc-2021-33"]').click()`);
     const land = await waitFor(async () => {
@@ -616,10 +615,7 @@ chromeTest("Ch.2 pages show syllabus LOs, KaTeX, and summary DSE embeds", async 
     assert.match(land.caption || "", /2021\/33 MC/);
     assert.ok(land.loaded);
     if (evidenceDir) {
-      const paperName = page === "index.html"
-        ? "ch02-index-chip-lands-on-2021-33.png"
-        : "ch02-26-2-chip-lands-on-2021-33.png";
-      await cdp.screenshot(path.join(evidenceDir, paperName), "#dse-mc-2021-33");
+      await cdp.screenshot(path.join(evidenceDir, "ch02-26-2-chip-lands-on-2021-33.png"), "#dse-mc-2021-33");
     }
   }
 
@@ -644,23 +640,17 @@ chromeTest("Ch.2 pages show syllabus LOs, KaTeX, and summary DSE embeds", async 
   }
 });
 
-chromeTest("Book 5 menu keeps two chapter cards and hosts nuclear-energy LOs with papers", async () => {
+chromeTest("Book 5 menu keeps the hub limited to its two chapter cards", async () => {
   await cdp.goto(book5Url("index.html"));
   const menu = await cdp.evaluate(`(function () {
     var cards = Array.from(document.querySelectorAll(".chapter-cards a"));
-    var papers = Array.from(document.querySelectorAll(".dse-paper"));
-    var loaded = papers.filter(function (fig) {
-      var img = fig.querySelector("img");
-      return img && img.complete && img.naturalWidth > 0;
-    }).length;
-    var lo = document.querySelector("#nuclear-energy");
     return {
       nCards: cards.length,
       title: document.querySelector("h1") && document.querySelector("h1").textContent,
-      loText: lo && lo.innerText,
-      nPapers: papers.length,
-      loaded: loaded,
-      katex: !!document.querySelector(".katex"),
+      hasLo: !!document.querySelector(".lo-block"),
+      hasDseBank: !!document.querySelector(".dse-bank"),
+      nPapers: document.querySelectorAll(".dse-paper").length,
+      hasNuclearLink: !!document.querySelector('a[href="#nuclear-energy"]'),
       remote: Array.from(document.querySelectorAll("script[src]")).some(function (s) {
         return /^https?:\\/\\//.test(s.getAttribute("src") || "");
       })
@@ -668,16 +658,11 @@ chromeTest("Book 5 menu keeps two chapter cards and hosts nuclear-energy LOs wit
   })()`);
   assert.equal(menu.nCards, 2);
   assert.match(menu.title, /Radiation chapters/i);
-  assert.match(menu.loText, /Students should be able to/);
-  assert.match(menu.loText, /realise the release of energy in nuclear fission and fusion/);
+  assert.equal(menu.hasLo, false, "the hub must not contain Chapter 3 learning objectives");
+  assert.equal(menu.hasDseBank, false, "DSE banks belong on chapter pages, not the hub");
+  assert.equal(menu.nPapers, 0, "the hub must not embed DSE papers");
+  assert.equal(menu.hasNuclearLink, false, "the hub must not link to an absent Chapter 3 section");
   assert.equal(menu.remote, false);
-  assert.equal(menu.katex, true);
-  assert.ok(menu.nPapers >= 10, "expected nuclear DSE embeds, n=" + menu.nPapers);
-  assert.ok(menu.loaded >= 1, "nuclear DSE images should load, loaded=" + menu.loaded);
-  if (evidenceDir) {
-    await cdp.screenshot(path.join(evidenceDir, "book5-nuclear-energy-lo-block.png"), "#nuclear-energy");
-    await cdp.screenshot(path.join(evidenceDir, "book5-nuclear-energy-dse-bank.png"), ".dse-bank");
-  }
 });
 
 chromeTest("each Ch.2 subsection groups links to its own DSE practice", async () => {
