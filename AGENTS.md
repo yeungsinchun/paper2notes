@@ -10,6 +10,8 @@ HTML notes live under `notes/`. Open a chapter `index.html` in a browser (no bui
 
 Book 5 drafts: `notes/book5/ch01-radiation-and-radioactivity/` and `notes/book5/ch02-rate-of-decay-and-uses-of-radionuclides/`. Motion figures use local three.js (`js/lib/three.min.js`, no build). Maths uses vendored KaTeX at `notes/book5/vendor/katex/` (no CDN). Syllabus "Students should be able to" bullets sit in a Learning objectives block at the top of each student page; wording comes from `ch5.pdf` (HKDSE Physics Compulsory Part: Radioactivity and Nuclear Energy). Related classified DSE items are labelled on those bullets. Chapter `summary.html` pages (and the Book 5 menu for nuclear energy, which has no student chapter yet) repeat the LOs and embed the papers from gitignored `notes/book5/_local/dse/`. Browser interactives are covered by each chapter's `js/notes.interactives.test.mjs` (needs Google Chrome).
 
+Hosting: `notes/` is served by nginx on a GCP e2-micro (`deploy/gcp/README.md` has project, instance, and access model). `.github/workflows/deploy.yml` runs `deploy/gcp/deploy.sh` on push to `main`; `deploy/gcp/provision.sh` is the idempotent source of truth for the cloud resources. `notes/_source/` and `_local/` are never published.
+
 ## Maintaining this file
 
 Keep this file for knowledge useful to almost every future agent session in this project.

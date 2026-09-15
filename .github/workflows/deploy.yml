@@ -1,0 +1,58 @@
+name: Deploy
+
+# Publishes notes/ to the paper2notes Compute Engine VM after every merge to
+# main. Authentication is Workload Identity Federation: GitHub's OIDC token is
+# exchanged for a short-lived token of the deployer service account, so the
+# repository holds no cloud keys. The two secrets are identifiers written by
+# deploy/gcp/provision.sh, not credentials.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "notes/**"
+      - "deploy/gcp/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-gcp
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    name: Deploy to Compute Engine
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: http://${{ steps.site.outputs.ip }}/book5/
+    env:
+      GCP_PROJECT_ID: paper2notes-site
+      GCP_ZONE: us-west1-b
+      GCP_INSTANCE: paper2notes-web
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOYER_SERVICE_ACCOUNT }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy notes/ to the VM
+        run: deploy/gcp/deploy.sh
+
+      - name: Record site address
+        id: site
+        run: |
+          ip="$(gcloud compute instances describe "$GCP_INSTANCE" --project "$GCP_PROJECT_ID" --zone "$GCP_ZONE" \
+            --format='value(networkInterfaces[0].accessConfigs[0].natIP)')"
+          echo "ip=$ip" >> "$GITHUB_OUTPUT"

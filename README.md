@@ -16,3 +16,7 @@ Convert HKDSE Physics source material into HTML notes that prioritize interactiv
 ## Notes
 
 HTML notes live under `notes/`. Follow textbook order; prefer visual animation over text.
+
+## Hosting
+
+Merges to `main` deploy `notes/` to a Compute Engine VM via `.github/workflows/deploy.yml`. Project, instance, access model, and cost are in `deploy/gcp/README.md`.
