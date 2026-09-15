@@ -133,6 +133,10 @@
     return nums;
   }
 
+  /* Section quiz: one DSE paper at a time in a single card.
+     Card: LO line (which objective this paper tests, paper id), the scan,
+     A-D tiles for MC, verdict. Prev / Next and "n of N" with dots under it.
+     Papers are ordered by their last-matching LO so the LO line changes as the student moves on. */
   function initQuizDecks() {
     $all("[data-quiz]").forEach(function (deck) {
       if (deck.getAttribute("data-quiz-ready")) return;
@@ -144,50 +148,22 @@
         var p = $("p", li);
         return ((p ? p.textContent : li.textContent) || "").replace(/\s+/g, " ").trim();
       }).filter(Boolean);
-      var meta = slides.map(function (slide) {
+      var playlist = slides.map(function (slide) {
         var nums = loNumbersFor(slide.id, loTexts);
-        return {
-          slide: slide,
-          los: nums,
-          primary: nums.length ? nums[nums.length - 1] : 0,
-          others: nums.slice(0, -1)
-        };
-      });
-      var groups = {};
-      var playlist = [];
-      meta.forEach(function (item) {
-        var key = String(item.primary);
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(item);
-      });
-      Object.keys(groups).sort(function (a, b) { return Number(a) - Number(b); }).forEach(function (key) {
-        groups[key].forEach(function (item) { playlist.push(item); });
-      });
+        return { slide: slide, primary: nums.length ? nums[nums.length - 1] : 0 };
+      }).sort(function (a, b) { return a.primary - b.primary; });
       var index = 0;
+      var isLq = deck.getAttribute("data-quiz") === "lq";
+      var slidesBox = $(".quiz-slides", deck) || deck;
 
-      meta.forEach(function (item) {
-        var slide = item.slide;
-        $all(".quiz-lo", slide).forEach(function (el) { el.parentNode.removeChild(el); });
-        if (item.others.length && !$(".quiz-also", slide)) {
-          var also = document.createElement("p");
-          also.className = "quiz-also";
-          also.textContent = "also LO " + item.others.join(", ");
-          slide.insertBefore(also, slide.firstChild);
-        }
-        if (slide.id.indexOf("dse-lq-") === 0) {
-          if (!$(".quiz-lq", slide)) {
-            var tag = document.createElement("p");
-            tag.className = "quiz-lq";
-            tag.textContent = "LQ";
-            slide.insertBefore(tag, slide.firstChild);
-          }
-          return;
-        }
+      slides.forEach(function (slide) {
+        $all(".quiz-lo, .quiz-lq, .quiz-also", slide).forEach(function (el) { el.parentNode.removeChild(el); });
+        if (slide.id.indexOf("dse-lq-") === 0) return;
         if ($(".quiz-choices", slide)) return;
         var row = document.createElement("div");
         row.className = "quiz-choices";
         row.setAttribute("role", "group");
-        row.setAttribute("aria-label", "Answer A B C D");
+        row.setAttribute("aria-label", "Your answer: A, B, C or D");
         ["A", "B", "C", "D"].forEach(function (letter) {
           var b = document.createElement("button");
           b.type = "button";
@@ -199,11 +175,12 @@
         slide.appendChild(row);
         var pct = document.createElement("p");
         pct.className = "quiz-pct";
+        pct.setAttribute("aria-live", "polite");
         pct.hidden = true;
         slide.appendChild(pct);
       });
 
-      if (deck.getAttribute("data-quiz") !== "lq" && !$("[data-quiz-export]", deck)) {
+      if (!isLq && !$("[data-quiz-export]", deck)) {
         var exp = document.createElement("a");
         exp.className = "quiz-export";
         exp.setAttribute("data-quiz-export", "true");
@@ -221,35 +198,52 @@
       if (!loLabel) {
         loLabel = document.createElement("p");
         loLabel.className = "quiz-lo";
-        var headEl = $("header", deck);
-        if (headEl && headEl.nextSibling) deck.insertBefore(loLabel, headEl.nextSibling);
-        else deck.insertBefore(loLabel, deck.firstChild);
+        slidesBox.insertBefore(loLabel, slidesBox.firstChild);
       }
-      var tabRow = $(".quiz-los", deck);
-      if (!tabRow) {
-        tabRow = document.createElement("div");
-        tabRow.className = "quiz-los";
-        tabRow.setAttribute("role", "tablist");
-        tabRow.setAttribute("aria-label", "Learning objectives");
-        loLabel.parentNode.insertBefore(tabRow, loLabel.nextSibling);
+      var loNum = document.createElement("b");
+      loNum.className = "quiz-lo-num";
+      var loText = document.createElement("span");
+      loText.className = "quiz-lo-text";
+      var paperId = document.createElement("span");
+      paperId.className = "quiz-paper-id";
+      paperId.setAttribute("aria-hidden", "true");
+      loLabel.textContent = "";
+      loLabel.appendChild(loNum);
+      loLabel.appendChild(document.createTextNode(" "));
+      loLabel.appendChild(loText);
+      loLabel.appendChild(paperId);
+
+      var dots = null;
+      if (status && status.parentNode) {
+        var wrap = document.createElement("div");
+        wrap.className = "quiz-progress";
+        status.parentNode.insertBefore(wrap, status);
+        wrap.appendChild(status);
+        dots = document.createElement("div");
+        dots.className = "quiz-dots";
+        dots.setAttribute("aria-hidden", "true");
+        wrap.appendChild(dots);
       }
-      Object.keys(groups).sort(function (a, b) { return Number(a) - Number(b); }).forEach(function (key) {
-        var tab = document.createElement("button");
-        tab.type = "button";
-        tab.className = "quiz-lo-tab";
-        tab.setAttribute("data-quiz-lo", key);
-        tab.setAttribute("role", "tab");
-        tab.textContent = "LO " + key;
-        tabRow.appendChild(tab);
-      });
+
+      function paintDots(current) {
+        if (!dots) return;
+        dots.textContent = "";
+        dots.hidden = playlist.length < 2;
+        playlist.forEach(function (item) {
+          var dot = document.createElement("span");
+          var result = item.slide.getAttribute("data-quiz-result");
+          dot.className = "quiz-dot" +
+            (item === current ? " is-current" : "") +
+            (result ? " is-" + result : "");
+          dots.appendChild(dot);
+        });
+      }
 
       function show() {
         if (!playlist.length) return;
         if (index < 0) index = playlist.length - 1;
         if (index >= playlist.length) index = 0;
         var current = playlist[index];
-        var group = groups[String(current.primary)] || [current];
-        var at = group.indexOf(current) + 1;
         slides.forEach(function (slide) {
           var on = slide === current.slide;
           slide.hidden = !on;
@@ -257,14 +251,12 @@
           else slide.classList.remove("is-current");
         });
         var desc = loTexts[current.primary - 1] || "";
-        loLabel.textContent = desc ? ("LO " + current.primary + " · " + desc) : ("LO " + current.primary);
-        $all("[data-quiz-lo]", tabRow).forEach(function (tab) {
-          var on = tab.getAttribute("data-quiz-lo") === String(current.primary);
-          tab.setAttribute("aria-selected", on ? "true" : "false");
-          if (on) tab.classList.add("is-current");
-          else tab.classList.remove("is-current");
-        });
-        if (status) status.textContent = at + " of " + group.length;
+        loNum.textContent = "LO " + current.primary;
+        loText.textContent = desc;
+        var cap = $("figcaption", current.slide);
+        paperId.textContent = cap ? cap.textContent.trim() : "";
+        if (status) status.textContent = (index + 1) + " of " + playlist.length;
+        paintDots(current);
       }
 
       function markChoice(letterBtn) {
@@ -278,6 +270,8 @@
           return;
         }
         slide.setAttribute("data-quiz-marked", "true");
+        var right = letterBtn.getAttribute("data-quiz-choice") === key.option;
+        slide.setAttribute("data-quiz-result", right ? "right" : "wrong");
         $all("[data-quiz-choice]", slide).forEach(function (b) {
           var choice = b.getAttribute("data-quiz-choice");
           b.disabled = true;
@@ -286,16 +280,28 @@
           else if (b === letterBtn) b.classList.add("wrong");
         });
         var out = $(".quiz-pct", slide);
-        if (out && key.pct != null) {
+        if (out) {
           out.hidden = false;
-          out.textContent = "Correct percentage: " + key.pct + "%";
+          out.className = "quiz-pct " + (right ? "is-right" : "is-wrong");
+          out.textContent = "";
+          var verdict = document.createElement("b");
+          verdict.className = "quiz-verdict";
+          verdict.textContent = right ? "Correct" : ("Not quite. The answer is " + key.option + ".");
+          out.appendChild(verdict);
+          if (key.pct != null) {
+            out.appendChild(document.createTextNode(" "));
+            var stat = document.createElement("span");
+            stat.className = "quiz-stat";
+            stat.textContent = "Correct percentage: " + key.pct + "%";
+            out.appendChild(stat);
+          }
         }
+        paintDots(playlist[index]);
       }
 
       deck.addEventListener("click", function (ev) {
         var prev = ev.target.closest("[data-quiz-prev]");
         var next = ev.target.closest("[data-quiz-next]");
-        var tab = ev.target.closest("[data-quiz-lo]");
         var letter = ev.target.closest("[data-quiz-choice]");
         if (prev) {
           ev.preventDefault();
@@ -306,19 +312,6 @@
         if (next) {
           ev.preventDefault();
           index += 1;
-          show();
-          return;
-        }
-        if (tab && deck.contains(tab)) {
-          ev.preventDefault();
-          var want = tab.getAttribute("data-quiz-lo");
-          var n;
-          for (n = 0; n < playlist.length; n += 1) {
-            if (String(playlist[n].primary) === want) {
-              index = n;
-              break;
-            }
-          }
           show();
           return;
         }
