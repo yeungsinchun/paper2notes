@@ -507,7 +507,7 @@ chromeTest("26.3 sievert check and activity vs dose labels", async () => {
   }
 });
 
-chromeTest("Ch.2 pages show syllabus LOs, KaTeX, and summary DSE embeds", async () => {
+chromeTest("Ch.2 pages show syllabus LOs without DSE chips; papers live in section quizzes", async () => {
   for (const page of ["26-1.html", "26-2.html", "26-3.html", "summary.html"]) {
     await cdp.goto(pageUrl(page));
     const info = await cdp.evaluate(`(function () {
@@ -545,29 +545,17 @@ chromeTest("Ch.2 pages show syllabus LOs, KaTeX, and summary DSE embeds", async 
 
   await cdp.goto(pageUrl("summary.html"));
   const bank = await cdp.evaluate(`(function () {
-    var papers = Array.from(document.querySelectorAll(".dse-paper"));
-    var loaded = papers.filter(function (fig) {
-      var img = fig.querySelector("img");
-      return img && img.complete && img.naturalWidth > 0;
-    }).length;
-    var fig2021 = document.getElementById("dse-mc-2021-33");
-    var img2021 = fig2021 && fig2021.querySelector("img");
     return {
-      n: papers.length,
-      loaded: loaded,
-      has2013: !!document.getElementById("dse-lq-2013-9"),
-      has2021_33: !!fig2021,
-      src2021_33: img2021 && img2021.getAttribute("src")
+      n: document.querySelectorAll(".dse-paper").length,
+      hasBank: !!document.querySelector(".dse-bank"),
+      hasLabels: !!document.querySelector(".dse-labels")
     };
   })()`);
-  assert.ok(bank.n >= 18, "expected Ch.2 DSE embeds, n=" + bank.n);
-  assert.equal(bank.has2013, true);
-  assert.equal(bank.has2021_33, true);
-  assert.match(bank.src2021_33 || "", /mc\/25\/2021_q33\.png$/);
-  assert.ok(bank.loaded >= 1, "localhost DSE images should load, loaded=" + bank.loaded);
+  assert.equal(bank.hasBank, false, "summary must not dump the classified set");
+  assert.equal(bank.n, 0, "DSE papers belong in section quizzes, n=" + bank.n);
+  assert.equal(bank.hasLabels, false);
   if (evidenceDir) {
     await cdp.screenshot(path.join(evidenceDir, "ch02-summary-lo-block.png"), ".lo-block");
-    await cdp.screenshot(path.join(evidenceDir, "ch02-summary-dse-mc-2021-33.png"), "#dse-mc-2021-33");
   }
 
   await cdp.goto(pageUrl("26-1.html"));
@@ -576,67 +564,62 @@ chromeTest("Ch.2 pages show syllabus LOs, KaTeX, and summary DSE embeds", async 
     if (!ok) throw new Error("KaTeX missing in 26.1 LO");
     return true;
   }, 8000, "26.1 LO KaTeX");
+  assert.equal(await cdp.evaluate("!!document.querySelector('.lo-block .dse-labels')"), false);
   if (evidenceDir) {
     await cdp.screenshot(path.join(evidenceDir, "ch02-26-1-lo-katex.png"), ".lo-block");
   }
 
-  for (const page of ["26-2.html"]) {
-    await cdp.goto(pageUrl(page));
-    if (evidenceDir) {
-      await cdp.evaluate(`(function () {
-        var a = document.querySelector('a[href="summary.html#dse-mc-2021-33"]');
-        if (a && a.closest("li")) a.closest("li").scrollIntoView({ block: "center" });
-      })()`);
-      await cdp.evaluate("new Promise((r) => setTimeout(r, 180))");
-      await cdp.screenshot(path.join(evidenceDir, "ch02-26-2-lo-2021-33-chip.png"));
-    }
-    await cdp.evaluate(`document.querySelector('a[href="summary.html#dse-mc-2021-33"]').click()`);
-    const land = await waitFor(async () => {
-      const info = await cdp.evaluate(`(function () {
-        var fig = document.getElementById("dse-mc-2021-33");
-        var img = fig && fig.querySelector("img");
-        var cap = fig && fig.querySelector("figcaption");
-        return {
-          href: location.href,
-          hash: location.hash,
-          caption: cap && cap.textContent,
-          loaded: !!(img && img.complete && img.naturalWidth > 0),
-          width: img && img.naturalWidth,
-          alt: img && img.alt
-        };
-      })()`);
-      if (!/summary\.html#dse-mc-2021-33$/.test(info.href)) {
-        throw new Error("wrong land href=" + info.href + " hash=" + info.hash);
-      }
-      if (!info.loaded) throw new Error("2021/33 image not loaded");
-      return info;
-    }, 10000, page + " chip to 2021/33");
-    assert.equal(land.hash, "#dse-mc-2021-33");
-    assert.match(land.caption || "", /2021\/33 MC/);
-    assert.ok(land.loaded);
-    if (evidenceDir) {
-      await cdp.screenshot(path.join(evidenceDir, "ch02-26-2-chip-lands-on-2021-33.png"), "#dse-mc-2021-33");
-    }
+  await cdp.goto(pageUrl("26-2.html"));
+  const quiz2021 = await waitFor(async () => {
+    const info = await cdp.evaluate(`(function () {
+      var next = document.querySelector("[data-quiz-next]");
+      var fig = document.getElementById("dse-mc-2021-33");
+      if (fig && !fig.classList.contains("is-current") && next && !next.disabled) next.click();
+      fig = document.getElementById("dse-mc-2021-33");
+      var img = fig && fig.querySelector("img");
+      var cap = fig && fig.querySelector("figcaption");
+      return {
+        href: location.href,
+        caption: cap && cap.textContent,
+        loaded: !!(img && img.complete && img.naturalWidth > 0),
+        hidden: !!(fig && !fig.classList.contains("is-current")),
+        src: img && img.getAttribute("src"),
+        loChip: !!document.querySelector('.lo-block a[href*="dse-mc-2021-33"]')
+      };
+    })()`);
+    if (info.loChip) throw new Error("LO chip still present");
+    if (!info.loaded || info.hidden) throw new Error("2021/33 not shown in 26.2 quiz");
+    return info;
+  }, 10000, "26.2 quiz 2021/33");
+  assert.match(quiz2021.href, /26-2\.html/);
+  assert.match(quiz2021.caption || "", /2021\/33 MC/);
+  assert.match(quiz2021.src || "", /mc\/25\/2021_q33\.png$/);
+  if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "ch02-26-2-quiz-2021-33.png"), "#dse-mc-2021-33");
   }
 
-  await cdp.goto(ch1Url("summary.html"));
+  await cdp.goto(ch1Url("25-2.html"));
   const ch1 = await waitFor(async () => {
     const info = await cdp.evaluate(`(function () {
+      var next = document.querySelector("[data-quiz-next]");
       var fig = document.getElementById("dse-mc-2021-33");
+      if (fig && !fig.classList.contains("is-current") && next && !next.disabled) next.click();
+      fig = document.getElementById("dse-mc-2021-33");
       var img = fig && fig.querySelector("img");
       return {
         src: img && img.getAttribute("src"),
         loaded: !!(img && img.complete && img.naturalWidth > 0),
+        hidden: !!(fig && !fig.classList.contains("is-current")),
         caption: fig && fig.querySelector("figcaption") && fig.querySelector("figcaption").textContent
       };
     })()`);
-    if (!info.loaded) throw new Error("Ch.1 2021/33 not loaded");
+    if (!info.loaded || info.hidden) throw new Error("Ch.1 2021/33 not shown");
     return info;
   }, 8000, "Ch.1 2021/33 still embedded");
   assert.match(ch1.src || "", /mc\/25\/2021_q33\.png$/);
   assert.match(ch1.caption || "", /2021\/33 MC/);
   if (evidenceDir) {
-    await cdp.screenshot(path.join(evidenceDir, "ch01-summary-dse-mc-2021-33-unchanged.png"), "#dse-mc-2021-33");
+    await cdp.screenshot(path.join(evidenceDir, "ch01-25-2-dse-mc-2021-33.png"), "#dse-mc-2021-33");
   }
 });
 
@@ -680,7 +663,7 @@ chromeTest("Book 5 hub and chapter maps keep objectives on subsection pages", as
   }
 });
 
-chromeTest("each Ch.2 subsection groups links to its own DSE practice", async () => {
+chromeTest("each Ch.2 subsection quizzes its DSE papers one at a time", async () => {
   const expected = {
     "26-1.html": ["dse-mc-2020-30", "dse-mc-2012-35", "dse-mc-2023-31", "dse-mc-2024-32", "dse-mc-2019-32", "dse-mc-2025-31", "dse-mc-sap-35", "dse-mc-2020-32", "dse-mc-2016-33", "dse-lq-2021-9"],
     "26-2.html": ["dse-mc-2024-33", "dse-mc-2015-33", "dse-lq-2014-10", "dse-lq-2017-10", "dse-lq-2018-10", "dse-lq-2026-12"],
@@ -697,43 +680,52 @@ chromeTest("each Ch.2 subsection groups links to its own DSE practice", async ()
     try {
       practice = await cdp.evaluate(`(function () {
         var section = document.querySelector(".section-dse");
-        var links = [];
+        var slides = [];
         if (section) {
-          var anchors = section.querySelectorAll(".dse-practice-links a");
-          for (var i = 0; i < anchors.length; i += 1) {
-            links.push(anchors[i].getAttribute("href"));
+          var items = section.querySelectorAll(".quiz-slide");
+          for (var i = 0; i < items.length; i += 1) {
+            slides.push(items[i].id);
           }
         }
+        var visible = section ? Array.prototype.filter.call(section.querySelectorAll(".quiz-slide"), function (s) { return s.classList.contains("is-current"); }) : [];
+        var firstImg = visible[0] && visible[0].querySelector("img");
         return {
           heading: section && section.querySelector("h2") && section.querySelector("h2").textContent,
-          cards: section ? section.querySelectorAll(".dse-practice-card").length : 0,
-          paper: !!(section && section.querySelector(".subsection-paper img") && section.querySelector(".subsection-paper img").complete && section.querySelector(".subsection-paper img").naturalWidth > 0),
-          links: links
+          slides: slides,
+          visible: visible.length,
+          paper: !!(firstImg && firstImg.complete && firstImg.naturalWidth > 0),
+          hasPrev: !!(section && section.querySelector("[data-quiz-prev]")),
+          hasNext: !!(section && section.querySelector("[data-quiz-next]"))
         };
       })()`);
     } catch (err) {
       throw new Error(page + " practice panel: " + err.message);
     }
-    assert.match(practice.heading || "", /topic-matched past-paper practice/i);
-    assert.ok(practice.cards >= 2, page + " should classify more than one skill");
+    assert.match(practice.heading || "", /check the learning objectives/i);
+    assert.equal(practice.hasPrev, true, page + " needs Prev");
+    assert.equal(practice.hasNext, true, page + " needs Next");
+    assert.equal(practice.visible, 1, page + " must show one quiz item");
     assert.ok(practice.paper, page + " should include a topic-matched DSE paper");
-    assert.deepEqual(practice.links.map((href) => href.replace(/^summary\.html#/, "")), expectedIds);
+    for (const id of expectedIds) {
+      assert.ok(practice.slides.includes(id), page + " missing " + id);
+    }
   }
 
   await cdp.goto(pageUrl("26-2.html"));
-  await cdp.evaluate(`document.querySelector('.section-dse a[href="summary.html#dse-mc-2024-33"]').click()`);
   const target = await waitFor(async () => {
     const found = await cdp.evaluate(`(function () {
       var paper = document.getElementById("dse-mc-2024-33");
+      var img = paper && paper.querySelector("img");
       return {
         href: location.href,
+        hidden: !!(paper && !paper.classList.contains("is-current")),
         paper: !!paper,
-        image: !!(paper && paper.querySelector("img") && paper.querySelector("img").complete && paper.querySelector("img").naturalWidth > 0)
+        image: !!(img && img.complete && img.naturalWidth > 0)
       };
     })()`);
-    if (!found.paper || !found.image) throw new Error("DSE target not ready");
+    if (!found.paper || found.hidden || !found.image) throw new Error("DSE target not ready");
     return found;
   }, 10000, "topic-matched DSE paper");
-  assert.match(target.href, /summary\.html#dse-mc-2024-33$/);
+  assert.match(target.href, /26-2\.html/);
 });
 });

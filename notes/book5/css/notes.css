@@ -267,6 +267,58 @@ p { margin: 0.45rem 0; }
   font-size: 0.91rem;
 }
 
+.quiz-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 0.85rem;
+}
+
+.quiz-nav .quiz-status,
+.quiz-status {
+  margin: 0;
+  min-width: 4.5rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.quiz-nav button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.quiz-slides {
+  min-height: 8rem;
+  overflow: hidden;
+}
+
+.quiz-slide {
+  display: none;
+}
+
+.quiz-slide.is-current {
+  display: block;
+}
+
+.quiz-slide h3 {
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+}
+
+.quiz-slide > p {
+  margin: 0 0 0.65rem;
+  color: var(--muted);
+  font-size: 0.91rem;
+}
+
+.quiz-slide .dse-paper {
+  margin: 0;
+}
+
 .dse-practice-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

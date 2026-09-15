@@ -1244,7 +1244,7 @@ chromeTest("3d scenes magnify, label the tube, keep β drift, and pulse radially
   }
 });
 
-chromeTest("every Ch.1 section page shows syllabus LOs and the summary embeds DSE papers", async () => {
+chromeTest("every Ch.1 section page shows syllabus LOs and keeps DSE papers in the section quiz", async () => {
   for (const page of ["25-1.html", "25-2.html", "25-3.html", "summary.html"]) {
     await cdp.goto(pageUrl(page));
     const info = await cdp.evaluate(`(function () {
@@ -1278,34 +1278,27 @@ chromeTest("every Ch.1 section page shows syllabus LOs and the summary embeds DS
   await cdp.goto(pageUrl("25-1.html"));
   const xray = await cdp.evaluate("document.querySelector('.lo-block').innerText");
   assert.match(xray, /realise X-rays as ionizing electromagnetic radiations of short wavelengths with high penetrating power/);
-  assert.match(xray, /2022\/31 MC/);
+  assert.equal(await cdp.evaluate("!!document.querySelector('.lo-block .dse-labels')"), false);
+  assert.doesNotMatch(xray, /2022\/31 MC/);
 
   await cdp.goto(pageUrl("summary.html"));
   const bank = await cdp.evaluate(`(function () {
-    var papers = Array.from(document.querySelectorAll(".dse-paper"));
-    var loaded = papers.filter(function (fig) {
-      var img = fig.querySelector("img");
-      return img && img.complete && img.naturalWidth > 0;
-    }).length;
     return {
-      n: papers.length,
-      loaded: loaded,
-      has2022: !!document.getElementById("dse-mc-2022-31"),
-      has2026: !!document.getElementById("dse-lq-2026-12"),
+      n: document.querySelectorAll(".dse-paper").length,
+      hasBank: !!document.querySelector(".dse-bank"),
+      hasLabels: !!document.querySelector(".dse-labels"),
       katex: !!document.querySelector(".katex")
     };
   })()`);
-  assert.ok(bank.n >= 20, "expected Ch.1 DSE embeds, n=" + bank.n);
-  assert.equal(bank.has2022, true);
-  assert.equal(bank.has2026, true);
-  assert.ok(bank.loaded >= 1, "localhost DSE images should load, loaded=" + bank.loaded);
+  assert.equal(bank.hasBank, false, "summary must not dump the classified set");
+  assert.equal(bank.n, 0, "DSE papers belong in section quizzes, n=" + bank.n);
+  assert.equal(bank.hasLabels, false);
   if (evidenceDir) {
     await cdp.screenshot(path.join(evidenceDir, "ch01-summary-lo-block.png"), ".lo-block");
-    await cdp.screenshot(path.join(evidenceDir, "ch01-summary-dse-bank.png"), ".dse-bank");
   }
 });
 
-chromeTest("each Ch.1 subsection groups links to its own DSE practice", async () => {
+chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async () => {
   const expected = {
     "25-1.html": ["dse-mc-2022-31", "dse-mc-2015-31"],
     "25-2.html": ["dse-mc-2012-36", "dse-mc-2013-34", "dse-mc-2014-31", "dse-lq-2026-12", "dse-mc-2021-31", "dse-mc-2025-32", "dse-mc-2021-33"],
@@ -1316,33 +1309,48 @@ chromeTest("each Ch.1 subsection groups links to its own DSE practice", async ()
     await cdp.goto(pageUrl(page));
     const practice = await cdp.evaluate(`(function () {
       var section = document.querySelector(".section-dse");
+      var slides = section ? Array.from(section.querySelectorAll(".quiz-slide")) : [];
+        var visible = slides.filter(function (s) { return s.classList.contains("is-current"); });
+      var firstImg = visible[0] && visible[0].querySelector("img");
       return {
         heading: section && section.querySelector("h2") && section.querySelector("h2").textContent,
-        cards: section ? section.querySelectorAll(".dse-practice-card").length : 0,
-        paper: !!(section && section.querySelector(".subsection-paper img") && section.querySelector(".subsection-paper img").complete && section.querySelector(".subsection-paper img").naturalWidth > 0),
-        links: section ? Array.from(section.querySelectorAll(".dse-practice-links a")).map(function (a) { return a.getAttribute("href"); }) : []
+        slides: slides.map(function (s) { return s.id; }),
+        visible: visible.length,
+        paper: !!(firstImg && firstImg.complete && firstImg.naturalWidth > 0),
+        hasPrev: !!(section && section.querySelector("[data-quiz-prev]")),
+        hasNext: !!(section && section.querySelector("[data-quiz-next]")),
+        status: section && section.querySelector(".quiz-status") && section.querySelector(".quiz-status").textContent
       };
     })()`);
-    assert.match(practice.heading || "", /topic-matched past-paper practice/i);
-    assert.ok(practice.cards >= 2, page + " should classify more than one skill");
+    assert.match(practice.heading || "", /check the learning objectives/i);
+    assert.equal(practice.hasPrev, true, page + " needs Prev");
+    assert.equal(practice.hasNext, true, page + " needs Next");
+    assert.equal(practice.visible, 1, page + " must show one quiz item");
     assert.ok(practice.paper, page + " should include a topic-matched DSE paper");
-    assert.deepEqual(practice.links.map((href) => href.replace(/^summary\.html#/, "")), expectedIds);
+    for (const id of expectedIds) {
+      assert.ok(practice.slides.includes(id), page + " missing " + id);
+    }
   }
 
   await cdp.goto(pageUrl("25-3.html"));
-  await cdp.evaluate(`document.querySelector('.section-dse a[href="summary.html#dse-mc-2019-31"]').click()`);
   const target = await waitFor(async () => {
     const found = await cdp.evaluate(`(function () {
+      var next = document.querySelector("[data-quiz-next]");
       var paper = document.getElementById("dse-mc-2019-31");
+      if (paper && !paper.classList.contains("is-current") && next && !next.disabled) next.click();
+      paper = document.getElementById("dse-mc-2019-31");
+      var img = paper && paper.querySelector("img");
       return {
         href: location.href,
+        hidden: !!(paper && !paper.classList.contains("is-current")),
         paper: !!paper,
-        image: !!(paper && paper.querySelector("img") && paper.querySelector("img").complete && paper.querySelector("img").naturalWidth > 0)
+        image: !!(img && img.complete && img.naturalWidth > 0)
       };
     })()`);
-    if (!found.paper || !found.image) throw new Error("DSE target not ready");
+    if (!found.paper || found.hidden || !found.image) throw new Error("DSE target not ready");
     return found;
   }, 10000, "topic-matched DSE paper");
-  assert.match(target.href, /summary\.html#dse-mc-2019-31$/);
+  assert.match(target.href, /25-3\.html/);
+  assert.equal(target.paper, true);
 });
 });

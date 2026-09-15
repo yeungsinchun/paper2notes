@@ -114,10 +114,52 @@
     });
   }
 
+  function initQuizDecks() {
+    $all("[data-quiz]").forEach(function (deck) {
+      var slides = $all(".quiz-slide", deck);
+      if (!slides.length) return;
+      var index = 0;
+      var status = $(".quiz-status", deck);
+      var prev = $("[data-quiz-prev]", deck);
+      var next = $("[data-quiz-next]", deck);
+
+      function show() {
+        slides.forEach(function (slide, n) {
+          var on = n === index;
+          slide.hidden = !on;
+          if (on) slide.classList.add("is-current");
+          else slide.classList.remove("is-current");
+        });
+        if (status) {
+          status.textContent = (index + 1) + " of " + slides.length;
+        }
+        if (prev) prev.disabled = index === 0;
+        if (next) next.disabled = index === slides.length - 1;
+      }
+
+      if (prev) {
+        prev.addEventListener("click", function () {
+          if (index === 0) return;
+          index -= 1;
+          show();
+        });
+      }
+      if (next) {
+        next.addEventListener("click", function () {
+          if (index >= slides.length - 1) return;
+          index += 1;
+          show();
+        });
+      }
+      show();
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     numberChecks();
     initMc();
     initTf();
     initSa();
+    initQuizDecks();
   });
 })();
