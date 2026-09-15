@@ -1921,11 +1921,11 @@
     var handLift = 0.36;
     var startY = 1.7 + handLift;
     var yAxis = new THREE.Vector3(0, 1, 0);
-    /* Transmitting rays cross palm or finger flesh beside a bone, never an air gap. */
+    /* Transmitting rays cross metacarpal or finger flesh beside a bone, never an air gap. */
     var specs = [
       { x: 0.13, z: -0.32, absorb: false },
-      { x: -0.5, z: -0.05, absorb: false },
-      { x: 0.68, z: -0.34, absorb: false },
+      { x: -0.38, z: -0.2, absorb: false },
+      { x: 0.57, z: -0.34, absorb: false },
       { x: 0.14, z: 1.0, absorb: false },
       { x: -0.53, z: 0.82, absorb: false },
       { x: 0.03, z: -0.05, absorb: true, stopY: 0.53 + handLift },
@@ -1940,7 +1940,7 @@
     filmCanvas.height = PX;
     var fctx = filmCanvas.getContext("2d");
     /* Flesh and bone are each drawn as one opaque mask, then composited once, so
-       overlapping fingers and palm do not stack into lighter patches. */
+       overlapping fingers and metacarpals do not stack into lighter patches. */
     var fleshMask = document.createElement("canvas");
     fleshMask.width = PX;
     fleshMask.height = PX;
@@ -1959,7 +1959,6 @@
       };
     }
     var segs = [];
-    var palmFoot = { x: 0.1, z: -0.2, rx: 1.08 * 0.9, rz: 0.98 * 0.9 };
     function paintCapsule(ctx, ax, az, bx, bz, radius, fill) {
       var a = xzToPx(ax, az);
       var b = xzToPx(bx, bz);
@@ -1974,11 +1973,6 @@
     function paintMasks() {
       var mctx = fleshMask.getContext("2d");
       mctx.clearRect(0, 0, PX, PX);
-      var palm = xzToPx(palmFoot.x, palmFoot.z);
-      mctx.fillStyle = "#807468";
-      mctx.beginPath();
-      mctx.ellipse(palm.cx, palm.cy, (palmFoot.rx / filmW) * PX, (palmFoot.rz / filmD) * PX, 0, 0, Math.PI * 2);
-      mctx.fill();
       segs.forEach(function (seg) {
         paintCapsule(mctx, seg.a.x, seg.a.z, seg.b.x, seg.b.z, seg.rF, "#807468");
       });
@@ -2094,11 +2088,8 @@
         at = next;
       });
     }
-    var palm = new THREE.Mesh(new THREE.SphereGeometry(1, 28, 20), fleshMat);
-    palm.scale.set(1.08, 0.32, 0.98);
-    palm.position.set(0.1, 0.52, -0.2);
-    hand.add(palm);
-    nFlesh += 1;
+    /* No palm blob: the hand is its bones and the flesh around each one, so the
+       metacarpals fan out from the wrist the way they do on a real radiograph. */
     addSeg(vec(0.2, 0.5, -1.18), vec(0.22, 0.52, -0.72), 0.17, 0.075);
     addSeg(vec(-0.06, 0.5, -1.18), vec(-0.08, 0.52, -0.72), 0.155, 0.068);
     addJoint(vec(0.08, 0.51, -0.72), 0.28);
@@ -2151,7 +2142,7 @@
       });
       placeHud(hudX, canvas, gfx.camera, new THREE.Vector3(0.1, startY - 0.1, -0.85));
       placeHud(hudBone, canvas, gfx.camera, new THREE.Vector3(0.04, 0.92 + handLift, 0.48));
-      placeHud(hudFlesh, canvas, gfx.camera, new THREE.Vector3(0.55, 0.6 + handLift, -0.95));
+      placeHud(hudFlesh, canvas, gfx.camera, new THREE.Vector3(-0.22, 0.3 + handLift, -1.16));
       placeHud(hudFilm, canvas, gfx.camera, new THREE.Vector3(0.08, filmY - 0.02, 2.05));
     }
     function lumAt(x, z) {
