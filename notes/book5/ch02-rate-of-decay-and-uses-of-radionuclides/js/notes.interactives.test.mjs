@@ -362,22 +362,31 @@ chromeTest("26.1 dice remaining falls and N+decayed stays 40 billion", async () 
   }
 });
 
-chromeTest("student pages hide intake chrome and keep per-box scale", async () => {
+chromeTest("student pages hide intake chrome and keep animation boxes plain", async () => {
   for (const page of ["index.html", "26-1.html", "26-2.html", "26-3.html", "summary.html"]) {
     await cdp.goto(pageUrl(page));
     const info = await cdp.evaluate(`(function () {
       var text = document.body.innerText;
       var stages = Array.from(document.querySelectorAll(".visual.play.stage"));
       var boxes = stages.map(function (stage) {
-        var plus = stage.querySelector("[data-box-scale='up']");
-        var minus = stage.querySelector("[data-box-scale='down']");
-        return { ok: !!(plus && minus), plus: plus && plus.textContent.trim(), minus: minus && minus.textContent.trim() };
+        var canvas = stage.querySelector("canvas");
+        var replay = stage.querySelector(".stage-replay");
+        var sr = stage.getBoundingClientRect();
+        var rr = replay ? replay.getBoundingClientRect() : null;
+        return {
+          id: stage.id,
+          scaleChrome: !!stage.querySelector(".box-scale, [data-box-scale]"),
+          white: canvas ? getComputedStyle(canvas).backgroundColor : "",
+          boxWhite: getComputedStyle(stage).backgroundColor,
+          replayInBox: replay ? (rr.left >= sr.left && rr.right <= sr.right + 1 && rr.top >= sr.top && rr.bottom <= sr.bottom + 1) : null
+        };
       });
       return {
         text: text,
         scripts: Array.from(document.querySelectorAll("script[src]")).map(function (s) { return s.getAttribute("src"); }),
         stageCount: stages.length,
         boxes: boxes,
+        strayReplays: document.querySelectorAll("[data-replay]:not(.stage-replay)").length,
         brand: document.querySelector(".brand") && document.querySelector(".brand").getAttribute("href")
       };
     })()`);
@@ -388,12 +397,14 @@ chromeTest("student pages hide intake chrome and keep per-box scale", async () =
     assert.doesNotMatch(info.text, /\bOCR\b/);
     assert.ok(info.scripts.every((src) => src && !/https?:\/\//.test(src)), "no remote scripts on " + page);
     assert.equal(info.brand, "../index.html");
+    assert.equal(info.strayReplays, 0, "Replay belongs inside its animation box on " + page);
     if (page === "index.html" || page === "summary.html") continue;
     assert.ok(info.stageCount > 0, "expected stages on " + page);
     info.boxes.forEach(function (box) {
-      assert.equal(box.ok, true, "scale buttons missing on " + page);
-      assert.equal(box.plus, "+");
-      assert.equal(box.minus, "−");
+      assert.equal(box.scaleChrome, false, "no +/- scale buttons on #" + box.id);
+      assert.equal(box.white, "rgb(255, 255, 255)", "white canvas on #" + box.id);
+      assert.equal(box.boxWhite, "rgb(255, 255, 255)", "white box on #" + box.id);
+      if (box.replayInBox !== null) assert.equal(box.replayInBox, true, "Replay inside #" + box.id);
     });
   }
 });

@@ -48,12 +48,10 @@
         <div class="visual play stage" id="decay-vis" data-autoplay data-scene="dice">
           <canvas class="scene-canvas" width="960" height="420" aria-label="One hundred nuclei. Each throw, about one in six decay and are removed."></canvas>
           <span class="hud-label" data-hud="live">100 undecayed</span>
+          <button type="button" class="stage-replay" data-replay="decay-vis">Replay</button>
         </div>
         <figcaption><b>Fig. 26.1 to 26.3</b> A dice model. Each nucleus is a die; on every throw each surviving die has the same 1-in-6 chance of "decaying" and is removed. Nobody can say which dice will go on the next throw, yet about one sixth of the survivors always do.</figcaption>
       </figure>
-      <div class="row">
-        <button type="button" data-replay="decay-vis">Replay</button>
-      </div>
       <div class="def">
         <span class="tag">Random and spontaneous</span>
         <p>Radioactive decay is <b>random</b>: it is impossible to predict when a particular nucleus will decay, and every undecayed nucleus of a given nuclide has the same chance of decaying in the next second, however old it is. It is <b>spontaneous</b>: it happens on its own and nothing external (temperature, pressure, chemical bonding, an electric field) speeds it up or slows it down.</p>
@@ -298,12 +296,10 @@
           <canvas class="scene-canvas" width="960" height="420" aria-label="Recorded count rate falls toward a background floor"></canvas>
           <span class="hud-label" data-hud="rec">recorded</span>
           <span class="hud-label" data-hud="bg">background</span>
+          <button type="button" class="stage-replay" data-replay="countbg-vis">Replay</button>
         </div>
         <figcaption><b>Example 26.1</b> The recorded count rate from a source falls but flattens out at about 40 counts per minute instead of zero. The flat part is background, which the GM tube counts whether or not a source is present.</figcaption>
       </figure>
-      <div class="row">
-        <button type="button" data-replay="countbg-vis">Replay</button>
-      </div>
       <div class="def">
         <span class="tag">Corrected count rate</span>
         <p>Background radiation (cosmic rays, rocks and soil, building materials, food and drink, radon in the air) gives a GM tube a small, roughly steady count rate even with no source nearby. The <b>corrected count rate</b> is the recorded count rate minus the background count rate, and it is the quantity proportional to the activity of the source.</p>

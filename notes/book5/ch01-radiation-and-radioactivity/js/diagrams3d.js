@@ -42,7 +42,7 @@
 
   function stage(canvas, fit) {
     var scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xfffaf1);
+    scene.background = new THREE.Color(0xffffff);
     var persp = fit && fit.persp;
     var look = persp
       ? new THREE.Vector3(persp.lookX || 0, persp.lookY || 0, persp.lookZ || 0)
@@ -105,7 +105,18 @@
     return { scene: scene, camera: camera, renderer: renderer, resize: resize, look: look, orbit: orbit };
   }
 
+  /* Drag-to-rotate only where the third dimension carries meaning (depth of a
+     film under a hand, an angled target, a nucleon cluster). Flat, diagram-like
+     scenes keep a fixed camera so nothing on the page invites fiddling. */
+  var ORBIT_SCENES = { imaging: 1, tube: 1, atom: 1, nuclide: 1, hydrogen: 1, "decay-a": 1, "decay-b": 1, "decay-g": 1, sealed: 1, bfield: 1 };
+
   function attachOrbit(canvas, camera, target) {
+    var host = canvas.closest ? canvas.closest("[data-scene]") : null;
+    var name = host ? host.getAttribute("data-scene") : "";
+    if (!ORBIT_SCENES[name]) {
+      return { target: target, enabled: false, nudge: function () { /* fixed camera */ } };
+    }
+    if (host) host.setAttribute("data-orbit", "");
     var sph = new THREE.Spherical();
     var dragging = false;
     var lastX = 0;
@@ -143,6 +154,7 @@
     canvas.addEventListener("pointercancel", endDrag);
     return {
       target: target,
+      enabled: true,
       nudge: function (dx, dy) {
         if (!synced) sync();
         sph.theta -= dx * 0.008;
@@ -2222,86 +2234,6 @@
     scenes.imaging = { replay: restart, snapshot: snapshot };
   }
 
-  function spectrum(host) {
-    if (!THREE) return;
-    var canvas = host.querySelector("canvas");
-    var gfx = stage(canvas, { halfW: 6.2, halfH: 2.05 });
-    gfx.camera.position.set(0, 1.4, 12);
-    gfx.camera.lookAt(0, 0.1, 0);
-    var hudNI = host.querySelector('[data-hud="nonion"]');
-    var hudI = host.querySelector('[data-hud="ion"]');
-    var hudGamma = host.querySelector('[data-hud="gamma"]');
-    var bands = [
-      { name: "radio", hex: 0xd9e4f0, w: 1.4, x: -5.05 },
-      { name: "micro", hex: 0xcfe0c8, w: 1.25, x: -3.65 },
-      { name: "IR", hex: 0xf0d5b8, w: 1.3, x: -2.3 },
-      { name: "vis", hex: 0xf1c40f, w: 0.48, x: -1.35 },
-      { name: "UV", hex: 0xb8a4d4, w: 1.15, x: -0.48 },
-      { name: "X-rays", hex: 0x455a64, w: 1.45, x: 0.9 },
-      { name: "Gamma ray", hex: 0x1c2430, w: 1.7, x: 2.55 }
-    ];
-    bands.forEach(function (b) {
-      var m = new THREE.Mesh(
-        new THREE.BoxGeometry(b.w - 0.04, 0.7, 0.55),
-        new THREE.MeshStandardMaterial({ color: b.hex, roughness: 0.45 })
-      );
-      m.position.set(b.x, 0.15, 0);
-      gfx.scene.add(m);
-      b.mesh = m;
-    });
-    var visCols = [0xc0392b, 0xe67e22, 0xf1c40f, 0x27ae60, 0x2980b9, 0x8e44ad];
-    visCols.forEach(function (hex, i) {
-      var sl = new THREE.Mesh(
-        new THREE.BoxGeometry(0.08, 0.72, 0.56),
-        new THREE.MeshStandardMaterial({ color: hex })
-      );
-      sl.position.set(-1.54 + i * 0.075, 0.15, 0.01);
-      gfx.scene.add(sl);
-    });
-    var uv = bands[4];
-    var uvLeft = uv.x - uv.w / 2;
-    var uvRight = uv.x + uv.w / 2;
-    var cutX = uvLeft + 0.1 * uv.w;
-    var cut = new THREE.Mesh(
-      new THREE.BoxGeometry(0.04, 1.45, 0.72),
-      new THREE.MeshStandardMaterial({ color: 0x1c2430 })
-    );
-    cut.position.set(cutX, 0.4, 0.12);
-    cut.name = "ionizing-cut";
-    gfx.scene.add(cut);
-    var xrayMesh = bands[5].mesh;
-    var gammaBand = bands[6];
-    function frame() {
-      placeHud(hudNI, canvas, gfx.camera, new THREE.Vector3(-3.2, 1.2, 0));
-      placeHud(hudI, canvas, gfx.camera, new THREE.Vector3(1.85, 1.2, 0));
-      placeHud(hudGamma, canvas, gfx.camera, new THREE.Vector3(gammaBand.x, 0.82, 0));
-      gfx.renderer.render(gfx.scene, gfx.camera);
-      requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-    scenes.spectrum = {
-      snapshot: function () {
-        return {
-          slider: !!document.querySelector("#spectrum-slider"),
-          mark: !!document.querySelector("#spectrum-mark"),
-          pointer: !!document.querySelector("#spectrum-pointer"),
-          cutX: cut.position.x,
-          uvX: uv.x,
-          uvLeft: uvLeft,
-          uvRight: uvRight,
-          xrayX: xrayMesh.position.x,
-          cutInUV: cut.position.x > uvLeft && cut.position.x < uvRight,
-          nonIonizingUVFrac: (cut.position.x - uvLeft) / uv.w,
-          mostUVionizing: (uvRight - cut.position.x) / uv.w > 0.75,
-          cutAfterUV: cut.position.x > uvRight,
-          xrayAfterCut: xrayMesh.position.x > cut.position.x,
-          gammaHud: hudGamma ? hudGamma.textContent.trim() : "",
-          bandWidths: bands.map(function (b) { return b.w; })
-        };
-      }
-    };
-  }
-
   function pairBall(hex, sign) {
     var g = new THREE.Group();
     g.add(ball(0.11, hex));
@@ -2906,7 +2838,6 @@
     sealed: sealed,
     badge: badge,
     imaging: imaging,
-    spectrum: spectrum,
     ionpower: ionpower,
     tracks: tracks,
     hydrogen: hydrogen,

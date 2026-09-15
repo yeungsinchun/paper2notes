@@ -53,7 +53,7 @@
             <span class="hud-label" data-hud="electrons">electron beam · particles</span>
           </div>
         </div>
-        <figcaption><b>Fig. 25.2</b> A light beam (left) is an electromagnetic wave: an oscillating electric field E with a perpendicular oscillating magnetic field B travelling together. An electron beam (right) is a stream of particles carrying kinetic energy. Drag either box to rotate it.</figcaption>
+        <figcaption><b>Fig. 25.2</b> A light beam (left) is an electromagnetic wave: an oscillating electric field E with a perpendicular oscillating magnetic field B travelling together. An electron beam (right) is a stream of particles carrying kinetic energy.</figcaption>
       </figure>
       <div class="def">
         <span class="tag">Definition</span>
@@ -63,7 +63,7 @@
         <thead><tr><th>Electromagnetic radiation</th><th>Particle radiation</th></tr></thead>
         <tbody>
           <tr><td>Oscillating E and B fields; no mass, no charge; speed \( c = 3 \times 10^{8}\ \mathrm{m\,s^{-1}} \) in vacuum</td><td>Moving particles with mass and kinetic energy; may carry charge; speed below \( c \)</td></tr>
-          <tr><td>Radio, microwave, infrared, visible, ultraviolet, X-rays, γ rays</td><td>Electron beams, α particles, β particles, neutrons</td></tr>
+          <tr><td>Radio, microwave, infrared, visible, ultraviolet, X-rays, gamma rays</td><td>Electron beams, α particles, β particles, neutrons</td></tr>
           <tr><td colspan="2">Both transfer energy. Both are radiation.</td></tr>
         </tbody>
       </table>
@@ -98,10 +98,10 @@
           <span class="hud-label" data-hud="ray">ionizing radiation</span>
           <span class="hud-label" data-hud="atom">atom</span>
           <span class="hud-label" data-hud="electron">electron</span>
+          <button type="button" class="stage-replay" data-replay="knock-vis">Replay</button>
         </div>
         <figcaption><b>Fig. 25.3</b> Ionization. Radiation with enough energy knocks one of the atom's own bound electrons out of the atom, leaving a positive ion behind.</figcaption>
       </figure>
-      <div class="row"><button type="button" data-replay="knock-vis">Replay knockout</button></div>
       <div class="def">
         <span class="tag">Definition</span>
         <p><b>Ionizing radiation</b> carries enough energy per photon or per particle to remove an electron from an atom or molecule, turning it into an ion. Radiation that cannot do this is <b>non-ionizing</b>.</p>
@@ -110,7 +110,7 @@
         <thead><tr><th></th><th>Ionizing</th><th>Non-ionizing</th></tr></thead>
         <tbody>
           <tr><th>Energy per photon or particle</th><td>Enough to knock an electron out of an atom or molecule</td><td>Not enough; at most the electron is raised to a higher energy level and falls back</td></tr>
-          <tr><th>Examples</th><td>X-rays, γ rays, most ultraviolet; α and β particles</td><td>Radio, microwaves, infrared, visible light, the lowest-energy part of ultraviolet</td></tr>
+          <tr><th>Examples</th><td>X-rays, gamma rays, most ultraviolet; α and β particles</td><td>Radio, microwaves, infrared, visible light, the lowest-energy part of ultraviolet</td></tr>
           <tr><th>Hazard</th><td>Ions and broken bonds inside cells damage tissue and DNA; cells may die or become cancerous</td><td>Heating at high intensity only; no ionization</td></tr>
         </tbody>
       </table>
@@ -139,38 +139,61 @@
       <header>
         <h2><span class="sec-num">C</span>Where the electromagnetic spectrum becomes ionizing</h2>
       </header>
-      <figure class="fig">
-        <div class="visual play stage" id="spectrum-vis" data-scene="spectrum">
-          <canvas class="scene-canvas" width="960" height="280" aria-label="EM spectrum: ionizing barrier on the low-frequency side of UV"></canvas>
-          <span class="hud-label" data-hud="nonion">non-ionizing</span>
-          <span class="hud-label" data-hud="ion">ionizing</span>
-          <span class="hud-label" data-hud="gamma">Gamma ray</span>
+      <figure class="fig" id="spectrum-fig">
+        <div class="visual svg-fig" id="spectrum-vis">
+          <svg class="spectrum-svg" viewBox="0 0 960 262" role="img" aria-labelledby="spectrum-title">
+            <title id="spectrum-title">The electromagnetic spectrum from radio to gamma ray, frequency increasing to the right. The ionizing threshold is a dashed line inside the ultraviolet band near its low-frequency end: everything left of it is non-ionizing, everything right of it is ionizing.</title>
+            <defs>
+              <linearGradient id="vis-grad" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0" stop-color="#c0392b"/>
+                <stop offset="0.2" stop-color="#e67e22"/>
+                <stop offset="0.4" stop-color="#f1c40f"/>
+                <stop offset="0.6" stop-color="#27ae60"/>
+                <stop offset="0.8" stop-color="#2980b9"/>
+                <stop offset="1" stop-color="#8e44ad"/>
+              </linearGradient>
+              <marker id="ax-head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" fill="#5d6673"/>
+              </marker>
+            </defs>
+            <g class="brackets" fill="none" stroke="#1b2129" stroke-width="1.2">
+              <path data-bracket="nonion" d="M40,50 v-6 H496.5 v6"/>
+              <path data-bracket="ion" d="M508.5,50 v-6 H920 v6"/>
+            </g>
+            <text class="bracket-label" data-hud="nonion" x="271.3" y="32" text-anchor="middle">non-ionizing</text>
+            <text class="bracket-label" data-hud="ion" x="711.3" y="32" text-anchor="middle">ionizing</text>
+            <g class="bands">
+          <rect x="40" y="70" width="140.8" height="80" fill="#cfd9e6"/>
+          <rect x="180.8" y="70" width="123.2" height="80" fill="#c9dcc3"/>
+          <rect x="304" y="70" width="132" height="80" fill="#ecd3b4"/>
+          <rect x="436" y="70" width="52.8" height="80" fill="url(#vis-grad)"/>
+          <rect class="uv-nonion" x="488.8" y="70" width="13.7" height="80" fill="#d9cde8"/>
+          <rect class="uv-ion" x="502.5" y="70" width="100.7" height="80" fill="#8e79b3"/>
+          <rect x="603.2" y="70" width="149.6" height="80" fill="#4b5a66"/>
+          <rect x="752.8" y="70" width="167.2" height="80" fill="#1c2430"/>
+            </g>
+            <line class="threshold" data-cut x1="502.5" y1="56" x2="502.5" y2="180" stroke="#1b2129" stroke-width="2" stroke-dasharray="5 4"/>
+            <text class="threshold-label" x="502.5" y="198" text-anchor="middle">ionizing threshold</text>
+            <g class="band-names">
+          <text class="band-name" data-band="radio" x="110.4" y="174" text-anchor="middle">radio</text>
+          <text class="band-name" data-band="microwave" x="242.4" y="174" text-anchor="middle">microwave</text>
+          <text class="band-name" data-band="infrared" x="370" y="174" text-anchor="middle">infrared</text>
+          <text class="band-name" data-band="visible" x="462.4" y="174" text-anchor="middle">visible</text>
+          <text class="band-name" data-band="ultraviolet" x="546" y="174" text-anchor="middle">ultraviolet</text>
+          <text class="band-name" data-band="X-rays" x="678" y="174" text-anchor="middle">X-rays</text>
+          <text class="band-name" data-band="gamma-ray" x="836.4" y="174" text-anchor="middle">gamma ray</text>
+            </g>
+            <line class="axis" x1="40" y1="240" x2="920" y2="240" stroke="#5d6673" stroke-width="1.2" marker-start="url(#ax-head)" marker-end="url(#ax-head)"/>
+            <text class="axis-label" x="52" y="232" text-anchor="start">longer wavelength</text>
+            <text class="axis-label" x="908" y="232" text-anchor="end">higher frequency, more energy per photon</text>
+          </svg>
         </div>
-        <figcaption><b>Fig. 25.5</b> The electromagnetic spectrum with frequency increasing to the right. The ionizing barrier sits inside the ultraviolet band, close to its low-frequency end.</figcaption>
+        <figcaption><b>Fig. 25.5</b> The electromagnetic spectrum with frequency increasing to the right. The ionizing threshold sits inside the ultraviolet band, close to its low-frequency end: the shaded sliver of UV beside visible light is still non-ionizing, the rest of UV, X-rays and gamma rays are ionizing.</figcaption>
       </figure>
-      <table class="notes spectrum-bands">
-        <colgroup>
-          <col class="band-radio">
-          <col class="band-micro">
-          <col class="band-ir">
-          <col class="band-vis">
-          <col class="band-uv">
-          <col class="band-xray">
-          <col class="band-gamma">
-        </colgroup>
-        <thead><tr><th>radio</th><th>micro</th><th>IR</th><th>vis</th><th>UV</th><th>X-rays</th><th>Gamma ray</th></tr></thead>
-        <tbody>
-          <tr>
-            <td colspan="4">non-ionizing</td>
-            <td>split</td>
-            <td colspan="2">ionizing EM</td>
-          </tr>
-        </tbody>
-      </table>
       <ul class="points">
         <li>Energy per photon rises with frequency (and falls with wavelength). Only photons above the ionization threshold can knock an electron out, so the ionizing part of the spectrum is the high-frequency, short-wavelength end.</li>
-        <li>Radio waves, microwaves, infrared and visible light are non-ionizing. The boundary lies inside the ultraviolet band; radiation of higher frequency than ultraviolet, that is X-rays and γ rays, is ionizing.</li>
-        <li>Scale to remember: visible light \( \lambda \sim 5 \times 10^{-7}\ \mathrm{m} \); X-rays \( \lambda \sim 10^{-11} \) to \( 10^{-8}\ \mathrm{m} \), \( f \sim 10^{18}\ \mathrm{Hz} \); γ rays are shorter still, \( f \sim 10^{20}\ \mathrm{Hz} \). Short wavelength goes with high photon energy, hence both ionizing and highly penetrating.</li>
+        <li>Radio waves, microwaves, infrared and visible light are non-ionizing. The boundary lies inside the ultraviolet band; radiation of higher frequency than ultraviolet, that is X-rays and gamma rays, is ionizing.</li>
+        <li>Scale to remember: visible light \( \lambda \sim 5 \times 10^{-7}\ \mathrm{m} \); X-rays \( \lambda \sim 10^{-11} \) to \( 10^{-8}\ \mathrm{m} \), \( f \sim 10^{18}\ \mathrm{Hz} \); gamma rays are shorter still, \( f \sim 10^{20}\ \mathrm{Hz} \). Short wavelength goes with high photon energy, hence both ionizing and highly penetrating.</li>
       </ul>
       <div class="check" data-check="mc" data-answer="B">
         <h3>Concept check</h3>
@@ -277,10 +300,10 @@
           <span class="hud-label" data-hud="bone">bone</span>
           <span class="hud-label" data-hud="flesh">flesh</span>
           <span class="hud-label" data-hud="film">photographic film</span>
+          <button type="button" class="stage-replay" data-replay="imaging-vis">Replay</button>
         </div>
         <figcaption><b>Fig. 25.7</b> Medical radiography. X-rays pass down through one hand onto photographic film. Flesh lets most of them through, so those spots blacken; bone absorbs them, so those spots stay white.</figcaption>
       </figure>
-      <div class="row"><button type="button" data-replay="imaging-vis">Replay film</button></div>
       <table class="notes">
         <thead><tr><th>What the X-rays meet</th><th>What the developed film shows</th></tr></thead>
         <tbody>

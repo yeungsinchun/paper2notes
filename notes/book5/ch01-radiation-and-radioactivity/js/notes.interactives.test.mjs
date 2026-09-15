@@ -243,54 +243,62 @@ function chromeTest(name, fn) {
 }
 
 describe("Book 5 Ch.1 notes interactives", { concurrency: 1 }, () => {
-chromeTest("25.1 spectrum is static with the ionizing barrier in UV", async () => {
+chromeTest("25.1 spectrum is a 2D strip with the ionizing threshold inside UV", async () => {
   await cdp.goto(pageUrl("25-1.html"));
   await cdp.evaluate("new Promise((r) => setTimeout(r, 250))");
   const spec = await cdp.evaluate(`(function () {
     var spec = document.getElementById("spectrum");
-    var snap = window.NotesScenes && window.NotesScenes.spectrum && window.NotesScenes.spectrum.snapshot();
+    var svg = spec && spec.querySelector("svg.spectrum-svg");
+    var names = svg ? Array.from(svg.querySelectorAll(".band-name")).map(function (t) { return t.textContent.trim(); }) : [];
+    var nonion = svg && svg.querySelector(".uv-nonion");
+    var ion = svg && svg.querySelector(".uv-ion");
+    var cut = svg && svg.querySelector(".threshold");
+    var xray = svg ? Array.from(svg.querySelectorAll(".bands rect"))[5] : null;
+    var num = function (el, attr) { return el ? Number(el.getAttribute(attr)) : NaN; };
+    var uvLeft = num(nonion, "x");
+    var uvRight = num(ion, "x") + num(ion, "width");
+    var cutX = num(cut, "x1");
     return {
-      slider: !!document.querySelector("#spectrum-slider"),
-      mark: !!document.querySelector("#spectrum-mark"),
-      pointer: !!document.querySelector("#spectrum-pointer"),
-      snap: snap,
+      canvas: !!spec.querySelector("canvas"),
+      scene: !!(window.NotesScenes && window.NotesScenes.spectrum),
+      table: !!spec.querySelector("table.spectrum-bands"),
+      svg: !!svg,
+      svgBox: svg ? svg.getBoundingClientRect().height : 0,
+      names: names,
       title: spec ? spec.querySelector("h2").textContent : "",
       body: spec ? spec.textContent : "",
-      nonion: spec && spec.querySelector('[data-hud="nonion"]') && spec.querySelector('[data-hud="nonion"]').textContent,
-      ion: spec && spec.querySelector('[data-hud="ion"]') && spec.querySelector('[data-hud="ion"]').textContent,
-      gammaHud: spec && spec.querySelector('#spectrum-vis [data-hud="gamma"]') && spec.querySelector('#spectrum-vis [data-hud="gamma"]').textContent,
-      headers: spec ? Array.from(spec.querySelectorAll("table.spectrum-bands thead th")).map(function (th) { return th.textContent.trim(); }) : [],
-      headerWidths: spec ? Array.from(spec.querySelectorAll("table.spectrum-bands thead th")).map(function (th) { return th.getBoundingClientRect().width; }) : [],
-      uvCell: spec && spec.querySelector("table.spectrum-bands tbody tr td:nth-child(2)") && spec.querySelector("table.spectrum-bands tbody tr td:nth-child(2)").textContent.trim()
+      nonion: svg && svg.querySelector('[data-hud="nonion"]') && svg.querySelector('[data-hud="nonion"]').textContent,
+      ion: svg && svg.querySelector('[data-hud="ion"]') && svg.querySelector('[data-hud="ion"]').textContent,
+      cutInUV: cutX > uvLeft && cutX < uvRight,
+      nonIonizingUVFrac: (cutX - uvLeft) / (uvRight - uvLeft),
+      xrayAfterCut: xray ? num(xray, "x") >= cutX : false,
+      nonionSliverLighter: nonion && ion ? nonion.getAttribute("fill") !== ion.getAttribute("fill") : false,
+      bracketNonion: svg && svg.querySelector('[data-bracket="nonion"]') && svg.querySelector('[data-bracket="nonion"]').getAttribute("d"),
+      bracketIon: svg && svg.querySelector('[data-bracket="ion"]') && svg.querySelector('[data-bracket="ion"]').getAttribute("d")
     };
   })()`);
-  assert.equal(spec.slider, false);
-  assert.equal(spec.mark, false);
-  assert.equal(spec.pointer, false);
-  assert.equal(spec.snap.cutInUV, true);
-  assert.equal(spec.snap.cutAfterUV, false);
-  assert.ok(spec.snap.nonIonizingUVFrac > 0.05 && spec.snap.nonIonizingUVFrac < 0.18);
-  assert.equal(spec.snap.mostUVionizing, true);
-  assert.equal(spec.snap.xrayAfterCut, true);
+  assert.equal(spec.canvas, false, "the spectrum is a 2D figure, not a three.js scene");
+  assert.equal(spec.scene, false);
+  assert.equal(spec.table, false, "the split table is gone; the strip carries the split");
+  assert.equal(spec.svg, true);
+  assert.ok(spec.svgBox > 120, "spectrum SVG should render, h=" + spec.svgBox);
+  assert.deepEqual(spec.names, ["radio", "microwave", "infrared", "visible", "ultraviolet", "X-rays", "gamma ray"]);
+  assert.doesNotMatch(spec.names.join(" "), /γ/, "the γ symbol is reserved for nuclear radiation");
+  assert.equal(spec.cutInUV, true);
+  assert.ok(spec.nonIonizingUVFrac > 0.05 && spec.nonIonizingUVFrac < 0.18, "threshold near the low-frequency end of UV, frac=" + spec.nonIonizingUVFrac);
+  assert.equal(spec.xrayAfterCut, true);
+  assert.equal(spec.nonionSliverLighter, true, "the non-ionizing sliver of UV is drawn in its own tint");
+  assert.match(spec.bracketNonion || "", /^M40,/, "non-ionizing bracket starts at the radio end");
+  assert.match(spec.bracketIon || "", /H920 /, "ionizing bracket runs to the gamma end");
   assert.match(spec.title, /spectrum becomes ionizing/i);
   assert.match(spec.nonion, /non-ionizing/);
   assert.match(spec.ion, /ionizing/);
   assert.match(spec.body, /X-rays/);
   assert.match(spec.body, /boundary lies inside the ultraviolet/i);
+  assert.doesNotMatch(spec.body, /γ rays/, "EM-spectrum copy says gamma rays");
   assert.doesNotMatch(spec.body, /one-tenth|1\/10 of UV/i);
   assert.doesNotMatch(spec.title, /where the EM cut sits/i);
   assert.doesNotMatch(spec.body, /book cut/i);
-  assert.deepEqual(spec.headers, ["radio", "micro", "IR", "vis", "UV", "X-rays", "Gamma ray"]);
-  assert.equal(spec.gammaHud.trim(), "Gamma ray");
-  assert.equal(spec.snap.gammaHud, "Gamma ray");
-  assert.doesNotMatch(spec.headers.join(" "), /γ/);
-  assert.ok(spec.uvCell.length < 12, "UV band cell should stay short, got " + spec.uvCell);
-  assert.doesNotMatch(spec.uvCell, /1\/10|one-tenth|most ionizing/i);
-  const visW = spec.headerWidths[3];
-  const radioW = spec.headerWidths[0];
-  const gammaW = spec.headerWidths[6];
-  assert.ok(visW < radioW * 0.6, "vis column should be narrower than radio, vis=" + visW + " radio=" + radioW);
-  assert.ok(gammaW > visW * 1.8, "Gamma ray column should be wider than vis, gamma=" + gammaW + " vis=" + visW);
 
   if (evidenceDir) {
     await cdp.screenshot(path.join(evidenceDir, "25-1-knockout-animation.png"), "#knockout");
@@ -779,45 +787,51 @@ chromeTest("chapter map, summary, and concept-check scoring are the public notes
       var pageWide = document.querySelector(".view-scale, [data-view-scale], .topbar [data-box-scale]");
       var stages = Array.from(document.querySelectorAll(".visual.play.stage"));
       var boxes = stages.map(function (stage) {
-        var plus = stage.querySelector("[data-box-scale='up']");
-        var minus = stage.querySelector("[data-box-scale='down']");
-        if (!plus || !minus) return { ok: false, id: stage.id };
         var hidden = stage.hasAttribute("hidden") || getComputedStyle(stage).display === "none";
+        var canvas = stage.querySelector("canvas");
+        var replay = stage.querySelector(".stage-replay");
         var sr = stage.getBoundingClientRect();
-        var pr = plus.getBoundingClientRect();
-        var mr = minus.getBoundingClientRect();
+        var rr = replay ? replay.getBoundingClientRect() : null;
         return {
-          ok: true,
           id: stage.id,
           hidden: hidden,
-          plusText: plus.textContent.trim(),
-          minusText: minus.textContent.trim(),
-          plusAfterMinus: hidden ? true : pr.left > mr.left,
-          rightGap: hidden ? 0 : sr.right - pr.right,
-          inBox: hidden ? true : pr.top >= sr.top - 1 && pr.bottom <= sr.bottom + 1
+          scaleChrome: !!stage.querySelector(".box-scale, [data-box-scale]"),
+          canvasBg: canvas ? getComputedStyle(canvas).backgroundColor : "",
+          boxBg: getComputedStyle(stage).backgroundColor,
+          orbit: stage.hasAttribute("data-orbit"),
+          cursor: canvas ? getComputedStyle(canvas).cursor : "",
+          replayInBox: replay && !hidden ? (rr.left >= sr.left && rr.right <= sr.right + 1 && rr.top >= sr.top && rr.bottom <= sr.bottom + 1) : null,
+          replayBottomRight: replay && !hidden ? (sr.right - rr.right < 40 && sr.bottom - rr.bottom < 40) : null
         };
       });
       return {
         hasBar: !!bar,
         noPageWide: !pageWide,
         stageCount: stages.length,
-        boxes: boxes
+        boxes: boxes,
+        strayReplays: document.querySelectorAll("[data-replay]:not(.stage-replay)").length
       };
     })()`);
     assert.equal(chrome.hasBar, true, "top bar missing on " + page);
     assert.equal(chrome.noPageWide, true, "page-wide scale chrome still on " + page);
+    assert.equal(chrome.strayReplays, 0, "Replay belongs inside its animation box on " + page);
     if (page === "index.html") {
       assert.equal(chrome.stageCount, 0);
     } else {
       assert.ok(chrome.stageCount > 0, "expected animation boxes on " + page);
     }
     chrome.boxes.forEach(function (box) {
-      assert.equal(box.ok, true, "scale buttons missing on " + page + " #" + box.id);
-      assert.equal(box.plusText, "+");
-      assert.equal(box.minusText, "−");
-      assert.equal(box.plusAfterMinus, true, "plus should sit to the right of minus on #" + box.id);
-      assert.ok(box.rightGap < 48, "scale buttons should sit at the top right of #" + box.id);
-      assert.equal(box.inBox, true, "scale buttons should stay on #" + box.id);
+      assert.equal(box.scaleChrome, false, "no +/- scale buttons on " + page + " #" + box.id);
+      if (box.id === "track-vis") return; /* cloud chamber keeps its dark field */
+      assert.equal(box.canvasBg, "rgb(255, 255, 255)", "white canvas on #" + box.id);
+      assert.equal(box.boxBg, "rgb(255, 255, 255)", "white box on #" + box.id);
+      if (!box.hidden) {
+        assert.equal(box.cursor === "grab", box.orbit, "grab cursor only on rotatable boxes, #" + box.id);
+      }
+      if (box.replayInBox !== null) {
+        assert.equal(box.replayInBox, true, "Replay inside #" + box.id);
+        assert.equal(box.replayBottomRight, true, "Replay at the bottom right of #" + box.id);
+      }
     });
   }
 
@@ -908,45 +922,6 @@ chromeTest("chapter map, summary, and concept-check scoring are the public notes
   assert.equal(replay25_1.knockout, 1, "knockout ejection should stay replayable");
   assert.equal(replay25_1.tube, 0, "X-ray tube loop should not have Replay");
   assert.equal(replay25_1.imaging, 1, "film blackening is a finite clip");
-
-  const scaled = await cdp.evaluate(`(function () {
-    var imaging = document.querySelector("#imaging-vis");
-    var other = document.querySelector("#knock-vis");
-    var canvas = imaging.querySelector("canvas");
-    var otherCanvas = other.querySelector("canvas");
-    var hud = imaging.querySelector("[data-hud='flesh']");
-    var plus = imaging.querySelector("[data-box-scale='up']");
-    var minus = imaging.querySelector("[data-box-scale='down']");
-    var before = {
-      scale: getComputedStyle(imaging).getPropertyValue("--box-scale").trim(),
-      otherScale: getComputedStyle(other).getPropertyValue("--box-scale").trim(),
-      canvasH: canvas.getBoundingClientRect().height,
-      otherH: otherCanvas.getBoundingClientRect().height,
-      hudH: hud.getBoundingClientRect().height
-    };
-    plus.click();
-    var mid = {
-      scale: getComputedStyle(imaging).getPropertyValue("--box-scale").trim(),
-      otherScale: getComputedStyle(other).getPropertyValue("--box-scale").trim(),
-      canvasH: canvas.getBoundingClientRect().height,
-      otherH: otherCanvas.getBoundingClientRect().height,
-      hudH: hud.getBoundingClientRect().height
-    };
-    minus.click();
-    var after = {
-      scale: getComputedStyle(imaging).getPropertyValue("--box-scale").trim(),
-      canvasH: canvas.getBoundingClientRect().height
-    };
-    return { before: before, mid: mid, after: after };
-  })()`);
-  assert.equal(scaled.before.scale, "1");
-  assert.equal(scaled.before.otherScale, "1");
-  assert.equal(scaled.mid.scale, "1.15");
-  assert.equal(scaled.mid.otherScale, "1", "plus on one box must not scale another");
-  assert.ok(scaled.mid.canvasH > scaled.before.canvasH * 1.08, "plus should enlarge that diagram");
-  near(scaled.mid.otherH, scaled.before.otherH, 1);
-  near(scaled.mid.canvasH / scaled.before.canvasH, scaled.mid.hudH / scaled.before.hudH, 0.08);
-  assert.equal(scaled.after.scale, "1");
 
   await cdp.goto(pageUrl("25-2.html"));
   const replay25_2 = await cdp.evaluate("document.querySelectorAll('[data-replay]').length");
@@ -1060,26 +1035,31 @@ chromeTest("3d scenes magnify, label the tube, keep β drift, and pulse radially
   near(camWheel.camR, cam0.camR, 0.02);
   near(camWheel.camX, cam0.camX, 0.02);
   near(camWheel.camZ, cam0.camZ, 0.02);
+  /* Fig 25.2 panes are flat diagrams: no drag-to-rotate, so the camera stays put. */
   await cdp.evaluate("window.NotesScenes['beams-em'].orbitBy(40, 6)");
+  await cdp.evaluate("window.NotesScenes['beams-e'].orbitBy(40, 6)");
   await cdp.evaluate("new Promise((r) => setTimeout(r, 250))");
   const cam1 = await cdp.evaluate("window.NotesScenes['beams-em'].snapshot()");
   const eCam1 = await cdp.evaluate("window.NotesScenes['beams-e'].snapshot()");
-  assert.ok(
-    Math.abs(cam1.camX - cam0.camX) > 0.12 || Math.abs(cam1.camZ - cam0.camZ) > 0.12,
-    "drag-orbit should move the light-beam camera"
-  );
+  near(cam1.camX, cam0.camX, 0.02);
+  near(cam1.camZ, cam0.camZ, 0.02);
   near(eCam1.camX, eCam0.camX, 0.02);
   near(eCam1.camZ, eCam0.camZ, 0.02);
   near(cam1.eHud, cam1.eProj, 18);
   near(cam1.bHud, cam1.bProj, 20);
-  await cdp.evaluate("window.NotesScenes['beams-e'].orbitBy(40, 6)");
-  await cdp.evaluate("new Promise((r) => setTimeout(r, 250))");
-  const eCam2 = await cdp.evaluate("window.NotesScenes['beams-e'].snapshot()");
-  assert.ok(
-    Math.abs(eCam2.camX - eCam1.camX) > 0.12 || Math.abs(eCam2.camZ - eCam1.camZ) > 0.12,
-    "drag-orbit should move the electron-beam camera"
-  );
-  near(eCam2.hudX, eCam2.projX, 16);
+  near(eCam1.hudX, eCam1.projX, 16);
+  const paneChrome = await cdp.evaluate(`({
+    emOrbit: document.getElementById("beam-em-vis").hasAttribute("data-orbit"),
+    eOrbit: document.getElementById("beam-e-vis").hasAttribute("data-orbit"),
+    imagingOrbit: document.getElementById("imaging-vis").hasAttribute("data-orbit"),
+    tubeOrbit: document.getElementById("tube-vis").hasAttribute("data-orbit"),
+    caption: document.querySelector("#radiation figcaption").textContent
+  })`);
+  assert.equal(paneChrome.emOrbit, false);
+  assert.equal(paneChrome.eOrbit, false);
+  assert.equal(paneChrome.imagingOrbit, true, "the hand-over-film scene keeps drag-to-rotate");
+  assert.equal(paneChrome.tubeOrbit, true, "the angled-target tube keeps drag-to-rotate");
+  assert.doesNotMatch(paneChrome.caption, /drag/i);
 
   const tube = await cdp.evaluate("window.NotesScenes.tube.snapshot()");
   near(tube.gunHud, tube.gunProj, 10);
