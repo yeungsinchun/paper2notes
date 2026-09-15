@@ -25,9 +25,26 @@
         if (target) replay(target);
       });
     });
-    $all(".visual[data-autoplay]").forEach(function (v) {
-      replay(v);
-    });
+    /* Autoplay clips start when the student scrolls to them, and start again
+       each time the box comes back into view, so a clip is never found already
+       finished. Without IntersectionObserver they simply play at load. */
+    var autos = $all(".visual[data-autoplay]");
+    if (!autos.length) return;
+    if (typeof IntersectionObserver !== "function") {
+      autos.forEach(replay);
+      return;
+    }
+    var lastPlay = new WeakMap();
+    var watcher = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var now = performance.now();
+        if (now - (lastPlay.get(entry.target) || -1e9) < 1200) return;
+        lastPlay.set(entry.target, now);
+        replay(entry.target);
+      });
+    }, { threshold: 0.45 });
+    autos.forEach(function (v) { watcher.observe(v); });
   }
 
   function initPipeline() {
