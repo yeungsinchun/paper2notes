@@ -729,19 +729,22 @@ chromeTest("25.3 ion-pair capture, Flip B marks, and β/γ check", async () => {
 
   const mc = await cdp.evaluate(`(function () {
     var page = document.body.innerText;
-    var box = Array.from(document.querySelectorAll("#fields .check")).find(function (el) {
-      return el.getAttribute("data-answer") === "C";
+    var boxes = Array.from(document.querySelectorAll("#fields .check"));
+    var box = boxes.find(function (el) {
+      return el.getAttribute("data-answer") === "B";
     });
     var stem = box.querySelector("p").textContent;
-    box.querySelector('[data-choice="C"]').click();
+    box.querySelector('[data-choice="B"]').click();
     return {
       hasQ35: /101 cpm/.test(page) || /400 cpm/.test(page),
+      dseStem: boxes.some(function (el) { return /statements about β and γ radiation is correct/.test(el.textContent); }),
       stem: stem,
       ok: box.querySelector(".feedback").classList.contains("ok")
     };
   })()`);
   assert.equal(mc.hasQ35, false);
-  assert.match(mc.stem, /β and γ/);
+  assert.equal(mc.dseStem, false, "HKDSE 2017/32 belongs in the section quiz, not the in-flow concept checks");
+  assert.match(mc.stem, /α and β particles/);
   assert.equal(mc.ok, true);
 
   if (evidenceDir) {

@@ -1885,8 +1885,10 @@
   function imaging(host) {
     if (!THREE) return;
     var canvas = host.querySelector("canvas");
+    /* Landscape framing for the 2:1 canvas: camera on the wrist side, so the fingers
+       point screen-right and the film's long edge runs across the canvas. */
     var gfx = stage(canvas, {
-      persp: { fov: 36, x: 3.0, y: 5.45, z: 7.35, lookX: 0.06, lookY: -0.12, lookZ: 0.1 }
+      persp: { fov: 34, x: -6.6, y: 4.78, z: 1.66, lookX: 0.1, lookY: -0.22, lookZ: 0.3 }
     });
     var hudX = host.querySelector('[data-hud="xrays"]');
     var hudBone = host.querySelector('[data-hud="bone"]');
@@ -1900,79 +1902,110 @@
     var filmW = 3.45;
     var filmD = 3.95;
     var filmY = -1.02;
-    var startY = 1.98;
+    /* The hand floats well above the film so its radiograph shows beside it from the
+       3/4 camera instead of hiding directly underneath. */
+    var handLift = 0.36;
+    var startY = 1.7 + handLift;
     var yAxis = new THREE.Vector3(0, 1, 0);
+    /* Transmitting rays cross palm or finger flesh beside a bone, never an air gap. */
     var specs = [
-      { x: 0.22, z: -0.22, absorb: false },
-      { x: -0.42, z: -0.2, absorb: false },
+      { x: 0.13, z: -0.32, absorb: false },
+      { x: -0.5, z: -0.05, absorb: false },
       { x: 0.68, z: -0.34, absorb: false },
-      { x: 0.22, z: 1.02, absorb: false },
-      { x: -0.58, z: 0.82, absorb: false },
-      { x: 0.03, z: -0.05, absorb: true, stopY: 0.53 },
-      { x: -0.27, z: -0.11, absorb: true, stopY: 0.515 },
-      { x: 0.31, z: -0.09, absorb: true, stopY: 0.515 },
-      { x: 0.05, z: 0.7, absorb: true, stopY: 0.525 },
-      { x: 0.57, z: -0.16, absorb: true, stopY: 0.485 }
+      { x: 0.14, z: 1.0, absorb: false },
+      { x: -0.53, z: 0.82, absorb: false },
+      { x: 0.03, z: -0.05, absorb: true, stopY: 0.53 + handLift },
+      { x: -0.27, z: -0.11, absorb: true, stopY: 0.515 + handLift },
+      { x: 0.31, z: -0.09, absorb: true, stopY: 0.515 + handLift },
+      { x: 0.05, z: 0.7, absorb: true, stopY: 0.525 + handLift },
+      { x: 0.57, z: -0.16, absorb: true, stopY: 0.485 + handLift }
     ];
+    var PX = 512;
     var filmCanvas = document.createElement("canvas");
-    filmCanvas.width = 512;
-    filmCanvas.height = 512;
+    filmCanvas.width = PX;
+    filmCanvas.height = PX;
     var fctx = filmCanvas.getContext("2d");
+    /* Flesh and bone are each drawn as one opaque mask, then composited once, so
+       overlapping fingers and palm do not stack into lighter patches. */
+    var fleshMask = document.createElement("canvas");
+    fleshMask.width = PX;
+    fleshMask.height = PX;
+    var boneMask = document.createElement("canvas");
+    boneMask.width = PX;
+    boneMask.height = PX;
     var filmTex = new THREE.CanvasTexture(filmCanvas);
+    filmTex.anisotropy = 4;
     function xzToPx(x, z) {
       return {
-        cx: ((x / filmW) + 0.5) * 512,
-        cy: (0.5 - (z / filmD)) * 512
+        cx: ((x / filmW) + 0.5) * PX,
+        cy: (0.5 - (z / filmD)) * PX
       };
     }
     var segs = [];
-    function paintCapsule(ax, az, bx, bz, radius, fill) {
+    var palmFoot = { x: 0.1, z: -0.2, rx: 1.08 * 0.9, rz: 0.98 * 0.9 };
+    function paintCapsule(ctx, ax, az, bx, bz, radius, fill) {
       var a = xzToPx(ax, az);
       var b = xzToPx(bx, bz);
-      fctx.strokeStyle = fill;
-      fctx.lineWidth = Math.max(7, (radius / filmW) * 1024);
-      fctx.lineCap = "round";
-      fctx.beginPath();
-      fctx.moveTo(a.cx, a.cy);
-      fctx.lineTo(b.cx, b.cy);
-      fctx.stroke();
+      ctx.strokeStyle = fill;
+      ctx.lineWidth = Math.max(6, (radius / filmW) * PX * 2);
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(a.cx, a.cy);
+      ctx.lineTo(b.cx, b.cy);
+      ctx.stroke();
+    }
+    function paintMasks() {
+      var mctx = fleshMask.getContext("2d");
+      mctx.clearRect(0, 0, PX, PX);
+      var palm = xzToPx(palmFoot.x, palmFoot.z);
+      mctx.fillStyle = "#807468";
+      mctx.beginPath();
+      mctx.ellipse(palm.cx, palm.cy, (palmFoot.rx / filmW) * PX, (palmFoot.rz / filmD) * PX, 0, 0, Math.PI * 2);
+      mctx.fill();
+      segs.forEach(function (seg) {
+        paintCapsule(mctx, seg.a.x, seg.a.z, seg.b.x, seg.b.z, seg.rF, "#807468");
+      });
+      var bctx = boneMask.getContext("2d");
+      bctx.clearRect(0, 0, PX, PX);
+      segs.forEach(function (seg) {
+        paintCapsule(bctx, seg.a.x, seg.a.z, seg.b.x, seg.b.z, seg.rB * 1.55, "rgba(236,230,218,0.5)");
+      });
+      segs.forEach(function (seg) {
+        paintCapsule(bctx, seg.a.x, seg.a.z, seg.b.x, seg.b.z, seg.rB * 1.12, "#fbf8f0");
+      });
     }
     function paintFilm(develop) {
+      fctx.globalAlpha = 1;
       fctx.fillStyle = "#fffaf1";
-      fctx.fillRect(0, 0, 512, 512);
+      fctx.fillRect(0, 0, PX, PX);
       if (develop > 0) {
-        fctx.fillStyle = "rgba(18,15,12," + (0.84 * develop) + ")";
-        fctx.fillRect(0, 0, 512, 512);
-        var palm = xzToPx(0.1, -0.18);
-        var grd = fctx.createRadialGradient(palm.cx, palm.cy, 12, palm.cx, palm.cy, 92);
-        grd.addColorStop(0, "rgba(40,34,28," + (0.4 * develop) + ")");
-        grd.addColorStop(1, "rgba(40,34,28,0)");
-        fctx.fillStyle = grd;
-        fctx.beginPath();
-        fctx.ellipse(palm.cx, palm.cy, 88, 72, 0, 0, Math.PI * 2);
-        fctx.fill();
-        segs.forEach(function (seg) {
-          paintCapsule(seg.a.x, seg.a.z, seg.b.x, seg.b.z, seg.rF, "rgba(32,27,22," + (0.55 * develop) + ")");
-        });
-        segs.forEach(function (seg) {
-          paintCapsule(seg.a.x, seg.a.z, seg.b.x, seg.b.z, seg.rB * 1.15, "rgba(250,246,236," + (0.96 * develop) + ")");
-        });
+        /* Air: every X-ray reaches the film, so it blackens fully. */
+        fctx.fillStyle = "rgba(14,12,11," + (0.94 * develop) + ")";
+        fctx.fillRect(0, 0, PX, PX);
+        /* Flesh: most X-rays get through, so only a little lighter than air. */
+        fctx.globalAlpha = 0.5 * develop;
+        fctx.drawImage(fleshMask, 0, 0);
+        /* Bone: X-rays absorbed, so the film stays white there. */
+        fctx.globalAlpha = 0.97 * develop;
+        fctx.drawImage(boneMask, 0, 0);
+        fctx.globalAlpha = 1;
       }
       filmTex.needsUpdate = true;
     }
     var cassette = new THREE.Mesh(
-      new THREE.BoxGeometry(filmW + 0.3, 0.08, filmD + 0.3),
-      new THREE.MeshStandardMaterial({ color: 0x3a3f46, roughness: 0.7 })
+      new THREE.BoxGeometry(filmW + 0.32, 0.1, filmD + 0.32),
+      new THREE.MeshStandardMaterial({ color: 0x4b5058, roughness: 0.65, metalness: 0.15 })
     );
-    cassette.position.set(0.04, filmY - 0.07, 0.12);
+    cassette.position.set(0.04, filmY - 0.08, 0.12);
     var film = new THREE.Mesh(
       new THREE.PlaneGeometry(filmW, filmD),
       new THREE.MeshStandardMaterial({
         map: filmTex,
-        roughness: 0.82,
+        roughness: 0.6,
         metalness: 0.02,
-        emissive: 0xf4efe0,
-        emissiveIntensity: 0.16
+        emissive: 0xffffff,
+        emissiveMap: filmTex,
+        emissiveIntensity: 0.28
       })
     );
     film.rotation.x = -Math.PI / 2;
@@ -1980,22 +2013,25 @@
     gfx.scene.add(cassette, film);
 
     var fleshMat = new THREE.MeshStandardMaterial({
-      color: 0xe8b496,
-      roughness: 0.74,
-      metalness: 0.02,
+      color: 0xf3c7a8,
+      roughness: 0.58,
+      metalness: 0.0,
+      emissive: 0x6b3a22,
+      emissiveIntensity: 0.1,
       transparent: true,
-      opacity: 0.36,
+      opacity: 0.42,
       depthWrite: false,
-      side: THREE.DoubleSide
+      side: THREE.FrontSide
     });
     var boneMat = new THREE.MeshStandardMaterial({
-      color: 0xf3ead4,
-      roughness: 0.4,
-      metalness: 0.06,
-      emissive: 0x2a2418,
-      emissiveIntensity: 0.05
+      color: 0xfaf4e6,
+      roughness: 0.38,
+      metalness: 0.04,
+      emissive: 0xfff5e0,
+      emissiveIntensity: 0.38
     });
     var hand = new THREE.Group();
+    hand.position.y = handLift;
     gfx.scene.add(hand);
     var nBone = 0;
     var nFlesh = 0;
@@ -2066,6 +2102,7 @@
     finger(mcp.ring, vec(0.16, -0.04, 1), [0.4, 0.25, 0.18], 0.125, 0.05);
     finger(mcp.pinky, vec(0.32, -0.05, 1), [0.32, 0.2, 0.15], 0.11, 0.044);
     finger(mcp.thumb, vec(-0.78, -0.04, 0.58), [0.36, 0.28], 0.14, 0.058);
+    paintMasks();
 
     var rays = [];
     specs.forEach(function (sp, i) {
@@ -2095,9 +2132,9 @@
       rays.forEach(function (g, i) {
         if (g.userData.update) g.userData.update(sec + i);
       });
-      placeHud(hudX, canvas, gfx.camera, new THREE.Vector3(0.1, 1.86, 0.18));
-      placeHud(hudBone, canvas, gfx.camera, new THREE.Vector3(0.04, 0.92, 0.48));
-      placeHud(hudFlesh, canvas, gfx.camera, new THREE.Vector3(0.92, 0.5, -0.22));
+      placeHud(hudX, canvas, gfx.camera, new THREE.Vector3(0.1, startY - 0.1, -0.85));
+      placeHud(hudBone, canvas, gfx.camera, new THREE.Vector3(0.04, 0.92 + handLift, 0.48));
+      placeHud(hudFlesh, canvas, gfx.camera, new THREE.Vector3(0.55, 0.6 + handLift, -0.95));
       placeHud(hudFilm, canvas, gfx.camera, new THREE.Vector3(0.08, filmY - 0.02, 2.05));
     }
     function lumAt(x, z) {

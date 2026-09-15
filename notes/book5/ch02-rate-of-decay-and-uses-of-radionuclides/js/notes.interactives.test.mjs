@@ -490,16 +490,19 @@ chromeTest("26.3 sievert check and activity vs dose labels", async () => {
     var box = Array.from(document.querySelectorAll('[data-check="mc"]')).find(function (el) {
       return /equivalent dose/.test(el.textContent);
     });
-    box.querySelector('[data-choice="A"]').click();
+    var answer = box.getAttribute("data-answer");
+    box.querySelector('[data-choice="' + answer + '"]').click();
     return {
-      ok: box.querySelector('[data-choice="A"]').classList.contains("correct"),
-      choice: box.querySelector('[data-choice="A"]').textContent.trim(),
+      ok: box.querySelector('[data-choice="' + answer + '"]').classList.contains("correct"),
+      dseStem: /Which unit is used to measure the radiation equivalent dose/.test(document.body.innerText),
+      sievert: /sievert/i.test(document.body.innerText),
       doseTable: /Radiation weighting factor/.test(document.body.innerText),
       mechanism: /DNA/.test(document.body.innerText)
     };
   })()`);
   assert.equal(pick.ok, true);
-  assert.match(pick.choice, /sievert/);
+  assert.equal(pick.dseStem, false, "HKDSE 2026/32 belongs in the section quiz, not the in-flow concept checks");
+  assert.equal(pick.sievert, true, "the sievert is named on the page");
   assert.equal(pick.doseTable, true, "weighting factors are on the page");
   assert.equal(pick.mechanism, true, "the harm mechanism is stated");
   if (evidenceDir) {
