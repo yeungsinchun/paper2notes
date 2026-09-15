@@ -986,8 +986,8 @@
     var hudXrays = host.querySelector('[data-hud="xrays"]');
     var gunAnchor = new THREE.Vector3(-2.85, 0.58, 0);
     var electronAnchor = new THREE.Vector3(-1.05, 0.48, 0);
-    var targetAnchor = new THREE.Vector3(0.35, 1.05, 0);
-    var xrayAnchor = new THREE.Vector3(0, 1, 0);
+    var targetAnchor = new THREE.Vector3(1.75, -0.25, 0);
+    var xrayAnchor = new THREE.Vector3(-0.25, 1.85, 0);
 
     var glassMat = new THREE.MeshStandardMaterial({
       color: 0xc8dbe6,
@@ -1048,9 +1048,8 @@
     target.updateMatrixWorld(true);
     var hit = new THREE.Vector3(-0.14, 0, 0).applyMatrix4(target.matrixWorld);
     var face = new THREE.Vector3(-1, 0, 0).transformDirection(target.matrixWorld).normalize();
-    var targetTop = new THREE.Vector3(0.04, 0.68, 0).applyMatrix4(target.matrixWorld);
-    targetAnchor.copy(targetTop);
-    xrayAnchor.copy(hit).addScaledVector(face, 0.42).add(new THREE.Vector3(0, 0.32, 0));
+    // Label the target from below-right, clear of the X-ray fan that leaves its face upward.
+    targetAnchor.set(hit.x + 0.7, hit.y - 0.62, 0);
     electronAnchor.set((filament.position.x + hit.x) / 2, 0.48, 0);
     gunAnchor.set(gun.position.x, 0.55, 0);
 
@@ -1104,10 +1103,8 @@
         hex: 0xd4a017
       });
     });
-    var fanMid = new THREE.Vector3();
-    xrayGlyphs.forEach(function (g) { fanMid.add(g.userData.mid); });
-    fanMid.multiplyScalar(1 / xrayGlyphs.length);
-    xrayAnchor.copy(fanMid);
+    // The fan spans from up-left to straight up, so the label sits in the free space up-right of it.
+    xrayAnchor.set(hit.x + 0.7, hit.y + 1.05, 0);
 
     var t0 = performance.now();
     function restart() {
@@ -1484,9 +1481,9 @@
     var t0 = performance.now();
     function restart() {
       t0 = performance.now();
+      apply(0);
     }
-    function frame(now) {
-      var t = ((now - t0) / 1000) % 1.4;
+    function apply(t) {
       var fly = smoothstep(t / 1.05);
       electron.material.opacity = 1;
       electron.position.set(argonHome.x, lerp(argonHome.y, 0.08, fly), 0);
@@ -1496,6 +1493,10 @@
       placeHud(hudWire, canvas, gfx.camera, wireAnchor);
       placeHud(hudCase, canvas, gfx.camera, caseAnchor);
       gfx.renderer.render(gfx.scene, gfx.camera);
+    }
+    function frame(now) {
+      var t = ((now - t0) / 1000) % 1.4;
+      apply(t);
       requestAnimationFrame(frame);
     }
     function snapshot() {

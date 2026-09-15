@@ -17,60 +17,7 @@
     return el;
   }
 
-  function setFeedback(el, ok, text) {
-    if (!el) return;
-    el.textContent = text;
-    el.className = "feedback " + (ok ? "ok" : "no");
-  }
-
-  function initMc() {
-    $all("[data-check='mc']").forEach(function (box) {
-      var answer = box.getAttribute("data-answer");
-      var out = $(".feedback", box);
-      $all("button[data-choice]", box).forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          var pick = btn.getAttribute("data-choice");
-          $all("button[data-choice]", box).forEach(function (b) {
-            b.classList.remove("correct", "wrong");
-            b.disabled = true;
-          });
-          if (pick === answer) {
-            btn.classList.add("correct");
-            setFeedback(out, true, "Yes.");
-          } else {
-            btn.classList.add("wrong");
-            var right = $("button[data-choice='" + answer + "']", box);
-            if (right) right.classList.add("correct");
-            setFeedback(out, false, "Not this one.");
-          }
-        });
-      });
-    });
-  }
-
-  function initTf() {
-    $all("[data-check='tf']").forEach(function (box) {
-      $all(".tf-item", box).forEach(function (item) {
-        var answer = item.getAttribute("data-answer") === "true";
-        var out = $(".feedback", item);
-        $all("button[data-tf]", item).forEach(function (btn) {
-          btn.addEventListener("click", function () {
-            var pick = btn.getAttribute("data-tf") === "true";
-            $all("button[data-tf]", item).forEach(function (b) {
-              b.disabled = true;
-            });
-            if (pick === answer) {
-              btn.classList.add("correct");
-              setFeedback(out, true, "Yes.");
-            } else {
-              btn.classList.add("wrong");
-              setFeedback(out, false, answer ? "True." : "False.");
-            }
-          });
-        });
-      });
-    });
-  }
+  /* Concept checks (MC / true-false / written answer) live in ../../js/checks.js. */
 
   function replay(el) {
     el.classList.remove("play");
@@ -215,6 +162,9 @@
     $all("[data-decay]").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var kind = btn.getAttribute("data-decay");
+        $all("[data-decay]").forEach(function (b) {
+          b.setAttribute("aria-pressed", b === btn ? "true" : "false");
+        });
         $all("[data-decay-panel]").forEach(function (p) {
           p.hidden = p.getAttribute("data-decay-panel") !== kind;
         });
@@ -299,9 +249,9 @@
   }
 
   var sources = {
-    abg: { a: 200, b: 385, g: 254, label: "α + β + γ" },
-    bg: { a: 0, b: 385, g: 254, label: "β + γ  (Example 25.6)" },
-    ag: { a: 150, b: 0, g: 254, label: "α + γ" }
+    abg: { a: 200, b: 385, g: 254, label: "Case 3" },
+    bg: { a: 0, b: 385, g: 254, label: "Case 1 · Example 25.6" },
+    ag: { a: 150, b: 0, g: 254, label: "Case 2" }
   };
 
   function absorberCount(src, paper, al, pb, bg) {
@@ -347,9 +297,9 @@
       }
     }
 
-    $all("[data-src]").forEach(function (btn) {
+    $all("[data-abs-src]").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        src = sources[btn.getAttribute("data-src")];
+        src = sources[btn.getAttribute("data-abs-src")];
         render();
       });
     });
@@ -522,17 +472,6 @@
     });
   }
 
-  function initCompare() {
-    $all("[data-compare]").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var row = btn.getAttribute("data-compare");
-        $all("tr[data-row]").forEach(function (tr) {
-          tr.classList.toggle("on", tr.getAttribute("data-row") === row);
-        });
-      });
-    });
-  }
-
   var BOX_SCALES = [0.85, 1, 1.15, 1.3, 1.5];
 
   function nearestBoxScale(s) {
@@ -591,8 +530,6 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     initBoxScale();
-    initMc();
-    initTf();
     initReplays();
     initImaging();
     initIsotopes();
@@ -606,6 +543,5 @@
     initFlow();
     initFields();
     initBadge();
-    initCompare();
   });
 })();

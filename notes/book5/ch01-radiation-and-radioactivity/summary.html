@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Book 5 Ch.1 summary</title>
+  <title>Book 5 Ch.1 summary: Radiation and Radioactivity</title>
+  <link rel="stylesheet" href="../css/notes.css">
   <link rel="stylesheet" href="css/notes.css">
   <link rel="stylesheet" href="../vendor/katex/katex.min.css">
-  <link rel="stylesheet" href="../css/lo.css">
 </head>
 <body>
   <header class="topbar">
@@ -20,8 +20,9 @@
     </nav>
   </header>
   <main>
-    <p class="kicker">Close</p>
-    <h1>Summary</h1>
+    <p class="kicker">Chapter 25</p>
+    <h1>Summary: Radiation and Radioactivity</h1>
+    <p class="lede">The whole chapter on one page: the facts to know cold, the equations to write, the traps examiners set, and the classified HKDSE questions for this chapter.</p>
 
     <section class="lo-block" aria-labelledby="lo-heading">
       <h2 id="lo-heading">Learning objectives</h2>
@@ -46,103 +47,137 @@
       </ul>
     </section>
 
-
-    <section class="idea">
+    <section class="idea" id="pictures">
       <header>
-        <h2>Three pictures to keep</h2>
-        <span class="stamp">Key ideas</span>
+        <h2><span class="sec-num">1</span>Two pictures to keep</h2>
       </header>
-      <div class="visual play stage" id="sum-tube" data-autoplay data-scene="tube">
-        <canvas class="scene-canvas" width="960" height="420" aria-label="X-ray tube: electrons hit the angled target face and X-rays leave that impact"></canvas>
-        <span class="hud-label" data-hud="gun">electron gun</span>
-        <span class="hud-label" data-hud="electrons">electrons</span>
-        <span class="hud-label" data-hud="target">heavy metal target</span>
-        <span class="hud-label" data-hud="xrays">X-rays</span>
-      </div>
-      <div class="visual play stage" id="sum-paths" data-scene="sumpaths">
-        <canvas class="scene-canvas" width="960" height="280" aria-label="Alpha, beta and gamma paths in E or B"></canvas>
-        <span class="hud-label" data-hud="alpha">α</span>
-        <span class="hud-label" data-hud="beta">β</span>
-        <span class="hud-label" data-hud="gamma">γ</span>
-      </div>
-      <table class="compact pair">
-        <thead><tr><th></th><th>A</th><th>Z</th></tr></thead>
-        <tbody>
-          <tr><td>α</td><td>−4</td><td>−2</td></tr>
-          <tr><td>β</td><td>same</td><td>+1</td></tr>
-          <tr><td>γ</td><td>same</td><td>same</td></tr>
-        </tbody>
-      </table>
+      <figure class="fig">
+        <div class="visual play stage" id="sum-tube" data-autoplay data-scene="tube">
+          <canvas class="scene-canvas" width="960" height="420" aria-label="X-ray tube: electrons hit the angled target face and X-rays leave that impact"></canvas>
+          <span class="hud-label" data-hud="gun">electron gun</span>
+          <span class="hud-label" data-hud="electrons">electrons</span>
+          <span class="hud-label" data-hud="target">heavy metal target</span>
+          <span class="hud-label" data-hud="xrays">X-rays</span>
+        </div>
+        <figcaption><b>The X-ray tube.</b> Heated filament emits electrons; a very high voltage accelerates them across a vacuum; they stop in a heavy metal target and part of their kinetic energy leaves as X-rays. X-rays are ionizing EM waves of very short wavelength; they are not nuclear radiation and a radioactive source never emits them.</figcaption>
+      </figure>
+      <figure class="fig">
+        <div class="visual play stage" id="sum-paths" data-scene="sumpaths">
+          <canvas class="scene-canvas" width="960" height="280" aria-label="Alpha, beta and gamma paths in E or B"></canvas>
+          <span class="hud-label" data-hud="alpha">α</span>
+          <span class="hud-label" data-hud="beta">β</span>
+          <span class="hud-label" data-hud="gamma">γ</span>
+        </div>
+        <figcaption><b>Three paths in a field.</b> α and β curve to opposite sides, β far more because of its tiny mass (not because of a larger force); γ goes straight. Reverse the field and both curves swap sides.</figcaption>
+      </figure>
     </section>
 
-    <section class="idea">
+    <section class="idea" id="glance">
       <header>
-        <h2>α / β / γ at a glance</h2>
-        <span class="stamp">Table 25.6</span>
+        <h2><span class="sec-num">2</span>α, β and γ at a glance</h2>
       </header>
-      <div class="row">
-        <button type="button" data-compare="nature">nature</button>
-        <button type="button" data-compare="speed">speed</button>
-        <button type="button" data-compare="ion">ionizing</button>
-        <button type="button" data-compare="range">range / penetrate</button>
-        <button type="button" data-compare="track">tracks</button>
-        <button type="button" data-compare="field">E / B</button>
-      </div>
-      <table class="compact compare">
+      <table class="notes compare" aria-label="Table 25.6">
         <thead>
           <tr><th></th><th>α</th><th>β</th><th>γ</th></tr>
         </thead>
         <tbody>
-          <tr data-row="nature"><td>nature</td><td>He nucleus</td><td>fast electrons</td><td>very high-f EM</td></tr>
-          <tr data-row="speed"><td>speed</td><td>up to ~0.05c</td><td>up to 0.98c</td><td>c</td></tr>
-          <tr data-row="speed"><td>rel. mass / charge</td><td>4 / +2</td><td>≈0 / −1</td><td>0 / 0</td></tr>
-          <tr data-row="ion"><td>ionizing</td><td>strongest</td><td>weak</td><td>weakest</td></tr>
-          <tr data-row="range"><td>range in air</td><td>~5 cm</td><td>~5 m</td><td>~100 m</td></tr>
-          <tr data-row="range"><td>penetrating</td><td>stopped by paper</td><td>stopped by 5 mm Al</td><td>halved by 25 mm Pb</td></tr>
-          <tr data-row="track"><td>cloud chamber</td><td>thick, straight</td><td>thin, irregular</td><td>hardly observable, scattered</td></tr>
-          <tr data-row="field"><td>E field (− on top)</td><td>bent slightly to −</td><td>bent greatly to +</td><td>none</td></tr>
-          <tr data-row="field"><td>B into page</td><td>bent slightly one way</td><td>bent greatly opposite</td><td>none</td></tr>
+          <tr><th>Nature</th><td>helium nucleus, \( {}^{4}_{2}\mathrm{He} \)</td><td>fast electron, \( {}^{0}_{-1}e \)</td><td>very high-frequency EM wave</td></tr>
+          <tr><th>Origin</th><td>ejected from the nucleus</td><td>a neutron in the nucleus becomes a proton and an electron</td><td>an excited nucleus loses energy, usually after α or β</td></tr>
+          <tr><th>Speed</th><td>up to about 0.05\( c \)</td><td>up to 0.98\( c \)</td><td>\( c \)</td></tr>
+          <tr><th>Mass / charge</th><td>4 u / +2</td><td>1/1840 u / −1</td><td>0 / 0</td></tr>
+          <tr><th>Ionizing power</th><td>strongest (20 000 to 50 000 pairs per cm)</td><td>weaker (50 to 500)</td><td>weakest (5 to 8)</td></tr>
+          <tr><th>Range in air</th><td>about 5 cm</td><td>about 5 m</td><td>about 100 m, intensity falling off</td></tr>
+          <tr><th>Stopped by</th><td>paper, skin</td><td>about 5 mm of aluminium</td><td>never fully; 25 mm of lead halves it</td></tr>
+          <tr><th>Cloud chamber</th><td>thick, straight, short, equal length</td><td>thin, twisted, longer</td><td>faint, scattered, hardly seen</td></tr>
+          <tr><th>Electric field</th><td>towards the negative plate, slightly</td><td>towards the positive plate, strongly</td><td>undeflected</td></tr>
+          <tr><th>Magnetic field</th><td>Fleming's rule, current with the motion; slight curve</td><td>Fleming's rule, current against the motion; strong curve the other way</td><td>undeflected</td></tr>
+          <tr><th>Detected by</th><td>cloud chamber, spark counter, GM (grid off, within 1.5 cm); never by a film badge</td><td>film, GM, cloud chamber</td><td>film, GM (less efficiently), cloud chamber (faintly)</td></tr>
+          <tr><th>Most dangerous</th><td>inside the body</td><td colspan="2">outside the body (γ especially)</td></tr>
         </tbody>
       </table>
     </section>
 
-    <section class="idea">
+    <section class="idea" id="equations">
       <header>
-        <h2>Three traps</h2>
-        <span class="stamp">Common mistakes</span>
+        <h2><span class="sec-num">3</span>Notation and equations</h2>
+      </header>
+      <div class="formula-sheet">
+        <div class="eq">\[ {}^{A}_{Z}\mathrm{X}: \quad A = Z + N, \quad N = A - Z \]</div>
+        <div class="eq">\[ {}^{A}_{Z}\mathrm{X} \rightarrow {}^{A-4}_{Z-2}\mathrm{Y} + {}^{4}_{2}\mathrm{He} \quad (\alpha) \]</div>
+        <div class="eq">\[ {}^{A}_{Z}\mathrm{X} \rightarrow {}^{A}_{Z+1}\mathrm{Y} + {}^{0}_{-1}e \quad (\beta) \]</div>
+        <div class="eq">\[ {}^{A}_{Z}\mathrm{X}^{*} \rightarrow {}^{A}_{Z}\mathrm{X} + \gamma \quad (\gamma) \]</div>
+        <div class="eq">\[ 4n_{\alpha} = \Delta A, \qquad 2n_{\alpha} - n_{\beta} = \Delta Z \]</div>
+        <div class="eq">\[ \text{corrected count rate} = \text{recorded} - \text{background} \]</div>
+      </div>
+      <ul class="points">
+        <li>Balance top and bottom separately: total \( A \) and total \( Z \) are the same on both sides. Emitted particles go on the right.</li>
+        <li>Every member of a decay series has \( A \) differing from the parent's by a multiple of 4; the end product is the lead isotope that satisfies this.</li>
+        <li>Isotopes: same \( Z \), different \( A \) (different \( N \)). Same chemistry, different mass. Not "same \( A \)".</li>
+      </ul>
+    </section>
+
+    <section class="idea" id="detectors">
+      <header>
+        <h2><span class="sec-num">4</span>Detectors compared</h2>
+      </header>
+      <table class="notes">
+        <thead><tr><th>Detector</th><th>What it shows</th><th>Detects α?</th><th>Tells the types apart on its own?</th></tr></thead>
+        <tbody>
+          <tr><td>Photographic film / film badge</td><td>Blackening proportional to total dose over the exposure period; absorber windows on a badge hint at the type</td><td>No: the light-proof wrapper stops α</td><td>Only roughly, via the absorber regions</td></tr>
+          <tr><td>GM counter</td><td>Count rate (counts per second or minute), fast and precise; always includes background, whose average is non-zero</td><td>Yes, with the grid removed and the source within about 1.5 cm</td><td>No: needs absorbers or a field</td></tr>
+          <tr><td>Cloud chamber</td><td>Visible tracks (droplets on the ions); random appearance shows decay is random</td><td>Yes: thick straight tracks</td><td>Yes, from the track shape</td></tr>
+          <tr><td>Ionization current / spark counter / charged electroscope</td><td>Air made conducting by ion-pairs; current, sparks or discharge</td><td>Yes (α is the strongest ionizer)</td><td>No</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="idea" id="traps">
+      <header>
+        <h2><span class="sec-num">5</span>Traps that cost marks</h2>
       </header>
       <div class="trap-grid">
         <div class="trap">
-          <h3>1. 5 mm Al drop</h3>
-          <p>does not prove "β only" until you eliminate α and γ.</p>
+          <h3>A drop at 5 mm Al is not "β only"</h3>
+          <p>Aluminium stops α as well as β. You need the paper step to rule out α and the lead step (a reading at background) to rule out γ.</p>
         </div>
         <div class="trap">
-          <h3>2. β electron</h3>
-          <p>from the nucleus, not from an orbit.</p>
+          <h3>Lead halves γ; it never zeroes it</h3>
+          <p>Each 25 mm of lead halves the γ. A reading can never fall below background, and a reading that keeps changing with thickness is not background.</p>
         </div>
         <div class="trap">
-          <h3>3. Half-life graphs</h3>
-          <p>wait for the next chapter: activity, sievert, C-14 dating, nuclear energy.</p>
+          <h3>β bends more because of mass, not force</h3>
+          <p>The force on an α is twice as large. The β is deflected more because it is about 7200 times lighter.</p>
+        </div>
+        <div class="trap">
+          <h3>The β electron comes from the nucleus</h3>
+          <p>A neutron becomes a proton and an electron. It is not an orbital electron, and no neutron is emitted.</p>
+        </div>
+        <div class="trap">
+          <h3>Ions do the work, not the α</h3>
+          <p>A charged object near an α source is neutralised by ions of the opposite sign drawn out of the ionized air. Moving the source a few centimetres away ends the effect.</p>
+        </div>
+        <div class="trap">
+          <h3>X-rays are not nuclear radiation</h3>
+          <p>Undeflected radiation from a radioactive source is γ. X-rays and γ differ only in origin; both are ionizing EM waves.</p>
+        </div>
+        <div class="trap">
+          <h3>Irradiated is not contaminated</h3>
+          <p>An X-rayed patient or a wrapped film under a source has absorbed energy and is not radioactive. Only radioactive material on or in an object makes it radioactive.</p>
+        </div>
+        <div class="trap">
+          <h3>"α particle", not "α decay"</h3>
+          <p>When asked to state the kind of radiation, name the particle. A radium source also gives β and γ because its daughters are radioactive, not because it is impure.</p>
         </div>
       </div>
     </section>
 
-    <section class="idea">
+    <section class="idea" id="last-checks">
       <header>
-        <h2>Last checks</h2>
-        <span class="stamp">Chapter exercise</span>
+        <h2><span class="sec-num">6</span>Last checks</h2>
       </header>
-      <div class="check" data-check="tf">
-        <h3>Absorber logic</h3>
-        <div class="tf-item" data-answer="false">
-          <p>A significant drop when 5 mm Al is inserted is enough to conclude the unknown is a β-only source.</p>
-          <div class="row"><button type="button" data-tf="true">True</button><button type="button" data-tf="false">False</button></div>
-          <p class="feedback"></p>
-        </div>
-      </div>
       <div class="check" data-check="mc" data-answer="B">
-        <h3>E/B split in vacuum</h3>
-        <p>Source emits α, β and γ. B into the page. Three paths: P curves one way slightly, Q straight, R curves the other way sharply.</p>
+        <h3>Concept check</h3>
+        <p>A source emitting α, β and γ radiation is placed in a vacuum in a uniform magnetic field directed into the page. Three paths are seen: P curves slightly one way, Q is straight, R curves sharply the other way. Which identification is correct?</p>
         <div class="choices">
           <button type="button" data-choice="A">P = β, Q = α, R = γ</button>
           <button type="button" data-choice="B">P = α, Q = γ, R = β</button>
@@ -150,14 +185,56 @@
           <button type="button" data-choice="D">P = α, Q = β, R = γ</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>The undeflected path must be the uncharged γ, so Q = γ (<b>A</b>, <b>C</b>, <b>D</b> all give Q a charged particle). Of the two charged radiations the light β curves sharply, so R = β and P = α: <b>B</b>. The two curves are on opposite sides because the charges have opposite signs.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="C">
+        <h3>Concept check</h3>
+        <p>A nuclide P decays by α emission to Q, and Q decays by β emission to R. Which of the following statements is/are correct?</p>
+        <ol class="stem-list">
+          <li>P and R have the same number of neutrons.</li>
+          <li>R has one more proton than Q.</li>
+          <li>The mass numbers of Q and R are equal.</li>
+        </ol>
+        <div class="choices">
+          <button type="button" data-choice="A">(1) only</button>
+          <button type="button" data-choice="B">(2) only</button>
+          <button type="button" data-choice="C">(2) and (3) only</button>
+          <button type="button" data-choice="D">(1), (2) and (3)</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Let P be \( (Z, N) \). Q = \( (Z-2, N-2) \); R = \( (Z-1, N-3) \). (1) is false: R has three fewer neutrons than P. (2) is true: β adds a proton. (3) is true: β leaves \( A \) unchanged. Answer <b>C</b>.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="D">
+        <h3>Concept check</h3>
+        <p>Which of the following would reduce the count rate registered by a GM tube placed 10 cm from a β source in air?</p>
+        <ol class="stem-list">
+          <li>inserting a 5 mm aluminium sheet between source and tube</li>
+          <li>applying a strong magnetic field across the path</li>
+          <li>inserting a sheet of paper between source and tube</li>
+        </ol>
+        <div class="choices">
+          <button type="button" data-choice="A">(1) only</button>
+          <button type="button" data-choice="B">(3) only</button>
+          <button type="button" data-choice="C">(1) and (3) only</button>
+          <button type="button" data-choice="D">(1) and (2) only</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>(1) stops the β. (2) deflects the β off the line to the tube, so fewer arrive. (3) does nothing measurable: paper stops α, and β passes through it. Answer <b>D</b>. (Reversing the polarity of deflecting plates would also do it; distance already exceeds the α range, so α plays no part.)</p>
+        </div>
       </div>
     </section>
 
-    <p class="later">Half-life, activity, and dating are in Chapter 26.</p>
-    <p class="lede"><a href="index.html">Back to chapter map</a></p>
+    <p class="later">Half-life, activity, the decay constant, dating and radiation dose follow in Chapter 26.</p>
+    <p class="next"><a href="index.html">Back to the chapter map</a> · <a href="../ch02-rate-of-decay-and-uses-of-radionuclides/index.html">On to Chapter 26 →</a></p>
+
     <section class="dse-bank" aria-labelledby="dse-heading">
       <h2 id="dse-heading">Related DSE problems</h2>
-      <p class="lede">Each paper is the classified HKDSE item for the learning objectives above.</p>
+      <p class="lede">Each paper is the classified HKDSE item for the learning objectives above. Attempt it before reading the notes' explanation of the same idea.</p>
       <div class="dse-group">
         <h3>Multiple choice</h3>
       <figure class="dse-paper" id="dse-mc-2012-36">
@@ -300,6 +377,7 @@
   <script src="../vendor/katex/katex.min.js"></script>
   <script src="../vendor/katex/auto-render.min.js"></script>
   <script src="../js/math.js"></script>
+  <script src="../js/checks.js"></script>
   <script src="js/lib/three.min.js"></script>
   <script src="js/diagrams3d.js"></script>
   <script src="js/notes.js"></script>

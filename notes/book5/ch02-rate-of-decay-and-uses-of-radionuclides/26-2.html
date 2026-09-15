@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>26.2 Uses of radionuclides</title>
+  <link rel="stylesheet" href="../css/notes.css">
   <link rel="stylesheet" href="css/notes.css">
   <link rel="stylesheet" href="../vendor/katex/katex.min.css">
-  <link rel="stylesheet" href="../css/lo.css">
 </head>
 <body>
   <header class="topbar">
@@ -22,6 +22,7 @@
   <main>
     <p class="kicker">26.2</p>
     <h1>Uses of radionuclides</h1>
+    <p class="lede">Every use of a radionuclide is a choice of radiation type and half-life, and sometimes of chemistry, to fit a job. Exam questions almost never ask "which isotope"; they ask "why this one and not that one". This section gives the reasons in the form the mark scheme wants.</p>
 
     <section class="lo-block" aria-labelledby="lo-heading">
       <h2 id="lo-heading">Learning objectives</h2>
@@ -34,186 +35,369 @@
       </ul>
     </section>
 
-
     <section class="idea" id="chooser">
       <header>
-        <h2>Choose type and half-life</h2>
-        <span class="stamp">26.2 opener</span>
+        <h2><span class="sec-num">A</span>Choosing a radionuclide for a job</h2>
       </header>
-      <div class="use-grid">
-        <button type="button" data-use="tracer" aria-pressed="true">Medical tracer</button>
-        <button type="button" data-use="knife">External γ therapy</button>
-        <button type="button" data-use="internal">Internal β therapy</button>
-        <button type="button" data-use="leak">Pipe leak</button>
-        <button type="button" data-use="thick">Thickness gauge</button>
-        <button type="button" data-use="smoke">Smoke detector</button>
-        <button type="button" data-use="plant">Plant tracer</button>
-        <button type="button" data-use="food">Food irradiation</button>
-      </div>
-      <table class="compact pair use-table">
-        <thead><tr><th>Use</th><th>Radiation</th><th>Half-life band</th></tr></thead>
+      <p>Three questions decide the choice. <b>Which radiation?</b> It must get from the source to where it is detected or where it must act, and no further. <b>How long a half-life?</b> Long enough for the job to be finished, short enough not to linger where it is unwanted; for instruments, long enough that the activity stays steady for years. <b>What chemistry?</b> Anything put into a body or a plant must go where the element normally goes and must not be poisonous, and neither must its daughter.</p>
+      <table class="notes" aria-label="Uses of radionuclides">
+        <thead><tr><th>Use</th><th>Radiation, and why</th><th>Half-life, and why</th></tr></thead>
         <tbody>
-          <tr data-use-row="tracer" class="on"><td>Medical tracer</td><td>γ (to leave the body)</td><td>hours</td></tr>
-          <tr data-use-row="knife"><td>External radiotherapy</td><td>γ</td><td>years (Co-60 ≈ 5.27 y)</td></tr>
-          <tr data-use-row="internal"><td>Internal radiotherapy</td><td>β (not α, not γ)</td><td>days to weeks</td></tr>
-          <tr data-use-row="leak"><td>Buried leak</td><td>γ (through soil)</td><td>hours</td></tr>
-          <tr data-use-row="thick"><td>Thickness gauge</td><td>β (α stopped, γ ignores thickness)</td><td>years, stable A</td></tr>
-          <tr data-use-row="smoke"><td>Smoke detector</td><td>α (ionizing, short range)</td><td>years (Am-241)</td></tr>
-          <tr data-use-row="plant"><td>Nutrient tracer</td><td>β (P-32)</td><td>hours</td></tr>
-          <tr data-use-row="food"><td>Sterilization</td><td>γ (Co-60)</td><td>years; food is not made radioactive</td></tr>
+          <tr><td>Medical tracer (imaging)</td><td>γ: penetrates out of the body to an external detector; weakly ionizing so does little damage inside</td><td>Hours to days (Tc-99m 6 h, I-123 13 h): long enough to take the images, short enough to limit the dose after</td></tr>
+          <tr><td>Internal radiotherapy</td><td>β: absorbed within a few millimetres, so the dose stays in the target tissue; ionizes less severely than α</td><td>Days to weeks (I-131 8 d, Sr-89 about 50 d): long enough to complete the treatment, short enough to avoid long-term exposure</td></tr>
+          <tr><td>External radiotherapy</td><td>γ: penetrates deep into the body to reach the tumour</td><td>Years (Co-60 5.27 y): the source need not be replaced often</td></tr>
+          <tr><td>Leak in a buried pipe</td><td>γ: passes through soil to a detector at the surface</td><td>Hours (Na-24 15 h): long enough to complete the survey, short enough that contamination of soil and water fades in days</td></tr>
+          <tr><td>Thickness gauge, level monitor</td><td>β for paper, plastic, foil; γ for steel or lead. The radiation must be <em>partly</em> absorbed, so the count changes with thickness. α is stopped completely</td><td>Years: the count rate stays steady, so the gauge does not need frequent recalibration or replacement</td></tr>
+          <tr><td>Smoke detector</td><td>α: strongly ionizing (a steady ion current in air); very short range so nothing escapes the chamber</td><td>Hundreds of years (Am-241 432 y): a stable ionization level for the life of the device</td></tr>
+          <tr><td>Plant nutrient tracer</td><td>β (P-32): detectable through leaf tissue with a GM tube; the element follows ordinary phosphorus</td><td>14.3 d: long enough for the plant to transport it and for the survey; P-34 (12 s) would decay before it moved</td></tr>
+          <tr><td>Food irradiation, sterilizing equipment</td><td>γ (Co-60), or X-rays: penetrates packaging and the whole item, killing microbes by damaging their cells. α cannot get in</td><td>Years: a steady, long-lived source in a shielded room</td></tr>
+          <tr><td>Carbon-14 dating</td><td>β, but the radiation is not chosen; the <em>constant half-life</em> is the clock</td><td>5730 y: dates once-living material from about 60 y to 60 000 y</td></tr>
         </tbody>
       </table>
+      <aside class="tip">
+        <span class="tag">Exam tip</span>
+        <p>When a table of candidate isotopes is given, eliminate by radiation type first, then by half-life, and give the reason for each rejection. "α cannot leave the body" or "a 45-minute half-life would decay before the survey ends" earns the mark; naming the right letter alone does not.</p>
+      </aside>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3>Concept check</h3>
+        <p>A radionuclide to be injected into a patient as a tracer should have</p>
+        <ol class="stem-list">
+          <li>a non-toxic parent and a non-toxic daughter</li>
+          <li>high ionizing power</li>
+          <li>high penetrating power</li>
+        </ol>
+        <div class="choices">
+          <button type="button" data-choice="A">(1) and (2) only</button>
+          <button type="button" data-choice="B">(1) and (3) only</button>
+          <button type="button" data-choice="C">(2) and (3) only</button>
+          <button type="button" data-choice="D">(1), (2) and (3)</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>(3): the radiation must be detected <em>outside</em> the body. (1): the tracer stays in the body, and so does whatever it decays into. (2) is the opposite of what is wanted: ionization inside the body is damage. Answer <b>B</b>.</p>
+        </div>
+      </div>
     </section>
 
-    <section class="idea" id="knife">
+    <section class="idea" id="medical">
       <header>
-        <h2>External radiotherapy</h2>
-        <span class="stamp">Fig. 26.8</span>
+        <h2><span class="sec-num">B</span>Medical uses</h2>
       </header>
-      <div class="visual play stage" id="knife-vis" data-autoplay data-scene="gammaknife">
-        <canvas class="scene-canvas" width="960" height="360" aria-label="Gamma rays from a helmet converge on a target"></canvas>
-        <span class="hud-label" data-hud="gamma">γ source · long half-life</span>
-        <span class="hud-label" data-hud="target">target</span>
+      <h3>Tracers</h3>
+      <ul class="points">
+        <li>A γ-emitting nuclide is attached to a compound the body sends to the organ of interest: iodine to the thyroid, sodium into the blood, technetium-99m compounds to bone or brain. A γ camera outside the body maps where the activity gathers. Only a tiny amount is injected, so the activity, and the dose, is small.</li>
+        <li>α is never used as a diagnostic tracer for two separate reasons: it cannot be detected outside the body (range in tissue is a fraction of a millimetre) and it ionizes strongly, so it would damage cells. Where a suitable γ-only nuclide is available, extra α or β emission is an avoidable internal dose. I-131 is therefore used chiefly for thyroid treatment, though its γ can support follow-up imaging.</li>
+        <li>Half-life, two-sided: long enough to prepare the dose and take the images, short enough that the activity in the patient falls to a safe level within days. Too long a half-life keeps the activity high inside the body for weeks.</li>
+        <li><b>Assumption</b> in tracer calculations: none of the tracer is lost from the body (excreted) during the measurement. If some is excreted, the measured concentration is lower than it should be, so a calculated blood volume comes out too large.</li>
+      </ul>
+      <div class="worked">
+        <span class="tag">Worked example</span>
+        <p>A doctor injects 20 000 Bq of sodium-24 (half-life 15 h) into a patient's bloodstream. 45 hours later a 10 cm<sup>3</sup> blood sample has an activity of 5 Bq. Estimate the patient's blood volume, stating one assumption.</p>
+        <ol class="steps">
+          <li>45 h is 3 half-lives, so the total activity remaining in the blood is \( 20\,000 / 8 = 2500 \) Bq.</li>
+          <li>The tracer is spread evenly: 5 Bq in every 10 cm<sup>3</sup>, so \( V = 10 \times \dfrac{2500}{5} = 5000 \) cm<sup>3</sup>.</li>
+          <li>Assumptions: the tracer is uniformly mixed through the blood, and none has been excreted.</li>
+        </ol>
+        <p class="note">Forgetting the decay (using 20 000 Bq) gives 40 000 cm<sup>3</sup>, which is not a human blood volume. Always decay the injected activity to the time of sampling first.</p>
       </div>
-      <table class="compact pair">
-        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
-        <tbody>
-          <tr><td>γ reaches a target inside the body</td><td>Need high penetrating power</td></tr>
-          <tr><td>The machine should not need a new source every week</td><td>Need a long half-life (years)</td></tr>
-        </tbody>
-      </table>
+      <h3>Internal radiotherapy</h3>
+      <ul class="points">
+        <li>A β emitter is taken up by the target tissue (iodine-131 by the thyroid, strontium-89 by bone). β is chosen because it travels only a few millimetres in tissue, so the energy is deposited in the tumour and not in other organs (γ would pass right through), and because it ionizes less intensely than α, avoiding severe local damage.</li>
+        <li>Half-life of days to weeks: long enough to deliver the treatment, short enough that the patient does not carry significant activity for months.</li>
+        <li>Many β emitters, including I-131, also give γ, which leaves the body. Patients are isolated for a few days after treatment, and airport radiation detectors have picked up treated patients weeks later.</li>
+      </ul>
+      <aside class="tip">
+        <span class="tag">Extension: targeted α therapy</span>
+        <p>Some modern treatments attach a short-lived α emitter such as bismuth-213 to a carrier that concentrates in cancer cells. The short α range is then an advantage: intense ionization is confined to the target. This is treatment, not a diagnostic tracer, and it depends on the carrier reaching the intended tissue.</p>
+      </aside>
+      <h3>External radiotherapy</h3>
+      <figure class="fig">
+        <div class="visual play stage" id="knife-vis" data-autoplay data-scene="gammaknife">
+          <canvas class="scene-canvas" width="960" height="360" aria-label="Gamma rays from a helmet converge on a target"></canvas>
+          <span class="hud-label" data-hud="gamma">γ source · long half-life</span>
+          <span class="hud-label" data-hud="target">target</span>
+        </div>
+        <figcaption><b>Fig. 26.8</b> A "gamma knife". About 200 weak γ beams from cobalt-60 sources enter the head from different directions. Each beam on its own deposits little energy in the healthy tissue it crosses; where they all meet, at the tumour, the dose is high.</figcaption>
+      </figure>
+      <ul class="points">
+        <li>γ is used because it penetrates the skull and tissue to reach a deep tumour. α and β would be absorbed in the skin and bone.</li>
+        <li>Cobalt-60 (half-life 5.27 y) is replaced every few years. The sources decay whether or not the machine is in use, so halving the machine's daily use does not let the sources last longer.</li>
+      </ul>
+      <div class="check" data-check="sa">
+        <h3>Write it out</h3>
+        <p>Give two different reasons why an α-emitting radionuclide is never used as a medical tracer, and explain why the half-life of a tracer should be neither too short nor too long. <span class="marks">(4 marks)</span></p>
+        <button type="button" data-reveal>Show model answer</button>
+        <div class="model" hidden>
+          <ol>
+            <li>α particles have a range of a fraction of a millimetre in tissue, so they cannot be detected outside the body.</li>
+            <li>α is strongly ionizing, so it would cause severe damage to cells near where it collects.</li>
+            <li>Too short: the activity would fall too low to detect before the images are taken.</li>
+            <li>Too long: the patient would carry a significant activity, and receive a dose, for a long time after the examination.</li>
+          </ol>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="C">
+        <h3>Concept check</h3>
+        <p>A hospital's cobalt-60 radiotherapy sources are replaced every five years. Which of the following statements is/are correct?</p>
+        <ol class="stem-list">
+          <li>Using the machine for fewer hours each day would let the sources last longer.</li>
+          <li>The sources are replaced because their activity, not their penetrating power, has fallen.</li>
+          <li>Cobalt-60 is used because γ radiation can reach a tumour deep inside the body.</li>
+        </ol>
+        <div class="choices">
+          <button type="button" data-choice="A">(1) and (2) only</button>
+          <button type="button" data-choice="B">(1) and (3) only</button>
+          <button type="button" data-choice="C">(2) and (3) only</button>
+          <button type="button" data-choice="D">(1), (2) and (3)</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>(1) is false: nuclei decay at the same rate whether the shutter is open or closed. (2) is true: each γ photon is as penetrating as ever; there are simply fewer per second, so treatments would take too long. (3) is the reason for choosing γ. Answer <b>C</b>.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="C">
+        <h3>Concept check</h3>
+        <p>Which radionuclide is most suitable for external diagnostic imaging of the brain?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">β · 6.0 hours</button>
+          <button type="button" data-choice="B">γ · 13.5 years</button>
+          <button type="button" data-choice="C">γ · 6.01 hours</button>
+          <button type="button" data-choice="D">β · 3.14 days</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Imaging from outside needs γ, which rules out <b>A</b> and <b>D</b> however convenient their half-lives. Of the two γ emitters, 13.5 years (<b>B</b>) would leave the patient radioactive for decades; 6 hours (<b>C</b>, technetium-99m) is long enough to image and gone within a couple of days.</p>
+        </div>
+      </div>
     </section>
 
-    <section class="idea" id="leak">
+    <section class="idea" id="industrial">
       <header>
-        <h2>Industrial tracer: find a leak</h2>
-        <span class="stamp">Fig. 26.11</span>
+        <h2><span class="sec-num">C</span>Industrial uses: tracers and gauges</h2>
       </header>
-      <div class="visual play stage" id="pipeline-vis" data-autoplay data-scene="pipeline">
-        <canvas class="scene-canvas" width="960" height="360" aria-label="Gamma tracer leaking from a buried pipe to a detector above ground"></canvas>
-        <span class="hud-label" data-hud="count">count</span>
-        <span class="hud-label" data-hud="leak">γ leak</span>
-      </div>
+      <h3>Finding a leak in a buried pipe</h3>
+      <figure class="fig">
+        <div class="visual play stage" id="pipeline-vis" data-autoplay data-scene="pipeline">
+          <canvas class="scene-canvas" width="960" height="360" aria-label="Gamma tracer leaking from a buried pipe to a detector above ground"></canvas>
+          <span class="hud-label" data-hud="count">count</span>
+          <span class="hud-label" data-hud="leak">γ leak</span>
+        </div>
+        <figcaption><b>Fig. 26.11</b> A γ-emitting tracer is added to the liquid in the pipe. A detector is moved along the ground above the pipe. Where the pipe leaks, tracer soaks into the soil and the count rate rises sharply. Switch the leak off to see the count fall back to the level from tracer inside the intact pipe.</figcaption>
+      </figure>
       <div class="row">
         <button type="button" data-leak="on" aria-pressed="true">Leak on</button>
         <button type="button" data-leak="off">Leak off</button>
       </div>
-      <div class="check" data-check="mc" data-answer="B">
-        <h3>Concept check</h3>
-        <p>A radioisotope is added to water in an underground pipe so a leak can be found from above ground. Which is most suitable?</p>
-        <div class="choices">
-          <button type="button" data-choice="A">P · 66 h · β</button>
-          <button type="button" data-choice="B">Q · 36 h · γ</button>
-          <button type="button" data-choice="C">R · 7.2 h · α</button>
-          <button type="button" data-choice="D">S · 45 min · α, β</button>
+      <ul class="points">
+        <li>γ because it must pass through a metre or so of soil to the detector. β would be stopped in the soil, α in the pipe wall.</li>
+        <li>Half-life of hours (sodium-24, 15 h): long enough to finish the survey, short enough that the soil and water are not left contaminated for long. Months would be far too long.</li>
+      </ul>
+      <h3>Thickness gauge</h3>
+      <figure class="fig">
+        <div class="visual play stage" id="thickness-vis" data-autoplay data-scene="thickness">
+          <canvas class="scene-canvas" width="960" height="360" aria-label="Beta particles through a sheet to a detector; thicker sheet, lower count"></canvas>
+          <span class="hud-label" data-hud="count">count</span>
         </div>
-        <p class="feedback"></p>
-      </div>
-    </section>
-
-    <section class="idea" id="thick">
-      <header>
-        <h2>Thickness gauge: β, not γ</h2>
-        <span class="stamp">Fig. 26.12</span>
-      </header>
-      <div class="visual play stage" id="thickness-vis" data-autoplay data-scene="thickness">
-        <canvas class="scene-canvas" width="960" height="360" aria-label="Beta particles through a sheet to a detector; thicker sheet, lower count"></canvas>
-        <span class="hud-label" data-hud="count">count</span>
-      </div>
+        <figcaption><b>Fig. 26.12</b> A β source below the moving sheet, a detector above. Drag the slider: a thicker sheet absorbs more β, so the count rate falls. The source never touches the product.</figcaption>
+      </figure>
       <div class="row">
         <label>Sheet thickness <input id="thick-slider" type="range" min="1" max="3" step="0.1" value="1"></label>
       </div>
-      <table class="compact pair">
-        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
-        <tbody>
-          <tr><td>Thicker sheet, lower count</td><td>The radiation must be sensitive to thickness</td></tr>
-          <tr><td>α is stopped by the sheet</td><td>No useful count</td></tr>
-          <tr><td>γ goes through almost unchanged</td><td>Count ignores thickness</td></tr>
-        </tbody>
-      </table>
+      <ul class="points">
+        <li><b>Feedback.</b> If the sheet comes out too thin, more β gets through and the count rate rises; the control system moves the rollers closer together. Too thick, the count falls and the rollers open. The set point is the count rate for the correct thickness.</li>
+        <li><b>Which radiation.</b> The radiation must be <em>partly</em> absorbed by the sheet, so that the count is sensitive to thickness. For paper, plastic film or aluminium foil that is β (α would be stopped completely, γ would pass almost unchanged). For thick steel plate or lead slabs β is stopped completely, so γ is the right choice.</li>
+        <li><b>Long half-life</b> (years) so the count rate for the correct thickness stays the same; otherwise the gauge would need frequent recalibration and the source frequent replacement.</li>
+        <li>As the source ages its <em>activity</em> falls (fewer particles per second). The <em>penetrating power</em> of each β particle does not change with time.</li>
+      </ul>
+      <h3>Level monitor</h3>
+      <p>The same idea checks whether cartons on a filling line are full. A β source and a detector face each other at the fill line. A full carton absorbs most of the β; an under-filled one lets it through and the count is abnormally high, so the carton is rejected. α could not pass through the carton at all, and γ would pass through the liquid almost unchanged. A source with a half-life of years is needed; ten minutes would be useless.</p>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3 data-src="HKDSE 2024 Paper 1A Q33">Concept check</h3>
+        <p>A radioisotope is to be added to water in an underground pipe so that a leak can be located from above ground. Which is most suitable?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">P · half-life 66 h · β</button>
+          <button type="button" data-choice="B">Q · half-life 36 h · γ</button>
+          <button type="button" data-choice="C">R · half-life 7.2 h · α</button>
+          <button type="button" data-choice="D">S · half-life 45 min · α and β</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Only γ can reach a detector through soil, so <b>B</b>. <b>A</b> has a workable half-life but β is absorbed by the soil; <b>C</b> and <b>D</b> give α, which would not even leave the water. 36 h is long enough for the survey and short enough that the soil is not contaminated for long.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="C">
+        <h3>Concept check</h3>
+        <p>Four sources are available for a gauge that monitors the thickness of lead slabs, about 2 cm thick, as they leave a rolling mill. Which is most suitable?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">α · half-life 432 years</button>
+          <button type="button" data-choice="B">β · half-life 5.75 years</button>
+          <button type="button" data-choice="C">γ · half-life 5.27 years</button>
+          <button type="button" data-choice="D">γ · half-life 6.0 hours</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>β (<b>B</b>) is the right choice for paper or foil, but 2 cm of lead stops every β particle, so the count would read zero whatever the thickness. γ is partly absorbed by lead (about half per 25 mm), so its count changes measurably with thickness: <b>C</b>. <b>D</b> is γ but would need recalibrating every hour. <b>A</b> is stopped by anything.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3>Concept check</h3>
+        <p>Andrew says the β source in a paper-thickness gauge must be replaced after some years "because the penetrating power of the β particles falls with time". Which is the best comment?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">Correct: older sources emit slower β particles.</button>
+          <button type="button" data-choice="B">Wrong reason: penetrating power per particle is unchanged, but the activity (particles per second) has fallen, so the count rate for the set thickness has drifted.</button>
+          <button type="button" data-choice="C">Wrong: a source with a half-life of years never needs replacing.</button>
+          <button type="button" data-choice="D">Wrong: the source is replaced only because the paper becomes radioactive.</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p><b>B</b>. The energy of the β particles from a given nuclide does not depend on the age of the source; what falls is how many are emitted per second. <b>C</b> ignores that even a long half-life eventually matters; <b>D</b> is false: β does not make the paper radioactive.</p>
+        </div>
+      </div>
+      <div class="check" data-check="sa">
+        <h3>Write it out</h3>
+        <p>Explain how a β source and a detector keep aluminium foil at the required thickness in a rolling mill, and state why a source with a long half-life is chosen. <span class="marks">(4 marks)</span></p>
+        <button type="button" data-reveal>Show model answer</button>
+        <div class="model" hidden>
+          <ol>
+            <li>β from the source passes through the foil to the detector; the thicker the foil, the more β is absorbed and the lower the count rate.</li>
+            <li>If the count rate rises above the set value, the foil is too thin and the rollers are moved closer together; if it falls below, the foil is too thick and the rollers are moved apart.</li>
+            <li>A long half-life means the activity, and so the count rate for the correct thickness, stays practically constant for years.</li>
+            <li>So the gauge does not need frequent recalibration or replacement of the source.</li>
+          </ol>
+        </div>
+      </div>
     </section>
 
     <section class="idea" id="smoke">
       <header>
-        <h2>Smoke detector: α ion current</h2>
-        <span class="stamp">Fig. 26.14</span>
+        <h2><span class="sec-num">D</span>Smoke detector</h2>
       </header>
-      <div class="visual play stage" id="smoke-vis" data-autoplay data-scene="smoke">
-        <canvas class="scene-canvas" width="960" height="360" aria-label="Alpha source ionizes air; smoke kills the current and trips the alarm"></canvas>
-        <span class="hud-label" data-hud="i">current</span>
-        <span class="hud-label" data-hud="alarm">alarm</span>
-      </div>
+      <figure class="fig">
+        <div class="visual play stage" id="smoke-vis" data-autoplay data-scene="smoke">
+          <canvas class="scene-canvas" width="960" height="360" aria-label="Alpha source ionizes air; smoke kills the current and trips the alarm"></canvas>
+          <span class="hud-label" data-hud="i">current</span>
+          <span class="hud-label" data-hud="alarm">alarm</span>
+        </div>
+        <figcaption><b>Fig. 26.14</b> A tiny americium-241 α source ionizes the air between two charged plates; the ions carry a small steady current. Smoke particles attach to the ions and the current falls, which trips the alarm.</figcaption>
+      </figure>
       <div class="row">
         <button type="button" data-fire="off" aria-pressed="true">Clear air</button>
         <button type="button" data-fire="on">Smoke</button>
       </div>
-      <table class="compact pair">
-        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
-        <tbody>
-          <tr><td>α makes ion pairs; a small current flows</td><td>Alarm stays off</td></tr>
-          <tr><td>Smoke attaches to the ions; current drops</td><td>Alarm on</td></tr>
-          <tr><td>α has a short range in air</td><td>Only a tiny chamber is affected</td></tr>
-        </tbody>
-      </table>
+      <ul class="points">
+        <li>The current is carried by the <em>ions</em> the α particles make in the air, not by the α particles themselves. Smoke particles capture the ions, making heavy, slow carriers, so the current drops.</li>
+        <li>α is chosen because it is the strongest ionizer, giving a usable current from a very weak source, and because its range in air is only a few centimetres, so no radiation leaves the chamber. Occupants of the room receive no extra dose.</li>
+        <li>Half-life of hundreds of years (Am-241, 432 y) keeps the ionization level, and so the "clear air" current, stable for the life of the detector. A short half-life is <em>not</em> wanted here.</li>
+      </ul>
+      <div class="worked">
+        <span class="tag">Worked example</span>
+        <p>A smoke detector fails when the activity of its Am-241 source (half-life 432 y) falls to 80% of its initial value. Will it still work after 100 years?</p>
+        <ol class="steps">
+          <li>\( k = \ln 2 / 432 = 1.60 \times 10^{-3} \) y<sup>-1</sup>.</li>
+          <li>\( 0.80 = e^{-kt} \) gives \( t = \ln(1/0.80)/k = 0.223 / (1.60 \times 10^{-3}) = 139 \) y.</li>
+          <li>139 y is more than 100 y, so yes.</li>
+        </ol>
+      </div>
+      <div class="check" data-check="mc" data-answer="D">
+        <h3>Concept check</h3>
+        <p>Which of the following statements about an ionization smoke detector is/are correct?</p>
+        <ol class="stem-list">
+          <li>The current between the plates is carried by α particles crossing the gap.</li>
+          <li>A source with a half-life of a few days would be a better choice because it would be less hazardous.</li>
+          <li>People in the room receive no significant dose from the source because α has a range of a few centimetres in air.</li>
+        </ol>
+        <div class="choices">
+          <button type="button" data-choice="A">(1) only</button>
+          <button type="button" data-choice="B">(1) and (3) only</button>
+          <button type="button" data-choice="C">(2) and (3) only</button>
+          <button type="button" data-choice="D">(3) only</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>(1) false: the α particles ionize the air and the <em>ions</em> carry the current. (2) false: the detector would stop working in weeks as the ion current fell; a long half-life keeps the current steady. (3) true. Answer <b>D</b>.</p>
+        </div>
+      </div>
     </section>
 
     <section class="idea" id="food">
       <header>
-        <h2>Irradiation does not make food radioactive</h2>
-        <span class="stamp">Fig. 26.16</span>
+        <h2><span class="sec-num">E</span>Irradiation: food, medical equipment, pests</h2>
       </header>
-      <div class="visual play stage" id="sterile-vis" data-autoplay data-scene="sterile">
-        <canvas class="scene-canvas" width="960" height="360" aria-label="Packaged food passing under a gamma source"></canvas>
-        <span class="hud-label" data-hud="food">packaged food · not radioactive</span>
-      </div>
-      <div class="check" data-check="tf">
-        <h3>Concept check</h3>
-        <div class="tf-item" data-answer="false">
-          <p>Strawberries labelled “treated by irradiation” are contaminated with radioactive sources.</p>
-          <div class="row"><button type="button" data-tf="true">True</button><button type="button" data-tf="false">False</button></div>
-          <p class="feedback"></p>
+      <figure class="fig">
+        <div class="visual play stage" id="sterile-vis" data-autoplay data-scene="sterile">
+          <canvas class="scene-canvas" width="960" height="360" aria-label="Packaged food passing under a gamma source"></canvas>
+          <span class="hud-label" data-hud="food">packaged food · not radioactive</span>
         </div>
-      </div>
+        <figcaption><b>Fig. 26.16</b> Packaged food passes a cobalt-60 source in a thick-walled room. γ passes through the packaging and the food, killing bacteria, moulds and insects by damaging their cells. The food absorbs energy but no radioactive material: it is irradiated, not contaminated, and is not radioactive afterwards.</figcaption>
+      </figure>
+      <ul class="points">
+        <li>γ (or X-rays, which are equally ionizing and penetrating) because it must reach the whole of a sealed package. α could not penetrate the wrapping, let alone the food.</li>
+        <li>The same process sterilizes sealed syringes, dressings and surgical instruments, which cannot be heat-treated after packaging, and sterilizes insect pests so that a population dies out.</li>
+        <li>A steady source with a half-life of years (Co-60, 5.27 y) is used, in a shielded room with remote handling.</li>
+        <li>For or against: irradiated food keeps longer and carries fewer disease organisms; some people object that it may alter taste or nutrients, or distrust the label. Either is acceptable in an exam if supported by a reason.</li>
+      </ul>
       <div class="check" data-check="mc" data-answer="D">
         <h3>Concept check</h3>
-        <p>Which is best as a tracer for medical imaging?</p>
+        <p>Which of the following statements about food irradiation is/are correct?</p>
+        <ol class="stem-list">
+          <li>An α source must be used, because α has the highest ionizing power.</li>
+          <li>γ must not be used, because its high penetrating power would make the food radioactive.</li>
+          <li>X-rays cannot be used, because they are not nuclear radiation.</li>
+        </ol>
         <div class="choices">
-          <button type="button" data-choice="A">α · 432 years</button>
-          <button type="button" data-choice="B">β · 7.4 seconds</button>
-          <button type="button" data-choice="C">β, γ · 4.5 months</button>
-          <button type="button" data-choice="D">γ · 8 days</button>
+          <button type="button" data-choice="A">(2) only</button>
+          <button type="button" data-choice="B">(3) only</button>
+          <button type="button" data-choice="C">(1) and (2) only</button>
+          <button type="button" data-choice="D">none of them</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>(1): α cannot get through the packaging or into the food. (2): penetration is exactly why γ <em>is</em> used, and irradiating food does not make it radioactive. (3): X-rays are ionizing EM waves just like γ, and are used. Answer <b>D</b>.</p>
+        </div>
       </div>
     </section>
 
     <section class="idea" id="dating">
       <header>
-        <h2>Carbon-14 dating</h2>
-        <span class="stamp">Fig. 26.18–26.19</span>
+        <h2><span class="sec-num">F</span>Carbon-14 dating</h2>
       </header>
-      <div class="visual play stage" id="dating-vis" data-autoplay data-scene="dating">
-        <canvas class="scene-canvas" width="960" height="380" aria-label="Carbon-14 activity stays A0 while alive, then halves after death"></canvas>
-        <span class="hud-label" data-hud="a">A</span>
-      </div>
+      <figure class="fig">
+        <div class="visual play stage" id="dating-vis" data-autoplay data-scene="dating">
+          <canvas class="scene-canvas" width="960" height="380" aria-label="Carbon-14 activity stays A0 while alive, then halves after death"></canvas>
+          <span class="hud-label" data-hud="a">A</span>
+        </div>
+        <figcaption><b>Fig. 26.18 and 26.19</b> While an organism lives, its carbon-14 activity per gram stays at the atmospheric value \( A_0 \). At death the exchange stops and the activity halves every 5730 years. Step through: alive, just dead, one half-life, two half-lives.</figcaption>
+      </figure>
       <div class="row">
         <button type="button" data-age="0" aria-pressed="true">Alive</button>
         <button type="button" data-age="1">Just dead</button>
         <button type="button" data-age="2">1 half-life</button>
         <button type="button" data-age="3">2 half-lives</button>
       </div>
-      <table class="compact pair">
-        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
-        <tbody>
-          <tr><td>Atmosphere and living things keep a steady C-14 fraction</td><td>Activity while alive is \( A_0 \)</td></tr>
-          <tr><td>Just after death the activity is still \( A_0 \)</td><td>Clock starts at death, not at “becoming radioactive”</td></tr>
-          <tr><td>After one half-life (~5730 y) activity is \( \tfrac{1}{2} A_0 \)</td><td>Age from remaining C-14</td></tr>
-          <tr><td>Reliable about 60 y to 60 000 y</td><td>Not rock, not metal, not a living person</td></tr>
-        </tbody>
-      </table>
+      <div class="def">
+        <span class="tag">Isotopes of carbon</span>
+        <p>Natural carbon is about 99% carbon-12 and 1% carbon-13, both stable, with a trace (about one atom in \( 10^{12} \)) of radioactive carbon-14. C-14 is made continuously in the upper atmosphere when cosmic-ray neutrons strike nitrogen, \( {}^{14}_{7}\mathrm{N} + {}^{1}_{0}\mathrm{n} \rightarrow {}^{14}_{6}\mathrm{C} + {}^{1}_{1}\mathrm{p} \), and it decays by β emission, \( {}^{14}_{6}\mathrm{C} \rightarrow {}^{14}_{7}\mathrm{N} + {}^{0}_{-1}e \). Production balances decay, so the C-14 fraction in atmospheric carbon dioxide stays roughly constant.</p>
+      </div>
+      <ul class="points">
+        <li><b>Why it works.</b> Plants take in CO<sub>2</sub> and animals eat plants, so every living thing has the atmospheric C-14 fraction and the same activity per gram of carbon. When it dies the intake stops and the C-14 decays without replacement. Comparing the activity per gram (or the C-14 : C-12 ratio) of the sample with that of living material gives the number of half-lives since death.</li>
+        <li><b>Assumptions.</b> The atmospheric C-14 fraction was the same when the organism lived as it is today, and the organism had that fraction at death. (Burning fossil fuels adds C-12, diluting the fraction; nuclear tests added C-14, enriching it. Both need corrections.)</li>
+        <li><b>What cannot be dated.</b> Anything living (the fraction is still being topped up, so the clock has not started). Rocks, metals and pottery (never had a living carbon fraction). Fossil fuels: millions of years old, so their C-14 has entirely gone. Anything older than about 60 000 y (ten half-lives leave under 0.1% of the C-14, too little to measure reliably) or younger than about 60 y (the drop is too small to measure).</li>
+        <li><b>Direction of errors.</b> If a sample was contaminated with extra C-12, or the atmosphere had less C-14 when it lived, its activity per gram is lower than assumed and the calculated age is too <em>high</em>.</li>
+        <li>Always compare <em>per gram</em>: a 50 g sample giving 4.5 counts per minute is 0.09 min<sup>-1</sup> g<sup>-1</sup>.</li>
+      </ul>
+      <div class="worked">
+        <span class="tag">Worked example</span>
+        <p>Living wood gives 15 counts per minute per gram of carbon. A 50 g sample of carbon from an ancient beam gives 4.5 counts per minute (background already subtracted). Estimate the beam's age. Half-life of C-14 = 5730 y.</p>
+        <ol class="steps">
+          <li>Per gram: \( 4.5 / 50 = 0.090 \) min<sup>-1</sup> g<sup>-1</sup>.</li>
+          <li>\( A/A_0 = 0.090/15 = 0.0060 \). Number of half-lives \( n = \log_2(1/0.0060) = \ln(167)/\ln 2 = 7.38 \).</li>
+          <li>\( t = 7.38 \times 5730 = 42\,300 \) y. (Equivalently \( t = \frac{1}{k}\ln\frac{A_0}{A} \) with \( k = \ln 2 / 5730 \).)</li>
+        </ol>
+        <p class="note">Forgetting to divide by 50 g gives \( A/A_0 = 0.30 \) and an age of about 10 000 y.</p>
+      </div>
       <div class="check" data-check="mc" data-answer="D">
-        <h3>Concept check</h3>
-        <p>Ancient wood: \( 11.0\,\mathrm{min}^{-1} \) corrected. Fresh wood of the same kind: \( 15.6\,\mathrm{min}^{-1} \). \( T_{1/2} \) of C-14 = 5730 y. Approximate age?</p>
+        <h3 data-src="HKDSE 2015 Paper 1A Q33">Concept check</h3>
+        <p>Carbon from an ancient wooden object gives a corrected count rate of 11.0 min<sup>-1</sup>. The same mass of carbon from fresh wood of the same kind gives 15.6 min<sup>-1</sup>. The half-life of C-14 is 5730 y. The approximate age of the object is</p>
         <div class="choices">
           <button type="button" data-choice="A">890 years</button>
           <button type="button" data-choice="B">1300 years</button>
@@ -221,23 +405,104 @@
           <button type="button" data-choice="D">2900 years</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>\( A/A_0 = 11.0/15.6 = 0.705 \), which is \( (1/2)^{n} \) with \( n = \ln(15.6/11.0)/\ln 2 = 0.504 \) half-lives. \( t = 0.504 \times 5730 = 2900 \) y: <b>D</b>. A quick check: 0.705 is just under \( (1/2)^{1/2} = 0.707 \), so just over half a half-life, and half of 5730 is 2865. Any method that scales the percentage drop linearly with time is wrong: decay is exponential, not linear.</p>
+        </div>
       </div>
-      <div class="check" data-check="mc" data-answer="D">
+      <div class="check" data-check="mc" data-answer="C">
         <h3>Concept check</h3>
-        <p>Which object can be dated by carbon-14?</p>
+        <p>Which of the following could be dated reliably by the carbon-14 method?</p>
         <div class="choices">
-          <button type="button" data-choice="A">Rock</button>
-          <button type="button" data-choice="B">Old coin</button>
-          <button type="button" data-choice="C">Metal knife</button>
-          <button type="button" data-choice="D">Wooden chair</button>
+          <button type="button" data-choice="A">a granite rock</button>
+          <button type="button" data-choice="B">a bone believed to be 300 000 years old</button>
+          <button type="button" data-choice="C">a linen cloth believed to be 3000 years old</button>
+          <button type="button" data-choice="D">a wooden box made 20 years ago</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p><b>C</b>: linen is plant fibre, once living, and 3000 y is about half a half-life, a comfortable fraction to measure. <b>A</b> never exchanged carbon with the atmosphere (use uranium-lead dating instead). <b>B</b> is over 50 half-lives old: essentially no C-14 remains. <b>D</b> has lost only 0.2% of its C-14, too small a change to detect.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="C">
+        <h3>Concept check</h3>
+        <p>Why can the carbon-14 method not be used to find the age of a living person?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">The activity of the carbon-14 in a living body is too small to measure.</button>
+          <button type="button" data-choice="B">A human lifetime is far shorter than the half-life of carbon-14.</button>
+          <button type="button" data-choice="C">While a person is alive the carbon-14 fraction in the body is continually replenished from food, so it does not fall with age.</button>
+          <button type="button" data-choice="D">Carbon-14 is found only in plants.</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p><b>C</b>. The method measures time since carbon exchange <em>stopped</em>, which for a living person has not happened. <b>B</b> is a real limitation for very young objects but not the reason a living person cannot be dated at all; <b>A</b> and <b>D</b> are false.</p>
+        </div>
       </div>
     </section>
+
+    <section class="idea" id="rocks">
+      <header>
+        <h2><span class="sec-num">G</span>Dating rocks, and disposing of waste</h2>
+      </header>
+      <ul class="points">
+        <li><b>Uranium-lead dating.</b> Rocks contain no living carbon, but uranium-238 (half-life \( 4.47 \times 10^{9} \) y) decays through a series to stable lead-206. Comparing the amounts of parent and daughter in a rock gives the time since the rock solidified. Meteorites and the oldest Earth rocks give the age of the Earth as about \( 4.5 \times 10^{9} \) y. Each U-238 nucleus that reaches Pb-206 has emitted 8 α particles, so trapped helium counts decays too.</li>
+        <li><b>Radioactive waste.</b> Low-level waste (old smoke detectors, tracer syringes, contaminated gloves) cannot go to ordinary landfill. In Hong Kong it is stored at the Siu A Chau facility until its activity has fallen to a safe level; clinical waste is labelled as radioactive. Long-lived, high-level waste from reactors is stored in shielded, cooled containers for decades and then buried deep in stable rock.</li>
+      </ul>
+      <div class="worked">
+        <span class="tag">Worked example</span>
+        <p>A rock is found to contain 15 uranium-238 atoms for every 8 helium atoms trapped in it. Each U-238 to Pb-206 decay releases 8 α particles, which become helium atoms. Estimate the age of the rock. Half-life of U-238 = \( 4.5 \times 10^{9} \) y.</p>
+        <ol class="steps">
+          <li>8 helium atoms mean one uranium nucleus has decayed. So for every 16 original U atoms, 15 remain: \( N/N_0 = 15/16 \).</li>
+          <li>\( (1/2)^{n} = 15/16 \), \( n = \log_2(16/15) = 0.093 \) half-lives.</li>
+          <li>\( t = 0.093 \times 4.5 \times 10^{9} = 4.2 \times 10^{8} \) y.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section-dse" aria-labelledby="dse-practice-heading">
+      <header>
+        <span class="sec-num">DSE</span>
+        <h2 id="dse-practice-heading">Topic-matched past-paper practice</h2>
+      </header>
+      <p>In application questions, state both the property and why it fits the job. The links open the full classified question in this chapter's DSE bank.</p>
+      <div class="dse-practice-grid">
+        <article class="dse-practice-card">
+          <h3>Choosing a tracer for a buried leak</h3>
+          <p>Eliminate radiation that cannot reach the detector first. Only then compare the half-life with the time needed for the survey.</p>
+          <div class="dse-practice-links">
+            <a href="summary.html#dse-mc-2024-33">2024/33 MC</a>
+          </div>
+        </article>
+        <article class="dse-practice-card">
+          <h3>Carbon-14 dating</h3>
+          <p>Compare corrected count rates for equal masses, use the fraction remaining and reject materials whose carbon clock never started.</p>
+          <div class="dse-practice-links">
+            <a href="summary.html#dse-mc-2015-33">2015/33 MC</a>
+          </div>
+        </article>
+        <article class="dse-practice-card">
+          <h3>Applications in a longer response</h3>
+          <p>Practise a full explanation that connects radiation type, range or ionization, and the suitable half-life rather than naming a nuclide only.</p>
+          <div class="dse-practice-links">
+            <a href="summary.html#dse-lq-2014-10">2014/10 LQ</a>
+            <a href="summary.html#dse-lq-2017-10">2017/10 LQ</a>
+            <a href="summary.html#dse-lq-2018-10">2018/10 LQ</a>
+            <a href="summary.html#dse-lq-2026-12">2026/12 LQ</a>
+          </div>
+        </article>
+      </div>
+      <figure class="dse-paper subsection-paper">
+        <figcaption><b>Start here: 2024/33 MC</b><span>Choose a tracer for a buried leak by matching its radiation and half-life to the job.</span></figcaption>
+        <p class="dse-slot">Full paper question: 2024/33 MC</p>
+        <img src="../_local/dse/mc/26/2024_q33.png" alt="HKDSE 2024 Paper 1A Question 33">
+      </figure>
+    </section>
+
+    <p class="next"><a href="26-3.html">Next: 26.3 Radiation safety →</a></p>
   </main>
   <script src="../vendor/katex/katex.min.js"></script>
   <script src="../vendor/katex/auto-render.min.js"></script>
   <script src="../js/math.js"></script>
+  <script src="../js/checks.js"></script>
   <script src="js/lib/three.min.js"></script>
   <script src="js/diagrams3d.js"></script>
   <script src="js/notes.js"></script>

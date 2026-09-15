@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>26.1 Rate of radioactive decay</title>
+  <link rel="stylesheet" href="../css/notes.css">
   <link rel="stylesheet" href="css/notes.css">
   <link rel="stylesheet" href="../vendor/katex/katex.min.css">
-  <link rel="stylesheet" href="../css/lo.css">
 </head>
 <body>
   <header class="topbar">
@@ -22,6 +22,7 @@
   <main>
     <p class="kicker">26.1</p>
     <h1>Rate of radioactive decay</h1>
+    <p class="lede">Decay is random for one nucleus and perfectly predictable for a large sample. This section builds the two working tools, half-life and activity, shows how to read them from real (background-contaminated) data, and then, as extension, the decay constant and the exponential law that let you solve for any time, not only whole half-lives.</p>
 
     <section class="lo-block" aria-labelledby="lo-heading">
       <h2 id="lo-heading">Learning objectives</h2>
@@ -39,41 +40,47 @@
       </ul>
     </section>
 
-
     <section class="idea" id="random">
       <header>
-        <h2>Decay is random, a sample is not chaos</h2>
-        <span class="stamp">Fig. 26.1–26.3</span>
+        <h2><span class="sec-num">A</span>Decay is random, but a sample is predictable</h2>
       </header>
-      <div class="visual play stage" id="decay-vis" data-autoplay data-scene="dice">
-        <canvas class="scene-canvas" width="960" height="420" aria-label="One hundred nuclei. Each throw, about one in six decay and are removed."></canvas>
-        <span class="hud-label" data-hud="live">100 undecayed</span>
-      </div>
+      <figure class="fig">
+        <div class="visual play stage" id="decay-vis" data-autoplay data-scene="dice">
+          <canvas class="scene-canvas" width="960" height="420" aria-label="One hundred nuclei. Each throw, about one in six decay and are removed."></canvas>
+          <span class="hud-label" data-hud="live">100 undecayed</span>
+        </div>
+        <figcaption><b>Fig. 26.1 to 26.3</b> A dice model. Each nucleus is a die; on every throw each surviving die has the same 1-in-6 chance of "decaying" and is removed. Nobody can say which dice will go on the next throw, yet about one sixth of the survivors always do.</figcaption>
+      </figure>
       <div class="row">
         <button type="button" data-replay="decay-vis">Replay</button>
       </div>
-      <table class="compact pair">
-        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
-        <tbody>
-          <tr><td>You cannot name which nucleus decays on the next throw</td><td>Radioactive decay is a random process</td></tr>
-          <tr><td>Each nucleus has the same chance (here 1 in 6) each throw</td><td>A large sample still has a predictable pattern</td></tr>
-          <tr><td>Fewer live nuclei remain, so fewer decay on the next throw</td><td>The rate falls as N falls</td></tr>
-        </tbody>
-      </table>
+      <div class="def">
+        <span class="tag">Random and spontaneous</span>
+        <p>Radioactive decay is <b>random</b>: it is impossible to predict when a particular nucleus will decay, and every undecayed nucleus of a given nuclide has the same chance of decaying in the next second, however old it is. It is <b>spontaneous</b>: it happens on its own and nothing external (temperature, pressure, chemical bonding, an electric field) speeds it up or slows it down.</p>
+      </div>
+      <ul class="points">
+        <li>Because every nucleus has the same chance per unit time, the <em>number</em> decaying per second is proportional to the number of undecayed nuclei present. Fewer survivors, fewer decays. That is why the rate falls as the sample decays.</li>
+        <li>With a large number of nuclei (a microgram of anything contains about \( 10^{15} \) atoms) the statistical average is so reliable that the decay of a sample follows a smooth, predictable curve.</li>
+        <li>With very few nuclei the average is not reliable. If a million boxes each hold two nuclei and you wait one half-life, some boxes will have 0 left, some 1, some 2; only the <em>average</em> is 1. "Half of two nuclei decays after one half-life" is not a meaningful statement.</li>
+        <li>Evidence of randomness: repeated equal-time counts of the same source (or of background) are never identical, and cloud-chamber tracks appear at random places and moments.</li>
+      </ul>
       <div class="check" data-check="mc" data-answer="D">
         <h3>Concept check</h3>
-        <p>Radioactive decay is random in nature. This means that</p>
+        <p>Radioactive decay is described as random. This means that</p>
         <div class="choices">
           <button type="button" data-choice="A">the activity of a sample depends on the number of undecayed nuclei.</button>
           <button type="button" data-choice="B">the rate of decay increases with temperature.</button>
-          <button type="button" data-choice="C">the type of radiation emitted by the sample is unknown.</button>
-          <button type="button" data-choice="D">we can never tell which nucleus in the sample will decay first.</button>
+          <button type="button" data-choice="C">the type of radiation emitted by the sample cannot be known in advance.</button>
+          <button type="button" data-choice="D">we can never tell which nucleus in the sample will decay next, or when a given nucleus will decay.</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p><b>D</b> is the definition. <b>A</b> is true but is a <em>consequence</em> of every nucleus having the same chance, not what "random" means. <b>B</b> is false: decay is spontaneous and temperature has no effect. <b>C</b> is false: a given nuclide always emits the same radiation; what is unknown is the timing.</p>
+        </div>
       </div>
       <div class="check" data-check="mc" data-answer="D">
-        <h3>Concept check</h3>
-        <p>Four one-minute background counts are taken. Which set is the most probable?</p>
+        <h3 data-src="HKDSE 2020 Paper 1A Q30">Concept check</h3>
+        <p>Four one-minute background counts are taken in the same laboratory. Which set of readings is the most probable?</p>
         <div class="choices">
           <button type="button" data-choice="A">5, 62, 8, 69</button>
           <button type="button" data-choice="B">40, 40, 40, 40</button>
@@ -81,43 +88,81 @@
           <button type="button" data-choice="D">29, 26, 31, 35</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Background is roughly constant on average but random in detail, so consecutive counts should scatter <em>a little</em> about a mean: <b>D</b>. <b>B</b> shows no randomness at all; <b>A</b> swings far too wildly for a steady source; <b>C</b> falls steadily, which would mean a decaying source, not background.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="C">
+        <h3>Concept check</h3>
+        <p>A sample contains a very large number of nuclei of one radionuclide. Which of the following statements is/are correct?</p>
+        <ol class="stem-list">
+          <li>The nuclei that have survived longest are the most likely to decay next.</li>
+          <li>The number decaying per second falls as time goes on.</li>
+          <li>Cooling the sample would slow its decay.</li>
+        </ol>
+        <div class="choices">
+          <button type="button" data-choice="A">(1) only</button>
+          <button type="button" data-choice="B">(3) only</button>
+          <button type="button" data-choice="C">(2) only</button>
+          <button type="button" data-choice="D">(1) and (2) only</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>(1) is false: nuclei do not age; every survivor has the same chance per second. (2) is true: fewer undecayed nuclei remain, so fewer decay per second. (3) is false: decay is spontaneous and unaffected by temperature. Answer <b>C</b>.</p>
+        </div>
       </div>
     </section>
 
     <section class="idea" id="halflife">
       <header>
-        <h2>Half-life: N halves on a fixed clock</h2>
-        <span class="stamp">Fig. 26.4</span>
+        <h2><span class="sec-num">B</span>Half-life</h2>
       </header>
-      <div class="visual play stage" id="halfn-vis" data-autoplay data-scene="halfN">
-        <canvas class="scene-canvas" width="960" height="420" aria-label="Iodine-131: number of undecayed nuclei against time, with remaining and decayed stacks"></canvas>
-        <span class="hud-label" data-hud="n">N</span>
-        <span class="hud-label" data-hud="t">t</span>
+      <figure class="fig">
+        <div class="visual play stage" id="halfn-vis" data-autoplay data-scene="halfN">
+          <canvas class="scene-canvas" width="960" height="420" aria-label="Iodine-131: number of undecayed nuclei against time, with remaining and decayed stacks"></canvas>
+          <span class="hud-label" data-hud="n">N</span>
+          <span class="hud-label" data-hud="t">t</span>
+        </div>
+        <figcaption><b>Fig. 26.4</b> Iodine-131 (half-life 8 days). Starting with 40 billion nuclei, 20 billion remain at 8 days, 10 billion at 16 days, 5 billion at 24 days. The grey stack is the decayed nuclei, which have become daughter nuclei (xenon-131) and are still there: the two stacks always total 40 billion.</figcaption>
+      </figure>
+      <div class="def">
+        <span class="tag">Definition</span>
+        <p>The <b>half-life</b> \( T_{1/2} \) of a radionuclide is the time taken for the number of undecayed nuclei in a sample to fall to half its initial value. Equivalently, it is the time for the activity to fall to half. After \( n \) half-lives,</p>
+        <div class="eq">\[ N = N_0 \left(\tfrac{1}{2}\right)^{n}, \qquad n = \frac{t}{T_{1/2}} \]</div>
       </div>
-      <table class="compact pair">
-        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+      <ul class="points">
+        <li>Half-life is a property of the nuclide, not of the sample. A gram and a microgram of iodine-131 both have \( T_{1/2} = 8 \) d. Heating, cooling, dissolving or splitting the sample does not change it.</li>
+        <li>Half-life is not "how long the source lasts". After one half-life half the nuclei are still undecayed; after two, a quarter; the number approaches zero but a sample is never "finished" at any particular moment.</li>
+        <li>The <em>decayed</em> nuclei do not disappear. They become the daughter nuclide, so the total number of nuclei (and, very nearly, the mass) stays constant while the sample becomes progressively more daughter and less parent.</li>
+        <li>Half-lives range over more than twenty powers of ten:</li>
+      </ul>
+      <table class="notes" aria-label="Table 26.3">
+        <thead><tr><th>Radionuclide</th><th>Half-life</th><th>Radionuclide</th><th>Half-life</th></tr></thead>
         <tbody>
-          <tr><td>After 8 d, 20 billion remain and 20 billion have decayed</td><td>Half-life of I-131 is 8 days</td></tr>
-          <tr><td>The orange + grey stack still totals 40 billion</td><td>Decayed nuclei become a daughter; they do not vanish</td></tr>
-          <tr><td>The same halving repeats at 16 d and 24 d</td><td>\( N = N_0 (1/2)^{n} \) after n half-lives</td></tr>
+          <tr><td>polonium-215</td><td>0.0018 s</td><td>iodine-131</td><td>8 d</td></tr>
+          <tr><td>radon-220</td><td>52 s</td><td>strontium-90</td><td>28.8 y</td></tr>
+          <tr><td>bismuth-213</td><td>45.6 min</td><td>carbon-14</td><td>5730 y (often rounded to 5700 y)</td></tr>
+          <tr><td>sodium-24</td><td>15 h</td><td>uranium-238</td><td>\( 4.47 \times 10^{9} \) y</td></tr>
         </tbody>
       </table>
-      <div class="eq">\[ N = N_0 \left(\tfrac{1}{2}\right)^{n} \]</div>
-      <table class="compact">
-        <thead><tr><th>nuclide</th><th>half-life</th></tr></thead>
-        <tbody>
-          <tr><td>iodine-131</td><td>8 d</td></tr>
-          <tr><td>carbon-14</td><td>5700 y</td></tr>
-          <tr><td>uranium-238</td><td>\( 4.47 \times 10^{9} \) y</td></tr>
-        </tbody>
-      </table>
-      <div class="one-liners">
-        <p>Each radionuclide has a characteristic half-life. Heating or chemistry does not change it.</p>
+      <div class="worked">
+        <span class="tag">Worked example</span>
+        <p>A sample of a radionuclide with half-life 3 days has mass 100 g. (a) What mass of the nuclide remains after 12 days? (b) What mass has decayed? (c) What was the mass 6 days before the start?</p>
+        <ol class="steps">
+          <li>(a) \( n = 12/3 = 4 \) half-lives. Remaining \( = 100 \times (1/2)^4 = 6.25 \) g.</li>
+          <li>(b) Decayed \( = 100 - 6.25 = 93.75 \) g. (It is still in the sample, as daughter nuclide.)</li>
+          <li>(c) Going backwards two half-lives doubles twice: \( 100 \times 2^2 = 400 \) g.</li>
+        </ol>
+        <p class="note">Common slips: giving 6.25 g for "decayed", or 75 g (two half-lives) for "decayed in 12 days".</p>
       </div>
       <div class="check" data-check="mc" data-answer="B">
         <h3>Concept check</h3>
-        <p>Which statements about the half-life of a source are correct?</p>
-        <p>(1) Time for the activity to fall to half. (2) Time left for the source to remain radioactive. (3) Time for the number of undecayed nuclei to drop to half.</p>
+        <p>Which of the following statements about the half-life of a radioactive source is/are correct?</p>
+        <ol class="stem-list">
+          <li>It is the time for the activity of the source to fall to half its value.</li>
+          <li>It is the time the source remains radioactive.</li>
+          <li>It is the time for the number of undecayed nuclei to fall to half its value.</li>
+        </ol>
         <div class="choices">
           <button type="button" data-choice="A">(1) only</button>
           <button type="button" data-choice="B">(1) and (3) only</button>
@@ -125,11 +170,18 @@
           <button type="button" data-choice="D">(1), (2) and (3)</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>(3) is the definition and (1) follows because \( A \propto N \). (2) is the standard misconception: after one half-life the source is still radioactive with half its nuclei left. Answer <b>B</b>.</p>
+        </div>
       </div>
       <div class="check" data-check="mc" data-answer="C">
         <h3>Concept check</h3>
-        <p>A source contains only radioactive X, which decays to stable Y. After one half-life of X:</p>
-        <p>(1) The number of X nuclei is about half. (2) The number of Y nuclei is about twice its initial value. (3) The activity of the source is about half.</p>
+        <p>A source contains only radioactive nuclide X, which decays to stable Y. After one half-life of X, which of the following is/are correct?</p>
+        <ol class="stem-list">
+          <li>The number of X nuclei is about half the initial number.</li>
+          <li>The number of Y nuclei is about twice its initial value.</li>
+          <li>The activity of the source is about half its initial value.</li>
+        </ol>
         <div class="choices">
           <button type="button" data-choice="A">(1) only</button>
           <button type="button" data-choice="B">(2) only</button>
@@ -137,60 +189,105 @@
           <button type="button" data-choice="D">(2) and (3) only</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>(1) and (3) are the definition of half-life applied to \( N \) and \( A \). (2) is a trap: the source started with <em>no</em> Y, so there is no "initial value" to double. After one half-life the Y nuclei equal the X nuclei. Answer <b>C</b>.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="C">
+        <h3>Concept check</h3>
+        <p>A pure sample of a radionuclide decays to a stable daughter. After 2 years the sample is 2% parent and 98% daughter by number. What was its composition after 1 year?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">25% parent, 75% daughter</button>
+          <button type="button" data-choice="B">51% parent, 49% daughter</button>
+          <button type="button" data-choice="C">14% parent, 86% daughter</button>
+          <button type="button" data-choice="D">4% parent, 96% daughter</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Whatever fraction survives one year, the same fraction of <em>that</em> survives the next year. So \( f^2 = 0.02 \), \( f = \sqrt{0.02} = 0.14 \): <b>C</b>. <b>A</b> assumes the fraction falls linearly; <b>B</b> assumes half of the loss happens each year; <b>D</b> doubles instead of taking the square root.</p>
+        </div>
       </div>
     </section>
 
     <section class="idea" id="activity">
       <header>
-        <h2>Activity halves on the same clock</h2>
-        <span class="stamp">Fig. 26.5–26.6</span>
+        <h2><span class="sec-num">C</span>Activity</h2>
       </header>
-      <div class="pane-pair">
-        <div class="visual play stage" id="activityn-vis" data-autoplay data-scene="activityN">
-          <canvas class="scene-canvas" width="480" height="360" aria-label="Undecayed nuclei drop by half, so activity drops by half"></canvas>
-          <span class="hud-label" data-hud="a">A</span>
-          <span class="hud-label" data-hud="n">N</span>
+      <figure class="fig">
+        <div class="pane-pair">
+          <div class="visual play stage" id="activityn-vis" data-autoplay data-scene="activityN">
+            <canvas class="scene-canvas" width="480" height="360" aria-label="Undecayed nuclei drop by half, so activity drops by half"></canvas>
+            <span class="hud-label" data-hud="a">A</span>
+            <span class="hud-label" data-hud="n">N</span>
+          </div>
+          <div class="visual play stage" id="activitya-vis" data-autoplay data-scene="activityA">
+            <canvas class="scene-canvas" width="480" height="360" aria-label="Activity against time for iodine-131"></canvas>
+            <span class="hud-label" data-hud="a">A</span>
+          </div>
         </div>
-        <div class="visual play stage" id="activitya-vis" data-autoplay data-scene="activityA">
-          <canvas class="scene-canvas" width="480" height="360" aria-label="Activity against time for iodine-131"></canvas>
-          <span class="hud-label" data-hud="a">A</span>
-        </div>
+        <figcaption><b>Fig. 26.5 and 26.6</b> Left: fewer undecayed nuclei means fewer decays per second. Right: the activity of iodine-131 against time has exactly the same shape, and the same half-life, as the graph of \( N \).</figcaption>
+      </figure>
+      <div class="def">
+        <span class="tag">Definition</span>
+        <p>The <b>activity</b> \( A \) of a sample is the number of nuclei that decay per unit time. Unit: the <b>becquerel</b> (Bq), 1 Bq = 1 decay per second. Because every undecayed nucleus has the same chance of decaying per second, activity is proportional to the number of undecayed nuclei:</p>
+        <div class="eq">\[ A \propto N \qquad\text{so}\qquad A = A_0 \left(\tfrac{1}{2}\right)^{n} \]</div>
       </div>
-      <table class="compact pair">
-        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
-        <tbody>
-          <tr><td>Activity is the number of nuclei decaying per unit time</td><td>Unit: becquerel. 1 Bq = 1 s⁻¹</td></tr>
-          <tr><td>Fewer undecayed nuclei left</td><td>Lower activity. \( A \propto N \)</td></tr>
-          <tr><td>A halves when N halves</td><td>\( A = A_0 (1/2)^{n} \) as well</td></tr>
-        </tbody>
-      </table>
-      <div class="eq">\[ A \propto N \quad\text{so}\quad A = A_0 \left(\tfrac{1}{2}\right)^{n} \]</div>
+      <ul class="points">
+        <li>Activity depends on <em>two</em> things: how many undecayed nuclei there are, and the nuclide's half-life (a short half-life means each nucleus is more likely to decay per second). It does not depend on the type of radiation emitted.</li>
+        <li>Halving a sample halves \( N \) and therefore \( A \). It leaves the half-life unchanged.</li>
+        <li><b>Count rate is not activity.</b> A GM tube some distance away records far fewer counts per second than the activity in Bq: radiation is emitted in all directions and the tube intercepts only a small fraction; some is absorbed on the way; the tube does not register every particle that enters it. The corrected count rate is <em>proportional</em> to activity, so it halves on the same clock and can be used to find the half-life.</li>
+        <li>Non-integer numbers of half-lives are allowed: \( n = t / T_{1/2} \) need not be a whole number. \( A = A_0 (1/2)^{t/T_{1/2}} \) works for any \( t \).</li>
+      </ul>
+      <div class="worked">
+        <span class="tag">Worked example</span>
+        <p>Iodine-131 has a half-life of 8 days. A sample has activity 200 Bq after 30 days. What was its initial activity?</p>
+        <ol class="steps">
+          <li>\( n = 30/8 = 3.75 \) half-lives (do not round to 3 or 4).</li>
+          <li>\( A_0 = A \times 2^{n} = 200 \times 2^{3.75} = 200 \times 13.45 = 2690 \) Bq.</li>
+        </ol>
+        <p class="note">Rounding \( n \) to 4 gives 3200 Bq; to 3 gives 1600 Bq; multiplying by 3.75 gives 750 Bq. All three appear as distractors.</p>
+      </div>
       <div class="check" data-check="mc" data-answer="B">
-        <h3>Concept check</h3>
-        <p>A source undergoes decay such that 300 nuclides have decayed in 1 minute. Its activity is</p>
+        <h3 data-src="HKDSE 2025 Paper 1A Q31">Concept check</h3>
+        <p>A source undergoes decay such that 300 nuclei decay in 1 minute. Its activity is</p>
         <div class="choices">
           <button type="button" data-choice="A">0.2 Bq</button>
           <button type="button" data-choice="B">5 Bq</button>
           <button type="button" data-choice="C">300 Bq</button>
-          <button type="button" data-choice="D">18000 Bq</button>
+          <button type="button" data-choice="D">18 000 Bq</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Activity is decays <em>per second</em>: \( 300 / 60 = 5 \) Bq, <b>B</b>. <b>C</b> forgets the unit conversion; <b>D</b> multiplies instead of dividing; <b>A</b> inverts.</p>
+        </div>
       </div>
-      <div class="check" data-check="mc" data-answer="D">
+      <div class="check" data-check="mc" data-answer="A">
         <h3>Concept check</h3>
-        <p>The activity of a sample is 18 MBq. What was it 3 half-lives earlier?</p>
+        <p>Half of a powdered radioactive sample is removed. For the half that remains, which of the following are halved compared with the original sample?</p>
+        <ol class="stem-list">
+          <li>the activity</li>
+          <li>the half-life</li>
+          <li>the number of undecayed nuclei</li>
+        </ol>
         <div class="choices">
-          <button type="button" data-choice="A">6 MBq</button>
-          <button type="button" data-choice="B">54 MBq</button>
-          <button type="button" data-choice="C">72 MBq</button>
-          <button type="button" data-choice="D">144 MBq</button>
+          <button type="button" data-choice="A">(1) and (3) only</button>
+          <button type="button" data-choice="B">(1) only</button>
+          <button type="button" data-choice="C">(1), (2) and (3)</button>
+          <button type="button" data-choice="D">(2) and (3) only</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Half the powder means half the nuclei (3), and since \( A \propto N \) half the activity (1). The half-life is a property of the nuclide and is unchanged. Answer <b>A</b>.</p>
+        </div>
       </div>
       <div class="check" data-check="mc" data-answer="D">
         <h3>Concept check</h3>
         <p>On which of the following does the activity of a radioactive source depend?</p>
-        <p>(1) the nature of the nuclear radiation emitted (2) the half-life of the source (3) the number of active nuclei</p>
+        <ol class="stem-list">
+          <li>the nature of the radiation emitted</li>
+          <li>the half-life of the nuclide</li>
+          <li>the number of undecayed nuclei</li>
+        </ol>
         <div class="choices">
           <button type="button" data-choice="A">(1) only</button>
           <button type="button" data-choice="B">(3) only</button>
@@ -198,32 +295,75 @@
           <button type="button" data-choice="D">(2) and (3) only</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>\( A = kN \): the number of nuclei (3) and, through \( k = \ln 2 / T_{1/2} \), the half-life (2). Whether the decay gives α, β or γ has no bearing on <em>how many</em> decays occur per second. Answer <b>D</b>.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="C">
+        <h3>Concept check</h3>
+        <p>Two samples P and Q are of the same radionuclide. P has twice as many undecayed nuclei as Q. Which of the following is correct?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">P has twice the half-life of Q.</button>
+          <button type="button" data-choice="B">P and Q have the same activity because they are the same nuclide.</button>
+          <button type="button" data-choice="C">P has twice the activity of Q, and both activities halve in the same time.</button>
+          <button type="button" data-choice="D">P's activity takes twice as long as Q's to fall to half.</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p><b>C</b>: \( A \propto N \) gives the factor of two; half-life is fixed by the nuclide, so both halve on the same clock. <b>A</b> and <b>D</b> make the half-life depend on the amount; <b>B</b> ignores \( N \).</p>
+        </div>
       </div>
     </section>
 
     <section class="idea" id="background">
       <header>
-        <h2>Read half-life from corrected counts</h2>
-        <span class="stamp">Example 26.1</span>
+        <h2><span class="sec-num">D</span>Reading half-life from real data</h2>
       </header>
-      <div class="visual play stage" id="countbg-vis" data-autoplay data-scene="countbg">
-        <canvas class="scene-canvas" width="960" height="420" aria-label="Recorded count rate falls toward a background floor"></canvas>
-        <span class="hud-label" data-hud="rec">recorded</span>
-        <span class="hud-label" data-hud="bg">background</span>
-      </div>
+      <figure class="fig">
+        <div class="visual play stage" id="countbg-vis" data-autoplay data-scene="countbg">
+          <canvas class="scene-canvas" width="960" height="420" aria-label="Recorded count rate falls toward a background floor"></canvas>
+          <span class="hud-label" data-hud="rec">recorded</span>
+          <span class="hud-label" data-hud="bg">background</span>
+        </div>
+        <figcaption><b>Example 26.1</b> The recorded count rate from a source falls but flattens out at about 40 counts per minute instead of zero. The flat part is background, which the GM tube counts whether or not a source is present.</figcaption>
+      </figure>
       <div class="row">
-        <button type="button" data-replay="countbg-vis">Replay fall to background</button>
+        <button type="button" data-replay="countbg-vis">Replay</button>
       </div>
-      <table class="compact pair">
-        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
-        <tbody>
-          <tr><td>The graph flattens above zero</td><td>The leftover count is background, not “activity never reaches zero”</td></tr>
-          <tr><td>Initial recorded ≈ 840 min⁻¹, floor ≈ 40 min⁻¹</td><td>Corrected start = 800 min⁻¹</td></tr>
-          <tr><td>Corrected halves to 400 at t = 10 h; recorded then = 440</td><td>\( T_{1/2} = 10\,\mathrm{h} \) from the corrected curve</td></tr>
-        </tbody>
-      </table>
+      <div class="def">
+        <span class="tag">Corrected count rate</span>
+        <p>Background radiation (cosmic rays, rocks and soil, building materials, food and drink, radon in the air) gives a GM tube a small, roughly steady count rate even with no source nearby. The <b>corrected count rate</b> is the recorded count rate minus the background count rate, and it is the quantity proportional to the activity of the source.</p>
+        <div class="eq">\[ \text{corrected count rate} = \text{recorded count rate} - \text{background count rate} \]</div>
+      </div>
+      <div class="worked">
+        <span class="tag">Worked example</span>
+        <p>In Example 26.1 the recorded count rate starts at 840 min<sup>-1</sup> and flattens at about 40 min<sup>-1</sup>. Find the half-life.</p>
+        <ol class="steps">
+          <li>Background \( \approx 40 \) min<sup>-1</sup> (the level the graph flattens to). Corrected initial rate \( = 840 - 40 = 800 \) min<sup>-1</sup>.</li>
+          <li>After one half-life the corrected rate is 400 min<sup>-1</sup>, so the <em>recorded</em> rate is \( 400 + 40 = 440 \) min<sup>-1</sup>.</li>
+          <li>Read the time at which the recorded curve passes 440 min<sup>-1</sup>: 10 h. So \( T_{1/2} = 10 \) h.</li>
+        </ol>
+        <p class="note">Reading the time to fall from 840 to 420 on the uncorrected curve gives a half-life that is too long. Always halve the corrected value, then add background back before reading the graph.</p>
+      </div>
+      <ul class="points">
+        <li><b>Why the curve flattens.</b> The corrected count rate approaches zero but never quite reaches it (each half-life only halves what is left). Long before that, the source's contribution has fallen below the background, so the recorded rate levels off at the background value.</li>
+        <li><b>From a table.</b> Subtract background from every reading, then find the half-life from the corrected column (or plot it and read the graph). A single corrected reading can come out slightly negative or below background because both source and background counts fluctuate randomly; treat it as "about zero".</li>
+        <li><b>Each reading more than half the previous</b> in equal time steps does not mean a long half-life; it is the signature of an uncorrected background. Subtract it and check again.</li>
+        <li><b>Scatter.</b> Points that do not lie exactly on a smooth curve are expected: decay is random. Draw the best smooth curve through them.</li>
+        <li><b>A second run with a weaker source</b> of the same nuclide starts lower but has the same half-life and flattens at the same background level.</li>
+        <li>Reduce background error by counting for longer and by measuring background for a long time before and after the experiment.</li>
+      </ul>
+      <div class="worked">
+        <span class="tag">Worked example</span>
+        <p>A GM counter near a source reads 1000 min<sup>-1</sup>. Two half-lives later it reads 400 min<sup>-1</sup>. (a) Find the background count rate. (b) What will it read after a further half-life?</p>
+        <ol class="steps">
+          <li>(a) Let background be \( b \). Corrected start \( = 1000 - b \). After two half-lives corrected \( = (1000 - b)/4 \), so recorded \( = (1000 - b)/4 + b = 400 \). Then \( 1000 - b + 4b = 1600 \), \( b = 200 \) min<sup>-1</sup>.</li>
+          <li>(b) Corrected after three half-lives \( = 800/8 = 100 \); recorded \( = 100 + 200 = 300 \) min<sup>-1</sup>.</li>
+        </ol>
+        <p class="note">Dividing 1000 by 4 and comparing with 400 "proves" nothing: the mismatch <em>is</em> the background.</p>
+      </div>
       <div class="check" data-check="mc" data-answer="D">
-        <h3>Concept check</h3>
+        <h3 data-src="HKDSE 2024 Paper 1A Q32">Concept check</h3>
         <p>It takes 2.0 years for the activity of a sample to drop from 800 Bq to 600 Bq. How long will it take to drop from 600 Bq to 300 Bq?</p>
         <div class="choices">
           <button type="button" data-choice="A">2.0 years</button>
@@ -232,33 +372,65 @@
           <button type="button" data-choice="D">4.8 years</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Falling to 3/4 took 2.0 y. Falling to 1/2 is a bigger drop, so it takes longer than 2.0 y; and 3/4 squared is 9/16, still more than 1/2, so two such periods (4.0 y) are not enough either: the answer must exceed 4.0 y, leaving <b>D</b>. Exactly: \( (3/4)^{T/2} = 1/2 \) gives \( T = 2 \ln(1/2)/\ln(3/4) = 4.8 \) y. <b>A</b> treats equal drops in Bq as taking equal times; decay is not linear.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3>Concept check</h3>
+        <p>A GM counter records 140 min<sup>-1</sup> when a source is first placed near it. After a long time the reading settles at 20 min<sup>-1</sup>. At what recorded count rate should you read the graph to find one half-life?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">70 min<sup>-1</sup></button>
+          <button type="button" data-choice="B">80 min<sup>-1</sup></button>
+          <button type="button" data-choice="C">60 min<sup>-1</sup></button>
+          <button type="button" data-choice="D">10 min<sup>-1</sup></button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Corrected start \( = 140 - 20 = 120 \); half of that is 60; recorded \( = 60 + 20 = 80 \) min<sup>-1</sup>, <b>B</b>. <b>A</b> halves the uncorrected reading; <b>C</b> forgets to add the background back before reading the recorded curve; <b>D</b> halves the background.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3>Concept check</h3>
+        <p>Counts per minute from a source are recorded every minute, with background about 100 min<sup>-1</sup>: 900, 417, 225, 150, 113, 92, 102. Which explanation of the reading of 92 is best?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">The source has become negative in activity.</button>
+          <button type="button" data-choice="B">The source now contributes almost nothing and the background itself fluctuates randomly.</button>
+          <button type="button" data-choice="C">The half-life of the source has changed.</button>
+          <button type="button" data-choice="D">The counter must be faulty.</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>By 5 minutes the corrected rate is close to zero, so the reading is essentially background, and background counts vary randomly from minute to minute: <b>B</b>. Activity cannot be negative (<b>A</b>); half-life is constant (<b>C</b>); a slightly low count is normal, not a fault (<b>D</b>). From the first three corrected values, 800, 317, 125, each minute multiplies by about 0.4, giving \( T_{1/2} \approx 45 \) s.</p>
+        </div>
       </div>
     </section>
 
     <section class="idea" id="longer">
       <header>
-        <h2>A longer half-life is not automatically weaker</h2>
-        <span class="stamp">Amy &amp; Bob</span>
+        <h2><span class="sec-num">E</span>Comparing two sources</h2>
       </header>
-      <table class="compact">
-        <thead><tr><th></th><th>initial A / Bq</th><th>half-life / y</th></tr></thead>
+      <p>A longer half-life does not mean a weaker source, and a stronger source now does not mean a longer-lasting one. Both the starting activity and the half-life matter. Amy and Bob each buy a device that stops working when the source's activity falls below 1000 Bq:</p>
+      <table class="notes">
+        <thead><tr><th></th><th>Initial activity</th><th>Half-life</th><th>Activity year by year</th><th>Working life</th></tr></thead>
         <tbody>
-          <tr><td>Amy</td><td>8000</td><td>2</td></tr>
-          <tr><td>Bob</td><td>16000</td><td>1</td></tr>
+          <tr><td>Amy</td><td>8000 Bq</td><td>2 y</td><td>8000 → 4000 (2 y) → 2000 (4 y) → 1000 (6 y)</td><td>about 6 y</td></tr>
+          <tr><td>Bob</td><td>16 000 Bq</td><td>1 y</td><td>16 000 → 8000 (1 y) → 4000 (2 y) → 2000 (3 y) → 1000 (4 y)</td><td>about 4 y</td></tr>
         </tbody>
       </table>
-      <table class="compact pair">
-        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
-        <tbody>
-          <tr><td>The device needs A &gt; 1000 Bq</td><td>Compare remaining A, not T½ alone</td></tr>
-          <tr><td>Amy: 8000 → 4000 (2 y) → 2000 (4 y) → 1000 (6 y)</td><td>Amy lasts about 6 y</td></tr>
-          <tr><td>Bob: 16000 → 8000 (1 y) → 1000 after 4 halvings = 4 y</td><td>Bob dies first even though A started higher</td></tr>
-        </tbody>
-      </table>
+      <ul class="points">
+        <li>Bob's source starts stronger but dies first: four halvings in 4 years against Amy's three in 6 years.</li>
+        <li>For <em>equal numbers of nuclei</em>, the shorter half-life gives the higher activity (each nucleus is more likely to decay per second). For unequal amounts you must compare \( A = kN \) directly.</li>
+        <li>On a graph of activity against time, the curve that falls more steeply <em>as a fraction of its current value</em> has the shorter half-life. Two curves that cross have equal activity at that moment, but the one with the shorter half-life has <em>fewer</em> undecayed nuclei there (\( N = A/k \) with larger \( k \)).</li>
+      </ul>
       <div class="check" data-check="mc" data-answer="B">
-        <h3>Concept check</h3>
-        <p>Half-lives: C-11 20.3 min; P-32 14.3 d; Na-22 2.60 y. Which is/are correct?</p>
-        <p>(1) The activity of C-11 must be the highest. (2) The decay constant of P-32 is larger than that of C-11. (3) If Na-22 starts at 1520 Bq, after 6 y its activity is lower than 380 Bq.</p>
+        <h3 data-src="HKDSE 2019 Paper 1A Q32">Concept check</h3>
+        <p>Half-lives: carbon-11 20.3 min; phosphorus-32 14.3 d; sodium-22 2.60 y. Which of the following is/are correct?</p>
+        <ol class="stem-list">
+          <li>The activity of a carbon-11 sample must be the highest of the three.</li>
+          <li>The decay constant of phosphorus-32 is larger than that of carbon-11.</li>
+          <li>If a sodium-22 sample starts at 1520 Bq, after 6 years its activity is lower than 380 Bq.</li>
+        </ol>
         <div class="choices">
           <button type="button" data-choice="A">(1) only</button>
           <button type="button" data-choice="B">(3) only</button>
@@ -266,53 +438,209 @@
           <button type="button" data-choice="D">(2) and (3) only</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>(1) false: activity also depends on the number of nuclei, which is not given. (2) false: the shorter half-life (C-11) has the larger decay constant. (3) true: 6 y is more than two half-lives (5.2 y), so the activity is below \( 1520/4 = 380 \) Bq. Answer <b>B</b>.</p>
+        </div>
       </div>
       <div class="check" data-check="mc" data-answer="C">
-        <h3>Concept check</h3>
-        <p>A radioactive isotope X has a half-life of 20 hours. After 10 hours, the remaining fraction f of X satisfies</p>
+        <h3 data-src="HKDSE 2012 Paper 1A Q35">Concept check</h3>
+        <p>A radionuclide has a half-life of 20 hours. After 10 hours the fraction \( f \) of the original nuclei remaining satisfies</p>
         <div class="choices">
           <button type="button" data-choice="A">\( \tfrac{1}{4} \le f \le \tfrac{1}{2} \)</button>
           <button type="button" data-choice="B">\( f = \tfrac{1}{2} \)</button>
-          <button type="button" data-choice="C">\( \tfrac{3}{4} &gt; f &gt; \tfrac{1}{2} \)</button>
+          <button type="button" data-choice="C">\( \tfrac{1}{2} &lt; f &lt; \tfrac{3}{4} \)</button>
           <button type="button" data-choice="D">\( f &gt; \tfrac{3}{4} \)</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Half a half-life. The fraction is more than 1/2 (only a full half-life gets you to 1/2), but less than 3/4, because more decays happen in the first half of the period (more nuclei present) than in the second: \( f = (1/2)^{0.5} = 0.71 \). <b>C</b>. <b>D</b> is the linear-decay error ("half the time, half the loss").</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="D">
+        <h3>Concept check</h3>
+        <p>Initially a sample contains 4 times as many nuclei of X (half-life \( t \)) as of Y (half-life \( 2t \)). After how long are the numbers of X and Y nuclei equal?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">\( t \)</button>
+          <button type="button" data-choice="B">\( 2t \)</button>
+          <button type="button" data-choice="C">\( 3t \)</button>
+          <button type="button" data-choice="D">\( 4t \)</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Set \( 4N(1/2)^{T/t} = N(1/2)^{T/2t} \). Writing 4 as \( 2^2 \): \( 2 - T/t = -T/2t \), so \( T/2t = 2 \), \( T = 4t \): <b>D</b>. Check: after \( 4t \), X has had 4 half-lives (factor 1/16, so \( 4N/16 = N/4 \)) and Y has had 2 (factor 1/4, so \( N/4 \)).</p>
+        </div>
       </div>
     </section>
 
     <section class="idea" id="constant">
       <header>
-        <h2>Decay constant</h2>
-        <span class="stamp">Extension · Fig. 26.7</span>
+        <h2><span class="sec-num">F</span>The decay constant and the exponential law <span class="lo-ext">extension</span></h2>
       </header>
-      <div class="eq">\[ A = kN \]</div>
-      <table class="compact pair">
-        <thead><tr><th>What k is</th><th>What that means</th></tr></thead>
-        <tbody>
-          <tr><td>nuclei decaying per unit time / undecayed nuclei</td><td>probability of decay per unit time</td></tr>
-          <tr><td>\( k = \ln 2 / T_{1/2} \)</td><td>k is characteristic of the nuclide, like T½</td></tr>
-          <tr><td>\( N = N_0 e^{-kt} \) and \( A = A_0 e^{-kt} \)</td><td>both fall exponentially with t</td></tr>
-        </tbody>
-      </table>
-      <div class="one-liners">
-        <p>Splitting a sample, changing temperature, or interrupting a chain reaction does not change T½ or k.</p>
+      <div class="def">
+        <span class="tag">Definition</span>
+        <p>The <b>decay constant</b> \( k \) of a nuclide is the instantaneous probability per unit time that one undecayed nucleus decays; equivalently, it is the instantaneous fraction of undecayed nuclei that decay per unit time. Unit: s<sup>-1</sup> (or min<sup>-1</sup>, h<sup>-1</sup>, y<sup>-1</sup>). For a very short interval \( \Delta t \), the probability is approximately \( k\Delta t \). Over a whole second, if \( k = 0.2 \) s<sup>-1</sup>, the exact probability is \( 1-e^{-0.2}=0.181 \), not exactly \( 0.2 \).</p>
       </div>
-      <div class="check" data-check="mc" data-answer="D">
+      <div class="formula-sheet">
+        <div class="eq">\[ A = kN \]</div>
+        <div class="eq">\[ N = N_0 e^{-kt}, \qquad A = A_0 e^{-kt} \]</div>
+        <div class="eq">\[ k = \frac{\ln 2}{T_{1/2}} = \frac{0.693}{T_{1/2}} \]</div>
+        <div class="eq">\[ t = \frac{1}{k}\ln\frac{N_0}{N} = \frac{1}{k}\ln\frac{A_0}{A} \]</div>
+      </div>
+      <ul class="points">
+        <li>\( k \) is <em>not</em> the activity. Activity is decays per second for the whole sample and falls with time; \( k \) is per nucleus and is constant for a given nuclide. Like the half-life, \( k \) identifies the nuclide and is unchanged by temperature, pressure, chemical state or the amount of sample.</li>
+        <li>Large \( k \) means short half-life: \( k T_{1/2} = \ln 2 \) always. Both describe the same thing.</li>
+        <li>The decay law follows from \( A = kN \): the rate of loss of \( N \) is proportional to \( N \), and the only function that does that is the exponential. \( (1/2)^{t/T_{1/2}} \) and \( e^{-kt} \) are the same curve written two ways.</li>
+        <li>On a graph of \( \ln A \) (or \( \ln N \)) against \( t \), the points lie on a straight line: \( \ln A = \ln A_0 - kt \). Slope \( = -k \), intercept \( = \ln A_0 \). A mixture of two nuclides gives a curve that is straight only at the ends (the short-lived one dominates early, the long-lived one late).</li>
+        <li>The probability that a given nucleus decays within time \( t \) is \( 1 - e^{-kt} \), not \( kt \) (that approximation only works when \( kt \ll 1 \)).</li>
+        <li><b>Units.</b> Keep \( k \) and \( t \) in the same unit. Convert \( k \) to s<sup>-1</sup> before using \( A = kN \) with \( A \) in Bq.</li>
+        <li><b>Counting nuclei from mass.</b> \( N = \dfrac{m}{M} \times N_A \), where \( M \) is the molar mass in grams (numerically the mass number) and \( N_A = 6.02 \times 10^{23} \) mol<sup>-1</sup>; or \( N = m / (\text{mass of one atom}) \). Watch the mass units: 1 μg \( = 10^{-6} \) g.</li>
+      </ul>
+      <div class="worked">
+        <span class="tag">Worked example</span>
+        <p>The number of undecayed nuclei in a sample falls to one third of its initial value in 50 days. (a) Find the decay constant. (b) How long does it take to fall to one tenth? (c) How long does it take to fall <em>by</em> one third?</p>
+        <ol class="steps">
+          <li>(a) \( N/N_0 = 1/3 = e^{-k(50)} \). Taking ln: \( \ln 3 = 50k \), \( k = 1.099/50 = 0.0220 \) d<sup>-1</sup>.</li>
+          <li>(b) \( 1/10 = e^{-kt} \), \( t = \ln 10 / k = 2.303/0.0220 = 105 \) d.</li>
+          <li>(c) Falling <em>by</em> one third leaves \( N/N_0 = 2/3 \). \( t = \ln(3/2)/k = 0.405/0.0220 = 18.5 \) d.</li>
+        </ol>
+        <p class="note">"Decreases by one third" and "decreases to one third" are different questions. Read the stem twice.</p>
+      </div>
+      <div class="worked">
+        <span class="tag">Worked example</span>
+        <p>A 1 μg sample of plutonium-239 has activity 2300 Bq. Find (a) the number of Pu-239 nuclei, (b) the decay constant, (c) the half-life in years. (\( N_A = 6.02 \times 10^{23} \) mol<sup>-1</sup>; 1 y \( = 3.15 \times 10^{7} \) s.)</p>
+        <ol class="steps">
+          <li>(a) \( N_0 = \dfrac{1 \times 10^{-6}}{239} \times 6.02 \times 10^{23} = 2.52 \times 10^{15} \).</li>
+          <li>(b) \( k = A/N = 2300 / (2.52 \times 10^{15}) = 9.13 \times 10^{-13} \) s<sup>-1</sup>.</li>
+          <li>(c) \( T_{1/2} = \ln 2 / k = 7.59 \times 10^{11} \) s \( = 7.59 \times 10^{11} / (3.15 \times 10^{7}) = 24\,100 \) y.</li>
+        </ol>
+      </div>
+      <div class="check" data-check="mc" data-answer="A">
         <h3>Concept check</h3>
-        <p>The decay constant of a radioisotope of an element</p>
+        <p>Which statement about the decay constant of a radionuclide is <b>incorrect</b>?</p>
         <div class="choices">
-          <button type="button" data-choice="A">is random.</button>
-          <button type="button" data-choice="B">depends on pressure and temperature.</button>
-          <button type="button" data-choice="C">is directly proportional to the number of nucleons in the isotope.</button>
-          <button type="button" data-choice="D">is an identifying characteristic of that isotope.</button>
+          <button type="button" data-choice="A">It is the rate of decay of a sample of the nuclide.</button>
+          <button type="button" data-choice="B">It is the fraction of the undecayed nuclei that decay per unit time.</button>
+          <button type="button" data-choice="C">It is the probability that a given nucleus decays per unit time.</button>
+          <button type="button" data-choice="D">It is independent of the temperature of the sample.</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p><b>A</b> describes the <em>activity</em>, which depends on how much sample there is and falls with time. <b>B</b> and <b>C</b> are two wordings of the definition of \( k \); <b>D</b> is true because decay is spontaneous.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3>Concept check</h3>
+        <p>A radionuclide has decay constant \( 1.02 \times 10^{-5} \) s<sup>-1</sup>. The time for the number of undecayed nuclei to decrease <em>by</em> one third is about</p>
+        <div class="choices">
+          <button type="button" data-choice="A">\( 1.08 \times 10^{5} \) s</button>
+          <button type="button" data-choice="B">\( 3.98 \times 10^{4} \) s</button>
+          <button type="button" data-choice="C">\( 6.80 \times 10^{4} \) s</button>
+          <button type="button" data-choice="D">\( 3.27 \times 10^{4} \) s</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Decreasing by one third leaves 2/3: \( t = \ln(3/2)/k = 0.405/(1.02 \times 10^{-5}) = 3.98 \times 10^{4} \) s, <b>B</b>. <b>A</b> is the time to fall <em>to</em> one third (\( \ln 3 / k \)); <b>C</b> is one half-life; <b>D</b> uses \( kt = 1/3 \), the linear approximation.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="C">
+        <h3>Concept check</h3>
+        <p>For a certain source, a graph of \( \ln A \) against \( t \) is a straight line through \( (0, 6.0) \) and \( (4.0 \text{ h}, 2.0) \). Which of the following is correct?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">The half-life is 4.0 h.</button>
+          <button type="button" data-choice="B">The decay constant is 4.0 h<sup>-1</sup>.</button>
+          <button type="button" data-choice="C">The decay constant is 1.0 h<sup>-1</sup> and the half-life is about 0.69 h.</button>
+          <button type="button" data-choice="D">The initial activity is 6.0 Bq.</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>\( \ln A = \ln A_0 - kt \). Slope \( = (2.0 - 6.0)/4.0 = -1.0 \) h<sup>-1</sup>, so \( k = 1.0 \) h<sup>-1</sup> and \( T_{1/2} = 0.693/1.0 = 0.69 \) h: <b>C</b>. The intercept is \( \ln A_0 = 6.0 \), so \( A_0 = e^{6} \approx 400 \) Bq, not 6 Bq (<b>D</b>).</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3>Concept check</h3>
+        <p>A nuclide has decay constant \( 0.05 \) s<sup>-1</sup>. The probability that a particular undecayed nucleus decays within the next 10 s is</p>
+        <div class="choices">
+          <button type="button" data-choice="A">0.50</button>
+          <button type="button" data-choice="B">0.39</button>
+          <button type="button" data-choice="C">0.61</button>
+          <button type="button" data-choice="D">0.05</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>The probability of <em>surviving</em> 10 s is \( e^{-kt} = e^{-0.5} = 0.61 \) (<b>C</b> is the survival probability). So the probability of decaying is \( 1 - 0.61 = 0.39 \), <b>B</b>. <b>A</b> is \( kt \), which overestimates because the chance is applied to a shrinking population; <b>D</b> is the probability per second.</p>
+        </div>
+      </div>
+      <div class="check" data-check="sa">
+        <h3>Write it out</h3>
+        <p>A 0.040 mg sample of iron-60 (molar mass 59.9 g) has an activity of 3400 Bq. (a) Find the number of iron-60 nuclei. (b) Find the decay constant. (c) Find the half-life in seconds, and comment on why iron-60 is found in samples of lunar soil that formed millions of years ago. (\( N_A = 6.02 \times 10^{23} \) mol<sup>-1</sup>.) <span class="marks">(5 marks)</span></p>
+        <button type="button" data-reveal>Show model answer</button>
+        <div class="model" hidden>
+          <ol>
+            <li>(a) \( N = \dfrac{0.040 \times 10^{-3}}{59.9} \times 6.02 \times 10^{23} = 4.02 \times 10^{17} \).</li>
+            <li>(b) \( k = A/N = 3400 / (4.02 \times 10^{17}) = 8.46 \times 10^{-15} \) s<sup>-1</sup>.</li>
+            <li>(c) \( T_{1/2} = \ln 2 / k = 0.693 / (8.46 \times 10^{-15}) = 8.2 \times 10^{13} \) s (about 2.6 million years).</li>
+            <li>A half-life of millions of years means only a small fraction of any iron-60 present when the soil formed has decayed, so measurable amounts remain.</li>
+          </ol>
+          <p class="note">Mass conversion (1), \( N \) (1), \( k \) (1), \( T_{1/2} \) (1), comment linking long half-life to survival (1).</p>
+        </div>
       </div>
     </section>
+
+    <section class="section-dse" aria-labelledby="dse-practice-heading">
+      <header>
+        <span class="sec-num">DSE</span>
+        <h2 id="dse-practice-heading">Topic-matched past-paper practice</h2>
+      </header>
+      <p>Practise the equation or graph-reading decision named on each card, then open the full classified paper for the original question.</p>
+      <div class="dse-practice-grid">
+        <article class="dse-practice-card">
+          <h3>Random counts and background</h3>
+          <p>Choose a realistic set of repeated counts: a narrow random spread about a mean, not an identical sequence or a decaying trend.</p>
+          <div class="dse-practice-links">
+            <a href="summary.html#dse-mc-2020-30">2020/30 MC</a>
+          </div>
+        </article>
+        <article class="dse-practice-card">
+          <h3>Half-life from activity data</h3>
+          <p>Recognise that equal changes in Bq do not take equal times. Work with the fraction remaining, not the absolute drop.</p>
+          <div class="dse-practice-links">
+            <a href="summary.html#dse-mc-2012-35">2012/35 MC</a>
+            <a href="summary.html#dse-mc-2023-31">2023/31 MC</a>
+            <a href="summary.html#dse-mc-2024-32">2024/32 MC</a>
+          </div>
+        </article>
+        <article class="dse-practice-card">
+          <h3>Activity depends on \( k \) and \( N \)</h3>
+          <p>Separate activity from radiation type and from half-life. Compare sources with \( A = kN \), not by one fact alone.</p>
+          <div class="dse-practice-links">
+            <a href="summary.html#dse-mc-2019-32">2019/32 MC</a>
+            <a href="summary.html#dse-mc-2025-31">2025/31 MC</a>
+            <a href="summary.html#dse-mc-sap-35">SAP/35 MC</a>
+          </div>
+        </article>
+        <article class="dse-practice-card">
+          <h3>Decay constant and two-nuclide models</h3>
+          <p>For the extension, keep the units of \( k \) and \( t \) aligned and set up one term for each radionuclide.</p>
+          <div class="dse-practice-links">
+            <a href="summary.html#dse-mc-2020-32">2020/32 MC</a>
+            <a href="summary.html#dse-mc-2016-33">2016/33 MC</a>
+            <a href="summary.html#dse-lq-2021-9">2021/9 LQ</a>
+          </div>
+        </article>
+      </div>
+      <figure class="dse-paper subsection-paper">
+        <figcaption><b>Start here: 2023/31 MC</b><span>Use the fraction remaining to read a half-life from a graph or numerical data, then check your method against the original question.</span></figcaption>
+        <p class="dse-slot">Full paper question: 2023/31 MC</p>
+        <img src="../_local/dse/mc/26/2023_q31.png" alt="HKDSE 2023 Paper 1A Question 31">
+      </figure>
+    </section>
+
+    <p class="next"><a href="26-2.html">Next: 26.2 Uses of radionuclides →</a></p>
   </main>
   <script src="../vendor/katex/katex.min.js"></script>
   <script src="../vendor/katex/auto-render.min.js"></script>
   <script src="../js/math.js"></script>
+  <script src="../js/checks.js"></script>
   <script src="js/lib/three.min.js"></script>
   <script src="js/diagrams3d.js"></script>
   <script src="js/notes.js"></script>

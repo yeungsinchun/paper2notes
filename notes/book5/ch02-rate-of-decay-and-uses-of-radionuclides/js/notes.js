@@ -9,60 +9,7 @@
     return Array.from((root || document).querySelectorAll(sel));
   }
 
-  function setFeedback(el, ok, text) {
-    if (!el) return;
-    el.textContent = text;
-    el.className = "feedback " + (ok ? "ok" : "no");
-  }
-
-  function initMc() {
-    $all("[data-check='mc']").forEach(function (box) {
-      var answer = box.getAttribute("data-answer");
-      var out = $(".feedback", box);
-      $all("button[data-choice]", box).forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          var pick = btn.getAttribute("data-choice");
-          $all("button[data-choice]", box).forEach(function (b) {
-            b.classList.remove("correct", "wrong");
-            b.disabled = true;
-          });
-          if (pick === answer) {
-            btn.classList.add("correct");
-            setFeedback(out, true, "Yes.");
-          } else {
-            btn.classList.add("wrong");
-            var right = $("button[data-choice='" + answer + "']", box);
-            if (right) right.classList.add("correct");
-            setFeedback(out, false, "Not this one.");
-          }
-        });
-      });
-    });
-  }
-
-  function initTf() {
-    $all("[data-check='tf']").forEach(function (box) {
-      $all(".tf-item", box).forEach(function (item) {
-        var answer = item.getAttribute("data-answer") === "true";
-        var out = $(".feedback", item);
-        $all("button[data-tf]", item).forEach(function (btn) {
-          btn.addEventListener("click", function () {
-            var pick = btn.getAttribute("data-tf") === "true";
-            $all("button[data-tf]", item).forEach(function (b) {
-              b.disabled = true;
-            });
-            if (pick === answer) {
-              btn.classList.add("correct");
-              setFeedback(out, true, "Yes.");
-            } else {
-              btn.classList.add("wrong");
-              setFeedback(out, false, answer ? "True." : "False.");
-            }
-          });
-        });
-      });
-    });
-  }
+  /* Concept checks (MC / true-false / written answer) live in ../../js/checks.js. */
 
   function replay(el) {
     el.classList.remove("play");
@@ -194,29 +141,12 @@
     });
   }
 
-  function initUseTable() {
-    $all("[data-use]").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var key = btn.getAttribute("data-use");
-        $all("tr[data-use-row]").forEach(function (tr) {
-          tr.classList.toggle("on", tr.getAttribute("data-use-row") === key);
-        });
-        $all("[data-use]").forEach(function (b) {
-          b.setAttribute("aria-pressed", b === btn ? "true" : "false");
-        });
-      });
-    });
-  }
-
   document.addEventListener("DOMContentLoaded", function () {
     initBoxScale();
-    initMc();
-    initTf();
     initReplays();
     initPipeline();
     initThickness();
     initSmoke();
     initDating();
-    initUseTable();
   });
 })();

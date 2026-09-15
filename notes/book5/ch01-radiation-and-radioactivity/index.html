@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Book 5 Ch.1 · Radiation and Radioactivity</title>
+  <link rel="stylesheet" href="../css/notes.css">
   <link rel="stylesheet" href="css/notes.css">
   <link rel="stylesheet" href="../vendor/katex/katex.min.css">
-  <link rel="stylesheet" href="../css/lo.css">
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="../index.html">Active Physics Book 5<small>Ch.1</small></a>
+    <a class="brand" href="../index.html">Active Physics Book 5<small>Ch.1 Radiation and Radioactivity</small></a>
     <nav>
       <a href="index.html" aria-current="page">Map</a>
       <a href="25-1.html">25.1</a>
@@ -22,11 +22,34 @@
   <main>
     <p class="kicker">Book 5 · Chapter 1</p>
     <h1>Radiation and Radioactivity</h1>
-    <p class="lede">Ionizing radiation, nuclei, and how to tell α, β and γ apart.</p>
+    <p class="lede">Ionizing radiation and X-rays, where α, β and γ come from, and how to compare, detect and identify them. Work through the three sections in order, then use the summary tables and the past-paper bank to revise.</p>
+
+    <div class="toc">
+      <a href="25-1.html">
+        <span class="num">25.1</span>
+        <strong>Ionizing radiation</strong>
+        <span>Radiation as energy transfer · ionization by knockout · the EM spectrum · how an X-ray tube works and what X-rays are used for · nuclear radiation is spontaneous</span>
+      </a>
+      <a href="25-2.html">
+        <span class="num">25.2</span>
+        <strong>Origin of nuclear radiation</strong>
+        <span>Atomic structure · nuclide notation and isotopes · why heavy nuclei are unstable · α, β and γ decay equations · decay series · sealed sources, handling rules and background radiation</span>
+      </a>
+      <a href="25-3.html">
+        <span class="num">25.3</span>
+        <strong>Properties of nuclear radiation</strong>
+        <span>Ionizing power · cloud chamber, film badge and GM counter · range and penetrating power · absorber experiments and the identification procedure · deflection in electric and magnetic fields</span>
+      </a>
+      <a href="summary.html">
+        <span class="num">Σ</span>
+        <strong>Summary and past papers</strong>
+        <span>Decay equations and the α / β / γ comparison table · common mistakes · closing checks · every classified HKDSE item for this chapter</span>
+      </a>
+    </div>
 
     <section class="lo-block" aria-labelledby="lo-heading">
       <h2 id="lo-heading">Learning objectives</h2>
-      <p class="lo-stem">Students should be able to:</p>
+      <p class="lo-stem">HKDSE syllabus, Radioactivity and Nuclear Energy. Students should be able to:</p>
       <ul class="lo-list">
         <li><p>realise X-rays as ionizing electromagnetic radiations of short wavelengths with high penetrating power</p><p class="dse-labels"><a href="summary.html#dse-mc-2022-31">2022/31 MC</a></p></li>
         <li><p>realise the emission of X-rays when fast electrons hit a heavy metal target</p><p class="dse-labels"><a href="summary.html#dse-mc-2022-31">2022/31 MC</a></p></li>
@@ -46,56 +69,9 @@
         <li><p>represent radioactive transmutations in α, β and γ decays using equations</p><p class="dse-labels"><a href="summary.html#dse-mc-2013-34">2013/34 MC</a><a href="summary.html#dse-mc-2014-31">2014/31 MC</a><a href="summary.html#dse-mc-2020-31">2020/31 MC</a><a href="summary.html#dse-mc-2021-31">2021/31 MC</a><a href="summary.html#dse-mc-2025-32">2025/32 MC</a><a href="summary.html#dse-lq-2016-9">2016/9 LQ</a><a href="summary.html#dse-lq-2017-10">2017/10 LQ</a><a href="summary.html#dse-lq-2018-10">2018/10 LQ</a><a href="summary.html#dse-lq-2021-9">2021/9 LQ</a><a href="summary.html#dse-lq-2023-9">2023/9 LQ</a><a href="summary.html#dse-lq-2026-12">2026/12 LQ</a></p></li>
       </ul>
     </section>
-
-    <div class="toc">
-      <a href="25-1.html">
-        <strong>25.1 Ionizing radiation</strong>
-        <svg viewBox="0 0 220 72" aria-hidden="true">
-          <line x1="8" y1="36" x2="78" y2="36" stroke="#c9a227" stroke-width="6"/>
-          <circle cx="104" cy="36" r="18" fill="none" stroke="#9bb6c4"/>
-          <circle cx="104" cy="36" r="8" fill="#e0a04a"/>
-          <circle cx="86" cy="36" r="6" fill="#2a62a8"/>
-        </svg>
-        <span>Knockout · X-ray tube · decay vs a switch</span>
-      </a>
-      <a href="25-2.html">
-        <strong>25.2 Origin of nuclear radiation</strong>
-        <svg viewBox="0 0 220 72" aria-hidden="true">
-          <text x="36" y="28" font-size="14" font-family="Palatino, serif">A</text>
-          <text x="36" y="58" font-size="14" font-family="Palatino, serif">Z</text>
-          <text x="58" y="48" font-size="36" font-family="Palatino, serif">X</text>
-          <circle cx="150" cy="36" r="8" fill="#c0392b"/>
-          <circle cx="164" cy="36" r="8" fill="#2f7a4a"/>
-          <circle cx="157" cy="24" r="8" fill="#c0392b"/>
-          <circle cx="157" cy="48" r="8" fill="#2f7a4a"/>
-        </svg>
-        <span>Nuclides · α β γ equations · sealed source</span>
-      </a>
-      <a href="25-3.html">
-        <strong>25.3 Properties</strong>
-        <svg viewBox="0 0 220 72" aria-hidden="true">
-          <path d="M8 36h48" stroke="#c0392b" stroke-width="3"/>
-          <rect x="56" y="16" width="8" height="40" fill="#ddd"/>
-          <path d="M72 48h46" stroke="#1d4f91" stroke-width="3"/>
-          <rect x="118" y="16" width="14" height="40" fill="#c5ccd4"/>
-          <path d="M140 24h42" stroke="#c9a227" stroke-width="2"/>
-          <rect x="186" y="10" width="22" height="52" fill="#2d3038"/>
-        </svg>
-        <span>Decision graph for α / β / γ · E/B · tracks</span>
-      </a>
-      <a href="summary.html">
-        <strong>Summary</strong>
-        <svg viewBox="0 0 220 72" aria-hidden="true">
-          <rect x="16" y="16" width="188" height="40" fill="none" stroke="#0e5f56" stroke-width="2"/>
-          <text x="36" y="42" font-size="14">α · β · γ  in one table</text>
-        </svg>
-        <span>Comparison table and three common traps</span>
-      </a>
-    </div>
   </main>
   <script src="../vendor/katex/katex.min.js"></script>
   <script src="../vendor/katex/auto-render.min.js"></script>
   <script src="../js/math.js"></script>
-  <script src="js/notes.js"></script>
 </body>
 </html>

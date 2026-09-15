@@ -262,6 +262,22 @@ chromeTest("Book 5 picker lists both textbook chapter titles", async () => {
   assert.match(menu.text, /Rate of Decay and Uses of Radionuclides/);
   assert.doesNotMatch(menu.text, /PHY150/);
   assert.doesNotMatch(menu.text, /printed p/);
+  const cardLayout = await cdp.evaluate(`Array.from(document.querySelectorAll(".chapter-cards a")).map(function (card) {
+    var number = card.querySelector(".num").getBoundingClientRect();
+    var title = card.querySelector("strong").getBoundingClientRect();
+    var detail = card.querySelector("span:not(.num)").getBoundingClientRect();
+    return {
+      numberRight: number.right,
+      titleLeft: title.left,
+      detailLeft: detail.left,
+      titleWidth: title.width
+    };
+  })`);
+  cardLayout.forEach(function (card) {
+    assert.ok(card.numberRight < card.titleLeft, "chapter number should occupy the left column");
+    assert.ok(Math.abs(card.detailLeft - card.titleLeft) < 2, "chapter detail should align with its title");
+    assert.ok(card.titleWidth > 300, "chapter title must not be constrained to the number column");
+  });
   if (evidenceDir) {
     await cdp.screenshot(path.join(evidenceDir, "book5-chapter-picker.png"));
   }
@@ -387,14 +403,22 @@ chromeTest("26.1 concept check marks the random-decay answer", async () => {
   const result = await cdp.evaluate(`(function () {
     var box = document.querySelector('[data-check="mc"]');
     var btn = box.querySelector('[data-choice="D"]');
+    var explain = box.querySelector(".explain");
+    var hiddenBefore = explain.hidden;
     btn.click();
     return {
       ok: btn.classList.contains("correct"),
-      feedback: box.querySelector(".feedback").textContent
+      feedback: box.querySelector(".feedback").textContent,
+      hiddenBefore: hiddenBefore,
+      explainShown: !explain.hidden,
+      stem: box.querySelector("p").textContent
     };
   })()`);
   assert.equal(result.ok, true);
-  assert.match(result.feedback, /Yes/);
+  assert.match(result.feedback, /Correct/);
+  assert.match(result.stem, /random/);
+  assert.equal(result.hiddenBefore, true);
+  assert.equal(result.explainShown, true, "reasoning shown after answering");
   if (evidenceDir) {
     await cdp.screenshot(path.join(evidenceDir, "26-1-concept-check.png"), "[data-check='mc']");
   }
@@ -407,6 +431,20 @@ chromeTest("26.2 leak, smoke, and C-14 alive equals just-dead", async () => {
     if (!ok) throw new Error("26.2 scenes missing");
     return true;
   }, 8000, "26.2 scenes");
+  const uses = await cdp.evaluate(`(function () {
+    var table = document.querySelector('#chooser table.notes');
+    return {
+      useButtons: document.querySelectorAll('[data-use], .use-grid').length,
+      headers: table ? Array.from(table.querySelectorAll('thead th')).map(function (th) { return th.textContent.trim(); }) : [],
+      rows: table ? table.querySelectorAll('tbody tr').length : 0,
+      text: table ? table.innerText : ""
+    };
+  })()`);
+  assert.equal(uses.useButtons, 0, "row-highlight buttons above the uses table were removed");
+  assert.deepEqual(uses.headers, ["Use", "Radiation, and why", "Half-life, and why"]);
+  assert.ok(uses.rows >= 8, "uses table lists every application, rows=" + uses.rows);
+  assert.match(uses.text, /γ for steel or lead/, "gauge row gives the γ-for-dense-material rule");
+  assert.match(uses.text, /14\.3 d/, "P-32 half-life follows the DSE value");
   await cdp.evaluate("window.NotesScenes.pipeline.setLeak(true)");
   const leakOn = await cdp.evaluate("window.NotesScenes.pipeline.snapshot()");
   assert.equal(leakOn.leak, true);
@@ -449,11 +487,21 @@ chromeTest("26.3 sievert check and activity vs dose labels", async () => {
   assert.match(dose.doseLabel, /dose/i);
   assert.match(dose.doseLabel, /Sv/);
   const pick = await cdp.evaluate(`(function () {
-    var box = document.querySelector('[data-check="mc"][data-answer="A"]');
+    var box = Array.from(document.querySelectorAll('[data-check="mc"]')).find(function (el) {
+      return /equivalent dose/.test(el.textContent);
+    });
     box.querySelector('[data-choice="A"]').click();
-    return box.querySelector('[data-choice="A"]').classList.contains("correct");
+    return {
+      ok: box.querySelector('[data-choice="A"]').classList.contains("correct"),
+      choice: box.querySelector('[data-choice="A"]').textContent.trim(),
+      doseTable: /Radiation weighting factor/.test(document.body.innerText),
+      mechanism: /DNA/.test(document.body.innerText)
+    };
   })()`);
-  assert.equal(pick, true);
+  assert.equal(pick.ok, true);
+  assert.match(pick.choice, /sievert/);
+  assert.equal(pick.doseTable, true, "weighting factors are on the page");
+  assert.equal(pick.mechanism, true, "the harm mechanism is stated");
   if (evidenceDir) {
     await cdp.screenshot(path.join(evidenceDir, "26-3-activity-vs-dose.png"), "#dose-vis");
   }
@@ -630,5 +678,62 @@ chromeTest("Book 5 menu keeps two chapter cards and hosts nuclear-energy LOs wit
     await cdp.screenshot(path.join(evidenceDir, "book5-nuclear-energy-lo-block.png"), "#nuclear-energy");
     await cdp.screenshot(path.join(evidenceDir, "book5-nuclear-energy-dse-bank.png"), ".dse-bank");
   }
+});
+
+chromeTest("each Ch.2 subsection groups links to its own DSE practice", async () => {
+  const expected = {
+    "26-1.html": ["dse-mc-2020-30", "dse-mc-2012-35", "dse-mc-2023-31", "dse-mc-2024-32", "dse-mc-2019-32", "dse-mc-2025-31", "dse-mc-sap-35", "dse-mc-2020-32", "dse-mc-2016-33", "dse-lq-2021-9"],
+    "26-2.html": ["dse-mc-2024-33", "dse-mc-2015-33", "dse-lq-2014-10", "dse-lq-2017-10", "dse-lq-2018-10", "dse-lq-2026-12"],
+    "26-3.html": ["dse-mc-2026-32", "dse-lq-2021-9"]
+  };
+
+  for (const [page, expectedIds] of Object.entries(expected)) {
+    let practice;
+    try {
+      await cdp.goto(pageUrl(page));
+    } catch (err) {
+      throw new Error(page + " navigation: " + err.message);
+    }
+    try {
+      practice = await cdp.evaluate(`(function () {
+        var section = document.querySelector(".section-dse");
+        var links = [];
+        if (section) {
+          var anchors = section.querySelectorAll(".dse-practice-links a");
+          for (var i = 0; i < anchors.length; i += 1) {
+            links.push(anchors[i].getAttribute("href"));
+          }
+        }
+        return {
+          heading: section && section.querySelector("h2") && section.querySelector("h2").textContent,
+          cards: section ? section.querySelectorAll(".dse-practice-card").length : 0,
+          paper: !!(section && section.querySelector(".subsection-paper img") && section.querySelector(".subsection-paper img").complete && section.querySelector(".subsection-paper img").naturalWidth > 0),
+          links: links
+        };
+      })()`);
+    } catch (err) {
+      throw new Error(page + " practice panel: " + err.message);
+    }
+    assert.match(practice.heading || "", /topic-matched past-paper practice/i);
+    assert.ok(practice.cards >= 2, page + " should classify more than one skill");
+    assert.ok(practice.paper, page + " should include a topic-matched DSE paper");
+    assert.deepEqual(practice.links.map((href) => href.replace(/^summary\.html#/, "")), expectedIds);
+  }
+
+  await cdp.goto(pageUrl("26-2.html"));
+  await cdp.evaluate(`document.querySelector('.section-dse a[href="summary.html#dse-mc-2024-33"]').click()`);
+  const target = await waitFor(async () => {
+    const found = await cdp.evaluate(`(function () {
+      var paper = document.getElementById("dse-mc-2024-33");
+      return {
+        href: location.href,
+        paper: !!paper,
+        image: !!(paper && paper.querySelector("img") && paper.querySelector("img").complete && paper.querySelector("img").naturalWidth > 0)
+      };
+    })()`);
+    if (!found.paper || !found.image) throw new Error("DSE target not ready");
+    return found;
+  }, 10000, "topic-matched DSE paper");
+  assert.match(target.href, /summary\.html#dse-mc-2024-33$/);
 });
 });

@@ -272,11 +272,12 @@ chromeTest("25.1 spectrum is static with the ionizing barrier in UV", async () =
   assert.ok(spec.snap.nonIonizingUVFrac > 0.05 && spec.snap.nonIonizingUVFrac < 0.18);
   assert.equal(spec.snap.mostUVionizing, true);
   assert.equal(spec.snap.xrayAfterCut, true);
-  assert.match(spec.title, /Non-ionizing and ionizing EM waves/i);
+  assert.match(spec.title, /spectrum becomes ionizing/i);
   assert.match(spec.nonion, /non-ionizing/);
   assert.match(spec.ion, /ionizing/);
   assert.match(spec.body, /X-rays/);
-  assert.match(spec.body, /one-tenth|1\/10|most of UV/i);
+  assert.match(spec.body, /boundary lies inside the ultraviolet/i);
+  assert.doesNotMatch(spec.body, /one-tenth|1\/10 of UV/i);
   assert.doesNotMatch(spec.title, /where the EM cut sits/i);
   assert.doesNotMatch(spec.body, /book cut/i);
   assert.deepEqual(spec.headers, ["radio", "micro", "IR", "vis", "UV", "X-rays", "Gamma ray"]);
@@ -419,7 +420,7 @@ chromeTest("25.3 absorber presets follow paper/Al/Pb contribution rules", async 
 
   async function setAbs(src, paper, al, pb) {
     return cdp.evaluate(`(function () {
-      document.querySelector('[data-src="${src}"]').click();
+      document.querySelector('[data-abs-src="${src}"]').click();
       var paperBtn = document.querySelector('#abs-paper');
       var alBtn = document.querySelector('#abs-al');
       var pbBtn = document.querySelector('#abs-pb');
@@ -448,7 +449,8 @@ chromeTest("25.3 absorber presets follow paper/Al/Pb contribution rules", async 
   near(mixPb.rate, 188, 8);
 
   const abgAir = await setAbs("abg", false, false, false);
-  assert.match(abgAir.note, /α \+ β \+ γ/);
+  assert.match(abgAir.note, /Case 3/);
+  assert.doesNotMatch(abgAir.note, /α \+ β \+ γ/, "the case selector must not reveal the diagnosis");
   near(abgAir.rate, 900, 8);
 
   const abgPaper = await setAbs("abg", true, false, false);
@@ -818,26 +820,45 @@ chromeTest("chapter map, summary, and concept-check scoring are the public notes
   const summary = await cdp.evaluate(`({
     isotopeItem: /which are isotopes/i.test(document.body.innerText),
     later: document.querySelector('.later') && document.querySelector('.later').textContent,
-    highlight: (function () {
-      document.querySelector('[data-compare="range"]').click();
-      return Array.from(document.querySelectorAll('tr[data-row="range"]')).every((tr) => tr.classList.contains('on'));
-    })()
+    compareControls: document.querySelectorAll('[data-compare]').length,
+    compareRows: Array.from(document.querySelectorAll('table.compare tbody th')).map((th) => th.textContent.trim()),
+    compareCols: document.querySelectorAll('table.compare thead th').length
   })`);
   assert.equal(summary.isotopeItem, false);
   assert.match(summary.later, /Chapter 26/);
-  assert.equal(summary.highlight, true);
+  assert.equal(summary.compareControls, 0, "row-highlight buttons above Table 25.6 were removed");
+  assert.ok(summary.compareRows.includes("Range in air"), "Table 25.6 keeps a plain Range row");
+  assert.ok(summary.compareRows.includes("Ionizing power"));
+  assert.equal(summary.compareCols, 4);
 
   await cdp.goto(pageUrl("25-1.html"));
   const check = await cdp.evaluate(`(function () {
     var box = document.querySelector('[data-check="mc"][data-answer="B"]');
+    var explain = box.querySelector('.explain');
+    var hiddenBefore = explain.hidden;
     box.querySelector('[data-choice="B"]').click();
+    var wrongBox = document.querySelector('#radiation .check[data-check="mc"]');
+    var wrongExplain = wrongBox.querySelector('.explain');
+    wrongBox.querySelector('[data-choice="A"]').click();
     return {
       ok: box.querySelector('.feedback').classList.contains('ok'),
-      text: box.querySelector('.feedback').textContent
+      text: box.querySelector('.feedback').textContent,
+      hiddenBefore: hiddenBefore,
+      explainShown: !explain.hidden && explain.textContent.trim().length > 40,
+      locked: Array.from(box.querySelectorAll('[data-choice]')).every(function (b) { return b.disabled; }),
+      wrong: wrongBox.querySelector('.feedback').textContent,
+      wrongMarksRight: wrongBox.querySelector('[data-choice="C"]').classList.contains('correct'),
+      wrongExplainShown: !wrongExplain.hidden
     };
   })()`);
   assert.equal(check.ok, true);
-  assert.equal(check.text, "Yes.");
+  assert.equal(check.text, "Correct.");
+  assert.equal(check.hiddenBefore, true, "reasoning stays hidden until the student answers");
+  assert.equal(check.explainShown, true, "reasoning is revealed after answering");
+  assert.equal(check.locked, true, "one attempt per check");
+  assert.match(check.wrong, /Not quite\. The answer is C\./);
+  assert.equal(check.wrongMarksRight, true, "the correct option is shown after a wrong pick");
+  assert.equal(check.wrongExplainShown, true);
   const radiationCopy = await cdp.evaluate("document.querySelector('#radiation').innerText");
   assert.doesNotMatch(radiationCopy, /does not become an electron beam/i);
   assert.doesNotMatch(radiationCopy, /Two carriers, one class/i);
@@ -846,15 +867,29 @@ chromeTest("chapter map, summary, and concept-check scoring are the public notes
     var box = document.querySelector("#radiation .check");
     return { stem: box.innerText, answer: box.getAttribute("data-answer") };
   })()`);
-  assert.match(radCheck.stem, /correct about radiation/i);
+  assert.match(radCheck.stem, /statements about radiation is\/are correct/i);
   assert.match(radCheck.stem, /medium to travel/i);
   assert.equal(radCheck.answer, "C");
-  const knockoutCopy = await cdp.evaluate("document.querySelector('#knockout').innerText");
-  assert.doesNotMatch(knockoutCopy, /turns a light beam into an electron beam/i);
-  assert.doesNotMatch(knockoutCopy, /made of ions/i);
-  assert.doesNotMatch(knockoutCopy, /made of atoms/i);
-  assert.match(knockoutCopy, /knocks protons out of the nucleus/i);
-  assert.match(knockoutCopy, /stays in the atom/i);
+  const knockoutCheck = await cdp.evaluate(`(function () {
+    var box = document.querySelector("#knockout .check");
+    var explain = box.querySelector(".explain");
+    var hiddenBefore = explain.hidden;
+    box.querySelector('[data-choice="C"]').click();
+    return {
+      copy: box.innerText,
+      hiddenBefore: hiddenBefore,
+      shown: !explain.hidden,
+      correct: box.querySelector('[data-choice="C"]').classList.contains("correct")
+    };
+  })()`);
+  assert.equal(knockoutCheck.hiddenBefore, true);
+  assert.equal(knockoutCheck.shown, true);
+  assert.equal(knockoutCheck.correct, true);
+  assert.doesNotMatch(knockoutCheck.copy, /turns a light beam into an electron beam/i);
+  assert.doesNotMatch(knockoutCheck.copy, /made of ions/i);
+  assert.doesNotMatch(knockoutCheck.copy, /made of atoms/i);
+  assert.match(knockoutCheck.copy, /strike electrons out of atoms or molecules/i);
+  assert.match(knockoutCheck.copy, /what the radiation does to matter/i);
 
   const replay25_1 = await cdp.evaluate(`({
     all: Array.from(document.querySelectorAll("[data-replay]")).map(function (b) { return b.getAttribute("data-replay"); }),
@@ -928,8 +963,7 @@ chromeTest("chapter map, summary, and concept-check scoring are the public notes
     await cdp.goto(pageUrl("index.html"));
     await cdp.screenshot(path.join(evidenceDir, "index-chapter-map.png"));
     await cdp.goto(pageUrl("summary.html"));
-    await cdp.evaluate("document.querySelector('[data-compare=\"range\"]').click()");
-    await cdp.screenshot(path.join(evidenceDir, "summary-table-25-6-range.png"), "table.compare");
+    await cdp.screenshot(path.join(evidenceDir, "summary-table-25-6.png"), "table.compare");
     await cdp.goto(pageUrl("25-3.html"));
     await cdp.evaluate("document.querySelector('[data-track=\"alpha\"]').click()");
     await cdp.evaluate("new Promise((r) => setTimeout(r, 200))");
@@ -1114,9 +1148,10 @@ chromeTest("3d scenes magnify, label the tube, keep β drift, and pulse radially
   near(betaIons.needleDeg, -14, 1);
   assert.ok(Math.abs(betaIons.needleDeg) < Math.abs(alphaIons.needleDeg), "β needle must show a smaller current");
 
-  await cdp.evaluate("window.NotesScenes.gm.replay()");
-  await cdp.evaluate("new Promise((r) => requestAnimationFrame(() => setTimeout(r, 40)))");
-  const pulseStart = await cdp.evaluate("window.NotesScenes.gm.snapshot()");
+  const pulseStart = await cdp.evaluate(`(function () {
+    window.NotesScenes.gm.replay();
+    return window.NotesScenes.gm.snapshot();
+  })()`);
   assert.ok(
     pulseStart.electronY > 0.45,
     "electron should start away from the anode wire, y=" + pulseStart.electronY
@@ -1219,10 +1254,13 @@ chromeTest("every Ch.1 page shows syllabus LOs and the summary embeds DSE papers
         heading: lo && lo.querySelector("h2") && lo.querySelector("h2").textContent,
         stem: lo && lo.innerText,
         firstAfterTitle: (function () {
+          // Subsection pages open with their LOs. The chapter map puts the section list
+          // first so navigation stays above the fold, then the full LO list.
           var h1 = document.querySelector("h1");
           var n = h1 && h1.nextElementSibling;
           while (n && n.tagName === "P" && n.classList.contains("lede")) n = n.nextElementSibling;
-          return n && n.classList.contains("lo-block");
+          if (n && n.classList.contains("toc")) n = n.nextElementSibling;
+          return !!(n && n.classList.contains("lo-block"));
         })(),
         remote: scripts.some(function (src) { return /^https?:\\/\\//.test(src); }),
         katex: scripts.some(function (src) { return /vendor\\/katex\\/katex\\.min\\.js$/.test(src); })
@@ -1263,5 +1301,46 @@ chromeTest("every Ch.1 page shows syllabus LOs and the summary embeds DSE papers
     await cdp.screenshot(path.join(evidenceDir, "ch01-summary-lo-block.png"), ".lo-block");
     await cdp.screenshot(path.join(evidenceDir, "ch01-summary-dse-bank.png"), ".dse-bank");
   }
+});
+
+chromeTest("each Ch.1 subsection groups links to its own DSE practice", async () => {
+  const expected = {
+    "25-1.html": ["dse-mc-2022-31", "dse-mc-2015-31"],
+    "25-2.html": ["dse-mc-2012-36", "dse-mc-2013-34", "dse-mc-2014-31", "dse-lq-2026-12", "dse-mc-2021-31", "dse-mc-2025-32", "dse-mc-2021-33"],
+    "25-3.html": ["dse-mc-2016-32", "dse-mc-2017-32", "dse-mc-pp-34", "dse-mc-2014-32", "dse-mc-2019-31", "dse-mc-sap-36", "dse-mc-2017-31", "dse-mc-pp-35"]
+  };
+
+  for (const [page, expectedIds] of Object.entries(expected)) {
+    await cdp.goto(pageUrl(page));
+    const practice = await cdp.evaluate(`(function () {
+      var section = document.querySelector(".section-dse");
+      return {
+        heading: section && section.querySelector("h2") && section.querySelector("h2").textContent,
+        cards: section ? section.querySelectorAll(".dse-practice-card").length : 0,
+        paper: !!(section && section.querySelector(".subsection-paper img") && section.querySelector(".subsection-paper img").complete && section.querySelector(".subsection-paper img").naturalWidth > 0),
+        links: section ? Array.from(section.querySelectorAll(".dse-practice-links a")).map(function (a) { return a.getAttribute("href"); }) : []
+      };
+    })()`);
+    assert.match(practice.heading || "", /topic-matched past-paper practice/i);
+    assert.ok(practice.cards >= 2, page + " should classify more than one skill");
+    assert.ok(practice.paper, page + " should include a topic-matched DSE paper");
+    assert.deepEqual(practice.links.map((href) => href.replace(/^summary\.html#/, "")), expectedIds);
+  }
+
+  await cdp.goto(pageUrl("25-3.html"));
+  await cdp.evaluate(`document.querySelector('.section-dse a[href="summary.html#dse-mc-2019-31"]').click()`);
+  const target = await waitFor(async () => {
+    const found = await cdp.evaluate(`(function () {
+      var paper = document.getElementById("dse-mc-2019-31");
+      return {
+        href: location.href,
+        paper: !!paper,
+        image: !!(paper && paper.querySelector("img") && paper.querySelector("img").complete && paper.querySelector("img").naturalWidth > 0)
+      };
+    })()`);
+    if (!found.paper || !found.image) throw new Error("DSE target not ready");
+    return found;
+  }, 10000, "topic-matched DSE paper");
+  assert.match(target.href, /summary\.html#dse-mc-2019-31$/);
 });
 });

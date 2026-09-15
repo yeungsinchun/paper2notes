@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>26.3 Radiation safety</title>
+  <link rel="stylesheet" href="../css/notes.css">
   <link rel="stylesheet" href="css/notes.css">
   <link rel="stylesheet" href="../vendor/katex/katex.min.css">
-  <link rel="stylesheet" href="../css/lo.css">
 </head>
 <body>
   <header class="topbar">
@@ -22,128 +22,313 @@
   <main>
     <p class="kicker">26.3</p>
     <h1>Radiation safety</h1>
+    <p class="lede">Why ionizing radiation harms living tissue, how the harm is measured (dose, in sieverts, is not the same as activity, in becquerels), what typical doses look like, and the handling rules that keep dose low. Most exam marks here are for giving a <em>reason</em> with each precaution.</p>
 
     <section class="lo-block" aria-labelledby="lo-heading">
       <h2 id="lo-heading">Learning objectives</h2>
       <p class="lo-stem">Students should be able to:</p>
       <ul class="lo-list">
         <li><p>represent radiation equivalent dose using the unit sievert (Sv)</p><p class="dse-labels"><a href="summary.html#dse-mc-2026-32">2026/32 MC</a></p></li>
-        <li><p>discuss potential hazards of ionizing radiation and the ways to minimise the radiation dose absorbed</p><p class="dse-labels"><a href="summary.html#dse-mc-2026-32">2026/32 MC</a><a href="summary.html#dse-mc-2015-32">2015/32 MC</a><a href="summary.html#dse-lq-2021-9">2021/9 LQ</a></p></li>
-        <li><p>suggest safety precautions in handling radioactive sources</p><p class="dse-labels"><a href="summary.html#dse-mc-2015-32">2015/32 MC</a><a href="summary.html#dse-lq-2014-10">2014/10 LQ</a></p></li>
+        <li><p>discuss potential hazards of ionizing radiation and the ways to minimise the radiation dose absorbed</p><p class="dse-labels"><a href="summary.html#dse-mc-2026-32">2026/32 MC</a><a href="summary.html#dse-lq-2021-9">2021/9 LQ</a></p></li>
+        <li><p>suggest safety precautions in handling radioactive sources</p><p class="dse-labels"><a href="summary.html#dse-lq-2014-10">2014/10 LQ</a></p></li>
       </ul>
     </section>
 
-
-    <section class="idea" id="inside">
+    <section class="idea" id="hazard">
       <header>
-        <h2>Outside vs inside the body</h2>
-        <span class="stamp">Fig. 26.21</span>
+        <h2><span class="sec-num">A</span>Why ionizing radiation is dangerous</h2>
       </header>
-      <table class="compact pair">
-        <thead><tr><th></th><th>Outside the body</th><th>Inhaled or swallowed</th></tr></thead>
+      <div class="def">
+        <span class="tag">Mechanism</span>
+        <p>α, β, γ and X-rays carry enough energy to knock electrons out of atoms. In living tissue this breaks up molecules in cells, in particular DNA. A cell may die, or its damaged DNA may make it divide uncontrollably, which is cancer. Damage to reproductive cells can be passed to offspring. The effects are cumulative: many small doses add up.</p>
+      </div>
+      <table class="notes" aria-label="Fig. 26.21">
+        <thead><tr><th></th><th>Source outside the body</th><th>Source inside the body (breathed in, swallowed, through a wound)</th></tr></thead>
         <tbody>
-          <tr><td>α</td><td>Stopped by skin / air; low external risk</td><td>Strong ionizing damage to nearby tissue</td></tr>
-          <tr><td>γ</td><td>Most dangerous of the three: it reaches every organ</td><td>Still irradiates the whole body</td></tr>
+          <tr><td><b>α</b></td><td>Little risk: stopped by a few centimetres of air or by the dead outer layer of skin.</td><td>Most dangerous: all its energy is dumped within a fraction of a millimetre of tissue, giving intense ionization at that spot.</td></tr>
+          <tr><td><b>β</b></td><td>Some risk: penetrates about a centimetre into tissue, so can burn skin and damage the eye.</td><td>Dangerous: ionizes the tissue around where it collects, less intensely than α but over a few millimetres.</td></tr>
+          <tr><td><b>γ</b></td><td>Most dangerous of the three: passes through the body and can irradiate every organ from a distance.</td><td>Still irradiates the whole body, but most of the energy passes out again, so the local damage is less than α.</td></tr>
         </tbody>
       </table>
-      <div class="check" data-check="tf">
+      <ul class="points">
+        <li>Radioactive material gets inside the body as dust on food or fingers, as contaminated food and drink, and as <b>radon</b>, a radioactive gas.</li>
+        <li><b>Radon-222</b> is a member of the uranium-238 decay series and seeps out of rocks, soil and concrete. Indoors it accumulates, especially in poorly ventilated rooms and lower floors of buildings. Breathed in, it and its α-emitting daughters lodge in the lungs, where the α ionizes lung tissue directly: hence lung cancer in uranium miners. Radon is the largest single contributor to natural background dose (about 1.5 mSv per year). The remedy is ventilation.</li>
+        <li>"Hot springs rich in radon cure disease" is not supported by the physics: α from radon in the body ionizes healthy cells at random, which is damage, not treatment. Radiotherapy works only because the source is targeted at a tumour.</li>
+        <li>Higher activity does not automatically mean more harm. The harm depends also on the type of radiation, whether the source is inside or outside the body, how far away it is, how long the exposure lasts, and what shielding is between.</li>
+      </ul>
+      <div class="check" data-check="mc" data-answer="B">
         <h3>Concept check</h3>
-        <div class="tf-item" data-answer="true">
-          <p>An α source such as Po-210 is not a serious external hazard if it stays outside the body.</p>
-          <div class="row"><button type="button" data-tf="true">True</button><button type="button" data-tf="false">False</button></div>
-          <p class="feedback"></p>
+        <p>A source emits both α and γ radiation. Which radiation is the greater hazard (i) if the source is swallowed, (ii) if the source is held against the skin?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">(i) α, (ii) α</button>
+          <button type="button" data-choice="B">(i) α, (ii) γ</button>
+          <button type="button" data-choice="C">(i) γ, (ii) α</button>
+          <button type="button" data-choice="D">(i) γ, (ii) γ</button>
         </div>
-        <div class="tf-item" data-answer="true">
-          <p>The same α source is deadly if it is ingested.</p>
-          <div class="row"><button type="button" data-tf="true">True</button><button type="button" data-tf="false">False</button></div>
-          <p class="feedback"></p>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Inside the body the strongly ionizing α, with all its energy absorbed locally, is the greater hazard. On the skin the α is stopped by the dead outer layer and does nothing, while the γ passes into the body. <b>B</b>. <b>C</b> reverses the logic; <b>A</b> and <b>D</b> ignore the location.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3>Concept check</h3>
+        <p>Sample X has a higher activity than sample Y. Does X necessarily cause more biological harm to a person nearby?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">Yes: harm is proportional to activity.</button>
+          <button type="button" data-choice="B">No: it also depends on the type of radiation, whether the source is inside or outside the body, the distance, the exposure time and any shielding.</button>
+          <button type="button" data-choice="C">No: only the half-life matters.</button>
+          <button type="button" data-choice="D">Yes, provided both are γ sources.</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p><b>B</b>. Activity is what the source emits; harm depends on what the body absorbs and how. A weak α source swallowed can do more harm than a stronger γ source across the room. <b>D</b> still ignores distance, time and shielding; <b>C</b> is irrelevant to harm.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="C">
+        <h3>Concept check</h3>
+        <p>Radon gas is a greater hazard to the lungs than to any other organ because</p>
+        <div class="choices">
+          <button type="button" data-choice="A">it emits γ radiation, which is absorbed mainly by lung tissue.</button>
+          <button type="button" data-choice="B">it has a very long half-life, so it stays in the lungs for years.</button>
+          <button type="button" data-choice="C">it is a gas that is breathed in, so it and its daughters decay inside the lungs, where their α particles ionize the tissue directly.</button>
+          <button type="button" data-choice="D">it is heavier than air and collects at floor level.</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p><b>C</b>. Radon is an α emitter; α is harmless outside the body and most harmful inside. Being a gas gets it inside, to the lungs specifically. <b>D</b> is true of radon but explains where it collects in a room, not why it harms the lungs. <b>B</b> is false (Rn-222 half-life is 3.8 days); <b>A</b> has the wrong radiation.</p>
         </div>
       </div>
     </section>
 
     <section class="idea" id="dose">
       <header>
-        <h2>Activity is emitted; dose is absorbed</h2>
-        <span class="stamp">Fig. 26.22–26.24</span>
+        <h2><span class="sec-num">B</span>Activity is emitted; dose is absorbed</h2>
       </header>
-      <div class="visual play stage" id="dose-vis" data-autoplay data-scene="dose">
-        <canvas class="scene-canvas" width="960" height="360" aria-label="A source emits radiation; a body absorbs some of it"></canvas>
-        <span class="hud-label" data-hud="act">activity · emitted · Bq</span>
-        <span class="hud-label" data-hud="dose">dose · absorbed · Sv</span>
+      <figure class="fig">
+        <div class="visual play stage" id="dose-vis" data-autoplay data-scene="dose">
+          <canvas class="scene-canvas" width="960" height="360" aria-label="A source emits radiation; a body absorbs some of it"></canvas>
+          <span class="hud-label" data-hud="act">activity · emitted · Bq</span>
+          <span class="hud-label" data-hud="dose">dose · absorbed · Sv</span>
+        </div>
+        <figcaption><b>Fig. 26.22 to 26.24</b> The source's activity (Bq) counts decays per second. The dose (Sv) measures the biological effect of the energy the body actually absorbs, which depends on distance, time, shielding, radiation type and which organs are hit.</figcaption>
+      </figure>
+      <div class="def">
+        <span class="tag">Definitions</span>
+        <p><b>Absorbed dose \(D\)</b> is the radiation energy absorbed per kilogram of tissue. It increases with the strength of the source, the time of exposure and closeness to the source.</p>
+        <p><b>Equivalent dose \(H\)</b> weights that absorbed dose for the radiation type: α causes denser ionization than β, γ or X-rays. <b>Effective dose \(E\)</b> then weights the equivalent dose for the sensitivity of the exposed tissue, so it can represent the overall risk from an exposure:</p>
+        <div class="eq">\[ H = D \times W_{\text{radiation}}, \qquad E = H \times W_{\text{tissue}} \]</div>
+        <p>For exposure involving several tissues, add the appropriately weighted contributions to obtain \(E\). Equivalent and effective dose are measured in <b>sievert</b> (Sv); one sievert is large, so everyday values are quoted in millisieverts (mSv).</p>
       </div>
-      <table class="compact pair">
-        <thead><tr><th>Factor</th><th>Why it matters</th></tr></thead>
+      <table class="notes">
+        <thead><tr><th>Radiation weighting factor \( W_{\text{radiation}} \)</th><th>Tissue weighting factor \( W_{\text{tissue}} \) (examples)</th></tr></thead>
         <tbody>
-          <tr><td>Energy absorbed</td><td>More energy deposited, larger absorbed dose</td></tr>
-          <tr><td>Type of radiation</td><td>Weighting: α 20; β, γ, X-ray 1</td></tr>
-          <tr><td>Tissue or organ</td><td>Some organs are more sensitive</td></tr>
+          <tr><td>α: 20<br>β, γ, X-rays: 1</td><td>gonads 0.20 · stomach 0.12 · colon 0.12 · liver 0.05 · oesophagus 0.05 · skin 0.01</td></tr>
         </tbody>
       </table>
-      <p class="eq">effective dose (Sv) folds in amount, type, and tissue</p>
+      <ul class="points">
+        <li>The factor of 20 for α says that, joule for joule, α does about twenty times the biological damage of β or γ, because it deposits its energy so densely. In the <em>same tissue</em>, 1 Sv equivalent dose from α and 1 Sv from γ represent the same radiation-type biological effect. Effective dose additionally compares the tissue risk.</li>
+        <li>Two people at different distances from the same source receive different doses from the same activity. Dose is about the receiver; activity is about the source.</li>
+      </ul>
+      <table class="notes" aria-label="Fig. 26.25">
+        <thead><tr><th>Typical effective doses</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>Dental X-ray</td><td>0.01 mSv</td></tr>
+          <tr><td>Chest X-ray check</td><td>0.02 mSv</td></tr>
+          <tr><td>Flight Hong Kong to New York (cosmic rays at altitude)</td><td>0.06 mSv</td></tr>
+          <tr><td>Watching television</td><td>0.02 mSv per year</td></tr>
+          <tr><td>Cosmic rays at sea level</td><td>0.3 mSv per year</td></tr>
+          <tr><td>Food and drink (mainly potassium-40)</td><td>0.4 mSv per year</td></tr>
+          <tr><td>Radon in the home</td><td>1.5 mSv per year</td></tr>
+          <tr><td>Total background, Hong Kong (about 80% natural, 20% artificial, mostly medical)</td><td>2.4 mSv per year</td></tr>
+          <tr><td>CT scan</td><td>10 mSv</td></tr>
+          <tr><td>Smoking 20 cigarettes a day (polonium-210 in tobacco)</td><td>36 mSv per year</td></tr>
+        </tbody>
+      </table>
+      <table class="notes" aria-label="Fig. 26.26">
+        <thead><tr><th>Whole-body dose received in a short time</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td>500 mSv</td><td>abnormal blood cell counts</td></tr>
+          <tr><td>1000 mSv (1 Sv)</td><td>radiation sickness: nausea, vomiting</td></tr>
+          <tr><td>4000 mSv</td><td>internal bleeding, hair loss; death possible</td></tr>
+          <tr><td>6000 mSv</td><td>fatal within weeks without treatment</td></tr>
+          <tr><td>10 000 mSv and above</td><td>fatal within weeks; much higher doses kill within days or hours</td></tr>
+        </tbody>
+      </table>
+      <ul class="points">
+        <li>These are <em>acute</em> effects of a large dose all at once. Small doses spread over years produce no immediate symptoms but raise the lifetime risk of cancer; there is no dose known to be completely safe, which is why exposure is kept as low as reasonably achievable.</li>
+        <li><b>Limits</b> (over and above natural background and medical procedures): 1 mSv per year for members of the public, 20 mSv per year for radiation workers.</li>
+      </ul>
       <div class="check" data-check="mc" data-answer="A">
-        <h3>Concept check</h3>
-        <p>Which unit measures the radiation equivalent dose of a patient receiving radiotherapy?</p>
+        <h3 data-src="HKDSE 2026 Paper 1A Q32">Concept check</h3>
+        <p>Which unit is used to measure the radiation equivalent dose received by a patient undergoing radiotherapy?</p>
         <div class="choices">
           <button type="button" data-choice="A">sievert (Sv)</button>
           <button type="button" data-choice="B">becquerel (Bq)</button>
           <button type="button" data-choice="C">joule (J)</button>
-          <button type="button" data-choice="D">watt per square metre (W m⁻²)</button>
+          <button type="button" data-choice="D">watt per square metre (W m<sup>-2</sup>)</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p><b>A</b>. Becquerel measures the activity of the <em>source</em>; joule measures energy without reference to mass, radiation type or tissue; W m<sup>-2</sup> is an intensity. Only the sievert folds in the biological weighting.</p>
+        </div>
       </div>
-      <div class="check" data-check="tf">
+      <div class="check" data-check="mc" data-answer="C">
         <h3>Concept check</h3>
-        <div class="tf-item" data-answer="false">
-          <p>The biological effect of radiation depends only on the amount absorbed, not on the type or the organ.</p>
-          <div class="row"><button type="button" data-tf="true">True</button><button type="button" data-tf="false">False</button></div>
-          <p class="feedback"></p>
+        <p>Background in Hong Kong is about 2.4 mSv per year. A chest X-ray gives about 0.02 mSv and smoking 10 cigarettes a day gives about 18 mSv per year. In one year Sam smokes 5 cigarettes a day and has three chest X-rays. His total effective dose for the year is about</p>
+        <div class="choices">
+          <button type="button" data-choice="A">2.46 mSv</button>
+          <button type="button" data-choice="B">9.06 mSv</button>
+          <button type="button" data-choice="C">11.5 mSv</button>
+          <button type="button" data-choice="D">20.5 mSv</button>
         </div>
-        <div class="tf-item" data-answer="false">
-          <p>A person receives about 2 Sv of effective dose from the environment in a year.</p>
-          <div class="row"><button type="button" data-tf="true">True</button><button type="button" data-tf="false">False</button></div>
-          <p class="feedback"></p>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Smoking: half of 18 is 9 mSv. X-rays: \( 3 \times 0.02 = 0.06 \) mSv. Background: 2.4 mSv. Total \( 2.4 + 9 + 0.06 = 11.46 \approx 11.5 \) mSv, <b>C</b>. <b>B</b> is his dose <em>above</em> background; <b>D</b> uses 10 cigarettes a day; <b>A</b> forgets the smoking. Note that the cigarettes contribute far more than the X-rays.</p>
         </div>
-        <div class="tf-item" data-answer="false">
-          <p>1 Sv from an α source and 1 Sv from a γ source produce different biological effects, because α is more ionizing.</p>
-          <div class="row"><button type="button" data-tf="true">True</button><button type="button" data-tf="false">False</button></div>
-          <p class="feedback"></p>
+      </div>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3>Concept check</h3>
+        <p>Which of the following statements is/are correct?</p>
+        <ol class="stem-list">
+          <li>The biological effect of radiation depends only on the energy absorbed, not on the type of radiation or the organ.</li>
+          <li>For the same tissue, an equivalent dose of 1 Sv from an α source and 1 Sv from a γ source cause about the same biological effect.</li>
+          <li>A dose of 1 Sv received in a short time is harmless.</li>
+        </ol>
+        <div class="choices">
+          <button type="button" data-choice="A">(1) only</button>
+          <button type="button" data-choice="B">(2) only</button>
+          <button type="button" data-choice="C">(1) and (3) only</button>
+          <button type="button" data-choice="D">(2) and (3) only</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>(1) is false: that is why the weighting factors exist. (2) is true: the weighting for α (20) has already been applied in arriving at 1 Sv, so equal sieverts mean equal effect. (3) is false: 1 Sv at once causes radiation sickness. Answer <b>B</b>.</p>
         </div>
       </div>
     </section>
 
     <section class="idea" id="alara">
       <header>
-        <h2>Time, distance, shielding</h2>
-        <span class="stamp">26.3 D</span>
+        <h2><span class="sec-num">C</span>Keeping the dose low</h2>
       </header>
-      <table class="compact pair">
-        <thead><tr><th>Move</th><th>Why</th></tr></thead>
+      <table class="notes">
+        <thead><tr><th>Principle</th><th>Why it works</th></tr></thead>
         <tbody>
-          <tr><td>Shorter handling time</td><td>Dose accumulates</td></tr>
-          <tr><td>Greater distance</td><td>Intensity falls off rapidly from a small source</td></tr>
-          <tr><td>Shielding (lead, concrete)</td><td>Stops or weakens the radiation that would reach you</td></tr>
+          <tr><td><b>Time</b>: keep exposure short</td><td>Dose accumulates with time. Plan the work so that sources are out of their containers for as little time as possible.</td></tr>
+          <tr><td><b>Distance</b>: stay far away</td><td>Radiation spreads out in all directions from a small source, so intensity falls off rapidly with distance (roughly as \( 1/r^{2} \) for γ). α does not even reach you beyond a few centimetres.</td></tr>
+          <tr><td><b>Shielding</b>: put dense material between</td><td>Lead or thick concrete stops β and greatly weakens γ. Wood or a thin aluminium box will not do for a γ source; a dense material is needed.</td></tr>
         </tbody>
       </table>
-      <div class="one-liners">
-        <p>Hong Kong background is about 2.4 mSv per year. Public limit 1 mSv; radiation workers 20 mSv (those limits exclude natural background and medical procedures).</p>
+      <table class="notes">
+        <thead><tr><th>Precaution</th><th>Reason</th></tr></thead>
+        <tbody>
+          <tr><td>Store sources in a labelled lead-lined container, locked away, and return them immediately after use</td><td>Shielding, and minimum time out of the container</td></tr>
+          <tr><td>Handle with long forceps or tongs; never touch a source; never point it at anyone</td><td>Distance; keeps the source away from fingers and eyes and the beam away from people</td></tr>
+          <tr><td>Wear gloves, protective clothing and a lead apron where appropriate; wash hands after; no eating or drinking in the laboratory</td><td>Prevents radioactive material entering the body, where α and β do most harm</td></tr>
+          <tr><td>Wear a film badge or dosimeter</td><td>Records the dose received so exposure can be monitored and workers rotated. It does <em>not</em> reduce the dose</td></tr>
+          <tr><td>Only trained, authorised persons handle sources; use remote handling (robot arms, thick windows) for strong sources</td><td>Time and distance for the people who face the largest doses</td></tr>
+          <tr><td>Label and store radioactive waste separately (for example contaminated syringes after a tracer test)</td><td>Prevents contamination of others and of ordinary refuse</td></tr>
+          <tr><td>For patients: keep X-ray and CT examinations to those that are needed; shield parts of the body not being imaged</td><td>Medical procedures are the main artificial contribution to dose</td></tr>
+        </tbody>
+      </table>
+      <div class="worked">
+        <span class="tag">Worked example</span>
+        <p>Polonium-210, an α emitter with a half-life of 138 days, was used in a notorious poisoning. (a) Explain why a Po-210 source is far more dangerous swallowed than carried in a sealed container in a pocket. (b) Find its decay constant in s<sup>-1</sup>. (c) After how long would the activity in a contaminated object have fallen to a quarter of its initial value? (d) Why could traces still be detected weeks afterwards?</p>
+        <ol class="steps">
+          <li>(a) α is stopped by the container wall (or by skin), so outside the body the dose is negligible. Swallowed, the α deposits all its energy in the surrounding tissue, giving a very high, heavily weighted (\( W = 20 \)) dose.</li>
+          <li>(b) \( k = \ln 2 / T_{1/2} = 0.693 / (138 \times 24 \times 3600) = 5.81 \times 10^{-8} \) s<sup>-1</sup>.</li>
+          <li>(c) A quarter is two half-lives: \( 2 \times 138 = 276 \) d.</li>
+          <li>(d) A 138-day half-life is long compared with a few weeks, so most of the Po-210 was still undecayed and still emitting.</li>
+        </ol>
       </div>
       <div class="check" data-check="mc" data-answer="B">
         <h3>Concept check</h3>
-        <p>When performing an experiment, can radiation exposure be reduced by</p>
-        <p>(a) planning so the handling time is shorter? (b) storing sources in lead when not in use? (c) wearing a film badge?</p>
+        <p>When performing an experiment with a radioactive source, can the radiation dose received be reduced by</p>
+        <ol class="stem-list">
+          <li>planning the experiment so that the handling time is shorter?</li>
+          <li>storing the source in a lead container when it is not in use?</li>
+          <li>wearing a film badge?</li>
+        </ol>
         <div class="choices">
-          <button type="button" data-choice="A">(a) only</button>
-          <button type="button" data-choice="B">(a) and (b) only</button>
-          <button type="button" data-choice="C">(b) and (c) only</button>
-          <button type="button" data-choice="D">(a), (b) and (c)</button>
+          <button type="button" data-choice="A">(1) only</button>
+          <button type="button" data-choice="B">(1) and (2) only</button>
+          <button type="button" data-choice="C">(2) and (3) only</button>
+          <button type="button" data-choice="D">(1), (2) and (3)</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>(1) is the time principle and (2) is shielding. A film badge (3) only <em>records</em> the dose already received; it does nothing to reduce it. Answer <b>B</b>.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="C">
+        <h3>Concept check</h3>
+        <p>A school stores a γ source in a box. Which box material gives the best protection, and why?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">Wood, because it is a good electrical insulator.</button>
+          <button type="button" data-choice="B">Aluminium, because 5 mm of aluminium stops all radiation.</button>
+          <button type="button" data-choice="C">Lead, because a dense, high-atomic-number material absorbs γ most effectively.</button>
+          <button type="button" data-choice="D">Any of them, because a sealed box keeps the radiation in.</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p><b>C</b>. γ is only weakened, never fully stopped; the thicker and denser the absorber, the more it is weakened, and lead is the practical choice. <b>B</b> is true only for α and β. <b>A</b> confuses electrical with radiation shielding; <b>D</b> is false: γ passes through wood or aluminium almost unchanged.</p>
+        </div>
+      </div>
+      <div class="check" data-check="sa">
+        <h3>Write it out</h3>
+        <p>A technician has to move a small γ source from its store to a demonstration bench and back. State four precautions the technician should take and give the reason for each. <span class="marks">(4 marks)</span></p>
+        <button type="button" data-reveal>Show model answer</button>
+        <div class="model" hidden>
+          <ol>
+            <li>Carry the source in its lead container and take it out only at the bench: shielding, and minimum time exposed.</li>
+            <li>Handle it with long tongs and keep it pointed away from people: distance, and no one in the beam.</li>
+            <li>Plan the demonstration beforehand so the source is out for the shortest possible time: dose accumulates with time.</li>
+            <li>Wear a film badge (and gloves; wash hands afterwards): so that the dose received is recorded, and so that no radioactive material is carried to the mouth.</li>
+          </ol>
+          <p class="note">Any four precaution-with-reason pairs. A precaution without its reason scores half.</p>
+        </div>
       </div>
     </section>
+
+    <section class="section-dse" aria-labelledby="dse-practice-heading">
+      <header>
+        <span class="sec-num">DSE</span>
+        <h2 id="dse-practice-heading">Topic-matched past-paper practice</h2>
+      </header>
+      <p>Use the full questions to practise the distinction between source activity and dose absorbed, then justify each safety precaution with its mechanism.</p>
+      <div class="dse-practice-grid">
+        <article class="dse-practice-card">
+          <h3>Dose and its unit</h3>
+          <p>Decide whether a quantity describes the source, energy or biological effect. A sievert already includes the biological weighting.</p>
+          <div class="dse-practice-links">
+            <a href="summary.html#dse-mc-2026-32">2026/32 MC</a>
+          </div>
+        </article>
+        <article class="dse-practice-card">
+          <h3>Reducing dose in practice</h3>
+          <p>Rehearse a full precaution-and-reason response: time, distance and shielding reduce exposure, while a film badge records a dose after the event.</p>
+        </article>
+        <article class="dse-practice-card">
+          <h3>Activity, decay and exposure</h3>
+          <p>In a longer response, combine half-life calculations with the path from a radioactive source to a dose received by people.</p>
+          <div class="dse-practice-links">
+            <a href="summary.html#dse-lq-2021-9">2021/9 LQ</a>
+          </div>
+        </article>
+      </div>
+      <figure class="dse-paper subsection-paper">
+        <figcaption><b>Start here: 2026/32 MC</b><span>Identify the quantity being measured before selecting a unit: source activity is not dose received.</span></figcaption>
+        <p class="dse-slot">Full paper question: 2026/32 MC</p>
+        <img src="../_local/dse/mc/26/2026_q32.png" alt="HKDSE 2026 Paper 1A Question 32">
+      </figure>
+    </section>
+
+    <p class="next"><a href="summary.html">Next: Chapter summary and past papers →</a></p>
   </main>
   <script src="../vendor/katex/katex.min.js"></script>
   <script src="../vendor/katex/auto-render.min.js"></script>
   <script src="../js/math.js"></script>
+  <script src="../js/checks.js"></script>
   <script src="js/lib/three.min.js"></script>
   <script src="js/diagrams3d.js"></script>
   <script src="js/notes.js"></script>

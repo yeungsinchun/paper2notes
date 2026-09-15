@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Book 5 Ch.2 summary</title>
+  <title>Book 5 Ch.2 summary: Rate of Decay and Uses of Radionuclides</title>
+  <link rel="stylesheet" href="../css/notes.css">
   <link rel="stylesheet" href="css/notes.css">
   <link rel="stylesheet" href="../vendor/katex/katex.min.css">
-  <link rel="stylesheet" href="../css/lo.css">
 </head>
 <body>
   <header class="topbar">
@@ -20,8 +20,9 @@
     </nav>
   </header>
   <main>
-    <p class="kicker">Close</p>
-    <h1>Summary</h1>
+    <p class="kicker">Chapter 26</p>
+    <h1>Summary: Rate of Decay and Uses of Radionuclides</h1>
+    <p class="lede">The formula sheet, the uses table with the reason behind every choice, the dose facts, the traps, and every classified HKDSE item for this chapter.</p>
 
     <section class="lo-block" aria-labelledby="lo-heading">
       <h2 id="lo-heading">Learning objectives</h2>
@@ -38,82 +39,127 @@
         <li><p>relate the decay constant and the half-life <span class="lo-ext">extension</span></p><p class="dse-labels"><a href="#dse-mc-2020-32">2020/32 MC</a><a href="#dse-mc-2019-32">2019/32 MC</a><a href="#dse-lq-2013-9">2013/9 LQ</a><a href="#dse-lq-2025-12">2025/12 LQ</a></p></li>
         <li><p>discuss uses of radioactive isotopes</p><p class="dse-labels"><a href="#dse-mc-2024-33">2024/33 MC</a><a href="#dse-mc-2015-33">2015/33 MC</a><a href="#dse-lq-2014-10">2014/10 LQ</a><a href="#dse-lq-2017-10">2017/10 LQ</a><a href="#dse-lq-2018-10">2018/10 LQ</a><a href="#dse-lq-2021-9">2021/9 LQ</a><a href="#dse-lq-2026-12">2026/12 LQ</a></p></li>
         <li><p>represent radiation equivalent dose using the unit sievert (Sv)</p><p class="dse-labels"><a href="#dse-mc-2026-32">2026/32 MC</a></p></li>
-        <li><p>discuss potential hazards of ionizing radiation and the ways to minimise the radiation dose absorbed</p><p class="dse-labels"><a href="#dse-mc-2026-32">2026/32 MC</a><a href="#dse-mc-2015-32">2015/32 MC</a><a href="#dse-lq-2021-9">2021/9 LQ</a></p></li>
-        <li><p>suggest safety precautions in handling radioactive sources</p><p class="dse-labels"><a href="#dse-mc-2015-32">2015/32 MC</a><a href="#dse-lq-2014-10">2014/10 LQ</a></p></li>
+        <li><p>discuss potential hazards of ionizing radiation and the ways to minimise the radiation dose absorbed</p><p class="dse-labels"><a href="#dse-mc-2026-32">2026/32 MC</a><a href="#dse-lq-2021-9">2021/9 LQ</a></p></li>
+        <li><p>suggest safety precautions in handling radioactive sources</p><p class="dse-labels"><a href="#dse-lq-2014-10">2014/10 LQ</a></p></li>
       </ul>
     </section>
 
-
-    <section class="idea">
+    <section class="idea" id="formulas">
       <header>
-        <h2>N and A share the same half-life clock</h2>
+        <h2><span class="sec-num">1</span>Formula sheet</h2>
       </header>
-      <div class="eq">\[ N = N_0 \left(\tfrac{1}{2}\right)^{n} \quad\text{and}\quad A = A_0 \left(\tfrac{1}{2}\right)^{n} \]</div>
-      <div class="eq">\[ A = kN \quad\text{with}\quad T_{1/2} = \ln 2 / k \] <span class="lo-ext">extension</span></div>
-      <table class="compact pair">
-        <thead><tr><th>Quantity</th><th>After one half-life</th></tr></thead>
+      <div class="formula-sheet">
+        <div class="eq">\[ N = N_0 \left(\tfrac{1}{2}\right)^{n}, \qquad A = A_0 \left(\tfrac{1}{2}\right)^{n}, \qquad n = \frac{t}{T_{1/2}} \]</div>
+        <div class="eq">\[ A \propto N, \qquad 1\ \text{Bq} = 1\ \text{decay per second} \]</div>
+        <div class="eq">\[ \text{corrected count rate} = \text{recorded} - \text{background} \]</div>
+        <div class="eq">\[ A = kN, \qquad k = \frac{\ln 2}{T_{1/2}} \quad \text{(extension)} \]</div>
+        <div class="eq">\[ N = N_0 e^{-kt}, \qquad t = \frac{1}{k}\ln\frac{N_0}{N} \quad \text{(extension)} \]</div>
+        <div class="eq">\[ N = \frac{m}{M} N_A, \qquad \ln A = \ln A_0 - kt \quad \text{(extension)} \]</div>
+        <div class="eq">\[ H\ \text{(equivalent dose)} = D \times W_{\text{radiation}}, \qquad E\ \text{(effective dose)} = H \times W_{\text{tissue}} \]</div>
+      </div>
+      <table class="notes">
+        <thead><tr><th>Quantity</th><th>After one half-life</th><th>When half the sample is removed</th></tr></thead>
         <tbody>
-          <tr><td>Undecayed nuclei N</td><td>halves</td></tr>
-          <tr><td>Activity A</td><td>halves</td></tr>
-          <tr><td>Probability of decay of one nucleus</td><td>unchanged</td></tr>
+          <tr><td>Undecayed nuclei \( N \)</td><td>halves</td><td>halves</td></tr>
+          <tr><td>Activity \( A \)</td><td>halves</td><td>halves</td></tr>
+          <tr><td>Half-life \( T_{1/2} \), decay constant \( k \)</td><td>unchanged</td><td>unchanged</td></tr>
+          <tr><td>Total nuclei (parent + daughter), mass</td><td>unchanged</td><td>halves</td></tr>
         </tbody>
       </table>
     </section>
 
-    <section class="idea">
+    <section class="idea" id="uses">
       <header>
-        <h2>Uses at a glance</h2>
+        <h2><span class="sec-num">2</span>Uses at a glance</h2>
       </header>
-      <table class="compact pair">
-        <thead><tr><th></th><th>Typical choice</th></tr></thead>
+      <table class="notes">
+        <thead><tr><th>Use</th><th>Radiation</th><th>Half-life</th><th>Property exploited</th></tr></thead>
         <tbody>
-          <tr><td>Medical tracer</td><td>γ, hours</td></tr>
-          <tr><td>External radiotherapy</td><td>γ, years</td></tr>
-          <tr><td>Internal radiotherapy</td><td>β, days to weeks</td></tr>
-          <tr><td>Pipe leak</td><td>γ, hours</td></tr>
-          <tr><td>Thickness gauge</td><td>β, long T½</td></tr>
-          <tr><td>Smoke detector</td><td>α, long T½</td></tr>
-          <tr><td>Food sterilization</td><td>γ; food is not activated</td></tr>
-          <tr><td>C-14 dating</td><td>once-living carbon, ~60 y to 60 000 y</td></tr>
+          <tr><td>Medical tracer</td><td>γ (leaves the body, weakly ionizing)</td><td>hours to days</td><td>penetrating power, chemistry of the carrier</td></tr>
+          <tr><td>Internal radiotherapy</td><td>β (stays in the target tissue)</td><td>days to weeks</td><td>short range, moderate ionization</td></tr>
+          <tr><td>External radiotherapy</td><td>γ (Co-60)</td><td>years</td><td>penetrating power</td></tr>
+          <tr><td>Pipe leak</td><td>γ (through soil)</td><td>hours</td><td>penetrating power</td></tr>
+          <tr><td>Thickness gauge, level monitor</td><td>β for paper, foil; γ for steel, lead</td><td>years</td><td>partial absorption (penetrating power)</td></tr>
+          <tr><td>Smoke detector</td><td>α (Am-241)</td><td>hundreds of years</td><td>ionizing power, short range</td></tr>
+          <tr><td>Food irradiation, sterilizing</td><td>γ (Co-60) or X-rays</td><td>years</td><td>penetrating power; kills cells</td></tr>
+          <tr><td>Plant tracer</td><td>β (P-32)</td><td>14.3 d</td><td>follows the element's chemistry</td></tr>
+          <tr><td>Carbon-14 dating</td><td>(β)</td><td>5730 y</td><td>constant half-life; once-living carbon, 60 y to 60 000 y</td></tr>
+          <tr><td>Rock dating</td><td>(α series)</td><td>U-238 \( 4.47 \times 10^{9} \) y</td><td>constant half-life; parent : daughter ratio</td></tr>
         </tbody>
       </table>
     </section>
 
-    <section class="idea">
+    <section class="idea" id="dose">
       <header>
-        <h2>Dose</h2>
+        <h2><span class="sec-num">3</span>Dose</h2>
       </header>
-      <table class="compact pair">
-        <thead><tr><th></th><th></th></tr></thead>
+      <table class="notes">
+        <thead><tr><th></th><th>Measures</th><th>Unit</th><th>Depends on</th></tr></thead>
         <tbody>
-          <tr><td>Activity</td><td>radiation emitted, Bq</td></tr>
-          <tr><td>Effective dose</td><td>biological effect on the whole body, Sv</td></tr>
+          <tr><td>Activity</td><td>decays per second in the source</td><td>Bq</td><td>number of undecayed nuclei, half-life</td></tr>
+          <tr><td>Absorbed dose</td><td>energy absorbed per kg of tissue</td><td>(energy per kg)</td><td>source strength, distance, time, shielding</td></tr>
+          <tr><td>Equivalent dose</td><td>biological effect adjusted for radiation type</td><td>Sv (mSv)</td><td>absorbed dose × \( W_{\text{radiation}} \) (α 20; β, γ, X 1)</td></tr>
+          <tr><td>Effective dose</td><td>risk adjusted for radiation type and exposed tissue</td><td>Sv (mSv)</td><td>equivalent dose × \( W_{\text{tissue}} \)</td></tr>
         </tbody>
       </table>
+      <ul class="points">
+        <li>Background about 2.4 mSv per year (80% natural, radon the largest part). Limits above background and medical: public 1 mSv per year, workers 20 mSv per year. 1 Sv at once causes radiation sickness; 6 Sv is fatal without treatment.</li>
+        <li>α: harmless outside, worst inside. γ: worst outside, reaches every organ. Radon gets α inside the lungs.</li>
+        <li>Time, distance, shielding; plus gloves, tongs, lead store, film badge (monitors, does not protect), labelled waste, authorised persons only.</li>
+      </ul>
     </section>
 
-    <div class="trap-grid">
-      <div class="trap">
-        <h3>Decayed nuclei are still there</h3>
-        <p>They become a daughter nuclide. Mass does not vanish after one half-life.</p>
-      </div>
-      <div class="trap">
-        <h3>Subtract background first</h3>
-        <p>Half-life is read from corrected count rate, not from a graph that still includes background.</p>
-      </div>
-      <div class="trap">
-        <h3>Long T½ is not “weak”</h3>
-        <p>Activity also depends on how many nuclei you have. Compare A, not T½ alone.</p>
-      </div>
-    </div>
-
-    <section class="idea">
+    <section class="idea" id="traps">
       <header>
-        <h2>Close checks</h2>
+        <h2><span class="sec-num">4</span>Traps that cost marks</h2>
+      </header>
+      <div class="trap-grid">
+        <div class="trap">
+          <h3>Decayed nuclei are still there</h3>
+          <p>They have become the daughter. Mass does not vanish; the sample becomes a parent-daughter mixture. "Amount decayed" is \( N_0 - N \), not \( N \).</p>
+        </div>
+        <div class="trap">
+          <h3>Subtract background, then halve, then add it back</h3>
+          <p>Half-life is read from the corrected count rate. On an uncorrected graph, read the time at (corrected/2 + background).</p>
+        </div>
+        <div class="trap">
+          <h3>Long half-life is not weak</h3>
+          <p>\( A = kN \): a large sample of a long-lived nuclide can out-emit a small sample of a short-lived one. Compare activities, not half-lives.</p>
+        </div>
+        <div class="trap">
+          <h3>Half the time is not half the loss</h3>
+          <p>After half a half-life 71% remains, not 75%. Decay is exponential; use \( (1/2)^{t/T} \) or \( e^{-kt} \) for any \( t \), including non-integers.</p>
+        </div>
+        <div class="trap">
+          <h3>"By" one third is not "to" one third</h3>
+          <p>Decreasing by one third leaves 2/3. Decreasing to one third leaves 1/3. The times differ by a factor of about 2.7.</p>
+        </div>
+        <div class="trap">
+          <h3>k is not the activity</h3>
+          <p>\( k \) is the probability of decay per nucleus per second, constant for the nuclide. \( A \) is the whole sample's decays per second and falls with time.</p>
+        </div>
+        <div class="trap">
+          <h3>Half-life reasons come in pairs</h3>
+          <p>Long enough to do the job; short enough not to linger (tracers) or long enough to stay steady (gauges, detectors, therapy machines). Give both halves.</p>
+        </div>
+        <div class="trap">
+          <h3>Irradiated is not radioactive</h3>
+          <p>Food, instruments and X-rayed patients absorb energy, not radioactive atoms. Only contamination with radioactive material makes something radioactive.</p>
+        </div>
+        <div class="trap">
+          <h3>Activity falls, penetrating power does not</h3>
+          <p>An old source emits fewer particles per second; each particle is as penetrating as ever. A film badge records dose; it does not reduce it.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="idea" id="last-checks">
+      <header>
+        <h2><span class="sec-num">5</span>Last checks</h2>
       </header>
       <div class="check" data-check="mc" data-answer="D">
-        <h3>Two activity graphs</h3>
-        <p>X falls from 100 Bq to 50 Bq in 60 s. Y falls from 100 Bq to 25 Bq in 30 s. Ratio of half-lives T<sub>X</sub> : T<sub>Y</sub> is</p>
+        <h3>Concept check</h3>
+        <p>Source X falls from 100 Bq to 50 Bq in 60 s. Source Y falls from 100 Bq to 25 Bq in 30 s. The ratio of half-lives \( T_X : T_Y \) is</p>
         <div class="choices">
           <button type="button" data-choice="A">1 : 1</button>
           <button type="button" data-choice="B">1 : 2</button>
@@ -121,31 +167,59 @@
           <button type="button" data-choice="D">4 : 1</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>\( T_X = 60 \) s directly. For Y, 100 to 25 is <em>two</em> half-lives in 30 s, so \( T_Y = 15 \) s. Ratio 4 : 1, <b>D</b>. <b>C</b> is the trap of treating 100 to 25 as one half-life.</p>
+        </div>
       </div>
-      <div class="check" data-check="mc" data-answer="C">
-        <h3>Which is not an application of radioactivity?</h3>
+      <div class="check" data-check="mc" data-answer="A">
+        <h3>Concept check</h3>
+        <p>Match each application to the property of the radionuclide it mainly relies on: thickness gauge, smoke detector, carbon-14 dating.</p>
         <div class="choices">
-          <button type="button" data-choice="A">Killing bacteria in food</button>
-          <button type="button" data-choice="B">Monitoring the thickness of a metal sheet</button>
-          <button type="button" data-choice="C">Transmitting signals overseas</button>
-          <button type="button" data-choice="D">Estimating the age of ancient remains</button>
+          <button type="button" data-choice="A">penetrating power · ionizing power · constant half-life</button>
+          <button type="button" data-choice="B">ionizing power · penetrating power · constant half-life</button>
+          <button type="button" data-choice="C">penetrating power · constant half-life · ionizing power</button>
+          <button type="button" data-choice="D">ionizing power · ionizing power · constant half-life</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>A gauge relies on the radiation being <em>partly</em> absorbed (penetrating power). A smoke detector relies on α ionizing the air. Dating relies on the half-life never changing. <b>A</b>. <b>B</b> swaps the first two; <b>D</b> forgets that the gauge count is about penetration.</p>
+        </div>
       </div>
       <div class="check" data-check="mc" data-answer="C">
-        <h3>External brain diagnostic imaging</h3>
+        <h3>Concept check</h3>
+        <p>A sample contains two radionuclides P (half-life 1 h) and Q (half-life 2 h) and has total activity \( 6.0 \times 10^{6} \) Bq. Four hours later the total activity is \( 6.0 \times 10^{5} \) Bq. The initial activity of P was</p>
         <div class="choices">
-          <button type="button" data-choice="A">α and β · 433 years</button>
-          <button type="button" data-choice="B">γ · 13.5 years</button>
-          <button type="button" data-choice="C">γ · 6.01 hours</button>
-          <button type="button" data-choice="D">β · 3.14 days</button>
+          <button type="button" data-choice="A">\( 1.2 \times 10^{6} \) Bq</button>
+          <button type="button" data-choice="B">\( 3.0 \times 10^{6} \) Bq</button>
+          <button type="button" data-choice="C">\( 4.8 \times 10^{6} \) Bq</button>
+          <button type="button" data-choice="D">\( 5.4 \times 10^{6} \) Bq</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>In 4 h, P has 4 half-lives (factor 1/16) and Q has 2 (factor 1/4). With \( A_Q = 6.0 \times 10^{6} - A_P \): \( A_P/16 + (6.0 \times 10^{6} - A_P)/4 = 6.0 \times 10^{5} \). Multiply by 16: \( A_P + 4(6.0 \times 10^{6}) - 4A_P = 9.6 \times 10^{6} \), so \( 3A_P = 1.44 \times 10^{7} \), \( A_P = 4.8 \times 10^{6} \) Bq: <b>C</b>. <b>A</b> is the answer for Q.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3>Concept check</h3>
+        <p>Two samples P and Q of different radionuclides are found to have the same corrected count rate at \( t = 10 \) min. P's count rate falls more steeply than Q's. Which of the following is correct at \( t = 10 \) min?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">P and Q contain the same number of undecayed nuclei.</button>
+          <button type="button" data-choice="B">P has the larger decay constant and contains fewer undecayed nuclei than Q.</button>
+          <button type="button" data-choice="C">P has the longer half-life and contains fewer undecayed nuclei than Q.</button>
+          <button type="button" data-choice="D">P has the larger decay constant and contains more undecayed nuclei than Q.</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Steeper fall means a larger fraction decays per minute: larger \( k \), shorter half-life. Equal activities with \( A = kN \) means the sample with larger \( k \) has smaller \( N \): <b>B</b>. <b>A</b> is the common error of equating count rate with amount.</p>
+        </div>
       </div>
     </section>
+
+    <p class="next"><a href="index.html">Back to the chapter map</a> · <a href="../ch01-radiation-and-radioactivity/index.html">← Chapter 25</a></p>
+
     <section class="dse-bank" aria-labelledby="dse-heading">
       <h2 id="dse-heading">Related DSE problems</h2>
-      <p class="lede">Each paper is the classified HKDSE item for the learning objectives above.</p>
+      <p class="lede">Each paper is the classified HKDSE item for the learning objectives above. Attempt it before reading the notes' explanation of the same idea.</p>
       <div class="dse-group">
         <h3>Multiple choice</h3>
       <figure class="dse-paper" id="dse-mc-2012-35">
@@ -298,6 +372,7 @@
   <script src="../vendor/katex/katex.min.js"></script>
   <script src="../vendor/katex/auto-render.min.js"></script>
   <script src="../js/math.js"></script>
+  <script src="../js/checks.js"></script>
   <script src="js/notes.js"></script>
 </body>
 </html>

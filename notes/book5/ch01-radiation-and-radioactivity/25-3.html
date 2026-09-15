@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>25.3 Properties of nuclear radiation</title>
+  <title>25.3 Properties and detection of nuclear radiation</title>
+  <link rel="stylesheet" href="../css/notes.css">
   <link rel="stylesheet" href="css/notes.css">
   <link rel="stylesheet" href="../vendor/katex/katex.min.css">
-  <link rel="stylesheet" href="../css/lo.css">
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="../index.html">Book 5 · Ch.1<small>25.3 Properties</small></a>
+    <a class="brand" href="../index.html">Book 5 · Ch.1<small>25.3 Properties and detection</small></a>
     <nav>
       <a href="index.html">Map</a>
       <a href="25-1.html">25.1</a>
@@ -20,8 +20,9 @@
     </nav>
   </header>
   <main>
-    <p class="kicker">25.3</p>
-    <h1>Properties of nuclear radiation</h1>
+    <p class="kicker">Section 25.3</p>
+    <h1>Properties and detection of nuclear radiation</h1>
+    <p class="lede">How α, β and γ ionize, how each detector turns that ionization into something visible, how far each radiation travels and what stops it, how to identify an unknown source from absorber readings, and how electric and magnetic fields separate the three.</p>
 
     <section class="lo-block" aria-labelledby="lo-heading">
       <h2 id="lo-heading">Learning objectives</h2>
@@ -33,51 +34,49 @@
       </ul>
     </section>
 
-
     <section class="idea" id="ion-pair">
       <header>
-        <h2>Ion-pairs, not lone positive ions</h2>
-        <span class="stamp">Fig. 25.24</span>
+        <h2><span class="sec-num">A</span>Ionizing power</h2>
       </header>
-      <div class="visual play stage" id="pair-vis" data-autoplay data-scene="ionpair">
-        <canvas class="scene-canvas" width="960" height="420" aria-label="Knocked electron is captured by a second atom, making an ion pair"></canvas>
-        <span class="hud-label" data-hud="a">atom</span>
-        <span class="hud-label" data-hud="b">atom</span>
-      </div>
+      <figure class="fig">
+        <div class="visual play stage" id="pair-vis" data-autoplay data-scene="ionpair">
+          <canvas class="scene-canvas" width="960" height="420" aria-label="Knocked electron is captured by a second atom, making an ion pair"></canvas>
+          <span class="hud-label" data-hud="a">atom</span>
+          <span class="hud-label" data-hud="b">atom</span>
+        </div>
+        <figcaption><b>Fig. 25.24</b> An ion-pair. The radiation knocks an electron out of one atom (leaving a positive ion); the electron is soon captured by a neighbouring atom, which becomes a negative ion. Ionization always produces pairs.</figcaption>
+      </figure>
       <div class="row"><button type="button" data-replay="pair-vis">Replay</button></div>
-      <table class="compact pair">
-        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+      <figure class="fig" id="ionizing-power">
+        <div class="visual play stage" id="ionpower-vis" data-scene="ionpower">
+          <canvas class="scene-canvas" width="960" height="420" aria-label="Ion pairs along alpha beta gamma paths"></canvas>
+          <span class="hud-label" data-hud="alpha">α</span>
+          <span class="hud-label" data-hud="beta">β</span>
+          <span class="hud-label" data-hud="gamma">γ</span>
+        </div>
+        <figcaption><b>Fig. 25.25</b> Ion-pairs left along the path of each radiation in air. α leaves a dense trail and stops soon; γ leaves only a few pairs over a long path.</figcaption>
+      </figure>
+      <table class="notes" aria-label="Table 25.4">
+        <thead><tr><th></th><th>Nature</th><th>Speed</th><th>Relative mass</th><th>Charge</th><th>Ion-pairs per cm of air</th><th>Ionizing power</th></tr></thead>
         <tbody>
-          <tr><td>Knocked electron is captured by another atom</td><td>Always a pair, not a lone positive ion</td></tr>
-          <tr><td>Lower speed, larger mass, larger charge</td><td>More ion-pairs per cm</td></tr>
+          <tr><td><b>α</b></td><td>helium nucleus</td><td>up to about 0.05\( c \) (some sources say 0.1\( c \))</td><td>4 (≈ 7200 × electron)</td><td>+2</td><td>20 000 to 50 000</td><td>strongest</td></tr>
+          <tr><td><b>β</b></td><td>fast electron</td><td>up to 0.98\( c \)</td><td>1/1840</td><td>−1</td><td>50 to 500</td><td>weaker</td></tr>
+          <tr><td><b>γ</b></td><td>EM wave</td><td>\( c \)</td><td>0</td><td>0</td><td>5 to 8</td><td>weakest</td></tr>
         </tbody>
       </table>
-    </section>
-
-    <section class="idea" id="ionizing-power">
-      <header>
-        <h2>α leaves a dense trail of pairs</h2>
-        <span class="stamp">Fig. 25.25 · Table 25.4</span>
-      </header>
-      <div class="visual play stage" id="ionpower-vis" data-scene="ionpower">
-        <canvas class="scene-canvas" width="960" height="420" aria-label="Ion pairs along alpha beta gamma paths"></canvas>
-        <span class="hud-label" data-hud="alpha">α</span>
-        <span class="hud-label" data-hud="beta">β</span>
-        <span class="hud-label" data-hud="gamma">γ</span>
-      </div>
-      <table class="compact">
-        <thead><tr><th></th><th>speed</th><th>rel. mass</th><th>rel. charge</th><th>ion-pairs / cm in air</th></tr></thead>
-        <tbody>
-          <tr><td>α</td><td>up to 0.05c</td><td>4</td><td>+2</td><td>20 000-50 000</td></tr>
-          <tr><td>β</td><td>up to 0.98c</td><td>≈ 0</td><td>−1</td><td>50-500</td></tr>
-          <tr><td>γ</td><td>c</td><td>0</td><td>0</td><td>5-8</td></tr>
-        </tbody>
-      </table>
-      <p class="caption">Ionizing power: α &gt; β &gt; γ. Inverse of range and penetrating power, next.</p>
-      <!-- HKDSE 2016/32 -->
+      <ul class="points">
+        <li><b>Why α ionizes most.</b> It is slow, massive and carries two units of charge, so it spends a long time near each atom it passes and pulls strongly on the electrons. β is light, fast and singly charged; γ has no charge at all and ionizes only when it happens to be absorbed by an electron.</li>
+        <li>All three <em>can</em> ionize, γ included; the differences are in how many pairs per centimetre. Because it loses energy at every ionization, the strongest ionizer runs out of energy first: ionizing power and range go opposite ways (Section F).</li>
+        <li>Nothing is ionized in a vacuum: there are no atoms to ionize. Ionizing radiation is not only nuclear radiation; X-rays ionize too.</li>
+      </ul>
       <div class="check" data-check="mc" data-answer="A">
-        <h3>Concept check</h3>
-        <p>(1) Ionizing power of α is much stronger than β. (2) γ can be completely shielded by 10 cm concrete. (3) α, β and γ all deflect in an E field.</p>
+        <h3 data-src="HKDSE 2016 Paper 1A Q32">Concept check</h3>
+        <p>Which of the following statements about α, β and γ radiation is/are correct?</p>
+        <ol class="stem-list">
+          <li>The ionizing power of α particles is much stronger than that of β particles.</li>
+          <li>γ rays can be completely shielded by 10 cm of concrete.</li>
+          <li>α, β and γ radiation are all deflected by an electric field.</li>
+        </ol>
         <div class="choices">
           <button type="button" data-choice="A">(1) only</button>
           <button type="button" data-choice="B">(1) and (2) only</button>
@@ -85,34 +84,52 @@
           <button type="button" data-choice="D">(2) and (3) only</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>(1) is right by two orders of magnitude (Table 25.4). (2) is the classic γ trap: dense material <em>reduces</em> γ intensity (each thickness cuts it by a fixed fraction) but never stops it completely, so "completely shielded" is wrong. (3) fails for γ, which carries no charge. Answer <b>A</b>.</p>
+        </div>
       </div>
     </section>
 
     <section class="idea" id="current">
       <header>
-        <h2>Ionized gas conducts</h2>
-        <span class="stamp">Fig. 25.26</span>
+        <h2><span class="sec-num">B</span>Ionized air conducts</h2>
       </header>
-      <div class="visual play stage" id="current-vis" data-autoplay data-scene="current">
-        <canvas class="scene-canvas" width="960" height="420" aria-label="Alpha knocks an electron from a gas atom; the pair drifts to the plates"></canvas>
-        <span class="hud-label" data-hud="source">α source</span>
-        <span class="hud-label" data-hud="minus">− plate</span>
-        <span class="hud-label" data-hud="plus">+ plate</span>
-      </div>
+      <figure class="fig">
+        <div class="visual play stage" id="current-vis" data-autoplay data-scene="current">
+          <canvas class="scene-canvas" width="960" height="420" aria-label="Alpha knocks an electron from a gas atom; the pair drifts to the plates"></canvas>
+          <span class="hud-label" data-hud="source">α source</span>
+          <span class="hud-label" data-hud="minus">− plate</span>
+          <span class="hud-label" data-hud="plus">+ plate</span>
+        </div>
+        <figcaption><b>Fig. 25.26</b> A source between two charged plates. The ions it creates drift to the plates (positive ions to the negative plate, electrons and negative ions to the positive plate), so a small current flows through the air and the meter deflects. Switch to a β source to see the smaller current.</figcaption>
+      </figure>
       <div class="row">
         <button type="button" data-current="alpha">α source</button>
-        <button type="button" data-current="beta">swap to β (current smaller)</button>
+        <button type="button" data-current="beta">β source</button>
       </div>
-      <table class="compact pair">
-        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+      <p>Air is normally an insulator. Ionizing radiation gives it free charge carriers, so it conducts. Everything in this section follows from that single fact.</p>
+      <table class="notes">
+        <thead><tr><th>Change made</th><th>Effect on the current, and why</th></tr></thead>
         <tbody>
-          <tr><td>+ ions to the negative plate, − ions to the positive plate</td><td>The gas conducts; a current flows</td></tr>
-          <tr><td>A charged sphere of either sign nearby</td><td>It can discharge, because ion-pairs exist</td></tr>
+          <tr><td>Replace the α source by a β source of similar activity</td><td>Current falls: β makes far fewer ion-pairs per centimetre.</td></tr>
+          <tr><td>Move the α source slowly away from the plates</td><td>Current falls to zero within a few centimetres: α has a range of only about 5 cm in air, so beyond that no air between the plates is ionized.</td></tr>
+          <tr><td>Pump the air out of the space between the plates</td><td>Current falls to zero. There is nothing to ionize, so there are no charge carriers, even though the α now travels further.</td></tr>
+          <tr><td>Blow smoke between the plates</td><td>Current falls: smoke particles capture the ions, making heavy, slow carriers. This is how an ionization smoke detector triggers its alarm (Chapter 26).</td></tr>
+          <tr><td>Bring the source near a charged metal sphere or a charged electroscope</td><td>The sphere discharges and the leaf falls, whatever the sign of its charge: ions of the opposite sign are drawn to it and neutralise it.</td></tr>
         </tbody>
       </table>
+      <aside class="tip">
+        <span class="tag">Exam tip</span>
+        <p>It is the <em>ions in the air</em> that neutralise a charged object or carry the current, not the α particles themselves. "The α particles are attracted to the charged dust and neutralise it" was the wrong answer picked out in the examiners' report for HKDSE 2017 Paper 1B Q10 (the anti-static brush).</p>
+      </aside>
       <div class="check" data-check="mc" data-answer="C">
-        <h3>Concept check</h3>
-        <p>(1) α is heavier than β. (2) α has stronger penetrating power than β. (3) An α source can discharge a positively charged metal sphere nearby.</p>
+        <h3 data-src="HKDSE Practice Paper 1A Q34">Concept check</h3>
+        <p>Which of the following statements is/are correct?</p>
+        <ol class="stem-list">
+          <li>An α particle is heavier than a β particle.</li>
+          <li>α particles have a stronger penetrating power than β particles.</li>
+          <li>An α source held near a positively charged metal sphere can discharge the sphere.</li>
+        </ol>
         <div class="choices">
           <button type="button" data-choice="A">(1) only</button>
           <button type="button" data-choice="B">(2) only</button>
@@ -120,225 +137,420 @@
           <button type="button" data-choice="D">(2) and (3) only</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>(1): an α particle (two protons, two neutrons) is about 7200 times heavier than an electron. (3): the α ionizes the air; the negative ions are attracted to the positive sphere and neutralise it. A negatively charged sphere would be discharged just as well by the positive ions. (2) is backwards: α is the strongest ionizer and therefore the <em>least</em> penetrating. Answer <b>C</b>.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="C">
+        <h3>Concept check</h3>
+        <p>In Fig. 25.26 the α source is moved slowly away from the plates. How does the meter reading change?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">It stays the same, because the source is emitting just as strongly.</button>
+          <button type="button" data-choice="B">It rises, because the α particles have more air to ionize.</button>
+          <button type="button" data-choice="C">It falls to zero within a few centimetres, because α particles have a range of only about 5 cm in air.</button>
+          <button type="button" data-choice="D">It falls gradually to zero over several metres.</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p><b>C</b>. Once the source is further from the plates than the range of the α particles, none of them reach the air between the plates, so no ion-pairs are formed there. <b>D</b> would describe a β source (range of a few metres). <b>A</b> ignores range; <b>B</b> has no mechanism. In a vacuum the current would be zero at any distance.</p>
+        </div>
       </div>
     </section>
 
     <section class="idea" id="tracks">
       <header>
-        <h2>Cloud-chamber tracks</h2>
-        <span class="stamp">Fig. 25.27 · Table 25.5</span>
+        <h2><span class="sec-num">C</span>Cloud chamber tracks</h2>
       </header>
-      <div class="visual play stage" id="track-vis" data-scene="tracks">
-        <canvas class="scene-canvas" width="960" height="420" aria-label="Animated cloud-chamber tracks"></canvas>
-        <span class="hud-label" data-hud="alpha">α</span>
-        <span class="hud-label" data-hud="beta">β</span>
-        <span class="hud-label" data-hud="gamma">γ</span>
-      </div>
+      <figure class="fig">
+        <div class="visual play stage" id="track-vis" data-scene="tracks">
+          <canvas class="scene-canvas" width="960" height="420" aria-label="Animated cloud-chamber tracks"></canvas>
+          <span class="hud-label" data-hud="alpha">α</span>
+          <span class="hud-label" data-hud="beta">β</span>
+          <span class="hud-label" data-hud="gamma">γ</span>
+        </div>
+        <figcaption><b>Fig. 25.27</b> Tracks in a diffusion cloud chamber. Choose a radiation to see its characteristic track.</figcaption>
+      </figure>
       <div class="row">
-        <button type="button" data-track="alpha" aria-pressed="true">α thick straight</button>
-        <button type="button" data-track="beta" aria-pressed="false">β thin irregular</button>
-        <button type="button" data-track="gamma" aria-pressed="false">γ faint / scattered</button>
+        <button type="button" data-track="alpha" aria-pressed="true">α tracks</button>
+        <button type="button" data-track="beta" aria-pressed="false">β tracks</button>
+        <button type="button" data-track="gamma" aria-pressed="false">γ tracks</button>
       </div>
-      <table class="compact pair">
-        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+      <div class="def">
+        <span class="tag">How the chamber works</span>
+        <p>Dry ice cools the base of the chamber. A felt ring soaked in alcohol near the top fills the chamber with alcohol vapour, which becomes <b>supersaturated</b> in the cold layer near the base. Radiation passing through ionizes the air along its path, and the vapour condenses on the ions into droplets. Lit from the side, the line of droplets shows up as a white track. Because tracks appear at random places and at random moments, the chamber is also direct evidence that decay is random.</p>
+      </div>
+      <table class="notes" aria-label="Table 25.5">
+        <thead><tr><th></th><th>Appearance</th><th>Why</th></tr></thead>
         <tbody>
-          <tr><td>Droplets condense on ions</td><td>Evacuate the vapour → no tracks</td></tr>
-          <tr><td>Massive / strongly ionizing</td><td>Straighter / thicker tracks</td></tr>
+          <tr><td><b>α</b></td><td>Thick, straight, short (a few cm) and all about the same length</td><td>Thick because it is a strong ionizer (many droplets per cm). Straight because it is massive and is not knocked off course by collisions with air molecules. Short because it spends its energy quickly. Equal lengths because the α particles from one source are emitted with the same energy.</td></tr>
+          <tr><td><b>β</b></td><td>Thin, twisted, longer</td><td>Thin because it ionizes weakly. Twisted because it is light and is deflected in every collision.</td></tr>
+          <tr><td><b>γ</b></td><td>Scattered, faint, short wisps, hardly observable</td><td>γ itself leaves almost no ions; the few visible tracks are made by electrons it knocks out of atoms.</td></tr>
         </tbody>
       </table>
-      <div class="check" data-check="mc" data-answer="B">
+      <ul class="points">
+        <li>The cloud chamber is the only common detector that can tell the three radiations apart on its own. Film and a GM counter show that radiation is present and how much; they cannot say which kind without absorbers or a field.</li>
+        <li>Background radiation also makes tracks: a chamber with no source still shows occasional tracks.</li>
+        <li>In a magnetic field the tracks curve; the direction of curvature gives the sign of the charge and the radius gives the momentum.</li>
+        <li>In a chamber filled with helium, an α track sometimes forks at a right angle: the α made an oblique elastic collision with a helium nucleus of equal mass, and equal masses separate at 90°. This is evidence that the α particle <em>is</em> a helium nucleus.</li>
+      </ul>
+      <div class="check" data-check="mc" data-answer="C">
         <h3>Concept check</h3>
-        <p>A cloud chamber has no supersaturated vapour. What follows?</p>
+        <p>α tracks in a cloud chamber are thick and straight. Which of the following properties of α particles explain this?</p>
+        <ol class="stem-list">
+          <li>They are heavy.</li>
+          <li>They have strong ionizing power.</li>
+          <li>They have weak penetrating power.</li>
+        </ol>
         <div class="choices">
-          <button type="button" data-choice="A">Tracks are the particles themselves glowing.</button>
-          <button type="button" data-choice="B">No supersaturated vapour → no droplets → no visible tracks.</button>
-          <button type="button" data-choice="C">γ would still draw thick lines.</button>
+          <button type="button" data-choice="A">(1) only</button>
+          <button type="button" data-choice="B">(2) only</button>
+          <button type="button" data-choice="C">(1) and (2) only</button>
+          <button type="button" data-choice="D">(1), (2) and (3)</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Thick comes from (2): many ion-pairs per cm means many droplets. Straight comes from (1): a heavy particle is not deflected by the light air molecules it hits. (3) explains why the track is <em>short</em>, not why it is thick or straight, so it is not a reason for the property asked. Answer <b>C</b>.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3>Concept check</h3>
+        <p>Which of the following detectors, used on its own, can distinguish α, β and γ radiation?</p>
+        <ol class="stem-list">
+          <li>photographic film</li>
+          <li>cloud chamber</li>
+          <li>GM counter</li>
+        </ol>
+        <div class="choices">
+          <button type="button" data-choice="A">(1) only</button>
+          <button type="button" data-choice="B">(2) only</button>
+          <button type="button" data-choice="C">(2) and (3) only</button>
+          <button type="button" data-choice="D">(1), (2) and (3)</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Only the cloud chamber shows a different track for each radiation. Film darkens and a GM tube counts whatever ionizing radiation reaches them; to identify the type you must add absorbers (Section G) or a field (Section H). Answer <b>B</b>.</p>
+        </div>
       </div>
     </section>
 
     <section class="idea" id="badge">
       <header>
-        <h2>Film badge: absorbers on film</h2>
-        <span class="stamp">Fig. 25.29</span>
+        <h2><span class="sec-num">D</span>Photographic film and the film badge</h2>
       </header>
-      <div class="visual play stage" id="badge-vis" data-scene="badge">
-        <canvas class="scene-canvas" width="960" height="420" aria-label="Film badge with open window, aluminium, and lead"></canvas>
-        <span class="hud-label" data-hud="open">open window</span>
-        <span class="hud-label" data-hud="al">thin Al</span>
-        <span class="hud-label" data-hud="pb">lead</span>
-      </div>
+      <figure class="fig">
+        <div class="visual play stage" id="badge-vis" data-scene="badge">
+          <canvas class="scene-canvas" width="960" height="420" aria-label="Film badge with open window, aluminium, and lead"></canvas>
+          <span class="hud-label" data-hud="open">open window</span>
+          <span class="hud-label" data-hud="al">thin Al</span>
+          <span class="hud-label" data-hud="pb">lead</span>
+        </div>
+        <figcaption><b>Fig. 25.29</b> A film badge. A piece of photographic film wrapped in opaque paper sits behind three regions: an open window, a thin aluminium sheet and a lead sheet. Choose a radiation to see how the developed film looks.</figcaption>
+      </figure>
       <div class="row">
-        <button type="button" data-badge="alpha">shine α</button>
-        <button type="button" data-badge="beta">shine β</button>
-        <button type="button" data-badge="gamma">shine γ</button>
+        <button type="button" data-badge="alpha">expose to α</button>
+        <button type="button" data-badge="beta">expose to β</button>
+        <button type="button" data-badge="gamma">expose to γ</button>
       </div>
-      <table class="compact pair">
-        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+      <ul class="points">
+        <li><b>Film detects radiation</b> because ionizing radiation blackens photographic film just as light does. Becquerel discovered radioactivity this way in 1896. A classic demonstration: a key or coin is laid on a film wrapped in black paper and a β source is held above it; after developing, the film is dark except for a white shadow of the key. The radiation passed through the paper but not the metal. The paper envelope has been irradiated but is not radioactive.</li>
+        <li><b>Purpose of the badge.</b> Worn by radiation workers to record the total (cumulative) dose received over weeks. Darker film means a stronger source or a longer exposure. It is cheap and simple but approximate, and it can only be read after the fact.</li>
+        <li><b>The wrapper</b> keeps visible light out; otherwise the film would blacken anyway. The same wrapper stops all α particles, so <b>a film badge can never detect α</b>. This was the point of HKDSE 2015 Paper 1A Q32, which only 35% of candidates got right.</li>
+      </ul>
+      <table class="notes">
+        <thead><tr><th>Radiation reaching the badge</th><th>Developed film</th></tr></thead>
         <tbody>
-          <tr><td>Blackening of the film</td><td>≈ dose</td></tr>
-          <tr><td>Paper/plastic wrap over the film</td><td>α is never seen</td></tr>
+          <tr><td>β only</td><td>Dark under the open window only; the aluminium and lead regions stay clear (5 mm Al stops β)</td></tr>
+          <tr><td>γ only</td><td>All three regions dark; lead region a little lighter than the others</td></tr>
+          <tr><td>β and γ</td><td>Open window darkest (β + γ); aluminium region dark (γ); lead region lightest (part of the γ)</td></tr>
+          <tr><td>α only</td><td>No darkening anywhere: the wrapper stops α before it reaches the film</td></tr>
         </tbody>
       </table>
+      <div class="check" data-check="mc" data-answer="A">
+        <h3 data-src="after HKDSE 2015 Paper 1A Q32">Concept check</h3>
+        <p>A worker's film badge is wrapped in opaque plastic. Which type of radiation can the badge <strong>not</strong> monitor?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">α</button>
+          <button type="button" data-choice="B">β</button>
+          <button type="button" data-choice="C">γ</button>
+          <button type="button" data-choice="D">It monitors all three.</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p><b>A</b>. α is stopped by a sheet of paper, so the light-proof wrapper alone absorbs it and nothing reaches the film. β passes the wrapper and darkens the open-window region; γ darkens every region. Most candidates chose <b>C</b>, thinking γ is "too penetrating to be caught", but γ is partly absorbed by the film and blackens it.</p>
+        </div>
+      </div>
+      <div class="check" data-check="sa">
+        <h3>Write it out</h3>
+        <p>A film badge has an open window, a 5 mm aluminium sheet and a 5 mm lead sheet in front of a wrapped film. Describe the appearance of the developed film if the wearer was exposed to (i) β only, (ii) γ only. Why is the film wrapped? <span class="marks">(4 marks)</span></p>
+        <button type="button" data-reveal>Show model answer</button>
+        <div class="model" hidden>
+          <ol>
+            <li>(i) Only the region behind the open window is darkened; the aluminium and lead regions stay clear because 5 mm of aluminium (and lead) stops β.</li>
+            <li>(ii) All three regions are darkened, the lead region least, because γ passes through aluminium almost unchanged and is only partly absorbed by lead.</li>
+            <li>The wrapper stops visible light from blackening the film, so any darkening is due to the ionizing radiation alone.</li>
+          </ol>
+          <p class="note">Pattern of darkening (1 mark each case), the absorber reason (1), the wrapper reason (1).</p>
+        </div>
+      </div>
     </section>
 
     <section class="idea" id="gm">
       <header>
-        <h2>GM tube: argon ion-pairs → pulses</h2>
-        <span class="stamp">Fig. 25.30</span>
+        <h2><span class="sec-num">E</span>The Geiger-Müller counter and count rate</h2>
       </header>
-      <div class="visual play stage" id="gm-vis" data-autoplay data-scene="gm">
-        <canvas class="scene-canvas" width="960" height="420" aria-label="Argon atom in a GM tube loses an electron toward the anode wire"></canvas>
-        <span class="hud-label" data-hud="window">thin window</span>
-        <span class="hud-label" data-hud="wire">+ wire</span>
-        <span class="hud-label" data-hud="case">− case · argon</span>
+      <figure class="fig">
+        <div class="visual play stage" id="gm-vis" data-autoplay data-scene="gm">
+          <canvas class="scene-canvas" width="960" height="420" aria-label="Argon atom in a GM tube loses an electron toward the anode wire"></canvas>
+          <span class="hud-label" data-hud="window">thin window</span>
+          <span class="hud-label" data-hud="wire">+ wire</span>
+          <span class="hud-label" data-hud="case">− case · argon</span>
+        </div>
+        <figcaption><b>Fig. 25.30</b> Inside a GM tube. Radiation enters through the thin mica window and ionizes an argon atom; the electron is pulled to the central wire and the positive ion to the case, giving one pulse of current.</figcaption>
+      </figure>
+      <div class="worked">
+        <span class="tag">How a GM counter works, step by step</span>
+        <ol class="steps">
+          <li>The tube contains argon at low pressure. A high voltage is kept between the central wire (positive, the anode) and the metal case (negative, the cathode). One end is a thin mica window.</li>
+          <li>Radiation enters through the window and ionizes argon atoms, producing ion-pairs.</li>
+          <li>The electrons are accelerated to the wire and the positive ions to the case; on the way they ionize more atoms, so a brief pulse of current flows through the tube.</li>
+          <li>Each pulse is counted by the attached scaler (total count) or ratemeter (counts per second or per minute, the <b>count rate</b>).</li>
+        </ol>
       </div>
-      <div class="row">
-        <span class="meter" id="gm-rate">0</span>
-        <span>count s⁻¹</span>
-        <span>corrected: <span class="meter" id="gm-corr">0</span></span>
+      <figure class="fig sim">
+        <div class="row">
+          <span class="row-label">Simulated ratemeter</span>
+          <span class="readout" id="gm-rate">0</span>
+          <span>count s⁻¹</span>
+          <span>corrected: <span class="readout" id="gm-corr">0</span> count s⁻¹</span>
+        </div>
+        <p class="caption" id="gm-bg"></p>
+        <div class="row">
+          <button type="button" id="gm-bg-btn">no source (background only)</button>
+          <button type="button" data-gm-src="40">β or γ source nearby</button>
+          <button type="button" data-gm-src="20" data-need-grid="off">α source nearby</button>
+          <button type="button" id="gm-grid" aria-pressed="true">plastic grid on (blocks α)</button>
+        </div>
+        <figcaption>A simulated reading. Notice that it fluctuates from second to second even with no source, and that an α source registers only when the protective plastic grid over the window is removed.</figcaption>
+      </figure>
+      <div class="eq">\[ \text{corrected count rate} = \text{recorded count rate} - \text{background count rate} \]</div>
+      <ul class="points">
+        <li><b>Always measure the background first</b>, with the source locked away, because every reading includes it. Decay is random, so readings fluctuate; take several readings and average them.</li>
+        <li>Background has a <b>non-zero average count rate</b>. A very short count can still be zero by chance, but repeated readings in Hong Kong typically average about 1 count per second (30 to 60 counts per minute).</li>
+        <li>Because it counts ion-pairs, the tube detects α and β more efficiently than γ, which usually passes straight through without ionizing anything. To detect α the plastic grid must be removed and the source placed within about 1.5 cm of the window; β and γ sources are placed about 5 cm away.</li>
+        <li>A GM counter is faster and more precise than film, but on its own it cannot tell which type of radiation it is counting.</li>
+        <li>The corrected count rate is proportional to the activity of the source (Chapter 26) but much smaller than it: the source radiates in all directions and the tube catches only the small fraction that enters its window, and some of that is absorbed on the way.</li>
+      </ul>
+      <div class="check" data-check="mc" data-answer="D">
+        <h3>Concept check</h3>
+        <p>With no radioactive source in the laboratory, a GM counter gives readings of 46, 58, 41, 55 and 50 counts per 100 s in five successive trials. Which of the following statements is/are correct?</p>
+        <ol class="stem-list">
+          <li>The counter is faulty, because it should read zero without a source.</li>
+          <li>The readings differ because radioactive decay is a random process.</li>
+          <li>The best estimate of the background count rate is the mean, about 0.5 counts per second.</li>
+        </ol>
+        <div class="choices">
+          <button type="button" data-choice="A">(1) only</button>
+          <button type="button" data-choice="B">(2) only</button>
+          <button type="button" data-choice="C">(1) and (3) only</button>
+          <button type="button" data-choice="D">(2) and (3) only</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>(1) is wrong: background radiation from radon, rocks, cosmic rays and the body reaches the tube everywhere, so a non-zero reading is normal. (2) and (3) are the two things to write about any set of background readings: the scatter is randomness, and averaging reduces its effect. Answer <b>D</b>.</p>
+        </div>
       </div>
-      <p class="caption" id="gm-bg"></p>
-      <div class="row">
-        <button type="button" id="gm-bg-btn">background only</button>
-        <button type="button" data-gm-src="40">β / γ nearby</button>
-        <button type="button" data-gm-src="20" data-need-grid="off">α (needs grid off)</button>
-        <button type="button" id="gm-grid" aria-pressed="true">plastic grid on (blocks α)</button>
-      </div>
-      <div class="eq">\[ \text{corrected count rate} = \text{recorded} - \text{background} \]</div>
-      <table class="compact pair">
-        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
-        <tbody>
-          <tr><td>Better counts for α, β than γ</td><td>γ ionizes too weakly for a thick pulse trail</td></tr>
-          <tr><td>Count rate fluctuates</td><td>Decay is random; always subtract background</td></tr>
-          <tr><td>Hong Kong typical background</td><td>~ \( 1 \) count \( \mathrm{s}^{-1} \)</td></tr>
-        </tbody>
-      </table>
     </section>
 
     <section class="idea" id="range">
       <header>
-        <h2>Range in air vs penetrating stack</h2>
-        <span class="stamp">Fig. 25.31-25.32</span>
+        <h2><span class="sec-num">F</span>Range and penetrating power</h2>
       </header>
-      <div class="visual play stage" id="abs-vis" data-autoplay data-scene="absorbers">
-        <canvas class="scene-canvas" width="960" height="420" aria-label="Paper, aluminium and lead slabs in front of a GM tube"></canvas>
-        <span class="hud-label" data-hud="source">source</span>
-        <span class="hud-label" data-hud="paper">paper</span>
-        <span class="hud-label" data-hud="al">5 mm Al</span>
-        <span class="hud-label" data-hud="pb">25 mm Pb</span>
-        <span class="hud-label" data-hud="gm">GM</span>
+      <figure class="fig">
+        <div class="visual play stage" id="abs-vis" data-autoplay data-scene="absorbers">
+          <canvas class="scene-canvas" width="960" height="420" aria-label="Paper, aluminium and lead slabs in front of a GM tube"></canvas>
+          <span class="hud-label" data-hud="source">source</span>
+          <span class="hud-label" data-hud="paper">paper</span>
+          <span class="hud-label" data-hud="al">5 mm Al</span>
+          <span class="hud-label" data-hud="pb">25 mm Pb</span>
+          <span class="hud-label" data-hud="gm">GM</span>
+        </div>
+        <figcaption><b>Fig. 25.31, 25.32</b> Absorbers between a source and a GM tube. Choose a case and insert absorbers; the simulated count rate uses the numbers of textbook Example 25.6 (background about 61 counts per minute).</figcaption>
+      </figure>
+      <div class="row">
+        <span class="row-label">Case to investigate</span>
+        <button type="button" data-abs-src="bg">Case 1 · Example 25.6</button>
+        <button type="button" data-abs-src="ag">Case 2</button>
+        <button type="button" data-abs-src="abg">Case 3</button>
       </div>
       <div class="row">
-        <span>Unknown:</span>
-        <button type="button" data-src="bg">β + γ</button>
-        <button type="button" data-src="ag">α + γ</button>
-        <button type="button" data-src="abg">α + β + γ</button>
-      </div>
-      <div class="row">
+        <span class="row-label">Absorbers in place</span>
         <button type="button" id="abs-paper" aria-pressed="false">paper</button>
         <button type="button" id="abs-al" aria-pressed="false">5 mm Al</button>
         <button type="button" id="abs-pb" aria-pressed="false">25 mm Pb</button>
-        <span class="meter" id="abs-rate">0 cpm</span>
+        <span class="readout" id="abs-rate">0 cpm</span>
       </div>
       <p class="caption" id="abs-note"></p>
-      <table class="compact pair">
-        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+      <details class="worked">
+        <summary>Show the diagnoses after you have tested the absorbers</summary>
+        <p><b>Case 1:</b> β + γ. <b>Case 2:</b> α + γ. <b>Case 3:</b> α + β + γ. In each case, compare one absorber result with the preceding result and subtract the background before deciding.</p>
+      </details>
+      <div class="def">
+        <span class="tag">Definitions</span>
+        <p>The <b>range</b> of a radiation in a material is the distance it travels before it has lost all its energy and stops. <b>Penetrating power</b> is the ability to pass through material. A strong ionizer loses energy quickly, so strong ionizing power means short range and weak penetrating power: α &lt; β &lt; γ in penetrating power, the reverse of Table 25.4.</p>
+      </div>
+      <table class="notes" aria-label="Table 25.6">
+        <thead><tr><th></th><th>Range in air</th><th>Stopped by</th><th>Penetrating power</th></tr></thead>
         <tbody>
-          <tr><td>In air (not to scale): α ~5 cm, β ~5 m, γ ~100 m</td><td>Range and ionizing power go opposite ways</td></tr>
-          <tr><td>Paper stops α; 5 mm Al stops β; 25 mm Pb halves γ</td><td>A drop at Al is not "β only" until α and γ are checked</td></tr>
+          <tr><td><b>α</b></td><td>a few cm (about 5 cm)</td><td>a sheet of paper, the skin, a few cm of air</td><td>weakest</td></tr>
+          <tr><td><b>β</b></td><td>a few m (about 5 m)</td><td>about 5 mm of aluminium; the count falls gradually as the aluminium thickens</td><td>strong</td></tr>
+          <tr><td><b>γ</b></td><td>very long (about 100 m, falling off with distance rather than stopping)</td><td>never completely stopped: 25 mm of lead roughly <em>halves</em> the intensity, and each further 25 mm halves it again</td><td>strongest</td></tr>
         </tbody>
       </table>
+      <div class="worked">
+        <span class="tag">Experiment: measuring the range of α in air</span>
+        <ol class="steps">
+          <li>With the source locked away, record the background count rate.</li>
+          <li>Remove the plastic grid from the GM tube and line up the α source with the window, a few millimetres away. Record the count rate.</li>
+          <li>Move the source away in small steps, recording the count rate each time, until the reading falls to the background value. Measure the separation with a metre rule: this is the range.</li>
+          <li>On a graph of count rate against distance the curve drops and then levels off; the level part is background and the distance at which it is reached is the range. To rule out gravity as the reason the α "stop", repeat with the apparatus turned through 90°: the result is the same.</li>
+        </ol>
+      </div>
+      <div class="worked">
+        <span class="tag">Worked example: γ through thick lead</span>
+        <p>A γ source gives 275 counts per minute at a GM tube; the background is 30 counts per minute. Estimate the reading with 100 mm of lead between source and tube, given that 25 mm of lead halves the γ intensity.</p>
+        <ol class="steps">
+          <li>Count from the source alone: \( 275 - 30 = 245 \) counts per minute.</li>
+          <li>100 mm is four thicknesses of 25 mm, so the source count is halved four times: \( 245 / 2^{4} \approx 15 \) counts per minute.</li>
+          <li>Add the background back: reading \( \approx 15 + 30 = 45 \) counts per minute. It can never fall below 30.</li>
+        </ol>
+      </div>
+      <div class="check" data-check="mc" data-answer="C">
+        <h3>Concept check</h3>
+        <p>A GM tube is placed at increasing distances \( d \) from a source. The count rate falls steadily and from \( d = 4\ \mathrm{cm} \) onwards stays at about 28 counts per minute however far the tube is moved. Which conclusion is correct?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">The source emits γ with a range of 4 cm.</button>
+          <button type="button" data-choice="B">The background count rate is zero and the source emits β.</button>
+          <button type="button" data-choice="C">The source emits α with a range of about 4 cm in air; the background is about 28 counts per minute.</button>
+          <button type="button" data-choice="D">The source stops emitting when the tube is more than 4 cm away.</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p><b>C</b>. A reading that levels off and stays constant at large distance is the background (a source never reads below it). The radiation from the source stops arriving at 4 cm, a few centimetres, which is the range of α in air. β would reach several metres and γ would fall off only slowly, so <b>A</b> and <b>B</b> are out. <b>D</b> confuses the source with what reaches the detector: decay is not affected by where the tube is.</p>
+        </div>
+      </div>
     </section>
 
     <section class="idea" id="identify">
       <header>
-        <h2>Identify α, β, γ</h2>
-        <span class="stamp">Absorber decision flow</span>
+        <h2><span class="sec-num">G</span>Identifying the radiation from absorber readings</h2>
       </header>
-      <p class="lede">Click a node, or step the example path. Yes / no on the edges.</p>
-      <div class="flow">
-        <div>
-          <svg id="id-flow" viewBox="0 0 520 600" role="img" aria-label="Decision graph for identifying radiation">
-            <defs>
-              <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-                <path d="M0,0 L8,4 L0,8 z" fill="#6b7380"/>
-              </marker>
-              <marker id="arrow-lit" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-                <path d="M0,0 L8,4 L0,8 z" fill="#0e5f56"/>
-              </marker>
-            </defs>
-            <path class="edge" data-until="1" d="M260 48 L260 68"/>
-            <path class="edge" data-side="alpha" data-until="1" d="M170 114 L80 114 L80 156"/>
-            <path class="edge" data-side="no-alpha" data-until="2" d="M350 114 L430 114 L430 156"/>
-            <path class="edge" data-side="alpha" data-until="2" d="M140 178 L350 178"/>
-            <path class="edge" data-side="beta" data-until="3" d="M430 206 L430 226"/>
-            <path class="edge" data-side="beta" data-until="4" d="M430 270 L430 300 L260 300 L260 328"/>
-            <path class="edge" data-side="no-beta" d="M350 206 L220 206 L220 328"/>
-            <path class="edge" data-until="5" d="M260 378 L260 398"/>
-            <path class="edge" data-until="6" d="M260 438 L120 438 L120 468"/>
-            <path class="edge" data-until="6" d="M260 438 L400 438 L400 468"/>
-            <text class="edge-label" x="92" y="106">yes → α</text>
-            <text class="edge-label" x="372" y="106">no</text>
-            <text class="edge-label" x="448" y="220">yes → β</text>
-            <text class="edge-label" x="228" y="198">no β</text>
-            <g class="node" data-step="0">
-              <ellipse cx="260" cy="28" rx="100" ry="20"/>
-              <text x="260" y="32" text-anchor="middle" font-size="13">unknown source</text>
-            </g>
-            <g class="node" data-step="1">
-              <rect x="170" y="68" width="180" height="46" rx="6"/>
-              <text x="260" y="88" text-anchor="middle" font-size="13">paper?</text>
-              <text x="260" y="104" text-anchor="middle" font-size="11">count drop?</text>
-            </g>
-            <g class="node" data-step="alpha">
-              <rect x="20" y="156" width="120" height="44" rx="6"/>
-              <text x="80" y="182" text-anchor="middle" font-size="13">α present</text>
-            </g>
-            <g class="node" data-step="2">
-              <rect x="350" y="156" width="160" height="50" rx="6"/>
-              <text x="430" y="178" text-anchor="middle" font-size="13">5 mm Al?</text>
-              <text x="430" y="194" text-anchor="middle" font-size="11">drop vs paper?</text>
-            </g>
-            <g class="node" data-step="3">
-              <rect x="370" y="226" width="120" height="44" rx="6"/>
-              <text x="430" y="252" text-anchor="middle" font-size="13">β present</text>
-            </g>
-            <g class="node" data-step="4">
-              <rect x="185" y="328" width="150" height="50" rx="6"/>
-              <text x="260" y="350" text-anchor="middle" font-size="12">25 mm Pb</text>
-              <text x="260" y="366" text-anchor="middle" font-size="11">still &gt; background?</text>
-            </g>
-            <g class="node" data-step="5">
-              <rect x="185" y="398" width="150" height="40" rx="6"/>
-              <text x="260" y="422" text-anchor="middle" font-size="13">γ present</text>
-            </g>
-            <g class="node" data-step="6">
-              <rect x="40" y="468" width="160" height="50" rx="6"/>
-              <text x="120" y="488" text-anchor="middle" font-size="12">E / B deflection</text>
-              <text x="120" y="504" text-anchor="middle" font-size="11">α / β opposite; γ straight</text>
-            </g>
-            <g class="node" data-step="6">
-              <rect x="320" y="468" width="160" height="50" rx="6"/>
-              <text x="400" y="488" text-anchor="middle" font-size="12">cloud tracks</text>
-              <text x="400" y="504" text-anchor="middle" font-size="11">thick / thin / faint</text>
-            </g>
-          </svg>
-          <div class="row">
-            <button type="button" id="flow-next">Step</button>
-            <button type="button" id="flow-reset">Reset</button>
+      <p>The standard test: place the source in front of a GM tube and insert, in turn, a sheet of paper, about 5 mm of aluminium and about 25 mm of lead. Each absorber stops one more type. Compare each reading with the one before it and with the background.</p>
+      <figure class="fig">
+        <div class="flow">
+          <div>
+            <svg id="id-flow" viewBox="0 0 520 600" role="img" aria-label="Decision graph for identifying radiation">
+              <defs>
+                <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                  <path d="M0,0 L8,4 L0,8 z" fill="#6b7380"/>
+                </marker>
+                <marker id="arrow-lit" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                  <path d="M0,0 L8,4 L0,8 z" fill="#0e5f56"/>
+                </marker>
+              </defs>
+              <path class="edge" data-until="1" d="M260 48 L260 68"/>
+              <path class="edge" data-side="alpha" data-until="1" d="M170 114 L80 114 L80 156"/>
+              <path class="edge" data-side="no-alpha" data-until="2" d="M350 114 L430 114 L430 156"/>
+              <path class="edge" data-side="alpha" data-until="2" d="M140 178 L350 178"/>
+              <path class="edge" data-side="beta" data-until="3" d="M430 206 L430 226"/>
+              <path class="edge" data-side="beta" data-until="4" d="M430 270 L430 300 L260 300 L260 328"/>
+              <path class="edge" data-side="no-beta" d="M350 206 L220 206 L220 328"/>
+              <path class="edge" data-until="5" d="M260 378 L260 398"/>
+              <path class="edge" data-until="6" d="M260 438 L120 438 L120 468"/>
+              <path class="edge" data-until="6" d="M260 438 L400 438 L400 468"/>
+              <text class="edge-label" x="92" y="106">yes → α</text>
+              <text class="edge-label" x="372" y="106">no</text>
+              <text class="edge-label" x="448" y="220">yes → β</text>
+              <text class="edge-label" x="228" y="198">no β</text>
+              <g class="node" data-step="0">
+                <ellipse cx="260" cy="28" rx="100" ry="20"/>
+                <text x="260" y="32" text-anchor="middle" font-size="13">unknown source</text>
+              </g>
+              <g class="node" data-step="1">
+                <rect x="170" y="68" width="180" height="46" rx="6"/>
+                <text x="260" y="88" text-anchor="middle" font-size="13">paper?</text>
+                <text x="260" y="104" text-anchor="middle" font-size="11">count drop?</text>
+              </g>
+              <g class="node" data-step="alpha">
+                <rect x="20" y="156" width="120" height="44" rx="6"/>
+                <text x="80" y="182" text-anchor="middle" font-size="13">α present</text>
+              </g>
+              <g class="node" data-step="2">
+                <rect x="350" y="156" width="160" height="50" rx="6"/>
+                <text x="430" y="178" text-anchor="middle" font-size="13">5 mm Al?</text>
+                <text x="430" y="194" text-anchor="middle" font-size="11">drop vs paper?</text>
+              </g>
+              <g class="node" data-step="3">
+                <rect x="370" y="226" width="120" height="44" rx="6"/>
+                <text x="430" y="252" text-anchor="middle" font-size="13">β present</text>
+              </g>
+              <g class="node" data-step="4">
+                <rect x="185" y="328" width="150" height="50" rx="6"/>
+                <text x="260" y="350" text-anchor="middle" font-size="12">25 mm Pb</text>
+                <text x="260" y="366" text-anchor="middle" font-size="11">still &gt; background?</text>
+              </g>
+              <g class="node" data-step="5">
+                <rect x="185" y="398" width="150" height="40" rx="6"/>
+                <text x="260" y="422" text-anchor="middle" font-size="13">γ present</text>
+              </g>
+              <g class="node" data-step="6">
+                <rect x="40" y="468" width="160" height="50" rx="6"/>
+                <text x="120" y="488" text-anchor="middle" font-size="12">E / B deflection</text>
+                <text x="120" y="504" text-anchor="middle" font-size="11">α / β opposite; γ straight</text>
+              </g>
+              <g class="node" data-step="6">
+                <rect x="320" y="468" width="160" height="50" rx="6"/>
+                <text x="400" y="488" text-anchor="middle" font-size="12">cloud tracks</text>
+                <text x="400" y="504" text-anchor="middle" font-size="11">thick / thin / faint</text>
+              </g>
+            </svg>
+            <div class="row">
+              <button type="button" id="flow-next">Step through Example 25.6</button>
+              <button type="button" id="flow-reset">Reset</button>
+            </div>
+          </div>
+          <div>
+            <p class="caption" id="flow-talk"></p>
+            <table class="notes">
+              <caption>Example 25.6 readings, counts per minute (background ≈ 61)</caption>
+              <thead><tr><th>Absorber</th><th>Reading</th></tr></thead>
+              <tbody>
+                <tr><td>none (air)</td><td>700</td></tr>
+                <tr><td>paper</td><td>700</td></tr>
+                <tr><td>5 mm Al</td><td>315</td></tr>
+                <tr><td>25 mm Pb</td><td>190</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
-        <div>
-          <p class="caption" id="flow-talk"></p>
-          <p class="eq">air 700 → paper 700 → Al 315 → Pb 190 &nbsp; (bg ≈ 61 cpm)</p>
-        </div>
+        <figcaption>The decision path. Step through the textbook example, or click a node to explore the other branches.</figcaption>
+      </figure>
+      <div class="worked">
+        <span class="tag">How to write the answer: observation, reasoning, conclusion</span>
+        <p>For Example 25.6, one line per absorber:</p>
+        <ol class="steps">
+          <li><b>Paper:</b> no significant change (700 → 700). Paper stops α. So the source emits no α.</li>
+          <li><b>5 mm aluminium:</b> large drop (700 → 315). Aluminium stops β (and would stop α). So the source emits β.</li>
+          <li><b>25 mm lead:</b> further drop (315 → 190) but still well above background (61). Lead only partly absorbs γ. So the source emits γ.</li>
+          <li><b>Conclusion:</b> β and γ, no α.</li>
+        </ol>
       </div>
-      <!-- HKDSE 2019/31 -->
+      <aside class="tip">
+        <span class="tag">The hard cases</span>
+        <p><b>No paper step.</b> 5 mm Al stops <em>both</em> α and β, so a drop at aluminium without a paper reading means "α or β or both", not "β". <b>Lead only.</b> A drop from air to 5 mm Pb proves nothing about which of α or β is present; a <em>further</em> drop from 5 mm to 15 mm Pb proves γ, and the background must be below the final reading. <b>Background not given.</b> If the reading keeps roughly halving as the lead thickens (say 90 → 46 from 25 to 50 mm), it has not reached a flat floor, so γ is still being absorbed and is present. <b>Proving "X only".</b> You need <em>no</em> significant drop at the other steps <em>and</em> a final reading at background. <b>Repeated readings</b> in a table (e.g. 210, 227; 224, 215) differ by randomness; a change only counts if it is well outside that scatter.</p>
+      </aside>
       <div class="check" data-check="mc" data-answer="D">
-        <h3>Concept check</h3>
-        <p>Source emits α, β and γ. Cardboard, then 5 mm Al, then 10 mm Pb. Detectors at X, Y, Z after each slab.</p>
+        <h3 data-src="HKDSE 2019 Paper 1A Q31">Concept check</h3>
+        <p>A source emits α, β and γ radiation. A piece of cardboard, then a 5 mm aluminium sheet, then a 10 mm lead sheet are placed in a line in front of it. Detectors X, Y and Z are placed just after the cardboard, the aluminium and the lead respectively. Which statement is correct?</p>
         <div class="choices">
           <button type="button" data-choice="A">No radiation from the source is detected at Z.</button>
           <button type="button" data-choice="B">Both β and γ can be detected at Y.</button>
@@ -346,85 +558,236 @@
           <button type="button" data-choice="D">β is detected at X but not at Y or Z.</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Cardboard stops α, so α reaches nowhere (<b>C</b> wrong). β passes cardboard and reaches X, but 5 mm Al stops it, so it never reaches Y or Z: <b>D</b> is correct and <b>B</b> wrong. γ passes everything, reduced but present at Z (<b>A</b> wrong).</p>
+        </div>
       </div>
-      <!-- HKDSE 2014/32 -->
       <div class="check" data-check="mc" data-answer="A">
-        <h3>Concept check</h3>
-        <p>α + γ source. Recorded 450 cpm, background 50. Cardboard x, 1 mm Al y, 2 mm Pb z.</p>
+        <h3 data-src="HKDSE 2014 Paper 1A Q32">Concept check</h3>
+        <p>A source emits α and γ radiation. With no absorber the GM counter records 450 counts per minute; the background is 50 counts per minute. A piece of cardboard, a 1 mm aluminium sheet and a 2 mm lead sheet are then inserted in turn (one at a time), giving <em>corrected</em> count rates \( x \), \( y \) and \( z \). Which set of values is possible?</p>
         <div class="choices">
-          <button type="button" data-choice="A">x = 300, y = 300, z = 100</button>
-          <button type="button" data-choice="B">x = 300, y = 100, z = 50</button>
-          <button type="button" data-choice="C">x = 100, y = 100, z = 0</button>
-          <button type="button" data-choice="D">x = 100, y = 50, z = 50</button>
+          <button type="button" data-choice="A">\( x = 300,\ y = 300,\ z = 100 \)</button>
+          <button type="button" data-choice="B">\( x = 300,\ y = 100,\ z = 50 \)</button>
+          <button type="button" data-choice="C">\( x = 100,\ y = 100,\ z = 0 \)</button>
+          <button type="button" data-choice="D">\( x = 100,\ y = 50,\ z = 50 \)</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Corrected rate with no absorber is \( 450 - 50 = 400 \), all from α and γ. Cardboard removes all the α and none of the γ; 1 mm Al does the same, so \( x = y \) (the γ part). 2 mm Pb absorbs some γ, so \( z \) is smaller than \( y \) but not zero. Only <b>A</b> fits. <b>B</b> has aluminium removing something extra, which would need β. <b>C</b> has lead stopping γ completely. <b>D</b> has aluminium and lead doing different things to what is left after the cardboard, but there is no β to remove.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="C">
+        <h3>Concept check</h3>
+        <p>Count rates (per second) measured with absorbers between a source and a GM tube: none 400; paper 398; 5 mm Al 180; 25 mm Pb 90; 50 mm Pb 46. The background was not measured. The source emits</p>
+        <div class="choices">
+          <button type="button" data-choice="A">β only</button>
+          <button type="button" data-choice="B">γ only</button>
+          <button type="button" data-choice="C">β and γ only</button>
+          <button type="button" data-choice="D">α, β and γ</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Paper: no drop, so no α (<b>D</b> out). Aluminium: a large drop, so β is present (<b>B</b> out). Lead: the count halves again between 25 mm and 50 mm, so it is not sitting at a flat background floor; something is still being attenuated, which must be γ (<b>A</b> out). Answer <b>C</b>. This is how to reason when the background is not given: a reading that keeps changing with thickness is not background.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3>Concept check</h3>
+        <p>With a source in front of a GM tube the readings are: no absorber 504; 5 mm lead 261; 15 mm lead 157 (counts per minute). No other absorbers were used. Which of the following can be concluded?</p>
+        <ol class="stem-list">
+          <li>The source emits β.</li>
+          <li>The source emits γ.</li>
+          <li>The background count rate is about 157 counts per minute.</li>
+        </ol>
+        <div class="choices">
+          <button type="button" data-choice="A">(1) only</button>
+          <button type="button" data-choice="B">(2) only</button>
+          <button type="button" data-choice="C">(1) and (2) only</button>
+          <button type="button" data-choice="D">(2) and (3) only</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>Only (2). The drop from 261 to 157 as the lead thickens shows γ is present. The first drop (504 → 261) could be α, β or both being stopped by the 5 mm lead, so (1) is not proved. (3) is wrong because 15 mm of lead does not stop γ; the background is somewhere <em>below</em> 157. Answer <b>B</b>.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3 data-src="after HKDSE 2018 Paper 1B Q10">Concept check</h3>
+        <p>A spark counter sparks when a radium-226 source is held close to its wire gauze. A student claims that the sparks are caused by the α particles rather than by the β or γ that the source also emits. Which test best verifies this claim?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">Photograph the tracks in a cloud chamber to show that α, β and γ are all present.</button>
+          <button type="button" data-choice="B">Insert a sheet of paper between the source and the gauze, or move the source more than about 5 cm away, and check that the sparking stops.</button>
+          <button type="button" data-choice="C">Bring a bar magnet close to the source and see whether the sparks change.</button>
+          <button type="button" data-choice="D">Replace the high-voltage supply with a lower voltage.</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p><b>B</b>: a test that removes only the α (paper, or distance beyond its range) and nothing else. If the sparks stop, the α were responsible. <b>A</b> shows what the source emits but not what causes the sparks; the examiners' report noted that many candidates gave this answer. <b>C</b> barely affects α and is inconclusive. <b>D</b> changes the detector, not the radiation.</p>
+        </div>
+      </div>
+      <div class="check" data-check="sa">
+        <h3>Write it out</h3>
+        <p>A source is placed 10 cm from a GM tube. Two readings are taken with each absorber (counts per minute): no absorber 210, 227; paper 224, 215; 5 mm Al 45, 47; 10 mm Pb 48, 42. The background is about 45 counts per minute. Show that the source emits β only. <span class="marks">(6 marks)</span></p>
+        <button type="button" data-reveal>Show model answer</button>
+        <div class="model" hidden>
+          <ol>
+            <li><b>Paper.</b> Observation: no significant change (about 220 both times; the two repeat readings differ by about as much). Reasoning: paper stops α. Conclusion: no α is emitted.</li>
+            <li><b>5 mm aluminium.</b> Observation: large drop to about 46. Reasoning: aluminium stops β. Conclusion: β is emitted.</li>
+            <li><b>10 mm lead.</b> Observation: no further drop; the reading (about 45) equals the background. Reasoning: lead would reduce γ but there is nothing above background left to reduce. Conclusion: no γ is emitted.</li>
+          </ol>
+          <p class="note">Each absorber earns an observation mark and a reasoning-plus-conclusion mark. The "β only" claim needs all three lines: what paper did not do, what aluminium did, and that lead found nothing left.</p>
+        </div>
       </div>
     </section>
 
     <section class="idea" id="fields">
       <header>
-        <h2>E and B split the three beams</h2>
-        <span class="stamp">Fig. 25.33-25.34</span>
+        <h2><span class="sec-num">H</span>Electric and magnetic fields separate the three</h2>
       </header>
-      <div class="visual play stage" id="efield-vis" data-autoplay data-scene="efield">
-        <canvas class="scene-canvas" width="960" height="420" aria-label="Alpha toward the negative plate, beta toward the positive plate and bent more, gamma straight"></canvas>
-        <span class="hud-label" data-hud="collimator">collimator</span>
-        <span class="hud-label" data-hud="minus">− plate</span>
-        <span class="hud-label" data-hud="plus">+ plate</span>
-        <span class="hud-label" data-hud="alpha">α toward −</span>
-        <span class="hud-label" data-hud="gamma">γ straight</span>
-        <span class="hud-label" data-hud="beta">β toward + (bent more)</span>
-      </div>
-      <div class="visual play stage" id="bfield-vis" data-autoplay data-scene="bfield">
-        <canvas class="scene-canvas" width="960" height="420" aria-label="Alpha, beta and gamma in a magnetic field"></canvas>
-        <span class="hud-label" data-hud="source">source</span>
-        <span class="hud-label" data-hud="alpha">α</span>
-        <span class="hud-label" data-hud="beta">β</span>
-        <span class="hud-label" data-hud="gamma">γ</span>
-        <span class="hud-label" data-b-mark>×  B into the page</span>
-      </div>
+      <figure class="fig">
+        <div class="visual play stage" id="efield-vis" data-autoplay data-scene="efield">
+          <canvas class="scene-canvas" width="960" height="420" aria-label="Alpha toward the negative plate, beta toward the positive plate and bent more, gamma straight"></canvas>
+          <span class="hud-label" data-hud="collimator">collimator</span>
+          <span class="hud-label" data-hud="minus">− plate</span>
+          <span class="hud-label" data-hud="plus">+ plate</span>
+          <span class="hud-label" data-hud="alpha">α toward −</span>
+          <span class="hud-label" data-hud="gamma">γ straight</span>
+          <span class="hud-label" data-hud="beta">β toward + (bent more)</span>
+        </div>
+        <figcaption><b>Fig. 25.33</b> A narrow beam in a uniform electric field (in a vacuum, so the α can travel). The diagram compares particles under the same field conditions and shows the usual visible separation: α bends towards the negative plate, β towards the positive plate, and γ is undeflected. The amount of bend also depends on speed.</figcaption>
+      </figure>
+      <figure class="fig">
+        <div class="visual play stage" id="bfield-vis" data-autoplay data-scene="bfield">
+          <canvas class="scene-canvas" width="960" height="420" aria-label="Alpha, beta and gamma in a magnetic field"></canvas>
+          <span class="hud-label" data-hud="source">source</span>
+          <span class="hud-label" data-hud="alpha">α</span>
+          <span class="hud-label" data-hud="beta">β</span>
+          <span class="hud-label" data-hud="gamma">γ</span>
+          <span class="hud-label" data-b-mark>×  B into the page</span>
+        </div>
+        <figcaption><b>Fig. 25.34</b> The same beam in a uniform magnetic field. α and β curve in opposite directions, β much more; γ is undeflected. Reverse the field and both curves reverse.</figcaption>
+      </figure>
       <div class="row">
-        <button type="button" id="b-flip">Flip B into / out of page</button>
+        <button type="button" id="b-flip">Reverse the field direction</button>
       </div>
-      <table class="compact pair">
-        <thead><tr><th>What you see</th><th>Therefore</th></tr></thead>
+      <table class="notes">
+        <thead><tr><th></th><th>Electric field</th><th>Magnetic field</th></tr></thead>
         <tbody>
-          <tr><td>β mass ≈ 1/7200 of α, so β bends much more</td><td>|q| is smaller but m is far smaller, so deflection is larger</td></tr>
-          <tr><td>Fleming left-hand: β travels opposite to conventional I</td><td>α and β curve opposite ways; γ goes straight</td></tr>
-          <tr><td>α stops in a few cm of air</td><td>Do E/B in vacuum if you need the α path</td></tr>
+          <tr><td><b>α</b> (+2, heavy)</td><td>Force along \( E \), towards the negative plate; direction fixed by positive charge</td><td>Fleming's left-hand rule with the current in the direction of motion; direction fixed by positive charge</td></tr>
+          <tr><td><b>β</b> (−1, light)</td><td>Force against \( E \), towards the positive plate; direction fixed by negative charge</td><td>Fleming's left-hand rule with the current <em>opposite</em> to the motion (negative charge); opposite side to α</td></tr>
+          <tr><td><b>γ</b> (no charge)</td><td colspan="2">No force, no deflection</td></tr>
         </tbody>
       </table>
-      <!-- HKDSE 2017/31 -->
-      <div class="check" data-check="mc" data-answer="A">
+      <ul class="points">
+        <li><b>How to compare bending.</b> The direction comes from the sign of charge. The amount depends on mass, charge magnitude, field strength and speed. <em>At the same speed</em>, a β has much greater acceleration because its mass is about 1/7200 of an α's, despite the α feeling twice the electric force. A question that gives equal kinetic energies instead needs the full comparison - mass alone does not decide it.</li>
+        <li><b>The collimator</b> (two lead blocks with a narrow slit) turns the radiation leaving the source in all directions into a fine beam travelling in one direction, so that a deflection can be seen. If film is the detector, the apparatus must be in the dark.</li>
+        <li><b>β spreads out.</b> β particles leave a source with a range of speeds, so they are deflected by different amounts and fan out over a region instead of hitting one spot. A GM tube at one point therefore catches only some of them, and the total β count with the field on is less than with it off. α particles from one source all have nearly the same speed, so they stay together.</li>
+        <li><b>In air</b> the α is absorbed within a few centimetres and is usually missing from the picture; to see the α path the apparatus must be evacuated.</li>
+        <li><b>Reading a detector scan.</b> Place γ at the undeflected position, β on the side the rule predicts, α (if any) on the other side. Two positions with equal small counts are both reading background. A missing peak does not prove a radiation is absent if it was deflected off the line of the scan or absorbed before arriving.</li>
+      </ul>
+      <div class="check" data-check="mc" data-answer="B">
         <h3>Concept check</h3>
-        <p>Uniform E in vacuum. Pick the path pair: α toward the negative plate, β the other way and bent more.</p>
+        <p>α and β particles enter the same uniform electric field with the <strong>same speed</strong>. β particles are deflected much more than α particles mainly because they</p>
         <div class="choices">
-          <button type="button" data-choice="A">α gentle curve to − ; β sharp curve to +</button>
-          <button type="button" data-choice="B">both curve the same way</button>
-          <button type="button" data-choice="C">β gentle, α sharp (mass the wrong way)</button>
-          <button type="button" data-choice="D">γ curves with α</button>
+          <button type="button" data-choice="A">experience a larger electric force.</button>
+          <button type="button" data-choice="B">have a much smaller mass.</button>
+          <button type="button" data-choice="C">carry more charge.</button>
+          <button type="button" data-choice="D">move more slowly.</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p><b>B</b>. At the same speed, the force on a β (charge e) is half that on an α (charge 2e), so <b>A</b> and <b>C</b> are wrong; its mass is about 7200 times smaller, giving a far larger acceleration. <b>D</b> conflicts with the stated equal speeds. If the particles had different speeds or equal kinetic energies, you would need those values as well before comparing their bends.</p>
+        </div>
       </div>
-      <!-- HKDSE 2017/32 -->
       <div class="check" data-check="mc" data-answer="C">
-        <h3>Concept check</h3>
-        <p>Which statement about β and γ is correct?</p>
+        <h3 data-src="HKDSE 2017 Paper 1A Q32">Concept check</h3>
+        <p>Which of the following statements about β and γ radiation is correct?</p>
         <div class="choices">
-          <button type="button" data-choice="A">Only β can ionize air.</button>
-          <button type="button" data-choice="B">Only γ can travel through vacuum.</button>
+          <button type="button" data-choice="A">Only β radiation can ionize air.</button>
+          <button type="button" data-choice="B">Only γ radiation can travel through a vacuum.</button>
           <button type="button" data-choice="C">Both can be detected by a photographic film.</button>
           <button type="button" data-choice="D">Both carry charge.</button>
         </div>
         <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p><b>C</b>: both are ionizing and both blacken film. <b>A</b>: γ ionizes too, weakly. <b>B</b>: both cross a vacuum (nothing is needed to carry either). <b>D</b>: γ has no charge, which is exactly why fields do not deflect it.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="B">
+        <h3>Concept check</h3>
+        <p>A collimated beam from a source enters a uniform magnetic field directed into the page. Beyond the field a GM tube on the original line of the beam reads 95 counts per minute; a second GM tube placed below the line reads 520 counts per minute. Which deduction <strong>must</strong> be correct?</p>
+        <div class="choices">
+          <button type="button" data-choice="A">The source emits γ radiation.</button>
+          <button type="button" data-choice="B">The source emits β radiation.</button>
+          <button type="button" data-choice="C">The source does not emit α radiation.</button>
+          <button type="button" data-choice="D">The background count rate is 95 counts per minute.</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p><b>B</b>. For a beam moving to the right in a field into the page, Fleming's rule sends a positive charge upwards and a negative charge downwards; a large count below the line must be β. <b>A</b>: 95 on the line could be γ, or could be entirely background, so γ is not proved. <b>C</b>: no tube was placed above the line, and α would in any case be absorbed by the air before arriving, so nothing can be said about α. <b>D</b>: 95 is an upper limit on the background (it may include some γ), not its value.</p>
+        </div>
+      </div>
+      <div class="check" data-check="mc" data-answer="A">
+        <h3>Concept check</h3>
+        <p>A GM tube on the straight-through line from a source reads 184 counts per minute with no field and 82 counts per minute when a strong magnetic field is switched on across the beam. A tube far from the source reads 42 counts per minute. Estimate the β and γ count rates reaching the tube on the line, assuming any α is absorbed by the air.</p>
+        <div class="choices">
+          <button type="button" data-choice="A">β ≈ 102, γ ≈ 40 counts per minute</button>
+          <button type="button" data-choice="B">β ≈ 82, γ ≈ 42 counts per minute</button>
+          <button type="button" data-choice="C">β ≈ 142, γ ≈ 82 counts per minute</button>
+          <button type="button" data-choice="D">β ≈ 184, γ ≈ 82 counts per minute</button>
+        </div>
+        <p class="feedback"></p>
+        <div class="explain" hidden>
+          <p>The field removes the β from the line and leaves the γ and background: β ≈ 184 − 82 = 102. The far tube reads background only, so γ ≈ 82 − 42 = 40. Answer <b>A</b>. The other options forget to subtract either the field-on reading or the background.</p>
+        </div>
       </div>
     </section>
 
-    <p class="lede"><a href="summary.html">Close with the comparison table and common mistakes →</a></p>
+    <section class="section-dse" aria-labelledby="dse-practice-heading">
+      <header>
+        <span class="sec-num">DSE</span>
+        <h2 id="dse-practice-heading">Topic-matched past-paper practice</h2>
+      </header>
+      <p>These classified questions are grouped by the evidence you must interpret. Open a full paper only after attempting the matching check above.</p>
+      <div class="dse-practice-grid">
+        <article class="dse-practice-card">
+          <h3>Ionization and detectors</h3>
+          <p>Link ionizing power to air conduction, film blackening and what a detector can or cannot show on its own.</p>
+          <div class="dse-practice-links">
+            <a href="summary.html#dse-mc-2016-32">2016/32 MC</a>
+            <a href="summary.html#dse-mc-2017-32">2017/32 MC</a>
+            <a href="summary.html#dse-mc-pp-34">PP/34 MC</a>
+          </div>
+        </article>
+        <article class="dse-practice-card">
+          <h3>Absorbers and the background floor</h3>
+          <p>Use each count-rate change to establish one radiation type, and do not mistake a non-zero final reading for surviving source radiation.</p>
+          <div class="dse-practice-links">
+            <a href="summary.html#dse-mc-2014-32">2014/32 MC</a>
+            <a href="summary.html#dse-mc-2019-31">2019/31 MC</a>
+            <a href="summary.html#dse-mc-sap-36">SAP/36 MC</a>
+          </div>
+        </article>
+        <article class="dse-practice-card">
+          <h3>Deflection in fields</h3>
+          <p>Use direction of deflection, mass and charge together. A straight path establishes only that the radiation is uncharged.</p>
+          <div class="dse-practice-links">
+            <a href="summary.html#dse-mc-2017-31">2017/31 MC</a>
+            <a href="summary.html#dse-mc-pp-35">PP/35 MC</a>
+          </div>
+        </article>
+      </div>
+      <figure class="dse-paper subsection-paper">
+        <figcaption><b>Start here: 2019/31 MC</b><span>Read each absorber result as evidence, then distinguish source radiation from the background floor.</span></figcaption>
+        <p class="dse-slot">Full paper question: 2019/31 MC</p>
+        <img src="../_local/dse/mc/25/2019_q31.png" alt="HKDSE 2019 Paper 1A Question 31">
+      </figure>
+    </section>
+
+    <p class="next"><a href="summary.html">Next: Chapter summary and past-paper bank →</a></p>
   </main>
   <script src="../vendor/katex/katex.min.js"></script>
   <script src="../vendor/katex/auto-render.min.js"></script>
   <script src="../js/math.js"></script>
+  <script src="../js/checks.js"></script>
   <script src="js/lib/three.min.js"></script>
   <script src="js/diagrams3d.js"></script>
   <script src="js/notes.js"></script>
