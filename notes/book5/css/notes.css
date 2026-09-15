@@ -372,6 +372,15 @@ p { margin: 0.45rem 0; }
   font-size: 0.91rem;
 }
 
+.quiz-lo {
+  margin: 0 0 0.65rem;
+  padding: 0.4rem 0.55rem;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  font-size: 0.86rem;
+  border-radius: 4px;
+}
+
 .quiz-slide .dse-paper {
   margin: 0;
 }

@@ -122,7 +122,23 @@
       if (!slides.length) return;
       var index = 0;
       var status = $(".quiz-status", deck);
-      slides.forEach(function (slide) {
+      var los = $all(".lo-list li").map(function (li) {
+        var p = $("p", li);
+        var text = (p ? p.textContent : li.textContent) || "";
+        return text.replace(/\s+/g, " ").trim();
+      }).filter(Boolean);
+      slides.forEach(function (slide, i) {
+        if (!$(".quiz-lo", slide) && los.length) {
+          var start = Math.floor(i * los.length / slides.length);
+          var end = Math.max(start + 1, Math.floor((i + 1) * los.length / slides.length));
+          var lo = los.slice(start, end).join(" ");
+          var line = document.createElement("p");
+          line.className = "quiz-lo";
+          line.textContent = "LO: " + lo;
+          var h = $("h3", slide);
+          if (h && h.nextSibling) slide.insertBefore(line, h.nextSibling);
+          else slide.insertBefore(line, slide.firstChild);
+        }
         if ($(".quiz-choices", slide)) return;
         var row = document.createElement("div");
         row.className = "quiz-choices";
