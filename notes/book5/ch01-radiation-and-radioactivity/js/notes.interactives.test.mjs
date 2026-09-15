@@ -1329,7 +1329,7 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
     assert.equal(practice.hasNext, true, page + " needs Next");
     assert.ok(practice.letters >= 4, page + " needs A B C D options");
     assert.match(practice.exportHref || "", /combined\.pdf$/);
-    assert.ok(await cdp.evaluate("!!document.querySelector('.quiz-lo')"), page + " needs an LO line on the quiz");
+    assert.match(await cdp.evaluate("document.querySelector('.quiz-lo') && document.querySelector('.quiz-lo').textContent.trim()"), /^LO \d+$/, page + " needs an LO number at the top of the quiz");
     assert.equal(practice.visible, 1, page + " must show one quiz item");
     assert.ok(practice.paper, page + " should include a topic-matched DSE paper");
     for (const id of expectedIds) {
@@ -1347,17 +1347,20 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
     var back = document.querySelector(".quiz-slide.is-current");
     var letter = document.querySelector("[data-quiz-choice='B']");
     if (letter) letter.click();
+    var pct = document.querySelector(".quiz-slide.is-current .quiz-pct");
     return {
       before: before,
       after: after && after.id,
       back: back && back.id,
-      picked: !!(letter && letter.classList.contains("is-picked")),
+      marked: !!(letter && (letter.classList.contains("correct") || letter.classList.contains("wrong"))),
+      pct: pct && !pct.hidden && pct.textContent,
       visible: document.querySelectorAll(".quiz-slide.is-current").length
     };
   })()`);
   assert.notEqual(rotated.after, rotated.before);
   assert.equal(rotated.back, rotated.before);
-  assert.equal(rotated.picked, true);
+  assert.equal(rotated.marked, true);
+  assert.match(rotated.pct || "", /correct percentage:\s*\d+%/i);
   assert.equal(rotated.visible, 1);
 
   await cdp.goto(pageUrl("25-3.html"));

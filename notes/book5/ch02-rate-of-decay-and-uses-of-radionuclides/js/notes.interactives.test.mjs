@@ -708,7 +708,7 @@ chromeTest("each Ch.2 subsection quizzes its DSE papers one at a time", async ()
     assert.equal(practice.hasNext, true, page + " needs Next");
     assert.ok(practice.letters >= 4, page + " needs A B C D options");
     assert.match(practice.exportHref || "", /combined\.pdf$/);
-    assert.ok(await cdp.evaluate("!!document.querySelector('.quiz-lo')"), page + " needs an LO line on the quiz");
+    assert.match(await cdp.evaluate("document.querySelector('.quiz-lo') && document.querySelector('.quiz-lo').textContent.trim()"), /^LO \d+$/, page + " needs an LO number at the top of the quiz");
     assert.equal(practice.visible, 1, page + " must show one quiz item");
     assert.ok(practice.paper, page + " should include a topic-matched DSE paper");
     for (const id of expectedIds) {

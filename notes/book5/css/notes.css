@@ -366,19 +366,69 @@ p { margin: 0.45rem 0; }
   margin: 0 0 0.35rem;
 }
 
+.quiz-slide > h3,
 .quiz-slide > p {
-  margin: 0 0 0.65rem;
+  display: none;
+}
+
+.quiz-slide > p.quiz-also,
+.quiz-slide > p.quiz-pct {
+  display: block;
+  margin: 0 0 0.55rem;
   color: var(--muted);
-  font-size: 0.91rem;
+  font-size: 0.9rem;
 }
 
 .quiz-lo {
-  margin: 0 0 0.65rem;
+  margin: 0 0 0.45rem;
   padding: 0.4rem 0.55rem;
   background: var(--accent-soft);
   color: var(--accent-deep);
-  font-size: 0.86rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
   border-radius: 4px;
+}
+
+.quiz-los {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0 0 0.75rem;
+}
+
+.quiz-lo-tab {
+  min-width: 3.4rem;
+  padding: 0.35rem 0.55rem;
+  font-weight: 700;
+  background: #fff;
+  color: var(--accent-deep);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+}
+
+.quiz-lo-tab.is-current,
+.quiz-lo-tab[aria-selected="true"] {
+  background: var(--accent-deep);
+  color: #f2ede2;
+  border-color: var(--accent-deep);
+}
+
+.quiz-letter.correct {
+  background: var(--ok-soft);
+  color: var(--ok);
+  border-color: var(--ok);
+}
+
+.quiz-letter.wrong {
+  background: var(--bad-soft);
+  color: var(--bad);
+  border-color: var(--bad);
+}
+
+.quiz-pct {
+  font-weight: 700;
+  color: var(--accent-deep);
 }
 
 .quiz-slide .dse-paper {
