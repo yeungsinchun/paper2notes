@@ -346,8 +346,8 @@ p { margin: 0.45rem 0; }
   width: 100%;
   height: auto;
   margin: 0;
-  border: 1px solid var(--quiz-line);
-  border-radius: 6px;
+  border: 0;
+  border-radius: 0;
   background: #fff;
 }
 
