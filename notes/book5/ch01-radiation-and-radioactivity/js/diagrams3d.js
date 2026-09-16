@@ -2092,7 +2092,6 @@
        metacarpals fan out from the wrist the way they do on a real radiograph. */
     addSeg(vec(0.2, 0.5, -1.18), vec(0.22, 0.52, -0.72), 0.17, 0.075);
     addSeg(vec(-0.06, 0.5, -1.18), vec(-0.08, 0.52, -0.72), 0.155, 0.068);
-    addJoint(vec(0.08, 0.51, -0.72), 0.28);
     var mcp = {
       index: vec(-0.38, 0.52, 0.36),
       middle: vec(0.04, 0.54, 0.48),

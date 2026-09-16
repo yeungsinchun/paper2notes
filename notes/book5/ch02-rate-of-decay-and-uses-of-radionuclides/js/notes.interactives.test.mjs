@@ -559,15 +559,18 @@ chromeTest("Ch.2 pages show syllabus LOs without DSE chips; papers live in secti
 
   await cdp.goto(pageUrl("summary.html"));
   const bank = await cdp.evaluate(`(function () {
+    var lede = document.querySelector(".lede");
     return {
       n: document.querySelectorAll(".dse-paper").length,
       hasBank: !!document.querySelector(".dse-bank"),
-      hasLabels: !!document.querySelector(".dse-labels")
+      hasLabels: !!document.querySelector(".dse-labels"),
+      lede: lede ? lede.textContent : ""
     };
   })()`);
   assert.equal(bank.hasBank, false, "summary must not dump the classified set");
   assert.equal(bank.n, 0, "DSE papers belong in section quizzes, n=" + bank.n);
   assert.equal(bank.hasLabels, false);
+  assert.doesNotMatch(bank.lede, /classified HKDSE/i, "summary lede must not advertise a DSE bank");
   if (evidenceDir) {
     await cdp.screenshot(path.join(evidenceDir, "ch02-summary-lo-block.png"), ".lo-block");
   }

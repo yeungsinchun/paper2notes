@@ -1265,16 +1265,19 @@ chromeTest("every Ch.1 section page shows syllabus LOs and keeps DSE papers in t
 
   await cdp.goto(pageUrl("summary.html"));
   const bank = await cdp.evaluate(`(function () {
+    var lede = document.querySelector(".lede");
     return {
       n: document.querySelectorAll(".dse-paper").length,
       hasBank: !!document.querySelector(".dse-bank"),
       hasLabels: !!document.querySelector(".dse-labels"),
+      lede: lede ? lede.textContent : "",
       katex: !!document.querySelector(".katex")
     };
   })()`);
   assert.equal(bank.hasBank, false, "summary must not dump the classified set");
   assert.equal(bank.n, 0, "DSE papers belong in section quizzes, n=" + bank.n);
   assert.equal(bank.hasLabels, false);
+  assert.doesNotMatch(bank.lede, /classified HKDSE/i, "summary lede must not advertise a DSE bank");
   if (evidenceDir) {
     await cdp.screenshot(path.join(evidenceDir, "ch01-summary-lo-block.png"), ".lo-block");
   }
@@ -1380,5 +1383,63 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
   }, 10000, "topic-matched DSE paper");
   assert.match(target.href, /25-3\.html/);
   assert.equal(target.paper, true);
+});
+
+chromeTest("Export PDF prints once after scans settle", async () => {
+  await cdp.goto(pageUrl("25-1.html"));
+  const result = await cdp.evaluate(`(function () {
+    function fakeImg(complete, raceOnSubscribe) {
+      var listeners = {};
+      return {
+        complete: complete,
+        addEventListener: function (type, fn) {
+          (listeners[type] = listeners[type] || []).push(fn);
+          if (raceOnSubscribe) this.complete = true;
+        },
+        fire: function (type) {
+          this.complete = true;
+          (listeners[type] || []).slice().forEach(function (fn) { fn(); });
+        }
+      };
+    }
+    function withOpen(images, fn) {
+      var prints = 0;
+      var orig = window.open;
+      window.open = function () {
+        return {
+          document: {
+            open: function () {},
+            write: function () {},
+            close: function () {},
+            images: images
+          },
+          focus: function () {},
+          print: function () { prints += 1; }
+        };
+      };
+      try {
+        document.querySelector("[data-quiz-export]").click();
+        return fn(images, function () { return prints; });
+      } finally {
+        window.open = orig;
+      }
+    }
+    var racePrints = withOpen([fakeImg(true, false), fakeImg(false, true)], function (imgs, n) {
+      return n();
+    });
+    var loading = fakeImg(false, false);
+    var loadPrints = withOpen([loading], function (imgs, n) {
+      var before = n();
+      imgs[0].fire("load");
+      var once = n();
+      imgs[0].fire("load");
+      return { before: before, once: once, twice: n() };
+    });
+    return { racePrints: racePrints, loadPrints: loadPrints };
+  })()`);
+  assert.equal(result.racePrints, 1, "a scan that completes after subscribe must still print");
+  assert.equal(result.loadPrints.before, 0);
+  assert.equal(result.loadPrints.once, 1);
+  assert.equal(result.loadPrints.twice, 1, "a late load after print must not print again");
 });
 });

@@ -185,17 +185,26 @@
     win.document.write(html);
     win.document.close();
     var imgs = Array.prototype.slice.call(win.document.images);
-    var pending = imgs.filter(function (img) { return !img.complete; }).length;
+    var pending = 0;
     function go() {
-      if (pending > 0) return;
+      if (pending !== 0) return;
       pending = -1;
       win.focus();
       win.print();
     }
     imgs.forEach(function (img) {
       if (img.complete) return;
-      img.addEventListener("load", function () { pending -= 1; go(); });
-      img.addEventListener("error", function () { pending -= 1; go(); });
+      pending += 1;
+      var settled = false;
+      function done() {
+        if (settled) return;
+        settled = true;
+        pending -= 1;
+        go();
+      }
+      img.addEventListener("load", done);
+      img.addEventListener("error", done);
+      if (img.complete) done();
     });
     go();
   }
