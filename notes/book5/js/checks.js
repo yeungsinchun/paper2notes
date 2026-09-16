@@ -186,9 +186,11 @@
     win.document.close();
     var imgs = Array.prototype.slice.call(win.document.images);
     var pending = 0;
+    var subscribed = false;
+    var printed = false;
     function go() {
-      if (pending !== 0) return;
-      pending = -1;
+      if (!subscribed || pending !== 0 || printed) return;
+      printed = true;
       win.focus();
       win.print();
     }
@@ -206,6 +208,7 @@
       img.addEventListener("error", done);
       if (img.complete) done();
     });
+    subscribed = true;
     go();
   }
 

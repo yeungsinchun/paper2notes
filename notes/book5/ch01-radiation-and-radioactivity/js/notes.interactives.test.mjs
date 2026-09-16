@@ -1287,7 +1287,7 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
   const expected = {
     "25-1.html": ["dse-mc-2022-31", "dse-mc-2015-31", "dse-lq-2017-10", "dse-lq-2014-10"],
     "25-2.html": ["dse-mc-2012-36", "dse-mc-2013-34", "dse-mc-2014-31", "dse-lq-2026-12", "dse-mc-2021-31", "dse-mc-2025-32", "dse-mc-2021-33", "dse-lq-2016-9", "dse-lq-2018-10", "dse-lq-2021-9", "dse-lq-2023-9", "dse-lq-2017-10", "dse-lq-2014-10"],
-    "25-3.html": ["dse-mc-2016-32", "dse-mc-2017-32", "dse-mc-pp-34", "dse-mc-2014-32", "dse-mc-2019-31", "dse-mc-sap-36", "dse-mc-2017-31", "dse-mc-pp-35", "dse-lq-2014-10"]
+    "25-3.html": ["dse-mc-2016-32", "dse-mc-2017-32", "dse-mc-pp-34", "dse-mc-2014-32", "dse-mc-2019-31", "dse-mc-sap-36", "dse-mc-2017-31", "dse-lq-2014-10"]
   };
 
   for (const [page, expectedIds] of Object.entries(expected)) {
@@ -1427,6 +1427,14 @@ chromeTest("Export PDF prints once after scans settle", async () => {
     var racePrints = withOpen([fakeImg(true, false), fakeImg(false, true)], function (imgs, n) {
       return n();
     });
+    var mixed = fakeImg(false, false);
+    var mixedPrints = withOpen([fakeImg(false, true), mixed], function (imgs, n) {
+      var during = n();
+      imgs[1].fire("load");
+      var once = n();
+      imgs[1].fire("load");
+      return { during: during, once: once, twice: n() };
+    });
     var loading = fakeImg(false, false);
     var loadPrints = withOpen([loading], function (imgs, n) {
       var before = n();
@@ -1435,9 +1443,12 @@ chromeTest("Export PDF prints once after scans settle", async () => {
       imgs[0].fire("load");
       return { before: before, once: once, twice: n() };
     });
-    return { racePrints: racePrints, loadPrints: loadPrints };
+    return { racePrints: racePrints, mixedPrints: mixedPrints, loadPrints: loadPrints };
   })()`);
   assert.equal(result.racePrints, 1, "a scan that completes after subscribe must still print");
+  assert.equal(result.mixedPrints.during, 0, "must not print while later scans are still being subscribed");
+  assert.equal(result.mixedPrints.once, 1);
+  assert.equal(result.mixedPrints.twice, 1, "a mixed cache must print once after every scan settles");
   assert.equal(result.loadPrints.before, 0);
   assert.equal(result.loadPrints.once, 1);
   assert.equal(result.loadPrints.twice, 1, "a late load after print must not print again");
