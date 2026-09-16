@@ -1388,7 +1388,7 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
   const expected = {
     "25-1.html": ["dse-mc-2022-31", "dse-mc-2015-31", "dse-lq-2017-10", "dse-lq-2014-10"],
     "25-2.html": ["dse-mc-2012-36", "dse-mc-2013-34", "dse-mc-2014-31", "dse-lq-2026-12", "dse-mc-2021-31", "dse-mc-2025-32", "dse-mc-2021-33", "dse-lq-2016-9", "dse-lq-2018-10", "dse-lq-2021-9", "dse-lq-2023-9", "dse-lq-2017-10", "dse-lq-2014-10"],
-    "25-3.html": ["dse-mc-2016-32", "dse-mc-2017-32", "dse-mc-pp-34", "dse-mc-2014-32", "dse-mc-2019-31", "dse-mc-sap-36", "dse-mc-2017-31", "dse-lq-2014-10"]
+    "25-3.html": ["dse-mc-2016-32", "dse-mc-2017-32", "dse-mc-pp-34", "dse-mc-2014-32", "dse-mc-2019-31", "dse-mc-sap-36", "dse-mc-2017-31", "dse-mc-pp-35", "dse-lq-2014-10"]
   };
 
   for (const [page, expectedIds] of Object.entries(expected)) {
@@ -1493,7 +1493,7 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
       exportLabel: mc.querySelector("[data-quiz-export]") && mc.querySelector("[data-quiz-export]").textContent
     };
   })()`);
-  assert.equal(marking.hasPp35, false, "PP/35 was dropped because its answer could not be verified");
+  assert.equal(marking.hasPp35, true, "PP/35 is in the 25.3 MC deck");
   assert.ok(marking.dots >= 2, "quiz-dots remain as a second progress channel");
   assert.match(marking.status || "", /\d+ of \d+/);
   assert.equal(marking.exportLabel, "Export PDF");
