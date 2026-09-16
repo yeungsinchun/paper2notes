@@ -1307,7 +1307,9 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
         navAfterSlides: !!(nav && slidesBox && (nav.compareDocumentPosition(slidesBox) & Node.DOCUMENT_POSITION_PRECEDING)),
         letters: mc ? mc.querySelectorAll("[data-quiz-choice]").length : 0,
         hasLq: !!(lq && lq.querySelector(".quiz-slide")),
-        exportHref: mc && mc.querySelector("[data-quiz-export]") && mc.querySelector("[data-quiz-export]").getAttribute("href"),
+        exportButton: !!(mc && mc.querySelector("button[data-quiz-export]")),
+        exportDoc: window.NotesQuiz ? window.NotesQuiz.sectionPapersHtml() : "",
+        scans: Array.from(document.querySelectorAll(".quiz-slide img")).map(function (img) { return img.getAttribute("src").split("/").pop(); }),
         lo: document.querySelector(".quiz-lo") && document.querySelector(".quiz-lo").textContent.trim()
       };
     })()`);
@@ -1316,7 +1318,12 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
     assert.equal(practice.hasNext, true, page + " needs Next");
     assert.equal(practice.navAfterSlides, true, page + " Prev/Next must sit under the question");
     assert.ok(practice.letters >= 4, page + " needs A B C D options");
-    assert.match(practice.exportHref || "", /combined\.pdf$/);
+    assert.equal(practice.exportButton, true, page + " needs its own Export PDF button");
+    assert.ok(practice.scans.length >= 2, page + " should have scans to export");
+    practice.scans.forEach(function (name) {
+      assert.ok(practice.exportDoc.includes(name), page + " export must carry " + name);
+    });
+    assert.doesNotMatch(practice.exportDoc, /combined\.pdf/, page + " export is built from this section's papers, not the chapter PDF");
     assert.match(practice.lo || "", /^LO \d+/, page + " needs an LO number and description at the top of the quiz");
     assert.equal(practice.hasLq, true, page + " needs a separate LQ section");
     assert.equal(practice.visible, 1, page + " must show one MC quiz item");

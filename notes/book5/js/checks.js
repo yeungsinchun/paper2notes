@@ -133,6 +133,73 @@
     return nums;
   }
 
+  function escapeHtml(text) {
+    return String(text).replace(/[&<>"']/g, function (ch) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
+    });
+  }
+
+  /* Every classified paper on this page (MC deck first, then LQ), one per printed
+     page, as a stand-alone document the browser's print dialog saves as a PDF.
+     Nothing is fetched beyond the scans already on the page. */
+  function sectionPapersHtml() {
+    var title = (document.title || "").trim();
+    var pages = [];
+    $all("[data-quiz]").forEach(function (deck) {
+      var kind = deck.getAttribute("data-quiz") === "lq" ? "Long question" : "Multiple choice";
+      $all(".quiz-slide", deck).forEach(function (slide) {
+        var img = $("img", slide);
+        if (!img) return;
+        var cap = $("figcaption", slide);
+        var src = new URL(img.getAttribute("src"), location.href).href;
+        pages.push(
+          '<section class="paper"><h2>' + escapeHtml(kind) + " \u00b7 " +
+          escapeHtml(cap ? cap.textContent.trim() : "") + "</h2>" +
+          '<img src="' + escapeHtml(src) + '" alt="' + escapeHtml(img.getAttribute("alt") || "") + '"></section>'
+        );
+      });
+    });
+    return "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">" +
+      "<title>" + escapeHtml(title) + " \u2013 classified papers</title>" +
+      "<style>" +
+      "body{margin:0;font:14px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#1b2129;background:#fff}" +
+      "h1{font-size:20px;margin:24px 24px 4px}" +
+      ".lead{margin:0 24px 16px;color:#5d6673}" +
+      ".paper{page-break-after:always;break-after:page;padding:16px 24px}" +
+      ".paper:last-child{page-break-after:auto;break-after:auto}" +
+      ".paper h2{font-size:15px;margin:0 0 10px;color:#5d6673}" +
+      ".paper img{display:block;max-width:100%;height:auto}" +
+      "@media print{h1,.lead{margin-top:0}.paper img{max-height:calc(100vh - 70px)}}" +
+      "</style></head><body>" +
+      "<h1>" + escapeHtml(title) + "</h1>" +
+      '<p class="lead">' + pages.length + " classified paper" + (pages.length === 1 ? "" : "s") +
+      " for this section. Use Save as PDF in the print dialog.</p>" +
+      pages.join("") + "</body></html>";
+  }
+
+  function exportSectionPapers() {
+    var html = sectionPapersHtml();
+    var win = window.open("", "_blank");
+    if (!win) return;
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+    var imgs = Array.prototype.slice.call(win.document.images);
+    var pending = imgs.filter(function (img) { return !img.complete; }).length;
+    function go() {
+      if (pending > 0) return;
+      pending = -1;
+      win.focus();
+      win.print();
+    }
+    imgs.forEach(function (img) {
+      if (img.complete) return;
+      img.addEventListener("load", function () { pending -= 1; go(); });
+      img.addEventListener("error", function () { pending -= 1; go(); });
+    });
+    go();
+  }
+
   /* Section quiz: one DSE paper at a time in a single card.
      Card: LO line (which objective this paper tests, paper id), the scan,
      A-D tiles for MC, verdict. Prev / Next and "n of N" with dots under it.
@@ -181,14 +248,12 @@
       });
 
       if (!isLq && !$("[data-quiz-export]", deck)) {
-        var exp = document.createElement("a");
+        var exp = document.createElement("button");
+        exp.type = "button";
         exp.className = "quiz-export";
         exp.setAttribute("data-quiz-export", "true");
-        exp.href = /ch02-rate/.test(location.pathname)
-          ? "../_local/dse/mc/26/combined.pdf"
-          : "../_local/dse/mc/25/combined.pdf";
-        exp.download = "combined.pdf";
         exp.textContent = "Export PDF";
+        exp.addEventListener("click", exportSectionPapers);
         var head = $("header", deck);
         if (head) head.appendChild(exp);
         else deck.insertBefore(exp, deck.firstChild);
@@ -328,6 +393,8 @@
     initSa();
     initQuizDecks();
   }
+
+  window.NotesQuiz = { sectionPapersHtml: sectionPapersHtml };
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", bootChecks);
