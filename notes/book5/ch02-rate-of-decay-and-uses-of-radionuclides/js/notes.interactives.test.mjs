@@ -572,6 +572,7 @@ chromeTest("Ch.2 pages show syllabus LOs without DSE chips; papers live in secti
   assert.equal(bank.hasLabels, false);
   assert.doesNotMatch(bank.lede, /classified HKDSE/i, "summary lede must not advertise a DSE bank");
   if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "ch02-summary-lede.png"), ".lede");
     await cdp.screenshot(path.join(evidenceDir, "ch02-summary-lo-block.png"), ".lo-block");
   }
 
@@ -760,5 +761,8 @@ chromeTest("each Ch.2 subsection quizzes its DSE papers one at a time", async ()
     return found;
   }, 10000, "topic-matched DSE paper");
   assert.match(target.href, /26-2\.html/);
+  if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "26-2-mc-quizlet.png"), '[data-quiz="mc"]');
+  }
 });
 });

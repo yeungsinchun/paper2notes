@@ -443,6 +443,8 @@
     var glyphs = [];
     var hands = 0;
     var films = 0;
+    var nFleshSpheres = 0;
+    var maxFleshSphereR = 0;
     scene.traverse(function (obj) {
       if (obj.isGroup && obj.userData && obj.userData.dir && obj.userData.tip) {
         glyphs.push(obj);
@@ -462,6 +464,12 @@
       if (!mat) return;
       if (mat.transparent && mat.opacity < 0.85 && (geoKind(obj, "Cylinder") || geoKind(obj, "Sphere"))) {
         flesh.push(obj);
+        if (geoKind(obj, "Sphere")) {
+          nFleshSpheres += 1;
+          var r = obj.geometry.parameters ? obj.geometry.parameters.radius : 0;
+          var sx = obj.scale ? Math.max(Math.abs(obj.scale.x), Math.abs(obj.scale.y), Math.abs(obj.scale.z)) : 1;
+          if (r * sx > maxFleshSphereR) maxFleshSphereR = r * sx;
+        }
       } else if (!mat.transparent && geoKind(obj, "Cylinder")) {
         bone.push(obj);
       }
@@ -519,7 +527,9 @@
       raysDown: down,
       stopInFlesh: stopInFlesh,
       stopInBone: stopInBone,
-      throughFlesh: throughFlesh
+      throughFlesh: throughFlesh,
+      nFleshSpheres: nFleshSpheres,
+      maxFleshSphereR: maxFleshSphereR
     };
   }
 
@@ -2204,6 +2214,8 @@
         filmUnder: filmY < 0,
         nBone: nBone,
         nFlesh: nFlesh,
+        nFleshSpheres: live.nFleshSpheres,
+        maxFleshSphereR: live.maxFleshSphereR,
         boneLum: boneLum,
         fleshLum: fleshLum,
         rayCount: rays.length,

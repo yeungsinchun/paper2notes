@@ -316,6 +316,7 @@ chromeTest("25.1 imaging is X-rays down through a hand onto film that starts whi
   assert.equal(start.filmCount, 1);
   assert.ok(start.nBone >= 5, "hand should contain several bones, n=" + start.nBone);
   assert.ok(start.nFlesh >= 5, "hand should contain flesh, n=" + start.nFlesh);
+  assert.ok(start.maxFleshSphereR < 0.2, "wrist must be truncated cylinders, not a palm/wrist blob, r=" + start.maxFleshSphereR);
   assert.ok(start.boneLum > 180, "film under bone starts white");
   assert.ok(start.fleshLum > 180, "whole film starts white, fleshLum=" + start.fleshLum);
   if (evidenceDir) {
@@ -808,12 +809,16 @@ chromeTest("chapter map, summary, and concept-check scoring are the public notes
         noPageWide: !pageWide,
         stageCount: stages.length,
         boxes: boxes,
-        strayReplays: document.querySelectorAll("[data-replay]:not(.stage-replay)").length
+        strayReplays: document.querySelectorAll("[data-replay]:not(.stage-replay)").length,
+        doubledChoices: Array.from(document.querySelectorAll(".choices [data-choice]")).filter(function (b) {
+          return /^[A-D][.)]\\s/.test(b.textContent.trim());
+        }).map(function (b) { return b.textContent.trim(); })
       };
     })()`);
     assert.equal(chrome.hasBar, true, "top bar missing on " + page);
     assert.equal(chrome.noPageWide, true, "page-wide scale chrome still on " + page);
     assert.equal(chrome.strayReplays, 0, "Replay belongs inside its animation box on " + page);
+    assert.deepEqual(chrome.doubledChoices, [], "choice text must not repeat the A-D badge on " + page);
     if (page === "index.html") {
       assert.equal(chrome.stageCount, 0);
     } else {
@@ -908,6 +913,31 @@ chromeTest("chapter map, summary, and concept-check scoring are the public notes
   assert.doesNotMatch(knockoutCheck.copy, /made of atoms/i);
   assert.match(knockoutCheck.copy, /strike electrons out of atoms or molecules/i);
   assert.match(knockoutCheck.copy, /what the radiation does to matter/i);
+  assert.match(knockoutCheck.copy, /gamma rays/, "Section B check says gamma rays, not the γ symbol");
+  assert.doesNotMatch(knockoutCheck.copy, /γ/, "γ is reserved for the nuclear-radiation section");
+
+  const spectrumCheck = await cdp.evaluate(`(function () {
+    var box = document.querySelector("#spectrum .check");
+    var explain = box.querySelector(".explain");
+    return {
+      shown: !explain.hidden,
+      copy: explain.innerText,
+      doubled: Array.from(document.querySelectorAll(".choices [data-choice]")).filter(function (b) {
+        return /^[A-D][.)]\\s/.test(b.textContent.trim());
+      }).map(function (b) { return b.textContent.trim(); })
+    };
+  })()`);
+  assert.equal(spectrumCheck.shown, true);
+  assert.match(spectrumCheck.copy, /gamma ray/, "Section C check says gamma ray, not the γ symbol");
+  assert.doesNotMatch(spectrumCheck.copy, /γ/);
+  assert.match(spectrumCheck.copy, /see Section F/, "Section C check must point at the nuclear-radiation section on this page");
+  assert.doesNotMatch(spectrumCheck.copy, /Section G/);
+  assert.deepEqual(spectrumCheck.doubled, [], "choice text must not repeat the A-D badge");
+
+  if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "25-1-section-b-check-gamma-wording.png"), "#knockout .check");
+    await cdp.screenshot(path.join(evidenceDir, "25-1-section-c-check-section-f.png"), "#spectrum .check");
+  }
 
   const replay25_1 = await cdp.evaluate(`({
     all: Array.from(document.querySelectorAll("[data-replay]")).map(function (b) { return b.getAttribute("data-replay"); }),
@@ -1279,6 +1309,7 @@ chromeTest("every Ch.1 section page shows syllabus LOs and keeps DSE papers in t
   assert.equal(bank.hasLabels, false);
   assert.doesNotMatch(bank.lede, /classified HKDSE/i, "summary lede must not advertise a DSE bank");
   if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "ch01-summary-lede.png"), ".lede");
     await cdp.screenshot(path.join(evidenceDir, "ch01-summary-lo-block.png"), ".lo-block");
   }
 });
@@ -1362,6 +1393,54 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
   assert.equal(rotated.marked, true);
   assert.match(rotated.pct || "", /correct percentage:\s*\d+%/i);
   assert.equal(rotated.visible, 1);
+
+  await cdp.goto(pageUrl("25-3.html"));
+  const marking = await cdp.evaluate(`(function () {
+    var mc = document.querySelector('[data-quiz="mc"]');
+    var next = mc.querySelector("[data-quiz-next]");
+    var n = mc.querySelectorAll(".quiz-slide").length;
+    var results = [];
+    var i;
+    for (i = 0; i < n; i += 1) {
+      var slide = mc.querySelector(".quiz-slide.is-current");
+      var btn = slide.querySelector("[data-quiz-choice='A']");
+      if (btn) btn.click();
+      var pct = slide.querySelector(".quiz-pct");
+      results.push({
+        id: slide.id,
+        marked: slide.getAttribute("data-quiz-marked") === "true",
+        pct: pct && !pct.hidden ? pct.textContent : "",
+        result: slide.getAttribute("data-quiz-result")
+      });
+      next.click();
+    }
+    return {
+      hasPp35: !!document.getElementById("dse-mc-pp-35"),
+      ids: results.map(function (r) { return r.id; }),
+      results: results,
+      dots: mc.querySelectorAll(".quiz-dot").length,
+      status: mc.querySelector(".quiz-status") && mc.querySelector(".quiz-status").textContent,
+      exportLabel: mc.querySelector("[data-quiz-export]") && mc.querySelector("[data-quiz-export]").textContent
+    };
+  })()`);
+  assert.equal(marking.hasPp35, false, "PP/35 was dropped because its answer could not be verified");
+  assert.ok(marking.dots >= 2, "quiz-dots remain as a second progress channel");
+  assert.match(marking.status || "", /\d+ of \d+/);
+  assert.equal(marking.exportLabel, "Export PDF");
+  marking.results.forEach(function (item) {
+    assert.equal(item.marked, true, item.id + " must mark after an A-D pick");
+    assert.match(item.pct, /correct|not quite/i, item.id + " needs a verdict");
+  });
+  if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "25-3-mc-quiz-marked.png"), '[data-quiz="mc"]');
+  }
+
+  await cdp.goto(pageUrl("25-1.html"));
+  if (evidenceDir) {
+    await cdp.evaluate("document.getElementById('mc-quiz-heading').scrollIntoView({ block: 'start' })");
+    await cdp.evaluate("new Promise((r) => setTimeout(r, 120))");
+    await cdp.screenshot(path.join(evidenceDir, "25-1-mc-quizlet.png"), '[data-quiz="mc"]');
+  }
 
   await cdp.goto(pageUrl("25-3.html"));
   const target = await waitFor(async () => {
