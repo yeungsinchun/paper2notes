@@ -2602,116 +2602,6 @@
     scenes.kinds = {};
   }
 
-  function makexray(host) {
-    if (!THREE) return;
-    var canvas = host.querySelector("canvas");
-    var gfx = stage(canvas, { halfW: 5.8, halfH: 2.15 });
-    gfx.camera.position.set(0.2, 1.5, 12);
-    gfx.camera.lookAt(0, 0.05, 0);
-    var labels = ["A", "B", "C", "D"];
-    var huds = labels.map(function (k) {
-      return host.querySelector('[data-hud="' + k + '"]');
-    });
-    function sponge(x) {
-      var m = new THREE.Mesh(
-        new THREE.SphereGeometry(0.42, 16, 12),
-        new THREE.MeshStandardMaterial({ color: 0xe8c9a8, roughness: 0.9 })
-      );
-      m.scale.set(1.15, 0.55, 0.8);
-      m.position.set(x, -0.55, 0);
-      gfx.scene.add(m);
-      return m;
-    }
-    function metalBlock(x) {
-      var m = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.42, 0.55), metal(0x8a9098));
-      m.position.set(x, -0.55, 0);
-      gfx.scene.add(m);
-      return m;
-    }
-    sponge(-4.15);
-    metalBlock(-1.4);
-    sponge(1.35);
-    metalBlock(4.15);
-    var uvA = wavyArrow(gfx.scene, {
-      origin: new THREE.Vector3(-4.15, 1.15, 0),
-      dir: new THREE.Vector3(0, -1, 0),
-      length: 1.15,
-      amp: 0.1,
-      waves: 3.0,
-      hex: 0x7e57c2
-    });
-    var uvB = wavyArrow(gfx.scene, {
-      origin: new THREE.Vector3(-1.4, 1.15, 0),
-      dir: new THREE.Vector3(0, -1, 0),
-      length: 1.15,
-      amp: 0.1,
-      waves: 3.0,
-      phase: 0.8,
-      hex: 0x7e57c2
-    });
-    var eC = [];
-    var eD = [];
-    var i;
-    for (i = 0; i < 5; i += 1) {
-      var c = ball(0.09, 0x2a62a8);
-      var d = ball(0.09, 0x2a62a8);
-      eC.push(c);
-      eD.push(d);
-      gfx.scene.add(c, d);
-    }
-    var xrayOut = [
-      wavyArrow(gfx.scene, {
-        origin: new THREE.Vector3(4.15, -0.28, 0),
-        dir: new THREE.Vector3(0.15, 1, 0.12),
-        length: 1.15,
-        amp: 0.1,
-        waves: 3.2,
-        hex: 0xd4a017
-      }),
-      wavyArrow(gfx.scene, {
-        origin: new THREE.Vector3(4.15, -0.28, 0),
-        dir: new THREE.Vector3(0.72, 0.7, 0),
-        length: 1.05,
-        amp: 0.09,
-        waves: 3.0,
-        phase: 1.2,
-        hex: 0xd4a017
-      }),
-      wavyArrow(gfx.scene, {
-        origin: new THREE.Vector3(4.15, -0.28, 0),
-        dir: new THREE.Vector3(-0.45, 0.9, 0.2),
-        length: 1.1,
-        amp: 0.1,
-        waves: 3.1,
-        phase: 2.1,
-        hex: 0xc9a227
-      })
-    ];
-    var t0 = performance.now();
-    function frame(now) {
-      var t = (now - t0) / 1000;
-      uvA.userData.update(t);
-      uvB.userData.update(t);
-      xrayOut.forEach(function (g) { g.userData.update(t); });
-      eC.forEach(function (m, idx) {
-        var u = (t * 0.7 + idx * 0.18) % 1;
-        m.position.set(1.35, lerp(1.15, -0.2, u), 0);
-      });
-      eD.forEach(function (m, idx) {
-        var u = (t * 0.7 + idx * 0.18) % 1;
-        m.position.set(4.15, lerp(1.15, -0.2, u), 0);
-      });
-      placeHud(huds[0], canvas, gfx.camera, new THREE.Vector3(-4.15, 1.55, 0));
-      placeHud(huds[1], canvas, gfx.camera, new THREE.Vector3(-1.4, 1.55, 0));
-      placeHud(huds[2], canvas, gfx.camera, new THREE.Vector3(1.35, 1.55, 0));
-      placeHud(huds[3], canvas, gfx.camera, new THREE.Vector3(4.15, 1.55, 0));
-      gfx.renderer.render(gfx.scene, gfx.camera);
-      requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-    scenes.makexray = {};
-  }
-
   function pie(host) {
     if (!THREE) return;
     var canvas = host.querySelector("canvas");
@@ -2839,7 +2729,6 @@
     hydrogen: hydrogen,
     nuclide: nuclide,
     kinds: kinds,
-    makexray: makexray,
     pie: pie,
     sumpaths: sumpaths
   };
