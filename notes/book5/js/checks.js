@@ -404,7 +404,22 @@
     initQuizDecks();
   }
 
+  /* The chapter-level Export PDF (js/export.js) opens this page with ?autoprint=1
+     because it can't drive printing from the opener over file://. Print once every
+     figure and quiz on the page has had a chance to render, then close the tab. */
+  function autoPrintIfRequested() {
+    if (new URLSearchParams(location.search).get("autoprint") !== "1") return;
+    function go() {
+      window.setTimeout(function () { window.print(); }, 300);
+    }
+    if (document.readyState === "complete") go();
+    else window.addEventListener("load", go);
+    window.addEventListener("afterprint", function () { window.close(); });
+  }
+
   window.NotesQuiz = { sectionPapersHtml: sectionPapersHtml };
+
+  autoPrintIfRequested();
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", bootChecks);
