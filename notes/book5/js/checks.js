@@ -133,81 +133,13 @@
     return nums;
   }
 
-  function escapeHtml(text) {
-    return String(text).replace(/[&<>"']/g, function (ch) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
+  /* Export notes as PDF: the browser's own print of this page (Save as PDF in
+     the dialog). Print styles drop the top bar, page tools and quiz decks, so
+     the PDF is the notes themselves. */
+  function initNotesExport() {
+    $all("[data-notes-export]").forEach(function (btn) {
+      btn.addEventListener("click", function () { window.print(); });
     });
-  }
-
-  /* Every classified paper in one quiz deck (MC or LQ), one per printed page, as
-     a stand-alone document the browser's print dialog saves as a PDF. Nothing is
-     fetched beyond the scans already on the page. */
-  function sectionPapersHtml(deck) {
-    var title = (document.title || "").trim();
-    var kind = deck.getAttribute("data-quiz") === "lq" ? "Long question" : "Multiple choice";
-    var pages = [];
-    $all(".quiz-slide", deck).forEach(function (slide) {
-      var img = $("img", slide);
-      if (!img) return;
-      var cap = $("figcaption", slide);
-      var src = new URL(img.getAttribute("src"), location.href).href;
-      pages.push(
-        '<section class="paper"><h2>' + escapeHtml(kind) + " \u00b7 " +
-        escapeHtml(cap ? cap.textContent.trim() : "") + "</h2>" +
-        '<img src="' + escapeHtml(src) + '" alt="' + escapeHtml(img.getAttribute("alt") || "") + '"></section>'
-      );
-    });
-    return "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">" +
-      "<title>" + escapeHtml(title) + " \u2013 " + escapeHtml(kind.toLowerCase()) + " papers</title>" +
-      "<style>" +
-      "body{margin:0;font:14px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#1b2129;background:#fff}" +
-      "h1{font-size:20px;margin:24px 24px 4px}" +
-      ".lead{margin:0 24px 16px;color:#5d6673}" +
-      ".paper{page-break-after:always;break-after:page;padding:16px 24px}" +
-      ".paper:last-child{page-break-after:auto;break-after:auto}" +
-      ".paper h2{font-size:15px;margin:0 0 10px;color:#5d6673}" +
-      ".paper img{display:block;max-width:100%;height:auto}" +
-      "@media print{h1,.lead{margin-top:0}.paper img{max-height:calc(100vh - 70px)}}" +
-      "</style></head><body>" +
-      "<h1>" + escapeHtml(title) + "</h1>" +
-      '<p class="lead">' + pages.length + " classified " + kind.toLowerCase() + " paper" + (pages.length === 1 ? "" : "s") +
-      " for this section. Use Save as PDF in the print dialog.</p>" +
-      pages.join("") + "</body></html>";
-  }
-
-  function exportSectionPapers(deck) {
-    var html = sectionPapersHtml(deck);
-    var win = window.open("", "_blank");
-    if (!win) return;
-    win.document.open();
-    win.document.write(html);
-    win.document.close();
-    var imgs = Array.prototype.slice.call(win.document.images);
-    var pending = 0;
-    var subscribed = false;
-    var printed = false;
-    function go() {
-      if (!subscribed || pending !== 0 || printed) return;
-      printed = true;
-      win.focus();
-      win.print();
-    }
-    imgs.forEach(function (img) {
-      if (img.complete) return;
-      pending += 1;
-      var settled = false;
-      function done() {
-        if (settled) return;
-        settled = true;
-        pending -= 1;
-        go();
-      }
-      img.addEventListener("load", done);
-      img.addEventListener("error", done);
-      if (img.complete) done();
-    });
-    subscribed = true;
-    go();
   }
 
   /* Section quiz: one DSE paper at a time in a single card.
@@ -257,13 +189,15 @@
         slide.appendChild(pct);
       });
 
-      if (!$("[data-quiz-export]", deck)) {
-        var exp = document.createElement("button");
-        exp.type = "button";
+      var pdf = deck.getAttribute("data-quiz-pdf");
+      if (pdf && !$("[data-quiz-export]", deck)) {
+        var exp = document.createElement("a");
         exp.className = "quiz-export";
         exp.setAttribute("data-quiz-export", isLq ? "lq" : "mc");
+        exp.href = pdf;
+        exp.target = "_blank";
+        exp.rel = "noopener";
         exp.textContent = "Export PDF";
-        exp.addEventListener("click", function () { exportSectionPapers(deck); });
         var head = $("header", deck);
         if (head) head.appendChild(exp);
         else deck.insertBefore(exp, deck.firstChild);
@@ -402,24 +336,8 @@
     initTf();
     initSa();
     initQuizDecks();
+    initNotesExport();
   }
-
-  /* The chapter-level Export PDF (js/export.js) opens this page with ?autoprint=1
-     because it can't drive printing from the opener over file://. Print once every
-     figure and quiz on the page has had a chance to render, then close the tab. */
-  function autoPrintIfRequested() {
-    if (new URLSearchParams(location.search).get("autoprint") !== "1") return;
-    function go() {
-      window.setTimeout(function () { window.print(); }, 300);
-    }
-    if (document.readyState === "complete") go();
-    else window.addEventListener("load", go);
-    window.addEventListener("afterprint", function () { window.close(); });
-  }
-
-  window.NotesQuiz = { sectionPapersHtml: sectionPapersHtml };
-
-  autoPrintIfRequested();
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", bootChecks);

@@ -716,12 +716,9 @@ chromeTest("each Ch.2 subsection quizzes its DSE papers one at a time", async ()
           navAfterSlides: !!(nav && slidesBox && (nav.compareDocumentPosition(slidesBox) & Node.DOCUMENT_POSITION_PRECEDING)),
           letters: mc ? mc.querySelectorAll("[data-quiz-choice]").length : 0,
           hasLq: !!(lq && lq.querySelector(".quiz-slide")),
-          exportButton: !!(mc && mc.querySelector("button[data-quiz-export]")),
-          lqExportButton: !!(lq && lq.querySelector("button[data-quiz-export]")),
-          exportDoc: window.NotesQuiz && mc ? window.NotesQuiz.sectionPapersHtml(mc) : "",
-          lqExportDoc: window.NotesQuiz && lq ? window.NotesQuiz.sectionPapersHtml(lq) : "",
-          scans: Array.from(mc ? mc.querySelectorAll(".quiz-slide img") : []).map(function (img) { return img.getAttribute("src").split("/").pop(); }),
-          lqScans: Array.from(lq ? lq.querySelectorAll(".quiz-slide img") : []).map(function (img) { return img.getAttribute("src").split("/").pop(); }),
+          mcPdf: mc && mc.querySelector('a[data-quiz-export="mc"]') && mc.querySelector('a[data-quiz-export="mc"]').getAttribute("href"),
+          lqPdf: lq && lq.querySelector('a[data-quiz-export="lq"]') && lq.querySelector('a[data-quiz-export="lq"]').getAttribute("href"),
+          pdfButtons: document.querySelectorAll("button[data-quiz-export]").length,
           lo: document.querySelector(".quiz-lo") && document.querySelector(".quiz-lo").textContent.trim()
         };
       })()`);
@@ -733,18 +730,9 @@ chromeTest("each Ch.2 subsection quizzes its DSE papers one at a time", async ()
     assert.equal(practice.hasNext, true, page + " needs Next");
     assert.equal(practice.navAfterSlides, true, page + " Prev/Next must sit under the question");
     assert.ok(practice.letters >= 4, page + " needs A B C D options");
-    assert.equal(practice.exportButton, true, page + " MC deck needs its own Export PDF button");
-    assert.equal(practice.lqExportButton, practice.hasLq, page + " LQ deck needs its own Export PDF button");
-    assert.ok(practice.scans.length >= 1, page + " should have MC scans to export");
-    practice.scans.forEach(function (name) {
-      assert.ok(practice.exportDoc.includes(name), page + " MC export must carry " + name);
-      assert.ok(!practice.lqExportDoc.includes(name), page + " LQ export must not carry the MC paper " + name);
-    });
-    practice.lqScans.forEach(function (name) {
-      assert.ok(practice.lqExportDoc.includes(name), page + " LQ export must carry " + name);
-      assert.ok(!practice.exportDoc.includes(name), page + " MC export must not carry the LQ paper " + name);
-    });
-    assert.doesNotMatch(practice.exportDoc + practice.lqExportDoc, /combined\.pdf/, page + " export is built from this section's papers, not the chapter PDF");
+    assert.equal(practice.mcPdf, "../_local/dse/mc/26/combined.pdf", page + " MC deck links its Export PDF to the chapter MC bank");
+    if (practice.hasLq) assert.equal(practice.lqPdf, "../_local/dse/lq/26/combined.pdf", page + " LQ deck links its Export PDF to the chapter LQ bank");
+    assert.equal(practice.pdfButtons, 0, page + " quiz export is a plain PDF link, not a generated print document");
     assert.match(practice.lo || "", /^LO \d+/, page + " needs an LO number and description at the top of the quiz");
     assert.equal(practice.hasLq, true, page + " needs a separate LQ section");
     assert.equal(practice.visible, 1, page + " must show one MC quiz item");

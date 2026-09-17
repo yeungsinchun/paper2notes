@@ -1411,12 +1411,9 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
         navAfterSlides: !!(nav && slidesBox && (nav.compareDocumentPosition(slidesBox) & Node.DOCUMENT_POSITION_PRECEDING)),
         letters: mc ? mc.querySelectorAll("[data-quiz-choice]").length : 0,
         hasLq: !!(lq && lq.querySelector(".quiz-slide")),
-        exportButton: !!(mc && mc.querySelector("button[data-quiz-export]")),
-        lqExportButton: !!(lq && lq.querySelector("button[data-quiz-export]")),
-        exportDoc: window.NotesQuiz && mc ? window.NotesQuiz.sectionPapersHtml(mc) : "",
-        lqExportDoc: window.NotesQuiz && lq ? window.NotesQuiz.sectionPapersHtml(lq) : "",
-        scans: Array.from(mc ? mc.querySelectorAll(".quiz-slide img") : []).map(function (img) { return img.getAttribute("src").split("/").pop(); }),
-        lqScans: Array.from(lq ? lq.querySelectorAll(".quiz-slide img") : []).map(function (img) { return img.getAttribute("src").split("/").pop(); }),
+        mcPdf: mc && mc.querySelector('a[data-quiz-export="mc"]') && mc.querySelector('a[data-quiz-export="mc"]').getAttribute("href"),
+        lqPdf: lq && lq.querySelector('a[data-quiz-export="lq"]') && lq.querySelector('a[data-quiz-export="lq"]').getAttribute("href"),
+        pdfButtons: document.querySelectorAll("button[data-quiz-export]").length,
         lo: document.querySelector(".quiz-lo") && document.querySelector(".quiz-lo").textContent.trim()
       };
     })()`);
@@ -1425,18 +1422,9 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
     assert.equal(practice.hasNext, true, page + " needs Next");
     assert.equal(practice.navAfterSlides, true, page + " Prev/Next must sit under the question");
     assert.ok(practice.letters >= 4, page + " needs A B C D options");
-    assert.equal(practice.exportButton, true, page + " MC deck needs its own Export PDF button");
-    assert.equal(practice.lqExportButton, practice.hasLq, page + " LQ deck needs its own Export PDF button");
-    assert.ok(practice.scans.length >= 1, page + " should have MC scans to export");
-    practice.scans.forEach(function (name) {
-      assert.ok(practice.exportDoc.includes(name), page + " MC export must carry " + name);
-      assert.ok(!practice.lqExportDoc.includes(name), page + " LQ export must not carry the MC paper " + name);
-    });
-    practice.lqScans.forEach(function (name) {
-      assert.ok(practice.lqExportDoc.includes(name), page + " LQ export must carry " + name);
-      assert.ok(!practice.exportDoc.includes(name), page + " MC export must not carry the LQ paper " + name);
-    });
-    assert.doesNotMatch(practice.exportDoc + practice.lqExportDoc, /combined\.pdf/, page + " export is built from this section's papers, not the chapter PDF");
+    assert.equal(practice.mcPdf, "../_local/dse/mc/25/combined.pdf", page + " MC deck links its Export PDF to the chapter MC bank");
+    if (practice.hasLq) assert.equal(practice.lqPdf, "../_local/dse/lq/25/combined.pdf", page + " LQ deck links its Export PDF to the chapter LQ bank");
+    assert.equal(practice.pdfButtons, 0, page + " quiz export is a plain PDF link, not a generated print document");
     assert.match(practice.lo || "", /^LO \d+/, page + " needs an LO number and description at the top of the quiz");
     assert.equal(practice.hasLq, true, page + " needs a separate LQ section");
     assert.equal(practice.visible, 1, page + " must show one MC quiz item");
@@ -1543,151 +1531,50 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
   assert.equal(target.paper, true);
 });
 
-chromeTest("Export PDF prints once after scans settle", async () => {
-  await cdp.goto(pageUrl("25-1.html"));
-  const result = await cdp.evaluate(`(function () {
-    function fakeImg(complete, raceOnSubscribe) {
-      var listeners = {};
-      return {
-        complete: complete,
-        addEventListener: function (type, fn) {
-          (listeners[type] = listeners[type] || []).push(fn);
-          if (raceOnSubscribe) this.complete = true;
-        },
-        fire: function (type) {
-          this.complete = true;
-          (listeners[type] || []).slice().forEach(function (fn) { fn(); });
-        }
-      };
-    }
-    function withOpen(images, fn) {
+chromeTest("each section page exports its own notes as a PDF from the top right", async () => {
+  for (const page of ["25-1.html", "25-2.html", "25-3.html"]) {
+    await cdp.goto(pageUrl(page));
+    const screen = await cdp.evaluate(`(function () {
+      var btn = document.querySelector("[data-notes-export]");
+      var main = document.querySelector("main");
+      var h1 = document.querySelector("main h1");
+      var b = btn && btn.getBoundingClientRect();
+      var m = main.getBoundingClientRect();
+      var h = h1.getBoundingClientRect();
       var prints = 0;
-      var orig = window.open;
-      window.open = function () {
-        return {
-          document: {
-            open: function () {},
-            write: function () {},
-            close: function () {},
-            images: images
-          },
-          focus: function () {},
-          print: function () { prints += 1; }
-        };
+      var orig = window.print;
+      window.print = function () { prints += 1; };
+      try { btn && btn.click(); } finally { window.print = orig; }
+      return {
+        label: btn && btn.textContent.trim(),
+        count: document.querySelectorAll("[data-notes-export]").length,
+        topRight: !!b && b.right > m.right - 40 && b.top <= h.top,
+        prints: prints,
+        homeLinks: document.querySelectorAll("a[href$='combined.pdf'][download]").length
       };
-      try {
-        document.querySelector("[data-quiz-export]").click();
-        return fn(images, function () { return prints; });
-      } finally {
-        window.open = orig;
-      }
-    }
-    var racePrints = withOpen([fakeImg(true, false), fakeImg(false, true)], function (imgs, n) {
-      return n();
-    });
-    var mixed = fakeImg(false, false);
-    var mixedPrints = withOpen([fakeImg(false, true), mixed], function (imgs, n) {
-      var during = n();
-      imgs[1].fire("load");
-      var once = n();
-      imgs[1].fire("load");
-      return { during: during, once: once, twice: n() };
-    });
-    var loading = fakeImg(false, false);
-    var loadPrints = withOpen([loading], function (imgs, n) {
-      var before = n();
-      imgs[0].fire("load");
-      var once = n();
-      imgs[0].fire("load");
-      return { before: before, once: once, twice: n() };
-    });
-    return { racePrints: racePrints, mixedPrints: mixedPrints, loadPrints: loadPrints };
-  })()`);
-  assert.equal(result.racePrints, 1, "a scan that completes after subscribe must still print");
-  assert.equal(result.mixedPrints.during, 0, "must not print while later scans are still being subscribed");
-  assert.equal(result.mixedPrints.once, 1);
-  assert.equal(result.mixedPrints.twice, 1, "a mixed cache must print once after every scan settles");
-  assert.equal(result.loadPrints.before, 0);
-  assert.equal(result.loadPrints.once, 1);
-  assert.equal(result.loadPrints.twice, 1, "a late load after print must not print again");
-});
+    })()`);
+    assert.equal(screen.count, 1, page + " has exactly one notes export");
+    assert.equal(screen.label, "Export notes as PDF", page);
+    assert.equal(screen.topRight, true, page + " notes export sits at the top right, above the title");
+    assert.equal(screen.prints, 1, page + " export prints the page itself once");
 
-chromeTest("Book 5 home exports a chapter's notes pages as one print document", async () => {
+    await cdp.send("Emulation.setEmulatedMedia", { media: "print" });
+    const printed = await cdp.evaluate(`(function () {
+      function shown(sel) { var el = document.querySelector(sel); return !!el && getComputedStyle(el).display !== "none"; }
+      return { topbar: shown(".topbar"), tools: shown(".page-tools"), quiz: shown(".section-dse"), next: shown(".next"), h1: shown("main h1"), lo: shown(".lo-block") };
+    })()`);
+    await cdp.send("Emulation.setEmulatedMedia", { media: "" });
+    assert.equal(printed.topbar, false, page + " print must not carry the header bar");
+    assert.equal(printed.tools, false, page + " print must not carry the export button");
+    assert.equal(printed.quiz, false, page + " print must not carry the quiz decks");
+    assert.equal(printed.next, false, page + " print must not carry the next link");
+    assert.equal(printed.h1, true, page + " print keeps the notes");
+    assert.equal(printed.lo, true, page + " print keeps the learning objectives");
+  }
+
   await cdp.goto(pageUrl("../index.html"));
-  const result = await cdp.evaluate(`(function () {
-    var links = Array.prototype.slice.call(document.querySelectorAll("main a.quiz-export"));
-    var hrefs = links.map(function (a) { return a.getAttribute("href"); });
-    var pages = links.map(function (a) { return a.getAttribute("data-export-pages") || ""; });
-    function fakeFrame(src) {
-      var listeners = {};
-      return {
-        src: src,
-        style: {},
-        contentDocument: { readyState: "loading", documentElement: { scrollHeight: 4000 }, body: { scrollHeight: 4000 } },
-        addEventListener: function (type, fn) { (listeners[type] = listeners[type] || []).push(fn); },
-        fire: function (type) {
-          this.contentDocument.readyState = "complete";
-          (listeners[type] || []).slice().forEach(function (fn) { fn(); });
-        }
-      };
-    }
-    var prints = 0, written = "", frames = [], timeouts = [];
-    var orig = window.open;
-    window.open = function () {
-      return {
-        document: {
-          open: function () {},
-          write: function (html) {
-            written = html;
-            var m = html.match(/<iframe src="([^"]+)"/g) || [];
-            frames = m.map(function (tag) { return fakeFrame(tag.replace(/.*src="([^"]+)".*/, "$1")); });
-          },
-          close: function () {},
-          querySelectorAll: function () { return frames; }
-        },
-        setTimeout: function (fn) { timeouts.push(fn); },
-        focus: function () {},
-        print: function () { prints += 1; }
-      };
-    };
-    try {
-      links[0].click();
-      var beforeLoad = prints;
-      frames.slice(0, -1).forEach(function (f) { f.fire("load"); });
-      var partial = prints + timeouts.length;
-      frames[frames.length - 1].fire("load");
-      var scheduled = timeouts.length;
-      timeouts.splice(0).forEach(function (fn) { fn(); });
-      var once = prints;
-      frames[0].fire("load");
-      timeouts.splice(0).forEach(function (fn) { fn(); });
-      return {
-        hrefs: hrefs, pages: pages, written: written,
-        frameSrcs: frames.map(function (f) { return f.src.split("/").slice(-2).join("/"); }),
-        heights: frames.map(function (f) { return f.style.height; }),
-        beforeLoad: beforeLoad, partial: partial, scheduled: scheduled, once: once, twice: prints,
-        stillOnHome: location.pathname.split("/").pop()
-      };
-    } finally {
-      window.open = orig;
-    }
-  })()`);
-  assert.equal(result.hrefs.length, 2, "the home page has one notes export per chapter");
-  result.hrefs.forEach((href) => assert.doesNotMatch(href, /combined\.pdf|_local/, "home export must not download the classified-papers PDF"));
-  assert.deepEqual(result.frameSrcs, [
-    "ch01-radiation-and-radioactivity/25-1.html",
-    "ch01-radiation-and-radioactivity/25-2.html",
-    "ch01-radiation-and-radioactivity/25-3.html",
-    "ch01-radiation-and-radioactivity/summary.html"
-  ], "Ch.1 export prints every section page then the summary");
-  assert.match(result.pages[1], /26-1\.html.*26-2\.html.*26-3\.html.*summary\.html/, "Ch.2 export lists its notes pages");
-  assert.match(result.written, /<!doctype html>/i);
-  assert.equal(result.beforeLoad, 0, "nothing prints before the pages load");
-  assert.equal(result.partial, 0, "nothing prints while a page is still loading");
-  assert.equal(result.scheduled, 1, "print is scheduled once every page has loaded");
-  assert.equal(result.once, 1, "the print dialog opens once");
-  assert.equal(result.twice, 1, "a repeated load event must not print again");
-  result.heights.forEach((h) => assert.equal(h, "4000px", "each frame is grown to its page's full height before printing"));
-  assert.equal(result.stillOnHome, "index.html", "the click is handled in-page, not followed as a link");
+  const home = await cdp.evaluate(`JSON.stringify({ exports: document.querySelectorAll("a.quiz-export, [data-export-pages], [data-notes-export]").length, scripts: document.scripts.length })`);
+  const parsed = JSON.parse(home);
+  assert.equal(parsed.exports, 0, "the Book 5 home page has no export of its own; each section page exports itself");
 });
 });
