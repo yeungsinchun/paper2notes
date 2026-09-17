@@ -322,7 +322,7 @@ chromeTest("25.1 imaging is X-rays down through a hand onto film that starts whi
   if (evidenceDir) {
     await cdp.screenshot(path.join(evidenceDir, "25-1-xray-imaging-start-white.png"), "#imaging");
   }
-  await cdp.evaluate("new Promise((r) => setTimeout(r, 1500))");
+  await cdp.evaluate("new Promise((r) => setTimeout(r, 4500))");
   const img = await cdp.evaluate(`(function () {
     var snap = window.NotesScenes.imaging.snapshot();
     var host = document.getElementById("imaging-vis");
@@ -331,6 +331,7 @@ chromeTest("25.1 imaging is X-rays down through a hand onto film that starts whi
     snap.replay = !!document.querySelector('#imaging [data-replay="imaging-vis"]');
     return snap;
   })()`);
+  assert.ok(img.t >= img.duration, "autoplay should reach the completed radiograph");
   assert.equal(img.toggles, 0);
   assert.equal(img.oneHand, true);
   assert.equal(img.twoSlabs, false);
@@ -352,6 +353,67 @@ chromeTest("25.1 imaging is X-rays down through a hand onto film that starts whi
 
   if (evidenceDir) {
     await cdp.screenshot(path.join(evidenceDir, "25-1-xray-imaging.png"), "#imaging");
+  }
+});
+
+chromeTest("25.1 film exposure follows arriving rays and bone shadows stay white", async () => {
+  await cdp.goto(pageUrl("25-1.html"));
+  async function at(sec) {
+    return cdp.evaluate(`(function () {
+      window.NotesScenes.imaging.seek(${sec});
+      return window.NotesScenes.imaging.snapshot();
+    })()`);
+  }
+  const initial = await at(0);
+  const firstArrival = Math.min(...initial.cells.map((cell) => cell.arrival));
+  const before = await at(firstArrival - 0.01);
+  assert.ok(before.cells.every((cell) => cell.minLuminance > 240), "no film pixel blackens before a ray arrives");
+  const during = await at(firstArrival + 0.35);
+  assert.ok(during.cells.some((cell) => cell.minLuminance < 90), "arriving rays expose local film patches");
+  assert.ok(during.cells.some((cell) => cell.arrival > during.t), "the sweep still has unexposed film");
+  for (const cell of during.cells.filter((cell) => cell.arrival > during.t)) {
+    assert.ok(cell.minLuminance > 240, "every pixel in an unreached patch stays white");
+  }
+  const transmitting = initial.exposures.filter((ray) => !ray.absorbed);
+  for (const [index, ray] of initial.exposures.entries()) {
+    const approaching = (await at(ray.arrival - 0.03)).exposures[index];
+    assert.ok(approaching.headY > ray.stopY, "the visible arrowhead approaches downward");
+    const arrived = (await at(ray.arrival + 0.3)).exposures[index];
+    assert.ok(Math.abs(arrived.headX - ray.x) < 1e-6);
+    assert.ok(Math.abs(arrived.headZ - ray.z) < 1e-6, "arrowhead and exposed pixel share the same film coordinate");
+    if (ray.absorbed) {
+      assert.equal(arrived.headInBone, true, "the rendered arrowhead stops inside a bone");
+      assert.ok(arrived.filmLum > 240, "the film under the stopped ray stays white");
+    } else {
+      assert.ok(Math.abs(arrived.headY - arrived.filmY) < 1e-6, "the rendered arrowhead reaches the film plane");
+      assert.ok(arrived.filmLum < 90, "the pixel underneath the arriving ray blackens");
+    }
+  }
+  assert.ok(transmitting.length >= 3);
+  const final = await at(initial.duration);
+  assert.ok(final.cells.every((cell) => Number.isFinite(cell.arrival) && cell.minLuminance < 90),
+    "each film patch has a transmitted ray and a dark exposed area");
+  assert.ok(final.exposures.filter((ray) => ray.absorbed).every((ray) => ray.filmLum > 240));
+  const later = await at(initial.duration + 2);
+  assert.deepEqual(later.cells, final.cells, "the final radiograph holds without flicker");
+  const replay = await cdp.evaluate(`(function () {
+    window.NotesScenes.imaging.replay();
+    return window.NotesScenes.imaging.snapshot();
+  })()`);
+  assert.ok(replay.cells.every((cell) => cell.minLuminance > 240), "Replay clears the previous exposure");
+  await cdp.send("Emulation.setDeviceMetricsOverride", {
+    width: 390, height: 844, deviceScaleFactor: 2, mobile: true,
+  });
+  try {
+    const phone = await cdp.evaluate(`new Promise((resolve) => requestAnimationFrame(() => {
+      window.NotesScenes.imaging.seek(5);
+      resolve(window.NotesScenes.imaging.snapshot());
+    }))`);
+    assert.equal(phone.clipped, false, "phone framing includes the hand and film");
+  } finally {
+    await cdp.send("Emulation.setDeviceMetricsOverride", {
+      width: 1280, height: 900, deviceScaleFactor: 2, mobile: false,
+    });
   }
 });
 
