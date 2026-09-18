@@ -377,18 +377,23 @@ chromeTest("25.1 film exposure follows arriving rays and bone shadows stay white
   const transmitting = initial.exposures.filter((ray) => !ray.absorbed);
   for (const [index, ray] of initial.exposures.entries()) {
     const approaching = (await at(ray.arrival - 0.03)).exposures[index];
-    assert.ok(approaching.headY > ray.stopY, "the visible arrowhead approaches downward");
+    assert.ok(approaching.frontY > ray.stopY, "the modelled ray front approaches downward");
     const arrived = (await at(ray.arrival + 0.3)).exposures[index];
-    assert.ok(Math.abs(arrived.headX - ray.x) < 1e-6);
-    assert.ok(Math.abs(arrived.headZ - ray.z) < 1e-6, "arrowhead and exposed pixel share the same film coordinate");
+    assert.ok(Math.abs(arrived.frontX - ray.x) < 1e-6);
+    assert.ok(Math.abs(arrived.frontZ - ray.z) < 1e-6, "ray front and exposed pixel share the same film coordinate");
     if (ray.absorbed) {
-      assert.equal(arrived.headInBone, true, "the rendered arrowhead stops inside a bone");
+      assert.equal(arrived.frontInBone, true, "the modelled ray stops inside a bone");
       assert.ok(arrived.filmLum > 240, "the film under the stopped ray stays white");
     } else {
-      assert.ok(Math.abs(arrived.headY - arrived.filmY) < 1e-6, "the rendered arrowhead reaches the film plane");
+      assert.ok(Math.abs(arrived.frontY - arrived.filmY) < 1e-6, "the modelled ray reaches the film plane");
       assert.ok(arrived.filmLum < 90, "the pixel underneath the arriving ray blackens");
     }
   }
+  const drawn = await cdp.evaluate(`(function () {
+    window.NotesScenes.imaging.seek(${initial.duration / 2});
+    return window.NotesScenes.imaging.snapshot().drawnRays;
+  })()`);
+  assert.equal(drawn, 0, "the exposure animates without visible ray glyphs");
   assert.ok(transmitting.length >= 3);
   const final = await at(initial.duration);
   assert.ok(final.cells.every((cell) => Number.isFinite(cell.arrival) && cell.minLuminance < 90),
