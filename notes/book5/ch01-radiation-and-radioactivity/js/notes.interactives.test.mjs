@@ -401,6 +401,7 @@ chromeTest("25.1 film exposure follows arriving rays and bone shadows stay white
   assert.ok(final.exposures.filter((ray) => ray.absorbed).every((ray) => ray.filmLum > 240));
   const later = await at(initial.duration + 2);
   assert.deepEqual(later.cells, final.cells, "the final radiograph holds without flicker");
+  assert.equal(later.drawnRays, 0, "no ray remnant is left once the animation settles");
   const replay = await cdp.evaluate(`(function () {
     window.NotesScenes.imaging.replay();
     return window.NotesScenes.imaging.snapshot();
