@@ -42,7 +42,7 @@
 
   function stage(canvas, fit) {
     var scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xfffaf1);
+    scene.background = new THREE.Color(0xffffff);
     var persp = fit && fit.persp;
     var look = persp
       ? new THREE.Vector3(persp.lookX || 0, persp.lookY || 0, persp.lookZ || 0)
@@ -105,7 +105,18 @@
     return { scene: scene, camera: camera, renderer: renderer, resize: resize, look: look, orbit: orbit };
   }
 
+  /* Drag-to-rotate only where the third dimension carries meaning (depth of a
+     film under a hand, an angled target, a nucleon cluster). Flat, diagram-like
+     scenes keep a fixed camera so nothing on the page invites fiddling. */
+  var ORBIT_SCENES = { imaging: 1, tube: 1, atom: 1, nuclide: 1, hydrogen: 1, "decay-a": 1, "decay-b": 1, "decay-g": 1, sealed: 1, bfield: 1 };
+
   function attachOrbit(canvas, camera, target) {
+    var host = canvas.closest ? canvas.closest("[data-scene]") : null;
+    var name = host ? host.getAttribute("data-scene") : "";
+    if (!ORBIT_SCENES[name]) {
+      return { target: target, enabled: false, nudge: function () { /* fixed camera */ } };
+    }
+    if (host) host.setAttribute("data-orbit", "");
     var sph = new THREE.Spherical();
     var dragging = false;
     var lastX = 0;
@@ -143,6 +154,7 @@
     canvas.addEventListener("pointercancel", endDrag);
     return {
       target: target,
+      enabled: true,
       nudge: function (dx, dy) {
         if (!synced) sync();
         sph.theta -= dx * 0.008;
@@ -424,17 +436,17 @@
     return geo.boundingBox.containsPoint(local);
   }
 
-  function imagingFromScene(scene, filmY) {
+  /* rays: the modelled X-ray paths as { origin, dir, end } world vectors. Fig 25.7
+     draws no ray glyphs, so the scene alone cannot say where its rays went. */
+  function imagingFromScene(scene, filmY, rays) {
     var flesh = [];
     var bone = [];
     var slabs = 0;
-    var glyphs = [];
     var hands = 0;
     var films = 0;
+    var nFleshSpheres = 0;
+    var maxFleshSphereR = 0;
     scene.traverse(function (obj) {
-      if (obj.isGroup && obj.userData && obj.userData.dir && obj.userData.tip) {
-        glyphs.push(obj);
-      }
       if (!obj.isMesh) return;
       if (geoKind(obj, "Plane")) {
         var y = obj.getWorldPosition(new THREE.Vector3()).y;
@@ -450,12 +462,18 @@
       if (!mat) return;
       if (mat.transparent && mat.opacity < 0.85 && (geoKind(obj, "Cylinder") || geoKind(obj, "Sphere"))) {
         flesh.push(obj);
+        if (geoKind(obj, "Sphere")) {
+          nFleshSpheres += 1;
+          var r = obj.geometry.parameters ? obj.geometry.parameters.radius : 0;
+          var sx = obj.scale ? Math.max(Math.abs(obj.scale.x), Math.abs(obj.scale.y), Math.abs(obj.scale.z)) : 1;
+          if (r * sx > maxFleshSphereR) maxFleshSphereR = r * sx;
+        }
       } else if (!mat.transparent && geoKind(obj, "Cylinder")) {
         bone.push(obj);
       }
     });
     scene.children.forEach(function (obj) {
-      if (!obj.isGroup || (obj.userData && obj.userData.dir)) return;
+      if (!obj.isGroup) return;
       var hasFlesh = false;
       var hasBone = false;
       obj.traverse(function (child) {
@@ -464,14 +482,14 @@
       });
       if (hasFlesh && hasBone) hands += 1;
     });
-    var down = glyphs.length > 0;
+    var down = rays.length > 0;
     var stopInFlesh = 0;
     var stopInBone = 0;
     var throughFlesh = 0;
-    glyphs.forEach(function (g) {
-      var dir = g.userData.dir;
-      var origin = g.userData.origin;
-      var end = g.userData.axisEnd || g.userData.tip;
+    rays.forEach(function (ray) {
+      var dir = ray.dir;
+      var origin = ray.origin;
+      var end = ray.end;
       if (!dir || dir.y > -0.7) down = false;
       if (!end || !origin) return;
       if (end.y < filmY + 0.25) {
@@ -507,7 +525,9 @@
       raysDown: down,
       stopInFlesh: stopInFlesh,
       stopInBone: stopInBone,
-      throughFlesh: throughFlesh
+      throughFlesh: throughFlesh,
+      nFleshSpheres: nFleshSpheres,
+      maxFleshSphereR: maxFleshSphereR
     };
   }
 
@@ -1885,173 +1905,312 @@
   function imaging(host) {
     if (!THREE) return;
     var canvas = host.querySelector("canvas");
+    /* Landscape framing for the 2:1 canvas: camera on the wrist side, so the fingers
+       point screen-right and the film's long edge runs across the canvas. */
     var gfx = stage(canvas, {
-      persp: { fov: 36, x: 2.9, y: 5.1, z: 6.9, lookX: 0.1, lookY: -0.2, lookZ: 0.2 }
+      persp: { fov: 40, x: -6.6, y: 4.78, z: 1.66, lookX: 0.1, lookY: -0.22, lookZ: 0.3 }
     });
-    var hudX = host.querySelector('[data-hud="xrays"]');
+    function fitImaging() {
+      /* Leave room above the hand for the whole exposure sweep, and preserve
+         the film's horizontal framing on narrow screens. */
+      gfx.camera.fov = 2 * Math.atan(Math.max(Math.tan(40 * Math.PI / 360),
+        Math.tan(34 * Math.PI / 360) * 1.56 / gfx.camera.aspect)) * 180 / Math.PI;
+      gfx.camera.updateProjectionMatrix();
+    }
+    fitImaging();
+    window.addEventListener("resize", fitImaging);
     var hudBone = host.querySelector('[data-hud="bone"]');
     var hudFlesh = host.querySelector('[data-hud="flesh"]');
     var hudFilm = host.querySelector('[data-hud="film"]');
-    var lift = new THREE.DirectionalLight(0xffffff, 0.55);
-    lift.position.set(2, 8, 4);
+    gfx.scene.add(new THREE.HemisphereLight(0xfff3e6, 0x43362e, 0.4));
+    var lift = new THREE.DirectionalLight(0xffffff, 0.42);
+    lift.position.set(2.2, 8, 3.5);
     gfx.scene.add(lift);
 
-    var filmW = 3.4;
-    var filmD = 3.8;
-    var filmY = -1.05;
-    var startY = 1.92;
+    var filmW = 3.45;
+    var filmD = 3.95;
+    var filmY = -1.02;
+    var filmX = 0.04;
+    var filmZ = 0.12;
+    /* The hand floats well above the film so its radiograph shows beside it from the
+       3/4 camera instead of hiding directly underneath. */
+    var handLift = 0.36;
+    var startY = 1.7 + handLift;
+    var yAxis = new THREE.Vector3(0, 1, 0);
+    /* Transmitting rays cross metacarpal or finger flesh beside a bone, never an air gap. */
     var specs = [
-      { x: 0.95, z: -0.15, absorb: false },
-      { x: 0.55, z: -0.48, absorb: false },
-      { x: -0.58, z: -0.32, absorb: false },
-      { x: 0.08, z: -0.48, absorb: false },
-      { x: 0.98, z: 0.92, absorb: false },
-      { x: 0.0, z: 1.32, absorb: true, stopY: 0.64 },
-      { x: -0.48, z: 1.18, absorb: true, stopY: 0.62 },
-      { x: 0.46, z: 1.20, absorb: true, stopY: 0.62 },
-      { x: 0.12, z: -1.05, absorb: true, stopY: 0.52 },
-      { x: -0.02, z: 0.28, absorb: true, stopY: 0.58 }
+      { x: 0.13, z: -0.32 },
+      { x: -0.38, z: -0.2 },
+      { x: 0.57, z: -0.34 },
+      { x: 0.14, z: 1.0 },
+      { x: -0.53, z: 0.82 },
+      { x: 0.03, z: -0.05 },
+      { x: -0.27, z: -0.11 },
+      { x: 0.31, z: -0.09 },
+      { x: 0.05, z: 0.7 },
+      { x: 0.57, z: -0.16 }
     ];
+    var PX = 512;
     var filmCanvas = document.createElement("canvas");
-    filmCanvas.width = 512;
-    filmCanvas.height = 512;
+    filmCanvas.width = PX;
+    filmCanvas.height = PX;
     var fctx = filmCanvas.getContext("2d");
+    /* Flesh and bone are each drawn as one opaque mask, then composited once, so
+       overlapping fingers and metacarpals do not stack into lighter patches. */
+    var fleshMask = document.createElement("canvas");
+    fleshMask.width = PX;
+    fleshMask.height = PX;
+    var boneMask = document.createElement("canvas");
+    boneMask.width = PX;
+    boneMask.height = PX;
     var filmTex = new THREE.CanvasTexture(filmCanvas);
+    filmTex.anisotropy = 4;
+    filmTex.colorSpace = THREE.SRGBColorSpace;
+    /* The film plane is rotated -90 deg about x, so its texture's top row (v = 1)
+       lies at world -z and its left column at -x. Pixels are measured from the
+       film's own centre so the shadow lands directly under the hand. */
     function xzToPx(x, z) {
       return {
-        cx: ((x / filmW) + 0.5) * 512,
-        cy: (0.5 - (z / filmD)) * 512
+        cx: (((x - filmX) / filmW) + 0.5) * PX,
+        cy: (((z - filmZ) / filmD) + 0.5) * PX
       };
     }
-    function paintFilm(develop) {
-      fctx.fillStyle = "#fffaf1";
-      fctx.fillRect(0, 0, 512, 512);
-      if (develop > 0) {
-        specs.forEach(function (sp) {
-          if (sp.absorb) return;
-          var p = xzToPx(sp.x, sp.z);
-          var g = fctx.createRadialGradient(p.cx, p.cy, 3, p.cx, p.cy, 32);
-          var a = 0.78 * develop;
-          g.addColorStop(0, "rgba(22,18,14," + a + ")");
-          g.addColorStop(1, "rgba(22,18,14,0)");
-          fctx.fillStyle = g;
-          fctx.beginPath();
-          fctx.arc(p.cx, p.cy, 32, 0, Math.PI * 2);
-          fctx.fill();
-        });
-      }
+    var cells = [];
+    var cols = 11;
+    var rows = 13;
+    var raySpeed = 6.4;
+    var rowDelay = 0.22;
+    /* The rays are modelled but not drawn: each one only sets when its film
+       tile starts to blacken, so the exposure sweep is the whole animation. */
+    var rays = [];
+    /* Project the actual meshes onto the film, including their flat wrist ends.
+       This gives ray collisions and white bone shadows the same geometry. */
+    function paintMask(mask, meshes, fill) {
+      var ctx = mask.getContext("2d");
+      ctx.clearRect(0, 0, PX, PX);
+      ctx.fillStyle = fill;
+      meshes.forEach(function (mesh) {
+        var geometry = mesh.geometry;
+        var positions = geometry.attributes.position;
+        var indices = geometry.index;
+        var count = indices ? indices.count : positions.count;
+        var point = new THREE.Vector3();
+        ctx.beginPath();
+        for (var i = 0; i < count; i += 3) {
+          var triangle = [];
+          for (var j = 0; j < 3; j += 1) {
+            point.fromBufferAttribute(positions, indices ? indices.getX(i + j) : i + j);
+            point.applyMatrix4(mesh.matrixWorld);
+            triangle.push(xzToPx(point.x, point.z));
+          }
+          var a = triangle[0], b = triangle[1], c = triangle[2];
+          if ((b.cx - a.cx) * (c.cy - a.cy) - (b.cy - a.cy) * (c.cx - a.cx) < 0) {
+            b = triangle[2]; c = triangle[1];
+          }
+          ctx.moveTo(a.cx, a.cy);
+          ctx.lineTo(b.cx, b.cy);
+          ctx.lineTo(c.cx, c.cy);
+          ctx.closePath();
+        }
+        ctx.fill();
+      });
+    }
+    var targetCanvas = document.createElement("canvas");
+    targetCanvas.width = targetCanvas.height = PX;
+    var targetCtx = targetCanvas.getContext("2d");
+    function paintFilm(sec) {
+      fctx.globalAlpha = 1;
+      fctx.fillStyle = "#f8fafb";
+      fctx.fillRect(0, 0, PX, PX);
+      cells.forEach(function (cell) {
+        /* Exposure is local and starts only after this cell's ray reaches film. */
+        var exposure = smoothstep((sec - cell.arrival) / 0.28);
+        if (!exposure) return;
+        fctx.globalAlpha = exposure;
+        fctx.drawImage(targetCanvas, cell.px, cell.py, cell.pw, cell.ph,
+          cell.px, cell.py, cell.pw, cell.ph);
+      });
+      fctx.globalAlpha = 1;
       filmTex.needsUpdate = true;
     }
     var cassette = new THREE.Mesh(
-      new THREE.BoxGeometry(filmW + 0.28, 0.08, filmD + 0.28),
-      new THREE.MeshStandardMaterial({ color: 0x3a3f46, roughness: 0.7 })
+      new THREE.BoxGeometry(filmW + 0.32, 0.1, filmD + 0.32),
+      new THREE.MeshStandardMaterial({ color: 0x273c48, roughness: 0.7, metalness: 0.12 })
     );
-    cassette.position.set(0.05, filmY - 0.07, 0.15);
+    cassette.position.set(filmX, filmY - 0.08, filmZ);
     var film = new THREE.Mesh(
       new THREE.PlaneGeometry(filmW, filmD),
-      new THREE.MeshStandardMaterial({
-        map: filmTex,
-        roughness: 0.82,
-        metalness: 0.02,
-        emissive: 0xf4efe0,
-        emissiveIntensity: 0.18
-      })
+      new THREE.MeshBasicMaterial({ map: filmTex })
     );
     film.rotation.x = -Math.PI / 2;
-    film.position.set(0.05, filmY, 0.15);
+    film.position.set(filmX, filmY, filmZ);
     gfx.scene.add(cassette, film);
 
     var fleshMat = new THREE.MeshStandardMaterial({
-      color: 0xe3b394,
-      roughness: 0.78,
-      metalness: 0.02,
+      color: 0xe5ac90,
+      roughness: 0.58,
+      metalness: 0.0,
+      emissive: 0x6b3a22,
+      emissiveIntensity: 0.1,
       transparent: true,
-      opacity: 0.4,
-      depthWrite: false
+      opacity: 0.3,
+      depthWrite: false,
+      side: THREE.FrontSide
     });
     var boneMat = new THREE.MeshStandardMaterial({
-      color: 0xf4ead6,
-      roughness: 0.42,
-      metalness: 0.05
+      color: 0xfaf4e6,
+      roughness: 0.38,
+      metalness: 0.04,
+      emissive: 0xfff5e0,
+      emissiveIntensity: 0.38
     });
     var hand = new THREE.Group();
+    hand.position.y = handLift;
     gfx.scene.add(hand);
     var nBone = 0;
     var nFlesh = 0;
-    function alongZ(mesh, len) {
-      mesh.rotation.x = Math.PI / 2;
-      mesh.scale.y = len;
+    function vec(x, y, z) {
+      return new THREE.Vector3(x, y, z);
     }
-    function limb(x, y, z, len, rF, rB) {
-      var flesh = new THREE.Mesh(new THREE.CylinderGeometry(rF * 0.84, rF, 1, 14), fleshMat);
-      var bone = new THREE.Mesh(new THREE.CylinderGeometry(rB * 0.84, rB, 0.92, 10), boneMat);
-      alongZ(flesh, len);
-      alongZ(bone, len);
-      flesh.position.set(x, y, z);
-      bone.position.set(x, y, z);
+    function addSeg(from, to, fleshRadius, boneRadius) {
+      var along = to.clone().sub(from);
+      var length = along.length();
+      if (length < 0.04) return;
+      along.normalize();
+      var mid = from.clone().add(to).multiplyScalar(0.5);
+      var align = new THREE.Quaternion().setFromUnitVectors(yAxis, along);
+      var flesh = new THREE.Mesh(new THREE.CylinderGeometry(fleshRadius * 0.9, fleshRadius, 1, 20), fleshMat);
+      var bone = new THREE.Mesh(new THREE.CylinderGeometry(boneRadius * 0.88, boneRadius, 1, 14), boneMat);
+      flesh.scale.set(1, length, 1);
+      bone.scale.set(1, length * 0.93, 1);
+      flesh.quaternion.copy(align);
+      bone.quaternion.copy(align);
+      flesh.position.copy(mid);
+      bone.position.copy(mid);
       hand.add(flesh, bone);
       nFlesh += 1;
       nBone += 1;
     }
-    var palm = new THREE.Mesh(new THREE.SphereGeometry(1, 22, 16), fleshMat);
-    palm.scale.set(1.18, 0.34, 1.08);
-    palm.position.set(0.12, 0.54, -0.22);
-    hand.add(palm);
-    nFlesh += 1;
-    limb(0.12, 0.52, -1.05, 0.85, 0.42, 0.16);
-    limb(-0.42, 0.58, 0.22, 0.95, 0.13, 0.055);
-    limb(-0.02, 0.58, 0.28, 1.02, 0.135, 0.058);
-    limb(0.4, 0.58, 0.22, 0.95, 0.125, 0.052);
-    limb(0.78, 0.56, 0.08, 0.78, 0.11, 0.048);
-    limb(-0.48, 0.62, 1.18, 1.28, 0.155, 0.068);
-    limb(0.0, 0.64, 1.32, 1.42, 0.165, 0.072);
-    limb(0.46, 0.62, 1.2, 1.28, 0.15, 0.065);
-    limb(0.88, 0.58, 0.92, 1.02, 0.13, 0.055);
-    var thumb = new THREE.Group();
-    var tFlesh = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.17, 1, 14), fleshMat);
-    var tBone = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.92, 10), boneMat);
-    alongZ(tFlesh, 0.95);
-    alongZ(tBone, 0.95);
-    thumb.add(tFlesh, tBone);
-    thumb.position.set(-0.95, 0.55, 0.12);
-    thumb.rotation.y = 0.72;
-    thumb.rotation.z = 0.38;
-    hand.add(thumb);
-    nFlesh += 1;
-    nBone += 1;
-
-    var rays = [];
-    specs.forEach(function (sp, i) {
-      var stopY = sp.absorb ? sp.stopY : filmY + 0.04;
-      var glyph = wavyArrow(gfx.scene, {
-        origin: new THREE.Vector3(sp.x, startY, sp.z),
-        dir: new THREE.Vector3(0, -1, 0),
-        length: startY - stopY,
-        amp: 0.09,
-        waves: 3.4,
-        radius: 0.028,
-        hex: 0xd4a017,
-        phase: i * 0.45,
-        side: new THREE.Vector3(1, 0, 0)
+    function addJoint(at, radius) {
+      var joint = new THREE.Mesh(new THREE.SphereGeometry(radius, 18, 14), fleshMat);
+      joint.position.copy(at);
+      hand.add(joint);
+      nFlesh += 1;
+    }
+    function finger(knuckle, heading, lengths, fleshRadius, boneRadius) {
+      var along = heading.clone().normalize();
+      var at = knuckle.clone();
+      addJoint(at, fleshRadius * 1.08);
+      lengths.forEach(function (length, i) {
+        var next = at.clone().addScaledVector(along, length);
+        next.y -= 0.018 * (i + 1);
+        var shrink = 1 - i * 0.14;
+        addSeg(at, next, fleshRadius * shrink, boneRadius * shrink);
+        addJoint(next, fleshRadius * shrink * 0.9);
+        at = next;
       });
-      sp.stopY = stopY;
-      rays.push(glyph);
+    }
+    /* No palm blob: the hand is its bones and the flesh around each one, so the
+       metacarpals fan out from the wrist the way they do on a real radiograph. */
+    addSeg(vec(0.2, 0.5, -1.18), vec(0.22, 0.52, -0.72), 0.17, 0.075);
+    addSeg(vec(-0.06, 0.5, -1.18), vec(-0.08, 0.52, -0.72), 0.155, 0.068);
+    var mcp = {
+      index: vec(-0.38, 0.52, 0.36),
+      middle: vec(0.04, 0.54, 0.48),
+      ring: vec(0.42, 0.52, 0.38),
+      pinky: vec(0.76, 0.48, 0.2),
+      thumb: vec(-0.68, 0.5, -0.16)
+    };
+    addSeg(vec(-0.16, 0.51, -0.58), mcp.index, 0.145, 0.058);
+    addSeg(vec(0.02, 0.52, -0.58), mcp.middle, 0.155, 0.062);
+    addSeg(vec(0.2, 0.51, -0.56), mcp.ring, 0.145, 0.056);
+    addSeg(vec(0.38, 0.49, -0.52), mcp.pinky, 0.125, 0.05);
+    addSeg(vec(-0.18, 0.5, -0.42), mcp.thumb, 0.15, 0.06);
+    finger(mcp.index, vec(-0.16, -0.04, 1), [0.4, 0.25, 0.19], 0.125, 0.05);
+    finger(mcp.middle, vec(0.03, -0.03, 1), [0.44, 0.28, 0.21], 0.135, 0.055);
+    finger(mcp.ring, vec(0.16, -0.04, 1), [0.4, 0.25, 0.18], 0.125, 0.05);
+    finger(mcp.pinky, vec(0.32, -0.05, 1), [0.32, 0.2, 0.15], 0.11, 0.044);
+    finger(mcp.thumb, vec(-0.78, -0.04, 0.58), [0.36, 0.28], 0.14, 0.058);
+    gfx.scene.updateMatrixWorld(true);
+    var boneMeshes = [];
+    var fleshMeshes = [];
+    hand.traverse(function (mesh) {
+      if (!mesh.isMesh) return;
+      (mesh.material === boneMat ? boneMeshes : fleshMeshes).push(mesh);
     });
-
+    paintMask(fleshMask, fleshMeshes, "#46555f");
+    paintMask(boneMask, boneMeshes, "#f8fafb");
+    targetCtx.fillStyle = "#172833";
+    targetCtx.fillRect(0, 0, PX, PX);
+    targetCtx.drawImage(fleshMask, 0, 0);
+    targetCtx.drawImage(boneMask, 0, 0);
+    var down = new THREE.Vector3(0, -1, 0);
+    var raycaster = new THREE.Raycaster();
+    function boneHit(x, z) {
+      raycaster.set(new THREE.Vector3(x, startY, z), down);
+      return raycaster.intersectObjects(boneMeshes)[0];
+    }
+    function addRay(sp, delay, keep, cell) {
+      var hit = boneHit(sp.x, sp.z);
+      var stopY = hit ? hit.point.y - 0.015 : filmY;
+      var length = startY - stopY;
+      var arrival = delay + length / raySpeed;
+      if (!hit && cell) cell.arrival = Math.min(cell.arrival, arrival);
+      rays.push({ x: sp.x, z: sp.z, stopY: stopY, length: length,
+        origin: new THREE.Vector3(sp.x, startY, sp.z), dir: down,
+        end: new THREE.Vector3(sp.x, stopY, sp.z),
+        delay: delay, arrival: arrival, absorb: !!hit, keep: keep, cell: cell });
+    }
+    /* Where the modelled ray front is at sec: still above the hand before its
+       delay, then travelling straight down until it stops in bone or on film. */
+    function rayFront(ray, sec) {
+      var progress = clamp01((sec - ray.delay) * raySpeed / ray.length);
+      return new THREE.Vector3(ray.x, startY - progress * ray.length, ray.z);
+    }
+    /* A sparse moving row represents a broad exposure. Each small film tile has
+       its own arriving ray; bone silhouettes are protected within every tile. */
+    for (var row = 0; row < rows; row += 1) {
+      for (var col = 0; col < cols; col += 1) {
+        var cell = { px: Math.round(col * PX / cols), py: Math.round(row * PX / rows),
+          pw: Math.round((col + 1) * PX / cols) - Math.round(col * PX / cols),
+          ph: Math.round((row + 1) * PX / rows) - Math.round(row * PX / rows), arrival: Infinity };
+        cells.push(cell);
+        var x = filmX + ((col + 0.5) / cols - 0.5) * filmW;
+        var z = filmZ + ((row + 0.5) / rows - 0.5) * filmD;
+        /* If the centre hits bone, retain that stopped ray and put the tile's
+           transmitted ray beside it, still inside the same patch of film. */
+        var delay = 0.16 + row * rowDelay + col * 0.006;
+        if (boneHit(x, z)) {
+          addRay({ x: x, z: z }, delay, false, null);
+          var found = false;
+          for (var sz = 1; sz <= 4 && !found; sz += 1) {
+            for (var sx = 1; sx <= 4 && !found; sx += 1) {
+              var cx = filmX + ((col + sx / 5) / cols - 0.5) * filmW;
+              var cz = filmZ + ((row + sz / 5) / rows - 0.5) * filmD;
+              if (!boneHit(cx, cz)) { x = cx; z = cz; found = true; }
+            }
+          }
+        }
+        addRay({ x: x, z: z }, delay, false, cell);
+      }
+    }
+    specs.forEach(function (sp) {
+      var col = Math.floor(((sp.x - filmX) / filmW + 0.5) * cols);
+      var row = Math.floor(((sp.z - filmZ) / filmD + 0.5) * rows);
+      addRay(sp, 0.16 + row * rowDelay + col * 0.006, true, cells[row * cols + col]);
+    });
+    var duration = Math.max.apply(null, rays.map(function (ray) { return ray.arrival; })) + 0.7;
     var t0 = performance.now();
-    var lastT = 0;
+    var lastT = -1;
+    var paused = false;
     var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     function apply(sec) {
+      var previous = lastT;
       lastT = sec;
-      var develop = clamp01((sec - 0.12) / (reduced ? 0.25 : 1.05));
-      paintFilm(develop);
-      rays.forEach(function (g, i) {
-        if (g.userData.update) g.userData.update(sec + i);
-      });
-      placeHud(hudX, canvas, gfx.camera, new THREE.Vector3(0.15, 1.78, 0.3));
-      placeHud(hudBone, canvas, gfx.camera, new THREE.Vector3(0.0, 0.95, 1.35));
-      placeHud(hudFlesh, canvas, gfx.camera, new THREE.Vector3(0.95, 0.55, -0.15));
-      placeHud(hudFilm, canvas, gfx.camera, new THREE.Vector3(0.12, filmY - 0.02, 1.85));
+      if (previous < duration || sec < duration) paintFilm(sec);
+      placeHud(hudBone, canvas, gfx.camera, new THREE.Vector3(0.04, 0.92 + handLift, 0.48));
+      placeHud(hudFlesh, canvas, gfx.camera, new THREE.Vector3(-0.22, 0.3 + handLift, -1.16));
+      placeHud(hudFilm, canvas, gfx.camera, new THREE.Vector3(0.08, filmY - 0.02, 2.05));
     }
     function lumAt(x, z) {
       var p = xzToPx(x, z);
@@ -2060,19 +2219,37 @@
       var d = fctx.getImageData(cx, cy, 1, 1).data;
       return 0.3 * d[0] + 0.6 * d[1] + 0.1 * d[2];
     }
-    function restart() { t0 = performance.now(); paintFilm(0); }
+    function restart() {
+      paused = false;
+      t0 = performance.now();
+      lastT = -1;
+      apply(0);
+      gfx.renderer.render(gfx.scene, gfx.camera);
+    }
+    function seek(sec) {
+      paused = true;
+      lastT = -1;
+      apply(Math.max(0, sec));
+      gfx.renderer.render(gfx.scene, gfx.camera);
+    }
     function frame(now) {
-      apply((now - t0) / 1000);
+      if (!paused) apply(reduced ? duration : (now - t0) / 1000);
       gfx.renderer.render(gfx.scene, gfx.camera);
       requestAnimationFrame(frame);
     }
     function snapshot() {
-      var fleshSpec = specs.filter(function (s) { return !s.absorb; });
-      var boneSpec = specs.filter(function (s) { return s.absorb; });
+      var fleshSpec = rays.filter(function (ray) { return ray.keep && !ray.absorb; });
+      var boneSpec = rays.filter(function (ray) { return ray.keep && ray.absorb; });
       var fleshLum = fleshSpec.reduce(function (a, s) { return a + lumAt(s.x, s.z); }, 0) / Math.max(1, fleshSpec.length);
       var boneLum = boneSpec.reduce(function (a, s) { return a + lumAt(s.x, s.z); }, 0) / Math.max(1, boneSpec.length);
       gfx.scene.updateMatrixWorld(true);
-      var live = imagingFromScene(gfx.scene, filmY);
+      var live = imagingFromScene(gfx.scene, filmY, rays);
+      /* Ray glyphs (wavyArrow groups) and landing rings must not be in this scene. */
+      var drawnRays = 0;
+      gfx.scene.traverse(function (obj) {
+        if (obj.isGroup && obj.userData && obj.userData.tip) drawnRays += 1;
+        if (obj.isMesh && geoKind(obj, "Ring")) drawnRays += 1;
+      });
       var minNX = 1;
       var maxNX = -1;
       var minNY = 1;
@@ -2103,7 +2280,6 @@
       hand.traverse(function (obj) {
         if (obj.isMesh) addNdc(obj.getWorldPosition(new THREE.Vector3()));
       });
-      addNdc(new THREE.Vector3(0.15, startY, 0.3));
       addBoxCorners(meshWorldBox(film));
       addBoxCorners(meshWorldBox(cassette));
       return {
@@ -2113,9 +2289,12 @@
         filmUnder: filmY < 0,
         nBone: nBone,
         nFlesh: nFlesh,
+        nFleshSpheres: live.nFleshSpheres,
+        maxFleshSphereR: live.maxFleshSphereR,
         boneLum: boneLum,
         fleshLum: fleshLum,
         rayCount: rays.length,
+        drawnRays: drawnRays,
         stopInBone: live.stopInBone,
         stopInFlesh: live.stopInFlesh,
         throughFlesh: live.throughFlesh,
@@ -2128,94 +2307,30 @@
         fillMinY: minNY,
         fillMaxY: maxNY,
         clipped: minNX < -1.02 || maxNX > 1.02 || minNY < -1.02 || maxNY > 1.02,
-        t: lastT
+        t: lastT,
+        duration: duration,
+        exposures: rays.filter(function (ray) { return ray.keep; }).map(function (ray) {
+          var front = rayFront(ray, lastT);
+          return { absorbed: ray.absorb, arrival: ray.arrival, x: ray.x, z: ray.z,
+            frontX: front.x, frontY: front.y, frontZ: front.z, stopY: ray.stopY,
+            frontInBone: boneMeshes.some(function (mesh) { return pointInMesh(mesh, front); }),
+            filmY: filmY, filmLum: lumAt(ray.x, ray.z),
+            cellArrival: ray.cell.arrival };
+        }),
+        cells: cells.map(function (cell) {
+          var pixels = fctx.getImageData(cell.px, cell.py, cell.pw, cell.ph).data;
+          var minimum = 255;
+          for (var i = 0; i < pixels.length; i += 4) {
+            minimum = Math.min(minimum, 0.3 * pixels[i] + 0.6 * pixels[i + 1] + 0.1 * pixels[i + 2]);
+          }
+          return { arrival: cell.arrival, minLuminance: minimum };
+        })
       };
     }
     hostReplay(host, restart);
-    paintFilm(0);
     apply(0);
     requestAnimationFrame(frame);
-    scenes.imaging = { replay: restart, snapshot: snapshot };
-  }
-
-  function spectrum(host) {
-    if (!THREE) return;
-    var canvas = host.querySelector("canvas");
-    var gfx = stage(canvas, { halfW: 6.2, halfH: 2.05 });
-    gfx.camera.position.set(0, 1.4, 12);
-    gfx.camera.lookAt(0, 0.1, 0);
-    var hudNI = host.querySelector('[data-hud="nonion"]');
-    var hudI = host.querySelector('[data-hud="ion"]');
-    var hudGamma = host.querySelector('[data-hud="gamma"]');
-    var bands = [
-      { name: "radio", hex: 0xd9e4f0, w: 1.4, x: -5.05 },
-      { name: "micro", hex: 0xcfe0c8, w: 1.25, x: -3.65 },
-      { name: "IR", hex: 0xf0d5b8, w: 1.3, x: -2.3 },
-      { name: "vis", hex: 0xf1c40f, w: 0.48, x: -1.35 },
-      { name: "UV", hex: 0xb8a4d4, w: 1.15, x: -0.48 },
-      { name: "X-rays", hex: 0x455a64, w: 1.45, x: 0.9 },
-      { name: "Gamma ray", hex: 0x1c2430, w: 1.7, x: 2.55 }
-    ];
-    bands.forEach(function (b) {
-      var m = new THREE.Mesh(
-        new THREE.BoxGeometry(b.w - 0.04, 0.7, 0.55),
-        new THREE.MeshStandardMaterial({ color: b.hex, roughness: 0.45 })
-      );
-      m.position.set(b.x, 0.15, 0);
-      gfx.scene.add(m);
-      b.mesh = m;
-    });
-    var visCols = [0xc0392b, 0xe67e22, 0xf1c40f, 0x27ae60, 0x2980b9, 0x8e44ad];
-    visCols.forEach(function (hex, i) {
-      var sl = new THREE.Mesh(
-        new THREE.BoxGeometry(0.08, 0.72, 0.56),
-        new THREE.MeshStandardMaterial({ color: hex })
-      );
-      sl.position.set(-1.54 + i * 0.075, 0.15, 0.01);
-      gfx.scene.add(sl);
-    });
-    var uv = bands[4];
-    var uvLeft = uv.x - uv.w / 2;
-    var uvRight = uv.x + uv.w / 2;
-    var cutX = uvLeft + 0.1 * uv.w;
-    var cut = new THREE.Mesh(
-      new THREE.BoxGeometry(0.04, 1.45, 0.72),
-      new THREE.MeshStandardMaterial({ color: 0x1c2430 })
-    );
-    cut.position.set(cutX, 0.4, 0.12);
-    cut.name = "ionizing-cut";
-    gfx.scene.add(cut);
-    var xrayMesh = bands[5].mesh;
-    var gammaBand = bands[6];
-    function frame() {
-      placeHud(hudNI, canvas, gfx.camera, new THREE.Vector3(-3.2, 1.2, 0));
-      placeHud(hudI, canvas, gfx.camera, new THREE.Vector3(1.85, 1.2, 0));
-      placeHud(hudGamma, canvas, gfx.camera, new THREE.Vector3(gammaBand.x, 0.82, 0));
-      gfx.renderer.render(gfx.scene, gfx.camera);
-      requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-    scenes.spectrum = {
-      snapshot: function () {
-        return {
-          slider: !!document.querySelector("#spectrum-slider"),
-          mark: !!document.querySelector("#spectrum-mark"),
-          pointer: !!document.querySelector("#spectrum-pointer"),
-          cutX: cut.position.x,
-          uvX: uv.x,
-          uvLeft: uvLeft,
-          uvRight: uvRight,
-          xrayX: xrayMesh.position.x,
-          cutInUV: cut.position.x > uvLeft && cut.position.x < uvRight,
-          nonIonizingUVFrac: (cut.position.x - uvLeft) / uv.w,
-          mostUVionizing: (uvRight - cut.position.x) / uv.w > 0.75,
-          cutAfterUV: cut.position.x > uvRight,
-          xrayAfterCut: xrayMesh.position.x > cut.position.x,
-          gammaHud: hudGamma ? hudGamma.textContent.trim() : "",
-          bandWidths: bands.map(function (b) { return b.w; })
-        };
-      }
-    };
+    scenes.imaging = { replay: restart, seek: seek, snapshot: snapshot };
   }
 
   function pairBall(hex, sign) {
@@ -2590,116 +2705,6 @@
     scenes.kinds = {};
   }
 
-  function makexray(host) {
-    if (!THREE) return;
-    var canvas = host.querySelector("canvas");
-    var gfx = stage(canvas, { halfW: 5.8, halfH: 2.15 });
-    gfx.camera.position.set(0.2, 1.5, 12);
-    gfx.camera.lookAt(0, 0.05, 0);
-    var labels = ["A", "B", "C", "D"];
-    var huds = labels.map(function (k) {
-      return host.querySelector('[data-hud="' + k + '"]');
-    });
-    function sponge(x) {
-      var m = new THREE.Mesh(
-        new THREE.SphereGeometry(0.42, 16, 12),
-        new THREE.MeshStandardMaterial({ color: 0xe8c9a8, roughness: 0.9 })
-      );
-      m.scale.set(1.15, 0.55, 0.8);
-      m.position.set(x, -0.55, 0);
-      gfx.scene.add(m);
-      return m;
-    }
-    function metalBlock(x) {
-      var m = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.42, 0.55), metal(0x8a9098));
-      m.position.set(x, -0.55, 0);
-      gfx.scene.add(m);
-      return m;
-    }
-    sponge(-4.15);
-    metalBlock(-1.4);
-    sponge(1.35);
-    metalBlock(4.15);
-    var uvA = wavyArrow(gfx.scene, {
-      origin: new THREE.Vector3(-4.15, 1.15, 0),
-      dir: new THREE.Vector3(0, -1, 0),
-      length: 1.15,
-      amp: 0.1,
-      waves: 3.0,
-      hex: 0x7e57c2
-    });
-    var uvB = wavyArrow(gfx.scene, {
-      origin: new THREE.Vector3(-1.4, 1.15, 0),
-      dir: new THREE.Vector3(0, -1, 0),
-      length: 1.15,
-      amp: 0.1,
-      waves: 3.0,
-      phase: 0.8,
-      hex: 0x7e57c2
-    });
-    var eC = [];
-    var eD = [];
-    var i;
-    for (i = 0; i < 5; i += 1) {
-      var c = ball(0.09, 0x2a62a8);
-      var d = ball(0.09, 0x2a62a8);
-      eC.push(c);
-      eD.push(d);
-      gfx.scene.add(c, d);
-    }
-    var xrayOut = [
-      wavyArrow(gfx.scene, {
-        origin: new THREE.Vector3(4.15, -0.28, 0),
-        dir: new THREE.Vector3(0.15, 1, 0.12),
-        length: 1.15,
-        amp: 0.1,
-        waves: 3.2,
-        hex: 0xd4a017
-      }),
-      wavyArrow(gfx.scene, {
-        origin: new THREE.Vector3(4.15, -0.28, 0),
-        dir: new THREE.Vector3(0.72, 0.7, 0),
-        length: 1.05,
-        amp: 0.09,
-        waves: 3.0,
-        phase: 1.2,
-        hex: 0xd4a017
-      }),
-      wavyArrow(gfx.scene, {
-        origin: new THREE.Vector3(4.15, -0.28, 0),
-        dir: new THREE.Vector3(-0.45, 0.9, 0.2),
-        length: 1.1,
-        amp: 0.1,
-        waves: 3.1,
-        phase: 2.1,
-        hex: 0xc9a227
-      })
-    ];
-    var t0 = performance.now();
-    function frame(now) {
-      var t = (now - t0) / 1000;
-      uvA.userData.update(t);
-      uvB.userData.update(t);
-      xrayOut.forEach(function (g) { g.userData.update(t); });
-      eC.forEach(function (m, idx) {
-        var u = (t * 0.7 + idx * 0.18) % 1;
-        m.position.set(1.35, lerp(1.15, -0.2, u), 0);
-      });
-      eD.forEach(function (m, idx) {
-        var u = (t * 0.7 + idx * 0.18) % 1;
-        m.position.set(4.15, lerp(1.15, -0.2, u), 0);
-      });
-      placeHud(huds[0], canvas, gfx.camera, new THREE.Vector3(-4.15, 1.55, 0));
-      placeHud(huds[1], canvas, gfx.camera, new THREE.Vector3(-1.4, 1.55, 0));
-      placeHud(huds[2], canvas, gfx.camera, new THREE.Vector3(1.35, 1.55, 0));
-      placeHud(huds[3], canvas, gfx.camera, new THREE.Vector3(4.15, 1.55, 0));
-      gfx.renderer.render(gfx.scene, gfx.camera);
-      requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-    scenes.makexray = {};
-  }
-
   function pie(host) {
     if (!THREE) return;
     var canvas = host.querySelector("canvas");
@@ -2822,13 +2827,11 @@
     sealed: sealed,
     badge: badge,
     imaging: imaging,
-    spectrum: spectrum,
     ionpower: ionpower,
     tracks: tracks,
     hydrogen: hydrogen,
     nuclide: nuclide,
     kinds: kinds,
-    makexray: makexray,
     pie: pie,
     sumpaths: sumpaths
   };
@@ -2851,4 +2854,3 @@
     boot();
   }
 })(window);
-

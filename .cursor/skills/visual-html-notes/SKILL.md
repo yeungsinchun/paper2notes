@@ -20,7 +20,7 @@ Same table style elsewhere: `What you see` / `Therefore`, for example "Both tran
 
 ## Worked figure (Fig. 25.2 light beam)
 
-An EM wave is the combination of the E field and the B field. In three.js that is a traveling train of arrows: E along y, B along z, both `sin(kx - ωt)`, Poynting along +x. That full E+B animation belongs only here, on its own canvas. The electron beam is a moving KE particle stream on a second canvas beside it. The HTML heading already names the class ("Two types of radiation"). Do not glue the two types with a divider, floor, rail, 3D title plane, or class HUD. Each pane has its own `stage()`, orbit, and `placeHud`. Student pages teach that physics; they do not recant earlier diagram mistakes.
+An EM wave is the combination of the E field and the B field. In three.js that is a traveling train of arrows: E along y, B along z, both `sin(kx - ωt)`, Poynting along +x. That full E+B animation belongs only here, on its own canvas. The electron beam is a moving KE particle stream on a second canvas beside it. The HTML heading already names the class ("Two types of radiation"). Do not glue the two types with a divider, floor, rail, 3D title plane, or class HUD. Each pane has its own `stage()` and `placeHud`, with a fixed camera (no drag-rotate). Student pages teach that physics; they do not recant earlier diagram mistakes.
 
 ```javascript
 var train = emTrain(scene, {
@@ -36,20 +36,19 @@ placeHud(hudB, canvas, camera, bTip);
 
 Every other EM-wave callout (X-rays from a target, γ from a nucleus, UV hitting a sample) is a small glyph: a few wavy arrows that say "EM wave produced here", not another cramped E+B train.
 
-Local three.js: `js/lib/three.min.js`. No CDN requirement. `stage()` makes the scene orbitable: drag to rotate only. No wheel zoom, pinch zoom, `camera.zoom` dolly, or `sph.radius` scaling. The Fig. 25.11 atom nucleus range slider is a teaching control, not orbit zoom. Each `.visual.play.stage` has + and − on its top-right; that pair scales only that box (diagram and labels together). The sticky top bar has no page-wide scale. Default framing fills the canvas: Fig. 25.7 is the example (hand, film, X-rays, HUD). `placeHud` keeps labels on the objects as the camera moves.
+Local three.js: `js/lib/three.min.js`. No CDN requirement. Figure boxes are plain white. `stage()` drag-rotates only where the third dimension carries meaning (hand over film, X-ray tube, nucleus); which scenes that is lives on `ORBIT_SCENES` in that chapter's `diagrams3d.js`. Flat scenes such as the Fig. 25.2 EM wave and electron beam keep a fixed camera. No wheel zoom, pinch zoom, `camera.zoom` dolly, `sph.radius` scaling, or per-box + / −. The Fig. 25.11 atom nucleus range slider is a teaching control, not orbit zoom. The sticky top bar has no page-wide scale. Default framing fills the canvas: Fig. 25.7 is the example (hand, film, and HUD). `placeHud` keeps labels on the objects as the camera moves. Replay, when the clip is finite, is a button inside that same `.stage` box.
 
 ```javascript
-gfx.orbit.nudge(40, 6); // same motion a student drag would make
 placeHud(hudE, canvas, gfx.camera, eFieldAnchor);
 ```
 
 ## Worked title (Fig. 25.5)
 
-Name the physics, not a private nickname. Bad: "where the EM cut sits". Good: "Non-ionizing and ionizing EM waves". The ionizing barrier sits far on the low-frequency side of UV: about one-tenth of UV is non-ionizing, most of UV plus X-rays and Gamma rays are ionizing. Label that last band **Gamma ray**, not γ. The table under the bar uses the same names, with column widths in proportion to the drawn bands. Keep the UV header cell short; put the ~1/10 split in the observation table or the concept check. No frequency slider or mark.
+Name the physics, not a private nickname. Bad: "where the EM cut sits". Good: "Non-ionizing and ionizing EM waves". Draw Fig. 25.5 as a static 2D SVG, not a 3D scene. The ionizing barrier sits far on the low-frequency side of UV: about one-tenth of UV is non-ionizing, most of UV plus X-rays and gamma rays are ionizing. Label that last band **gamma ray**, not γ (the symbol belongs in the nuclear-radiation section). Band widths follow the drawn spectrum. Paint the whole ultraviolet band one colour; the ~1/10 split is the dashed threshold on the bar plus the caption, not a second UV fill. No frequency slider, mark, or table under the bar.
 
 ## Worked concept check
 
-Pull stem and options from the textbook figure, `problems.md`, QB, or DSE. Every distractor must be a real mix-up from this section.
+Pull stem and options from the textbook figure, `problems.md`, QB, or DSE. Every distractor must be a real mix-up from this section. Classified paper scans belong in the end-of-section quizzes (see AGENTS.md), not in these in-flow checks.
 
 Worked item after Fig. 25.2: "Which of the following is correct about radiation?"
 
@@ -68,7 +67,7 @@ Answer B. A is excitation without knockout. C confuses ionization with a nuclear
 
 ## Worked replay
 
-A Replay button is only for a clip with a beginning and an end a student would watch again. Worked keep: knockout ejection (`#knock-vis`), ion-pair capture (`#pair-vis`), Fig. 25.7 film blackening (`#imaging-vis`). Worked drop: Fig. 25.2 Two types of radiation (both panes loop), the X-ray tube (electrons and X-rays keep coming). Do not leave an empty button row.
+A Replay button is only for a clip with a beginning and an end a student would watch again. It lives inside the `.stage` box (bottom-right), never outside the frame. Worked keep: knockout ejection (`#knock-vis`), ion-pair capture (`#pair-vis`), Fig. 25.7 film blackening (`#imaging-vis`). Worked drop: Fig. 25.2 Two types of radiation (both panes loop), the X-ray tube (electrons and X-rays keep coming). Do not leave an empty button row.
 
 ## Worked procedure (α / β / γ)
 
@@ -78,15 +77,15 @@ Teach identification as a steppable directed graph (paper / Al / Pb, then E or B
 
 | Do this | Not this |
 | --- | --- |
-| Fig 25.2: two canvases (E+B wave and electron stream); the heading names the class | One scene with floor, rail, divider, or class HUD |
-| Replay only on finite clips (knockout, ion-pair, film blackening) | Replay on a continuous loop such as Fig 25.2 or the X-ray tube |
+| Fig 25.2: two canvases (E+B wave and electron stream); the heading names the class; fixed camera | One scene with floor, rail, divider, or class HUD; drag-rotate on those panes |
+| Replay only on finite clips (knockout, ion-pair, film blackening); button inside the `.stage` | Replay on a continuous loop such as Fig 25.2 or the X-ray tube; Replay outside the frame |
 | Knockout: the same bound electron leaves the shell | An electron that fades in beside the atom |
 | X-rays leave the electron impact on the angled target face as three fanned glyphs | Tight gold stubs, five-plus rays, or a cramped E+B train on one axis |
-| Imaging: X-rays down through one hand (flesh and bones together); transmit through palm/finger flesh, not air gaps; film starts white; only reached spots blacken | Side-by-side bone/flesh boxes, rays in finger gaps, a pre-dark film, or growing-arrow slabs |
-| Orbit: drag-rotate only; Fig. 25.11 atom nucleus slider stays | Wheel / pinch / radius zoom on the apparatus |
-| Per-box + / − scales that stage; default Fig. 25.7 fills the canvas | Page-wide `--view-scale`, tiny apparatus in empty space, clipped film, or orbit dolly for size |
+| Imaging: model X-rays down through one hand (flesh cylinders around bones, truncated wrist) without drawing ray glyphs or landing rings; transmit through metacarpal/finger flesh, not air gaps; film starts white; only reached spots blacken, and that exposure sweep is the animation | Side-by-side bone/flesh boxes, visible ray glyphs, rays in finger gaps, a palm disc or wrist sphere, a pre-dark film, or growing-arrow slabs |
+| Orbit only where depth matters; Fig. 25.11 atom nucleus slider stays | Wheel / pinch / radius zoom; orbit on flat diagrams such as Fig. 25.2 |
+| Default framing fills the canvas (Fig. 25.7); figure boxes plain white | Page-wide `--view-scale`, per-box + / −, cream/yellow panel fill, tiny apparatus, clipped film, or orbit dolly for size |
 | Tables: columns sized to content; pair tables give the long prose column more width | Equal-width 100% slabs that squash short headers or stretch empty columns |
-| Spectrum: static barrier in UV (~1/10 of UV still non-ionizing); "Gamma ray" on the bar and table; column widths follow the bands | A frequency mark, slider, γ as the Fig. 25.5 header, equal-width slabs, or a paragraph in the UV cell |
+| Spectrum: static 2D SVG; whole UV band one colour; dashed ionizing threshold in UV (~1/10 still non-ionizing); last band labelled "gamma ray"; band widths follow the spectrum | A 3D demo, frequency mark or slider, γ as the Fig. 25.5 label, a split-colour UV band, equal-width slabs, or a table under the bar |
 | Follow that chapter's `outline.md`; flag gaps | Invent another chapter's topics |
-| Concept check after each idea (`problems.md`) | Dumping the whole HKDSE/QB set, or nonsense options |
+| Concept check after each idea (`problems.md`) | Dumping classified paper scans into the flow (those belong in the section quizzes), or nonsense options |
 | Redraw from `_source/.../images/` in SVG/CSS/canvas/three.js | Embedding crop PNGs as final art |

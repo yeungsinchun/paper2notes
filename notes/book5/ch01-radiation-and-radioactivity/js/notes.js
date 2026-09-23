@@ -33,9 +33,26 @@
         if (target) replay(target);
       });
     });
-    $all(".visual[data-autoplay]").forEach(function (v) {
-      replay(v);
-    });
+    /* Autoplay clips start when the student scrolls to them, and start again
+       each time the box comes back into view, so a clip is never found already
+       finished. Without IntersectionObserver they simply play at load. */
+    var autos = $all(".visual[data-autoplay]");
+    if (!autos.length) return;
+    if (typeof IntersectionObserver !== "function") {
+      autos.forEach(replay);
+      return;
+    }
+    var lastPlay = new WeakMap();
+    var watcher = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var now = performance.now();
+        if (now - (lastPlay.get(entry.target) || -1e9) < 1200) return;
+        lastPlay.set(entry.target, now);
+        replay(entry.target);
+      });
+    }, { threshold: 0.45 });
+    autos.forEach(function (v) { watcher.observe(v); });
   }
 
   function initImaging() {
@@ -472,64 +489,7 @@
     });
   }
 
-  var BOX_SCALES = [0.85, 1, 1.15, 1.3, 1.5];
-
-  function nearestBoxScale(s) {
-    var best = BOX_SCALES[0];
-    var i;
-    for (i = 0; i < BOX_SCALES.length; i += 1) {
-      if (Math.abs(BOX_SCALES[i] - s) < Math.abs(best - s)) best = BOX_SCALES[i];
-    }
-    return best;
-  }
-
-  function currentBoxScale(stage) {
-    return nearestBoxScale(Number(getComputedStyle(stage).getPropertyValue("--box-scale") || "1"));
-  }
-
-  function applyBoxScale(stage, s) {
-    var scale = nearestBoxScale(s);
-    stage.style.setProperty("--box-scale", String(scale));
-    var down = stage.querySelector('[data-box-scale="down"]');
-    var up = stage.querySelector('[data-box-scale="up"]');
-    if (down) down.disabled = scale <= BOX_SCALES[0];
-    if (up) up.disabled = scale >= BOX_SCALES[BOX_SCALES.length - 1];
-    window.dispatchEvent(new Event("resize"));
-  }
-
-  function ensureBoxScaleChrome(stage) {
-    if (stage.querySelector(".box-scale")) return;
-    var group = document.createElement("div");
-    group.className = "box-scale";
-    group.setAttribute("role", "group");
-    group.setAttribute("aria-label", "Scale this diagram");
-    group.innerHTML = '<button type="button" data-box-scale="down" aria-label="Smaller">−</button>' +
-      '<button type="button" data-box-scale="up" aria-label="Larger">+</button>';
-    stage.insertBefore(group, stage.firstChild);
-  }
-
-  function initBoxScale() {
-    $all(".visual.play.stage").forEach(function (stage) {
-      ensureBoxScaleChrome(stage);
-      applyBoxScale(stage, 1);
-    });
-    document.addEventListener("click", function (ev) {
-      var btn = ev.target.closest("[data-box-scale]");
-      if (!btn) return;
-      var stage = btn.closest(".visual.play.stage");
-      if (!stage) return;
-      ev.preventDefault();
-      var dir = btn.getAttribute("data-box-scale");
-      var idx = BOX_SCALES.indexOf(currentBoxScale(stage));
-      if (idx < 0) idx = BOX_SCALES.indexOf(1);
-      if (dir === "up") idx = Math.min(BOX_SCALES.length - 1, idx + 1);
-      if (dir === "down") idx = Math.max(0, idx - 1);
-      applyBoxScale(stage, BOX_SCALES[idx]);
-    });
-  }
-
   document.addEventListener("DOMContentLoaded", function () {
-    initBoxScale();
     initReplays();
     initImaging();
     initIsotopes();

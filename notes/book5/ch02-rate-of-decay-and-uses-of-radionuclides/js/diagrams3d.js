@@ -34,7 +34,7 @@
 
   function stage(canvas, fit) {
     var scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xfffaf1);
+    scene.background = new THREE.Color(0xffffff);
     var persp = fit && fit.persp;
     var look = persp
       ? new THREE.Vector3(persp.lookX || 0, persp.lookY || 0, persp.lookZ || 0)
@@ -97,7 +97,18 @@
     return { scene: scene, camera: camera, renderer: renderer, resize: resize, look: look, orbit: orbit };
   }
 
+  /* Drag-to-rotate only where the third dimension carries meaning (depth of a
+     film under a hand, an angled target, a nucleon cluster). Flat, diagram-like
+     scenes keep a fixed camera so nothing on the page invites fiddling. */
+  var ORBIT_SCENES = { gammaknife: 1 };
+
   function attachOrbit(canvas, camera, target) {
+    var host = canvas.closest ? canvas.closest("[data-scene]") : null;
+    var name = host ? host.getAttribute("data-scene") : "";
+    if (!ORBIT_SCENES[name]) {
+      return { target: target, enabled: false, nudge: function () { /* fixed camera */ } };
+    }
+    if (host) host.setAttribute("data-orbit", "");
     var sph = new THREE.Spherical();
     var dragging = false;
     var lastX = 0;
@@ -135,6 +146,7 @@
     canvas.addEventListener("pointercancel", endDrag);
     return {
       target: target,
+      enabled: true,
       nudge: function (dx, dy) {
         if (!synced) sync();
         sph.theta -= dx * 0.008;

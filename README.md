@@ -20,3 +20,7 @@ HTML notes live under `notes/`. Follow textbook order; prefer visual animation o
 ## Hosting
 
 Merges to `main` deploy `notes/` to Cloud Run via `.github/workflows/deploy.yml`. Live site: https://paper2notes-152505675251.asia-east1.run.app/. Project, service, access model, and cost are in `deploy/cloudrun/README.md`.
+
+## CI
+
+Pull requests and pushes to `main` run a GitHub Actions check (`.github/workflows/ci.yml`) that executes `node scripts/ci-check.mjs`. It skips with a message when `notes/` doesn't exist yet, and otherwise verifies each book's index and chapter indexes exist and are non-empty, and that in-repo relative links (`href`/`src`) resolve on disk. It does not run the local Chrome/Puppeteer interactive tests, since those hardcode macOS Chrome paths.
