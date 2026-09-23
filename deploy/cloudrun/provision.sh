@@ -9,11 +9,11 @@
 #
 # What it creates, and why:
 #   project        paper2notes-site          dedicated project, own billing line
-#   registry       paper2notes (asia-east1)  Artifact Registry Docker repo; keeps
+#   registry       paper2notes (asia-east2)  Artifact Registry Docker repo; keeps
 #                                            the 5 newest images, deletes the rest
 #   runtime SA     paper2notes-runtime       identity the container runs as; has
 #                                            no roles at all (nginx needs none)
-#   Cloud Run      paper2notes (asia-east1)  public, scale-to-zero, max 2
+#   Cloud Run      paper2notes (asia-east2)  public, scale-to-zero, max 2
 #                                            instances, 128 MiB; created with a
 #                                            placeholder image, CI rolls the real
 #                                            one out on every push to main
@@ -29,7 +29,7 @@ set -euo pipefail
 
 PROJECT_ID="${GCP_PROJECT_ID:-paper2notes-site}"
 PROJECT_NAME="paper2notes"
-REGION="${GCP_REGION:-asia-east1}"
+REGION="${GCP_REGION:-asia-east2}"
 SERVICE="${GCP_RUN_SERVICE:-paper2notes}"
 REPOSITORY="${GCP_AR_REPOSITORY:-paper2notes}"
 RUNTIME_SA=paper2notes-runtime

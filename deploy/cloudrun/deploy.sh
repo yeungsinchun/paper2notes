@@ -11,7 +11,7 @@
 set -euo pipefail
 
 PROJECT_ID="${GCP_PROJECT_ID:-paper2notes-site}"
-REGION="${GCP_REGION:-asia-east1}"
+REGION="${GCP_REGION:-asia-east2}"
 SERVICE="${GCP_RUN_SERVICE:-paper2notes}"
 REPOSITORY="${GCP_AR_REPOSITORY:-paper2notes}"
 

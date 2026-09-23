@@ -33,7 +33,7 @@ jobs:
       url: ${{ steps.site.outputs.url }}
     env:
       GCP_PROJECT_ID: paper2notes-site
-      GCP_REGION: asia-east1
+      GCP_REGION: asia-east2
       GCP_RUN_SERVICE: paper2notes
       GCP_AR_REPOSITORY: paper2notes
     steps:
