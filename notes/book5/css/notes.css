@@ -180,22 +180,6 @@ p { margin: 0.45rem 0; }
   display: block;
 }
 
-.lo-list li p + p.dse-labels {
-  display: flex;
-  margin: 0.2rem 0 0;
-  align-items: baseline;
-}
-
-.lo-list li p + p.dse-labels::before {
-  content: "Related DSE:";
-  flex: 0 0 auto;
-  margin-right: 0.35rem;
-  color: var(--muted);
-  font-size: 0.73rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
 .lo-ext {
   display: inline-block;
   margin-left: 0.35rem;
@@ -206,131 +190,264 @@ p { margin: 0.45rem 0; }
   font-weight: 700;
 }
 
-.dse-labels {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 0.16rem 0.38rem;
-  margin: 0;
-}
-
-.dse-labels a {
-  display: inline-block;
-  text-decoration: underline;
-  text-underline-offset: 0.13em;
-  color: var(--accent-deep);
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  font-size: 0.76rem;
-  line-height: 1.3;
-  padding: 0;
-  font-variant-numeric: tabular-nums;
-}
-
-.dse-labels a:hover { color: var(--accent); }
-
-/* ---------- topic-matched past-paper practice ---------- */
+/* ---------- end-of-section quiz (MC and LQ decks) ----------
+   A simple quizlet: small header row (tag, title, export), one card, Prev / Next.
+   Card: LO line (LO number, objective, paper id), the scan, A-D tiles, verdict.
+   Only the current question is in the flow. */
 
 .section-dse {
-  margin: 1.5rem 0 0;
-  padding: 1rem;
-  background: #eef5f2;
-  border: 1px solid #c9d9d4;
-  border-left: 4px solid var(--accent);
+  --quiz-line: #cfd9d4;
+  margin: 2rem 0 0;
+  padding: 1rem 0 0;
+  border-top: 1px solid var(--rule);
 }
 
 .section-dse > header {
   display: flex;
   align-items: baseline;
-  gap: 0.65rem;
-  margin: 0 0 0.35rem;
+  gap: 0.6rem;
+  margin: 0 0 0.7rem;
 }
 
 .section-dse > header h2 {
-  font-family: var(--sans);
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--accent-deep);
+  flex: 1 1 auto;
   margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
 }
 
 .section-dse > header .sec-num {
+  font: 700 0.7rem/1.4 "SF Mono", Menlo, Consolas, monospace;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.quiz-export {
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  white-space: nowrap;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.quiz-export:hover { text-decoration: underline; }
+
+.quiz-letter:focus-visible,
+.quiz-export:focus-visible,
+.quiz-nav button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.quiz-slides {
+  background: #fff;
+  border: 1px solid var(--quiz-line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.quiz-lo {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
   margin: 0;
-  font-size: 0.85rem;
-}
-
-.section-dse > p {
-  margin: 0 0 0.75rem;
-  color: var(--muted);
-  font-size: 0.91rem;
-}
-
-.dse-practice-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 0.6rem;
-}
-
-.dse-practice-card {
-  min-width: 0;
-  padding: 0.65rem 0.7rem;
-  background: var(--panel);
-  border: 1px solid #d3dfda;
-  border-radius: 3px;
-}
-
-.dse-practice-card h3 {
-  font-family: var(--sans);
-  font-size: 0.86rem;
-  font-weight: 700;
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--quiz-line);
+  font-size: 0.88rem;
+  line-height: 1.4;
   color: var(--ink);
-  margin: 0 0 0.2rem;
 }
 
-.dse-practice-card p {
-  margin: 0.15rem 0 0.45rem;
+.quiz-lo-num {
+  flex: none;
+  font: 700 0.7rem/1.6 "SF Mono", Menlo, Consolas, monospace;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 4px;
+  padding: 0 0.4rem;
+}
+
+.quiz-lo-text { flex: 1 1 auto; }
+
+.quiz-lo-text::first-letter { text-transform: uppercase; }
+
+.quiz-paper-id {
+  flex: none;
+  font: 500 0.75rem/1.6 "SF Mono", Menlo, Consolas, monospace;
   color: var(--muted);
-  font-size: 0.87rem;
 }
 
-.dse-practice-links {
+.quiz-slide { display: none; }
+
+.quiz-slide.is-current {
+  display: block;
+  padding: 0.85rem 0.9rem 1rem;
+}
+
+.quiz-slide > h3,
+.quiz-slide > p { display: none; }
+
+.quiz-slide .dse-paper { display: block; margin: 0; padding: 0; border: 0; background: none; }
+
+.quiz-slide .dse-paper figcaption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.quiz-slide .dse-paper img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: #fff;
+}
+
+.quiz-choices {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+  max-width: 22rem;
+  margin: 0.85rem 0 0;
+}
+
+.quiz-letter {
+  min-height: 2.6rem;
+  border: 1px solid var(--quiz-line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+  font: 600 1rem/1 inherit;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+
+.quiz-letter:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.quiz-letter.is-picked {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.quiz-letter:disabled {
+  cursor: default;
+  color: var(--muted);
+  background: #f7f7f4;
+}
+
+.quiz-letter.correct,
+.quiz-letter.correct:disabled {
+  border-color: var(--ok);
+  background: var(--ok);
+  color: #fff;
+}
+
+.quiz-letter.wrong,
+.quiz-letter.wrong:disabled {
+  border-color: var(--bad);
+  background: var(--bad-soft);
+  color: var(--bad);
+}
+
+.quiz-slide > p.quiz-pct {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.28rem 0.45rem;
+  align-items: baseline;
+  gap: 0.25rem 0.6rem;
+  margin: 0.7rem 0 0;
+  font-size: 0.92rem;
+  line-height: 1.45;
 }
 
-.dse-practice-links a {
-  color: var(--accent-deep);
-  font-size: 0.8rem;
-  font-weight: 650;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.15em;
+.quiz-slide > p.quiz-pct[hidden] { display: none; }
+
+.quiz-pct.is-right { color: var(--ok); }
+.quiz-pct.is-wrong { color: var(--bad); }
+
+.quiz-verdict { font-weight: 700; }
+
+.quiz-stat { color: var(--muted); font-size: 0.85rem; }
+
+.quiz-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0.7rem 0 0;
 }
 
-.dse-practice-links a::after {
-  content: " ↗";
-  color: var(--accent);
-  font-weight: 500;
-}
-
-.subsection-paper {
-  margin: 0.85rem 0 0;
-  border-color: #c9d9d4;
-}
-
-.subsection-paper figcaption {
+.quiz-nav [data-quiz-prev],
+.quiz-nav [data-quiz-next] {
+  border: 1px solid var(--quiz-line);
+  border-radius: 6px;
+  background: #fff;
   color: var(--ink);
+  font: 600 0.88rem/1 inherit;
+  font-family: inherit;
+  padding: 0.5rem 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease;
 }
 
-.subsection-paper figcaption span {
-  display: block;
-  margin-top: 0.15rem;
-  color: var(--muted);
-  font-weight: 400;
-  font-size: 0.86rem;
+.quiz-nav [data-quiz-prev]::before { content: "← "; color: var(--accent); }
+.quiz-nav [data-quiz-next]::after { content: " →"; color: var(--accent); }
+
+.quiz-nav [data-quiz-prev]:hover,
+.quiz-nav [data-quiz-next]:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
 }
+
+.quiz-progress {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.quiz-status {
+  font: 500 0.8rem/1 "SF Mono", Menlo, Consolas, monospace;
+  color: var(--muted);
+}
+
+.quiz-dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3rem;
+}
+
+.quiz-dots[hidden] { display: none; }
+
+.quiz-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--quiz-line);
+}
+
+.quiz-dot.is-current { background: var(--accent); }
+.quiz-dot.is-right { background: var(--ok); }
+.quiz-dot.is-wrong { background: var(--bad); }
 
 /* ---------- chapter map / picker ---------- */
 
@@ -432,7 +549,7 @@ figure.fig figcaption b {
 }
 
 .visual {
-  background: var(--panel);
+  background: #fff;
   border: 1px solid var(--rule);
   border-radius: 3px;
   padding: 0.5rem;
@@ -453,53 +570,35 @@ figure.fig figcaption b {
   overflow: hidden;
 }
 
-.visual.play.stage {
-  --box-scale: 1;
-  zoom: var(--box-scale);
-}
-
-@supports not (zoom: 1) {
-  .visual.play.stage {
-    transform: scale(var(--box-scale));
-    transform-origin: top center;
-  }
-}
-
-.box-scale {
-  position: absolute;
-  top: 0.4rem;
-  right: 0.4rem;
-  z-index: 6;
-  display: inline-flex;
-  gap: 0.2rem;
-}
-
-.box-scale button {
-  width: 1.7rem;
-  height: 1.7rem;
-  padding: 0;
-  border: 1px solid var(--rule);
-  border-radius: 3px;
-  background: rgba(255, 253, 248, 0.94);
-  color: var(--muted);
-  font-size: 1.1rem;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.box-scale button:hover:not(:disabled) { color: var(--ink); border-color: var(--accent); }
-.box-scale button:disabled { opacity: 0.3; cursor: default; }
-
 .stage canvas.scene-canvas {
   display: block;
   width: 100%;
   height: 300px;
-  background: var(--panel);
-  cursor: grab;
-  touch-action: none;
+  background: #fff;
 }
 
-.stage canvas.scene-canvas:active { cursor: grabbing; }
+.stage[data-orbit] canvas.scene-canvas { cursor: grab; touch-action: none; }
+.stage[data-orbit] canvas.scene-canvas:active { cursor: grabbing; }
+
+/* Replay lives inside the box it restarts, bottom right, out of the scene's way. */
+.stage .stage-replay {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 6;
+  padding: 0.3rem 0.7rem 0.3rem 0.55rem;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  font: 600 0.8rem/1.2 inherit;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.stage .stage-replay::before { content: "↻ "; color: var(--accent); }
+.stage .stage-replay:hover { border-color: var(--accent); background: var(--accent-soft); }
+.stage .stage-replay:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .stage canvas.scene-canvas.tall { height: 400px; }
 
 .stage .hud-label {
@@ -509,7 +608,7 @@ figure.fig figcaption b {
   pointer-events: none;
   white-space: nowrap;
   transform: translate(-50%, 0);
-  text-shadow: 0 0 5px var(--panel), 0 0 5px var(--panel);
+  text-shadow: 0 0 5px #fff, 0 0 5px #fff;
 }
 
 .pane-pair {
@@ -744,26 +843,21 @@ table.notes caption {
   padding: 0 0 0.3rem;
 }
 
-/* spectrum bands table keeps the drawn proportions */
+/* Fig 25.5: 2D spectrum strip */
 
-#spectrum table.spectrum-bands { table-layout: fixed; }
+#spectrum-vis { padding: 0.6rem 0.4rem 0.2rem; }
 
-#spectrum table.spectrum-bands th,
-#spectrum table.spectrum-bands td { text-align: center; }
+.spectrum-svg { display: block; width: 100%; height: auto; }
 
-#spectrum table.spectrum-bands th {
-  font-size: 0.78rem;
-  padding: 0.3rem 0.2rem;
-  word-break: break-word;
+.spectrum-svg text {
+  font-family: var(--sans);
+  fill: var(--ink);
 }
 
-#spectrum table.spectrum-bands col.band-radio { width: 16%; }
-#spectrum table.spectrum-bands col.band-micro { width: 14%; }
-#spectrum table.spectrum-bands col.band-ir { width: 15%; }
-#spectrum table.spectrum-bands col.band-vis { width: 6%; }
-#spectrum table.spectrum-bands col.band-uv { width: 13%; }
-#spectrum table.spectrum-bands col.band-xray { width: 17%; }
-#spectrum table.spectrum-bands col.band-gamma { width: 19%; }
+.spectrum-svg .bracket-label { font-size: 15px; font-weight: 600; }
+.spectrum-svg .band-name { font-size: 14px; }
+.spectrum-svg .threshold-label { font-size: 12.5px; fill: var(--muted); }
+.spectrum-svg .axis-label { font-size: 12.5px; fill: var(--muted); }
 
 /* ---------- concept checks ---------- */
 
@@ -936,28 +1030,6 @@ button[data-reveal] { margin-top: 0.5rem; }
 .formula-sheet .eq .katex-display { margin: 0.15rem 0; text-align: left; }
 .formula-sheet .eq .katex-display > .katex { text-align: left; }
 
-/* ---------- DSE bank ---------- */
-
-.dse-bank {
-  margin: 2.6rem 0 0;
-  padding-top: 1.4rem;
-  border-top: 1px solid var(--rule);
-}
-
-.dse-bank h2 { margin-bottom: 0.3rem; }
-
-.dse-group { margin-top: 1.1rem; }
-
-.dse-group h3 {
-  font-family: var(--sans);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--accent-deep);
-  margin-bottom: 0.45rem;
-}
-
 .dse-paper {
   margin: 0.6rem 0 1rem;
   padding: 0.5rem 0.6rem 0.65rem;
@@ -977,16 +1049,6 @@ button[data-reveal] { margin-top: 0.5rem; }
   height: auto;
   background: #fff;
 }
-
-.dse-slot {
-  margin: 0;
-  padding: 0.6rem 0.75rem;
-  background: #f3eee4;
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
-.dse-paper.is-loaded .dse-slot { display: none; }
 
 /* ---------- misc layout helpers ---------- */
 
@@ -1076,7 +1138,17 @@ button[data-reveal] { margin-top: 0.5rem; }
 
   main { padding: 1.3rem 0.85rem 3rem; }
 
-  .lo-block, .check, .section-dse { padding-left: 0.8rem; padding-right: 0.8rem; }
+  .lo-block, .check { padding-left: 0.8rem; padding-right: 0.8rem; }
+
+  .quiz-lo { flex-wrap: wrap; padding: 0.5rem 0.7rem; font-size: 0.85rem; }
+  .quiz-lo-text { flex: 1 1 12rem; }
+  .quiz-paper-id { margin-left: auto; }
+  .quiz-slide.is-current { padding: 0.7rem 0.7rem 0.85rem; }
+  .quiz-choices { max-width: none; }
+  .quiz-nav { gap: 0.5rem; }
+
+  .quiz-nav [data-quiz-prev],
+  .quiz-nav [data-quiz-next] { padding: 0.45rem 0.7rem; }
 
   table.notes {
     display: block;
@@ -1088,13 +1160,11 @@ button[data-reveal] { margin-top: 0.5rem; }
   table.notes th,
   table.notes td { min-width: 8.5rem; }
 
-  .dse-practice-grid { grid-template-columns: 1fr; }
-
   .marks { white-space: normal; }
 }
 
 @media print {
-  .topbar, .box-scale, .next { display: none; }
+  .topbar, .next { display: none; }
   .idea { break-inside: avoid; }
 }
 

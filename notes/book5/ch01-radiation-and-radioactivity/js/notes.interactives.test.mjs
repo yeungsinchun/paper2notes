@@ -243,54 +243,61 @@ function chromeTest(name, fn) {
 }
 
 describe("Book 5 Ch.1 notes interactives", { concurrency: 1 }, () => {
-chromeTest("25.1 spectrum is static with the ionizing barrier in UV", async () => {
+chromeTest("25.1 spectrum is a 2D strip with the ionizing threshold inside UV", async () => {
   await cdp.goto(pageUrl("25-1.html"));
   await cdp.evaluate("new Promise((r) => setTimeout(r, 250))");
   const spec = await cdp.evaluate(`(function () {
     var spec = document.getElementById("spectrum");
-    var snap = window.NotesScenes && window.NotesScenes.spectrum && window.NotesScenes.spectrum.snapshot();
+    var svg = spec && spec.querySelector("svg.spectrum-svg");
+    var names = svg ? Array.from(svg.querySelectorAll(".band-name")).map(function (t) { return t.textContent.trim(); }) : [];
+    var uv = svg && svg.querySelector(".uv");
+    var cut = svg && svg.querySelector(".threshold");
+    var xray = svg ? Array.from(svg.querySelectorAll(".bands rect"))[5] : null;
+    var num = function (el, attr) { return el ? Number(el.getAttribute(attr)) : NaN; };
+    var uvLeft = num(uv, "x");
+    var uvRight = num(uv, "x") + num(uv, "width");
+    var cutX = num(cut, "x1");
     return {
-      slider: !!document.querySelector("#spectrum-slider"),
-      mark: !!document.querySelector("#spectrum-mark"),
-      pointer: !!document.querySelector("#spectrum-pointer"),
-      snap: snap,
+      canvas: !!spec.querySelector("canvas"),
+      scene: !!(window.NotesScenes && window.NotesScenes.spectrum),
+      table: !!spec.querySelector("table.spectrum-bands"),
+      svg: !!svg,
+      svgBox: svg ? svg.getBoundingClientRect().height : 0,
+      names: names,
       title: spec ? spec.querySelector("h2").textContent : "",
       body: spec ? spec.textContent : "",
-      nonion: spec && spec.querySelector('[data-hud="nonion"]') && spec.querySelector('[data-hud="nonion"]').textContent,
-      ion: spec && spec.querySelector('[data-hud="ion"]') && spec.querySelector('[data-hud="ion"]').textContent,
-      gammaHud: spec && spec.querySelector('#spectrum-vis [data-hud="gamma"]') && spec.querySelector('#spectrum-vis [data-hud="gamma"]').textContent,
-      headers: spec ? Array.from(spec.querySelectorAll("table.spectrum-bands thead th")).map(function (th) { return th.textContent.trim(); }) : [],
-      headerWidths: spec ? Array.from(spec.querySelectorAll("table.spectrum-bands thead th")).map(function (th) { return th.getBoundingClientRect().width; }) : [],
-      uvCell: spec && spec.querySelector("table.spectrum-bands tbody tr td:nth-child(2)") && spec.querySelector("table.spectrum-bands tbody tr td:nth-child(2)").textContent.trim()
+      nonion: svg && svg.querySelector('[data-hud="nonion"]') && svg.querySelector('[data-hud="nonion"]').textContent,
+      ion: svg && svg.querySelector('[data-hud="ion"]') && svg.querySelector('[data-hud="ion"]').textContent,
+      cutInUV: cutX > uvLeft && cutX < uvRight,
+      nonIonizingUVFrac: (cutX - uvLeft) / (uvRight - uvLeft),
+      xrayAfterCut: xray ? num(xray, "x") >= cutX : false,
+      uvOneBand: !!uv && svg.querySelectorAll(".bands rect").length === 7 && !svg.querySelector(".uv-nonion"),
+      bracketNonion: svg && svg.querySelector('[data-bracket="nonion"]') && svg.querySelector('[data-bracket="nonion"]').getAttribute("d"),
+      bracketIon: svg && svg.querySelector('[data-bracket="ion"]') && svg.querySelector('[data-bracket="ion"]').getAttribute("d")
     };
   })()`);
-  assert.equal(spec.slider, false);
-  assert.equal(spec.mark, false);
-  assert.equal(spec.pointer, false);
-  assert.equal(spec.snap.cutInUV, true);
-  assert.equal(spec.snap.cutAfterUV, false);
-  assert.ok(spec.snap.nonIonizingUVFrac > 0.05 && spec.snap.nonIonizingUVFrac < 0.18);
-  assert.equal(spec.snap.mostUVionizing, true);
-  assert.equal(spec.snap.xrayAfterCut, true);
+  assert.equal(spec.canvas, false, "the spectrum is a 2D figure, not a three.js scene");
+  assert.equal(spec.scene, false);
+  assert.equal(spec.table, false, "the split table is gone; the strip carries the split");
+  assert.equal(spec.svg, true);
+  assert.ok(spec.svgBox > 120, "spectrum SVG should render, h=" + spec.svgBox);
+  assert.deepEqual(spec.names, ["radio", "microwave", "infrared", "visible", "ultraviolet", "X-rays", "gamma ray"]);
+  assert.doesNotMatch(spec.names.join(" "), /γ/, "the γ symbol is reserved for nuclear radiation");
+  assert.equal(spec.cutInUV, true);
+  assert.ok(spec.nonIonizingUVFrac > 0.05 && spec.nonIonizingUVFrac < 0.18, "threshold near the low-frequency end of UV, frac=" + spec.nonIonizingUVFrac);
+  assert.equal(spec.xrayAfterCut, true);
+  assert.equal(spec.uvOneBand, true, "ultraviolet is one band in one colour; only the dashed threshold marks the cut");
+  assert.match(spec.bracketNonion || "", /^M40,/, "non-ionizing bracket starts at the radio end");
+  assert.match(spec.bracketIon || "", /H920 /, "ionizing bracket runs to the gamma end");
   assert.match(spec.title, /spectrum becomes ionizing/i);
   assert.match(spec.nonion, /non-ionizing/);
   assert.match(spec.ion, /ionizing/);
   assert.match(spec.body, /X-rays/);
   assert.match(spec.body, /boundary lies inside the ultraviolet/i);
+  assert.doesNotMatch(spec.body, /γ rays/, "EM-spectrum copy says gamma rays");
   assert.doesNotMatch(spec.body, /one-tenth|1\/10 of UV/i);
   assert.doesNotMatch(spec.title, /where the EM cut sits/i);
   assert.doesNotMatch(spec.body, /book cut/i);
-  assert.deepEqual(spec.headers, ["radio", "micro", "IR", "vis", "UV", "X-rays", "Gamma ray"]);
-  assert.equal(spec.gammaHud.trim(), "Gamma ray");
-  assert.equal(spec.snap.gammaHud, "Gamma ray");
-  assert.doesNotMatch(spec.headers.join(" "), /γ/);
-  assert.ok(spec.uvCell.length < 12, "UV band cell should stay short, got " + spec.uvCell);
-  assert.doesNotMatch(spec.uvCell, /1\/10|one-tenth|most ionizing/i);
-  const visW = spec.headerWidths[3];
-  const radioW = spec.headerWidths[0];
-  const gammaW = spec.headerWidths[6];
-  assert.ok(visW < radioW * 0.6, "vis column should be narrower than radio, vis=" + visW + " radio=" + radioW);
-  assert.ok(gammaW > visW * 1.8, "Gamma ray column should be wider than vis, gamma=" + gammaW + " vis=" + visW);
 
   if (evidenceDir) {
     await cdp.screenshot(path.join(evidenceDir, "25-1-knockout-animation.png"), "#knockout");
@@ -309,12 +316,13 @@ chromeTest("25.1 imaging is X-rays down through a hand onto film that starts whi
   assert.equal(start.filmCount, 1);
   assert.ok(start.nBone >= 5, "hand should contain several bones, n=" + start.nBone);
   assert.ok(start.nFlesh >= 5, "hand should contain flesh, n=" + start.nFlesh);
+  assert.ok(start.maxFleshSphereR < 0.2, "wrist must be truncated cylinders, not a palm/wrist blob, r=" + start.maxFleshSphereR);
   assert.ok(start.boneLum > 180, "film under bone starts white");
   assert.ok(start.fleshLum > 180, "whole film starts white, fleshLum=" + start.fleshLum);
   if (evidenceDir) {
     await cdp.screenshot(path.join(evidenceDir, "25-1-xray-imaging-start-white.png"), "#imaging");
   }
-  await cdp.evaluate("new Promise((r) => setTimeout(r, 1500))");
+  await cdp.evaluate("new Promise((r) => setTimeout(r, 4500))");
   const img = await cdp.evaluate(`(function () {
     var snap = window.NotesScenes.imaging.snapshot();
     var host = document.getElementById("imaging-vis");
@@ -323,6 +331,7 @@ chromeTest("25.1 imaging is X-rays down through a hand onto film that starts whi
     snap.replay = !!document.querySelector('#imaging [data-replay="imaging-vis"]');
     return snap;
   })()`);
+  assert.ok(img.t >= img.duration, "autoplay should reach the completed radiograph");
   assert.equal(img.toggles, 0);
   assert.equal(img.oneHand, true);
   assert.equal(img.twoSlabs, false);
@@ -339,11 +348,80 @@ chromeTest("25.1 imaging is X-rays down through a hand onto film that starts whi
   assert.equal(img.clipped, false, "Fig 25.7 should stay inside the canvas, ndc x=" + img.fillMinX + ".." + img.fillMaxX + " y=" + img.fillMinY + ".." + img.fillMaxY);
   assert.equal(img.raysDown, true);
   assert.equal(img.replay, true);
-  assert.ok(img.labels.includes("X-rays"));
+  assert.ok(!img.labels.includes("X-rays"), "no X-rays label points at an undrawn ray");
   assert.ok(img.labels.includes("photographic film"));
 
   if (evidenceDir) {
     await cdp.screenshot(path.join(evidenceDir, "25-1-xray-imaging.png"), "#imaging");
+  }
+});
+
+chromeTest("25.1 film exposure follows arriving rays and bone shadows stay white", async () => {
+  await cdp.goto(pageUrl("25-1.html"));
+  async function at(sec) {
+    return cdp.evaluate(`(function () {
+      window.NotesScenes.imaging.seek(${sec});
+      return window.NotesScenes.imaging.snapshot();
+    })()`);
+  }
+  const initial = await at(0);
+  const firstArrival = Math.min(...initial.cells.map((cell) => cell.arrival));
+  const before = await at(firstArrival - 0.01);
+  assert.ok(before.cells.every((cell) => cell.minLuminance > 240), "no film pixel blackens before a ray arrives");
+  const during = await at(firstArrival + 0.35);
+  assert.ok(during.cells.some((cell) => cell.minLuminance < 90), "arriving rays expose local film patches");
+  assert.ok(during.cells.some((cell) => cell.arrival > during.t), "the sweep still has unexposed film");
+  for (const cell of during.cells.filter((cell) => cell.arrival > during.t)) {
+    assert.ok(cell.minLuminance > 240, "every pixel in an unreached patch stays white");
+  }
+  const transmitting = initial.exposures.filter((ray) => !ray.absorbed);
+  for (const [index, ray] of initial.exposures.entries()) {
+    const approaching = (await at(ray.arrival - 0.03)).exposures[index];
+    assert.ok(approaching.frontY > ray.stopY, "the modelled ray front approaches downward");
+    const arrived = (await at(ray.arrival + 0.3)).exposures[index];
+    assert.ok(Math.abs(arrived.frontX - ray.x) < 1e-6);
+    assert.ok(Math.abs(arrived.frontZ - ray.z) < 1e-6, "ray front and exposed pixel share the same film coordinate");
+    if (ray.absorbed) {
+      assert.equal(arrived.frontInBone, true, "the modelled ray stops inside a bone");
+      assert.ok(arrived.filmLum > 240, "the film under the stopped ray stays white");
+    } else {
+      assert.ok(Math.abs(arrived.frontY - arrived.filmY) < 1e-6, "the modelled ray reaches the film plane");
+      assert.ok(arrived.filmLum < 90, "the pixel underneath the arriving ray blackens");
+    }
+  }
+  const drawn = await cdp.evaluate(`(function () {
+    window.NotesScenes.imaging.seek(${initial.duration / 2});
+    return window.NotesScenes.imaging.snapshot().drawnRays;
+  })()`);
+  assert.equal(drawn, 0, "the exposure animates without visible ray glyphs");
+  assert.ok(transmitting.length >= 3);
+  const final = await at(initial.duration);
+  assert.ok(final.cells.every((cell) => Number.isFinite(cell.arrival) && cell.minLuminance < 90),
+    "each film patch has a transmitted ray and a dark exposed area");
+  assert.ok(final.exposures.filter((ray) => ray.absorbed).every((ray) => ray.filmLum > 240));
+  const later = await at(initial.duration + 2);
+  assert.deepEqual(later.cells, final.cells, "the final radiograph holds without flicker");
+  assert.equal(later.drawnRays, 0, "no ray remnant is left once the animation settles");
+  const xraysLabels = await cdp.evaluate(`document.querySelectorAll('#imaging-vis [data-hud="xrays"]').length`);
+  assert.equal(xraysLabels, 0, "no X-rays label is left over the hand");
+  const replay = await cdp.evaluate(`(function () {
+    window.NotesScenes.imaging.replay();
+    return window.NotesScenes.imaging.snapshot();
+  })()`);
+  assert.ok(replay.cells.every((cell) => cell.minLuminance > 240), "Replay clears the previous exposure");
+  await cdp.send("Emulation.setDeviceMetricsOverride", {
+    width: 390, height: 844, deviceScaleFactor: 2, mobile: true,
+  });
+  try {
+    const phone = await cdp.evaluate(`new Promise((resolve) => requestAnimationFrame(() => {
+      window.NotesScenes.imaging.seek(5);
+      resolve(window.NotesScenes.imaging.snapshot());
+    }))`);
+    assert.equal(phone.clipped, false, "phone framing includes the hand and film");
+  } finally {
+    await cdp.send("Emulation.setDeviceMetricsOverride", {
+      width: 1280, height: 900, deviceScaleFactor: 2, mobile: false,
+    });
   }
 });
 
@@ -729,19 +807,22 @@ chromeTest("25.3 ion-pair capture, Flip B marks, and β/γ check", async () => {
 
   const mc = await cdp.evaluate(`(function () {
     var page = document.body.innerText;
-    var box = Array.from(document.querySelectorAll("#fields .check")).find(function (el) {
-      return el.getAttribute("data-answer") === "C";
+    var boxes = Array.from(document.querySelectorAll("#fields .check"));
+    var box = boxes.find(function (el) {
+      return el.getAttribute("data-answer") === "B";
     });
     var stem = box.querySelector("p").textContent;
-    box.querySelector('[data-choice="C"]').click();
+    box.querySelector('[data-choice="B"]').click();
     return {
       hasQ35: /101 cpm/.test(page) || /400 cpm/.test(page),
+      dseStem: boxes.some(function (el) { return /statements about β and γ radiation is correct/.test(el.textContent); }),
       stem: stem,
       ok: box.querySelector(".feedback").classList.contains("ok")
     };
   })()`);
   assert.equal(mc.hasQ35, false);
-  assert.match(mc.stem, /β and γ/);
+  assert.equal(mc.dseStem, false, "HKDSE 2017/32 belongs in the section quiz, not the in-flow concept checks");
+  assert.match(mc.stem, /α and β particles/);
   assert.equal(mc.ok, true);
 
   if (evidenceDir) {
@@ -776,45 +857,55 @@ chromeTest("chapter map, summary, and concept-check scoring are the public notes
       var pageWide = document.querySelector(".view-scale, [data-view-scale], .topbar [data-box-scale]");
       var stages = Array.from(document.querySelectorAll(".visual.play.stage"));
       var boxes = stages.map(function (stage) {
-        var plus = stage.querySelector("[data-box-scale='up']");
-        var minus = stage.querySelector("[data-box-scale='down']");
-        if (!plus || !minus) return { ok: false, id: stage.id };
         var hidden = stage.hasAttribute("hidden") || getComputedStyle(stage).display === "none";
+        var canvas = stage.querySelector("canvas");
+        var replay = stage.querySelector(".stage-replay");
         var sr = stage.getBoundingClientRect();
-        var pr = plus.getBoundingClientRect();
-        var mr = minus.getBoundingClientRect();
+        var rr = replay ? replay.getBoundingClientRect() : null;
         return {
-          ok: true,
           id: stage.id,
           hidden: hidden,
-          plusText: plus.textContent.trim(),
-          minusText: minus.textContent.trim(),
-          plusAfterMinus: hidden ? true : pr.left > mr.left,
-          rightGap: hidden ? 0 : sr.right - pr.right,
-          inBox: hidden ? true : pr.top >= sr.top - 1 && pr.bottom <= sr.bottom + 1
+          scaleChrome: !!stage.querySelector(".box-scale, [data-box-scale]"),
+          canvasBg: canvas ? getComputedStyle(canvas).backgroundColor : "",
+          boxBg: getComputedStyle(stage).backgroundColor,
+          orbit: stage.hasAttribute("data-orbit"),
+          cursor: canvas ? getComputedStyle(canvas).cursor : "",
+          replayInBox: replay && !hidden ? (rr.left >= sr.left && rr.right <= sr.right + 1 && rr.top >= sr.top && rr.bottom <= sr.bottom + 1) : null,
+          replayBottomRight: replay && !hidden ? (sr.right - rr.right < 40 && sr.bottom - rr.bottom < 40) : null
         };
       });
       return {
         hasBar: !!bar,
         noPageWide: !pageWide,
         stageCount: stages.length,
-        boxes: boxes
+        boxes: boxes,
+        strayReplays: document.querySelectorAll("[data-replay]:not(.stage-replay)").length,
+        doubledChoices: Array.from(document.querySelectorAll(".choices [data-choice]")).filter(function (b) {
+          return /^[A-D][.)]\\s/.test(b.textContent.trim());
+        }).map(function (b) { return b.textContent.trim(); })
       };
     })()`);
     assert.equal(chrome.hasBar, true, "top bar missing on " + page);
     assert.equal(chrome.noPageWide, true, "page-wide scale chrome still on " + page);
+    assert.equal(chrome.strayReplays, 0, "Replay belongs inside its animation box on " + page);
+    assert.deepEqual(chrome.doubledChoices, [], "choice text must not repeat the A-D badge on " + page);
     if (page === "index.html") {
       assert.equal(chrome.stageCount, 0);
     } else {
       assert.ok(chrome.stageCount > 0, "expected animation boxes on " + page);
     }
     chrome.boxes.forEach(function (box) {
-      assert.equal(box.ok, true, "scale buttons missing on " + page + " #" + box.id);
-      assert.equal(box.plusText, "+");
-      assert.equal(box.minusText, "−");
-      assert.equal(box.plusAfterMinus, true, "plus should sit to the right of minus on #" + box.id);
-      assert.ok(box.rightGap < 48, "scale buttons should sit at the top right of #" + box.id);
-      assert.equal(box.inBox, true, "scale buttons should stay on #" + box.id);
+      assert.equal(box.scaleChrome, false, "no +/- scale buttons on " + page + " #" + box.id);
+      if (box.id === "track-vis") return; /* cloud chamber keeps its dark field */
+      assert.equal(box.canvasBg, "rgb(255, 255, 255)", "white canvas on #" + box.id);
+      assert.equal(box.boxBg, "rgb(255, 255, 255)", "white box on #" + box.id);
+      if (!box.hidden) {
+        assert.equal(box.cursor === "grab", box.orbit, "grab cursor only on rotatable boxes, #" + box.id);
+      }
+      if (box.replayInBox !== null) {
+        assert.equal(box.replayInBox, true, "Replay inside #" + box.id);
+        assert.equal(box.replayBottomRight, true, "Replay at the bottom right of #" + box.id);
+      }
     });
   }
 
@@ -892,6 +983,31 @@ chromeTest("chapter map, summary, and concept-check scoring are the public notes
   assert.doesNotMatch(knockoutCheck.copy, /made of atoms/i);
   assert.match(knockoutCheck.copy, /strike electrons out of atoms or molecules/i);
   assert.match(knockoutCheck.copy, /what the radiation does to matter/i);
+  assert.match(knockoutCheck.copy, /gamma rays/, "Section B check says gamma rays, not the γ symbol");
+  assert.doesNotMatch(knockoutCheck.copy, /γ/, "γ is reserved for the nuclear-radiation section");
+
+  const spectrumCheck = await cdp.evaluate(`(function () {
+    var box = document.querySelector("#spectrum .check");
+    var explain = box.querySelector(".explain");
+    return {
+      shown: !explain.hidden,
+      copy: explain.innerText,
+      doubled: Array.from(document.querySelectorAll(".choices [data-choice]")).filter(function (b) {
+        return /^[A-D][.)]\\s/.test(b.textContent.trim());
+      }).map(function (b) { return b.textContent.trim(); })
+    };
+  })()`);
+  assert.equal(spectrumCheck.shown, true);
+  assert.match(spectrumCheck.copy, /gamma ray/, "Section C check says gamma ray, not the γ symbol");
+  assert.doesNotMatch(spectrumCheck.copy, /γ/);
+  assert.match(spectrumCheck.copy, /see Section F/, "Section C check must point at the nuclear-radiation section on this page");
+  assert.doesNotMatch(spectrumCheck.copy, /Section G/);
+  assert.deepEqual(spectrumCheck.doubled, [], "choice text must not repeat the A-D badge");
+
+  if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "25-1-section-b-check-gamma-wording.png"), "#knockout .check");
+    await cdp.screenshot(path.join(evidenceDir, "25-1-section-c-check-section-f.png"), "#spectrum .check");
+  }
 
   const replay25_1 = await cdp.evaluate(`({
     all: Array.from(document.querySelectorAll("[data-replay]")).map(function (b) { return b.getAttribute("data-replay"); }),
@@ -905,45 +1021,6 @@ chromeTest("chapter map, summary, and concept-check scoring are the public notes
   assert.equal(replay25_1.knockout, 1, "knockout ejection should stay replayable");
   assert.equal(replay25_1.tube, 0, "X-ray tube loop should not have Replay");
   assert.equal(replay25_1.imaging, 1, "film blackening is a finite clip");
-
-  const scaled = await cdp.evaluate(`(function () {
-    var imaging = document.querySelector("#imaging-vis");
-    var other = document.querySelector("#knock-vis");
-    var canvas = imaging.querySelector("canvas");
-    var otherCanvas = other.querySelector("canvas");
-    var hud = imaging.querySelector("[data-hud='flesh']");
-    var plus = imaging.querySelector("[data-box-scale='up']");
-    var minus = imaging.querySelector("[data-box-scale='down']");
-    var before = {
-      scale: getComputedStyle(imaging).getPropertyValue("--box-scale").trim(),
-      otherScale: getComputedStyle(other).getPropertyValue("--box-scale").trim(),
-      canvasH: canvas.getBoundingClientRect().height,
-      otherH: otherCanvas.getBoundingClientRect().height,
-      hudH: hud.getBoundingClientRect().height
-    };
-    plus.click();
-    var mid = {
-      scale: getComputedStyle(imaging).getPropertyValue("--box-scale").trim(),
-      otherScale: getComputedStyle(other).getPropertyValue("--box-scale").trim(),
-      canvasH: canvas.getBoundingClientRect().height,
-      otherH: otherCanvas.getBoundingClientRect().height,
-      hudH: hud.getBoundingClientRect().height
-    };
-    minus.click();
-    var after = {
-      scale: getComputedStyle(imaging).getPropertyValue("--box-scale").trim(),
-      canvasH: canvas.getBoundingClientRect().height
-    };
-    return { before: before, mid: mid, after: after };
-  })()`);
-  assert.equal(scaled.before.scale, "1");
-  assert.equal(scaled.before.otherScale, "1");
-  assert.equal(scaled.mid.scale, "1.15");
-  assert.equal(scaled.mid.otherScale, "1", "plus on one box must not scale another");
-  assert.ok(scaled.mid.canvasH > scaled.before.canvasH * 1.08, "plus should enlarge that diagram");
-  near(scaled.mid.otherH, scaled.before.otherH, 1);
-  near(scaled.mid.canvasH / scaled.before.canvasH, scaled.mid.hudH / scaled.before.hudH, 0.08);
-  assert.equal(scaled.after.scale, "1");
 
   await cdp.goto(pageUrl("25-2.html"));
   const replay25_2 = await cdp.evaluate("document.querySelectorAll('[data-replay]').length");
@@ -1057,26 +1134,31 @@ chromeTest("3d scenes magnify, label the tube, keep β drift, and pulse radially
   near(camWheel.camR, cam0.camR, 0.02);
   near(camWheel.camX, cam0.camX, 0.02);
   near(camWheel.camZ, cam0.camZ, 0.02);
+  /* Fig 25.2 panes are flat diagrams: no drag-to-rotate, so the camera stays put. */
   await cdp.evaluate("window.NotesScenes['beams-em'].orbitBy(40, 6)");
+  await cdp.evaluate("window.NotesScenes['beams-e'].orbitBy(40, 6)");
   await cdp.evaluate("new Promise((r) => setTimeout(r, 250))");
   const cam1 = await cdp.evaluate("window.NotesScenes['beams-em'].snapshot()");
   const eCam1 = await cdp.evaluate("window.NotesScenes['beams-e'].snapshot()");
-  assert.ok(
-    Math.abs(cam1.camX - cam0.camX) > 0.12 || Math.abs(cam1.camZ - cam0.camZ) > 0.12,
-    "drag-orbit should move the light-beam camera"
-  );
+  near(cam1.camX, cam0.camX, 0.02);
+  near(cam1.camZ, cam0.camZ, 0.02);
   near(eCam1.camX, eCam0.camX, 0.02);
   near(eCam1.camZ, eCam0.camZ, 0.02);
   near(cam1.eHud, cam1.eProj, 18);
   near(cam1.bHud, cam1.bProj, 20);
-  await cdp.evaluate("window.NotesScenes['beams-e'].orbitBy(40, 6)");
-  await cdp.evaluate("new Promise((r) => setTimeout(r, 250))");
-  const eCam2 = await cdp.evaluate("window.NotesScenes['beams-e'].snapshot()");
-  assert.ok(
-    Math.abs(eCam2.camX - eCam1.camX) > 0.12 || Math.abs(eCam2.camZ - eCam1.camZ) > 0.12,
-    "drag-orbit should move the electron-beam camera"
-  );
-  near(eCam2.hudX, eCam2.projX, 16);
+  near(eCam1.hudX, eCam1.projX, 16);
+  const paneChrome = await cdp.evaluate(`({
+    emOrbit: document.getElementById("beam-em-vis").hasAttribute("data-orbit"),
+    eOrbit: document.getElementById("beam-e-vis").hasAttribute("data-orbit"),
+    imagingOrbit: document.getElementById("imaging-vis").hasAttribute("data-orbit"),
+    tubeOrbit: document.getElementById("tube-vis").hasAttribute("data-orbit"),
+    caption: document.querySelector("#radiation figcaption").textContent
+  })`);
+  assert.equal(paneChrome.emOrbit, false);
+  assert.equal(paneChrome.eOrbit, false);
+  assert.equal(paneChrome.imagingOrbit, true, "the hand-over-film scene keeps drag-to-rotate");
+  assert.equal(paneChrome.tubeOrbit, true, "the angled-target tube keeps drag-to-rotate");
+  assert.doesNotMatch(paneChrome.caption, /drag/i);
 
   const tube = await cdp.evaluate("window.NotesScenes.tube.snapshot()");
   near(tube.gunHud, tube.gunProj, 10);
@@ -1244,7 +1326,7 @@ chromeTest("3d scenes magnify, label the tube, keep β drift, and pulse radially
   }
 });
 
-chromeTest("every Ch.1 section page shows syllabus LOs and the summary embeds DSE papers", async () => {
+chromeTest("every Ch.1 section page shows syllabus LOs and keeps DSE papers in the section quiz", async () => {
   for (const page of ["25-1.html", "25-2.html", "25-3.html", "summary.html"]) {
     await cdp.goto(pageUrl(page));
     const info = await cdp.evaluate(`(function () {
@@ -1278,71 +1360,246 @@ chromeTest("every Ch.1 section page shows syllabus LOs and the summary embeds DS
   await cdp.goto(pageUrl("25-1.html"));
   const xray = await cdp.evaluate("document.querySelector('.lo-block').innerText");
   assert.match(xray, /realise X-rays as ionizing electromagnetic radiations of short wavelengths with high penetrating power/);
-  assert.match(xray, /2022\/31 MC/);
+  assert.equal(await cdp.evaluate("!!document.querySelector('.lo-block .dse-labels')"), false);
+  assert.doesNotMatch(xray, /2022\/31 MC/);
 
   await cdp.goto(pageUrl("summary.html"));
   const bank = await cdp.evaluate(`(function () {
-    var papers = Array.from(document.querySelectorAll(".dse-paper"));
-    var loaded = papers.filter(function (fig) {
-      var img = fig.querySelector("img");
-      return img && img.complete && img.naturalWidth > 0;
-    }).length;
+    var lede = document.querySelector(".lede");
     return {
-      n: papers.length,
-      loaded: loaded,
-      has2022: !!document.getElementById("dse-mc-2022-31"),
-      has2026: !!document.getElementById("dse-lq-2026-12"),
+      n: document.querySelectorAll(".dse-paper").length,
+      hasBank: !!document.querySelector(".dse-bank"),
+      hasLabels: !!document.querySelector(".dse-labels"),
+      lede: lede ? lede.textContent : "",
       katex: !!document.querySelector(".katex")
     };
   })()`);
-  assert.ok(bank.n >= 20, "expected Ch.1 DSE embeds, n=" + bank.n);
-  assert.equal(bank.has2022, true);
-  assert.equal(bank.has2026, true);
-  assert.ok(bank.loaded >= 1, "localhost DSE images should load, loaded=" + bank.loaded);
+  assert.equal(bank.hasBank, false, "summary must not dump the classified set");
+  assert.equal(bank.n, 0, "DSE papers belong in section quizzes, n=" + bank.n);
+  assert.equal(bank.hasLabels, false);
+  assert.doesNotMatch(bank.lede, /classified HKDSE/i, "summary lede must not advertise a DSE bank");
   if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "ch01-summary-lede.png"), ".lede");
     await cdp.screenshot(path.join(evidenceDir, "ch01-summary-lo-block.png"), ".lo-block");
-    await cdp.screenshot(path.join(evidenceDir, "ch01-summary-dse-bank.png"), ".dse-bank");
   }
 });
 
-chromeTest("each Ch.1 subsection groups links to its own DSE practice", async () => {
+chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async () => {
   const expected = {
-    "25-1.html": ["dse-mc-2022-31", "dse-mc-2015-31"],
-    "25-2.html": ["dse-mc-2012-36", "dse-mc-2013-34", "dse-mc-2014-31", "dse-lq-2026-12", "dse-mc-2021-31", "dse-mc-2025-32", "dse-mc-2021-33"],
-    "25-3.html": ["dse-mc-2016-32", "dse-mc-2017-32", "dse-mc-pp-34", "dse-mc-2014-32", "dse-mc-2019-31", "dse-mc-sap-36", "dse-mc-2017-31", "dse-mc-pp-35"]
+    "25-1.html": ["dse-mc-2022-31", "dse-mc-2015-31", "dse-lq-2017-10", "dse-lq-2014-10"],
+    "25-2.html": ["dse-mc-2012-36", "dse-mc-2013-34", "dse-mc-2014-31", "dse-lq-2026-12", "dse-mc-2021-31", "dse-mc-2025-32", "dse-mc-2021-33", "dse-lq-2016-9", "dse-lq-2018-10", "dse-lq-2021-9", "dse-lq-2023-9", "dse-lq-2017-10", "dse-lq-2014-10"],
+    "25-3.html": ["dse-mc-2016-32", "dse-mc-2017-32", "dse-mc-pp-34", "dse-mc-2014-32", "dse-mc-2019-31", "dse-mc-sap-36", "dse-mc-2017-31", "dse-lq-2014-10"]
   };
 
   for (const [page, expectedIds] of Object.entries(expected)) {
     await cdp.goto(pageUrl(page));
     const practice = await cdp.evaluate(`(function () {
-      var section = document.querySelector(".section-dse");
+      var mc = document.querySelector('[data-quiz="mc"]');
+      var lq = document.querySelector('[data-quiz="lq"]');
+      var slides = Array.from(document.querySelectorAll(".quiz-slide"));
+      var visibleMc = mc ? Array.from(mc.querySelectorAll(".quiz-slide.is-current")) : [];
+      var firstImg = visibleMc[0] && visibleMc[0].querySelector("img");
+      var nav = mc && mc.querySelector(".quiz-nav");
+      var slidesBox = mc && mc.querySelector(".quiz-slides");
       return {
-        heading: section && section.querySelector("h2") && section.querySelector("h2").textContent,
-        cards: section ? section.querySelectorAll(".dse-practice-card").length : 0,
-        paper: !!(section && section.querySelector(".subsection-paper img") && section.querySelector(".subsection-paper img").complete && section.querySelector(".subsection-paper img").naturalWidth > 0),
-        links: section ? Array.from(section.querySelectorAll(".dse-practice-links a")).map(function (a) { return a.getAttribute("href"); }) : []
+        heading: mc && mc.querySelector("h2") && mc.querySelector("h2").textContent,
+        slides: slides.map(function (s) { return s.id; }),
+        visible: visibleMc.length,
+        paper: !!(firstImg && firstImg.complete && firstImg.naturalWidth > 0),
+        hasPrev: !!(mc && mc.querySelector("[data-quiz-prev]")),
+        hasNext: !!(mc && mc.querySelector("[data-quiz-next]")),
+        navAfterSlides: !!(nav && slidesBox && (nav.compareDocumentPosition(slidesBox) & Node.DOCUMENT_POSITION_PRECEDING)),
+        letters: mc ? mc.querySelectorAll("[data-quiz-choice]").length : 0,
+        hasLq: !!(lq && lq.querySelector(".quiz-slide")),
+        exportButton: !!(mc && mc.querySelector("button[data-quiz-export]")),
+        exportDoc: window.NotesQuiz ? window.NotesQuiz.sectionPapersHtml() : "",
+        scans: Array.from(document.querySelectorAll(".quiz-slide img")).map(function (img) { return img.getAttribute("src").split("/").pop(); }),
+        lo: document.querySelector(".quiz-lo") && document.querySelector(".quiz-lo").textContent.trim()
       };
     })()`);
-    assert.match(practice.heading || "", /topic-matched past-paper practice/i);
-    assert.ok(practice.cards >= 2, page + " should classify more than one skill");
+    assert.match(practice.heading || "", /check the learning objectives/i);
+    assert.equal(practice.hasPrev, true, page + " needs Prev");
+    assert.equal(practice.hasNext, true, page + " needs Next");
+    assert.equal(practice.navAfterSlides, true, page + " Prev/Next must sit under the question");
+    assert.ok(practice.letters >= 4, page + " needs A B C D options");
+    assert.equal(practice.exportButton, true, page + " needs its own Export PDF button");
+    assert.ok(practice.scans.length >= 2, page + " should have scans to export");
+    practice.scans.forEach(function (name) {
+      assert.ok(practice.exportDoc.includes(name), page + " export must carry " + name);
+    });
+    assert.doesNotMatch(practice.exportDoc, /combined\.pdf/, page + " export is built from this section's papers, not the chapter PDF");
+    assert.match(practice.lo || "", /^LO \d+/, page + " needs an LO number and description at the top of the quiz");
+    assert.equal(practice.hasLq, true, page + " needs a separate LQ section");
+    assert.equal(practice.visible, 1, page + " must show one MC quiz item");
     assert.ok(practice.paper, page + " should include a topic-matched DSE paper");
-    assert.deepEqual(practice.links.map((href) => href.replace(/^summary\.html#/, "")), expectedIds);
+    for (const id of expectedIds) {
+      assert.ok(practice.slides.includes(id), page + " missing " + id);
+    }
+  }
+
+  await cdp.goto(pageUrl("25-1.html"));
+  const rotated = await cdp.evaluate(`(function () {
+    var mc = document.querySelector('[data-quiz="mc"]');
+    var first = mc.querySelector(".quiz-slide.is-current");
+    var before = first && first.id;
+    mc.querySelector("[data-quiz-next]").click();
+    var after = mc.querySelector(".quiz-slide.is-current");
+    mc.querySelector("[data-quiz-prev]").click();
+    var back = mc.querySelector(".quiz-slide.is-current");
+    var letter = mc.querySelector("[data-quiz-choice='B']");
+    if (letter) letter.click();
+    var pct = mc.querySelector(".quiz-slide.is-current .quiz-pct");
+    return {
+      before: before,
+      after: after && after.id,
+      back: back && back.id,
+      marked: !!(letter && (letter.classList.contains("correct") || letter.classList.contains("wrong"))),
+      pct: pct && !pct.hidden && pct.textContent,
+      visible: mc.querySelectorAll(".quiz-slide.is-current").length
+    };
+  })()`);
+  assert.notEqual(rotated.after, rotated.before);
+  assert.equal(rotated.back, rotated.before);
+  assert.equal(rotated.marked, true);
+  assert.match(rotated.pct || "", /correct percentage:\s*\d+%/i);
+  assert.equal(rotated.visible, 1);
+
+  await cdp.goto(pageUrl("25-3.html"));
+  const marking = await cdp.evaluate(`(function () {
+    var mc = document.querySelector('[data-quiz="mc"]');
+    var next = mc.querySelector("[data-quiz-next]");
+    var n = mc.querySelectorAll(".quiz-slide").length;
+    var results = [];
+    var i;
+    for (i = 0; i < n; i += 1) {
+      var slide = mc.querySelector(".quiz-slide.is-current");
+      var btn = slide.querySelector("[data-quiz-choice='A']");
+      if (btn) btn.click();
+      var pct = slide.querySelector(".quiz-pct");
+      results.push({
+        id: slide.id,
+        marked: slide.getAttribute("data-quiz-marked") === "true",
+        pct: pct && !pct.hidden ? pct.textContent : "",
+        result: slide.getAttribute("data-quiz-result")
+      });
+      next.click();
+    }
+    return {
+      hasPp35: !!document.getElementById("dse-mc-pp-35"),
+      ids: results.map(function (r) { return r.id; }),
+      results: results,
+      dots: mc.querySelectorAll(".quiz-dot").length,
+      status: mc.querySelector(".quiz-status") && mc.querySelector(".quiz-status").textContent,
+      exportLabel: mc.querySelector("[data-quiz-export]") && mc.querySelector("[data-quiz-export]").textContent
+    };
+  })()`);
+  assert.equal(marking.hasPp35, false, "PP/35 was dropped because its answer could not be verified");
+  assert.ok(marking.dots >= 2, "quiz-dots remain as a second progress channel");
+  assert.match(marking.status || "", /\d+ of \d+/);
+  assert.equal(marking.exportLabel, "Export PDF");
+  marking.results.forEach(function (item) {
+    assert.equal(item.marked, true, item.id + " must mark after an A-D pick");
+    assert.match(item.pct, /correct|not quite/i, item.id + " needs a verdict");
+  });
+  if (evidenceDir) {
+    await cdp.screenshot(path.join(evidenceDir, "25-3-mc-quiz-marked.png"), '[data-quiz="mc"]');
+  }
+
+  await cdp.goto(pageUrl("25-1.html"));
+  if (evidenceDir) {
+    await cdp.evaluate("document.getElementById('mc-quiz-heading').scrollIntoView({ block: 'start' })");
+    await cdp.evaluate("new Promise((r) => setTimeout(r, 120))");
+    await cdp.screenshot(path.join(evidenceDir, "25-1-mc-quizlet.png"), '[data-quiz="mc"]');
   }
 
   await cdp.goto(pageUrl("25-3.html"));
-  await cdp.evaluate(`document.querySelector('.section-dse a[href="summary.html#dse-mc-2019-31"]').click()`);
   const target = await waitFor(async () => {
     const found = await cdp.evaluate(`(function () {
+      var next = document.querySelector('[data-quiz="mc"] [data-quiz-next]');
       var paper = document.getElementById("dse-mc-2019-31");
+      if (paper && !paper.classList.contains("is-current") && next) next.click();
+      paper = document.getElementById("dse-mc-2019-31");
+      var img = paper && paper.querySelector("img");
       return {
         href: location.href,
+        hidden: !!(paper && !paper.classList.contains("is-current")),
         paper: !!paper,
-        image: !!(paper && paper.querySelector("img") && paper.querySelector("img").complete && paper.querySelector("img").naturalWidth > 0)
+        image: !!(img && img.complete && img.naturalWidth > 0)
       };
     })()`);
-    if (!found.paper || !found.image) throw new Error("DSE target not ready");
+    if (!found.paper || found.hidden || !found.image) throw new Error("DSE target not ready");
     return found;
   }, 10000, "topic-matched DSE paper");
-  assert.match(target.href, /summary\.html#dse-mc-2019-31$/);
+  assert.match(target.href, /25-3\.html/);
+  assert.equal(target.paper, true);
+});
+
+chromeTest("Export PDF prints once after scans settle", async () => {
+  await cdp.goto(pageUrl("25-1.html"));
+  const result = await cdp.evaluate(`(function () {
+    function fakeImg(complete, raceOnSubscribe) {
+      var listeners = {};
+      return {
+        complete: complete,
+        addEventListener: function (type, fn) {
+          (listeners[type] = listeners[type] || []).push(fn);
+          if (raceOnSubscribe) this.complete = true;
+        },
+        fire: function (type) {
+          this.complete = true;
+          (listeners[type] || []).slice().forEach(function (fn) { fn(); });
+        }
+      };
+    }
+    function withOpen(images, fn) {
+      var prints = 0;
+      var orig = window.open;
+      window.open = function () {
+        return {
+          document: {
+            open: function () {},
+            write: function () {},
+            close: function () {},
+            images: images
+          },
+          focus: function () {},
+          print: function () { prints += 1; }
+        };
+      };
+      try {
+        document.querySelector("[data-quiz-export]").click();
+        return fn(images, function () { return prints; });
+      } finally {
+        window.open = orig;
+      }
+    }
+    var racePrints = withOpen([fakeImg(true, false), fakeImg(false, true)], function (imgs, n) {
+      return n();
+    });
+    var mixed = fakeImg(false, false);
+    var mixedPrints = withOpen([fakeImg(false, true), mixed], function (imgs, n) {
+      var during = n();
+      imgs[1].fire("load");
+      var once = n();
+      imgs[1].fire("load");
+      return { during: during, once: once, twice: n() };
+    });
+    var loading = fakeImg(false, false);
+    var loadPrints = withOpen([loading], function (imgs, n) {
+      var before = n();
+      imgs[0].fire("load");
+      var once = n();
+      imgs[0].fire("load");
+      return { before: before, once: once, twice: n() };
+    });
+    return { racePrints: racePrints, mixedPrints: mixedPrints, loadPrints: loadPrints };
+  })()`);
+  assert.equal(result.racePrints, 1, "a scan that completes after subscribe must still print");
+  assert.equal(result.mixedPrints.during, 0, "must not print while later scans are still being subscribed");
+  assert.equal(result.mixedPrints.once, 1);
+  assert.equal(result.mixedPrints.twice, 1, "a mixed cache must print once after every scan settles");
+  assert.equal(result.loadPrints.before, 0);
+  assert.equal(result.loadPrints.once, 1);
+  assert.equal(result.loadPrints.twice, 1, "a late load after print must not print again");
 });
 });
