@@ -27,6 +27,4 @@ Access model:
 
 Monthly cost (as of Sep 2026): Cloud Run's Always Free tier covers 2 million requests, 180,000 vCPU-seconds and 360,000 GiB-seconds per month, and the service scales to zero between visits, so compute is expected to be $0. Artifact Registry storage stays under its 0.5 GB free allowance. Outbound traffic from `asia-east2` is charged (~$0.12/GB); the whole site is about 1.3 MB compressed, so even a few hundred visits a month is cents.
 
-## Prior asia-east1 deployment
-
-The service previously ran in `asia-east1` (Taiwan); the captain asked to move it to `asia-east2` (Hong Kong) instead. That `asia-east1` service and its Artifact Registry repository are left running as-is at https://paper2notes-152505675251.asia-east1.run.app/ — still serving a stale manual snapshot from before this deploy setup was finished — pending a separate decision on whether to remove them.
+The service originally ran in `asia-east1` (Taiwan); it and its Artifact Registry repository were deleted after the move to `asia-east2` (Hong Kong).
