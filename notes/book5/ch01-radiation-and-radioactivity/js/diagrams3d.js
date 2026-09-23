@@ -1919,7 +1919,6 @@
     }
     fitImaging();
     window.addEventListener("resize", fitImaging);
-    var hudX = host.querySelector('[data-hud="xrays"]');
     var hudBone = host.querySelector('[data-hud="bone"]');
     var hudFlesh = host.querySelector('[data-hud="flesh"]');
     var hudFilm = host.querySelector('[data-hud="film"]');
@@ -2201,7 +2200,6 @@
       addRay(sp, 0.16 + row * rowDelay + col * 0.006, true, cells[row * cols + col]);
     });
     var duration = Math.max.apply(null, rays.map(function (ray) { return ray.arrival; })) + 0.7;
-    var xrayAnchor = new THREE.Vector3(0.1, startY - 0.1, -0.85);
     var t0 = performance.now();
     var lastT = -1;
     var paused = false;
@@ -2210,7 +2208,6 @@
       var previous = lastT;
       lastT = sec;
       if (previous < duration || sec < duration) paintFilm(sec);
-      placeHud(hudX, canvas, gfx.camera, xrayAnchor);
       placeHud(hudBone, canvas, gfx.camera, new THREE.Vector3(0.04, 0.92 + handLift, 0.48));
       placeHud(hudFlesh, canvas, gfx.camera, new THREE.Vector3(-0.22, 0.3 + handLift, -1.16));
       placeHud(hudFilm, canvas, gfx.camera, new THREE.Vector3(0.08, filmY - 0.02, 2.05));
@@ -2283,7 +2280,6 @@
       hand.traverse(function (obj) {
         if (obj.isMesh) addNdc(obj.getWorldPosition(new THREE.Vector3()));
       });
-      addNdc(xrayAnchor);
       addBoxCorners(meshWorldBox(film));
       addBoxCorners(meshWorldBox(cassette));
       return {

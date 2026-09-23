@@ -348,7 +348,7 @@ chromeTest("25.1 imaging is X-rays down through a hand onto film that starts whi
   assert.equal(img.clipped, false, "Fig 25.7 should stay inside the canvas, ndc x=" + img.fillMinX + ".." + img.fillMaxX + " y=" + img.fillMinY + ".." + img.fillMaxY);
   assert.equal(img.raysDown, true);
   assert.equal(img.replay, true);
-  assert.ok(img.labels.includes("X-rays"));
+  assert.ok(!img.labels.includes("X-rays"), "no X-rays label points at an undrawn ray");
   assert.ok(img.labels.includes("photographic film"));
 
   if (evidenceDir) {
@@ -402,6 +402,8 @@ chromeTest("25.1 film exposure follows arriving rays and bone shadows stay white
   const later = await at(initial.duration + 2);
   assert.deepEqual(later.cells, final.cells, "the final radiograph holds without flicker");
   assert.equal(later.drawnRays, 0, "no ray remnant is left once the animation settles");
+  const xraysLabels = await cdp.evaluate(`document.querySelectorAll('#imaging-vis [data-hud="xrays"]').length`);
+  assert.equal(xraysLabels, 0, "no X-rays label is left over the hand");
   const replay = await cdp.evaluate(`(function () {
     window.NotesScenes.imaging.replay();
     return window.NotesScenes.imaging.snapshot();
