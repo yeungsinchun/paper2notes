@@ -10,6 +10,8 @@ HTML notes live under `notes/`. Open a chapter `index.html` in a browser (no bui
 
 Book 5 drafts: `notes/book5/ch01-radiation-and-radioactivity/` and `notes/book5/ch02-rate-of-decay-and-uses-of-radionuclides/`. Motion figures use local three.js (`js/lib/three.min.js`, no build). Maths uses vendored KaTeX at `notes/book5/vendor/katex/` (no CDN). Syllabus "Students should be able to" bullets sit in a Learning objectives block at the top of each student page; wording comes from `ch5.pdf` (HKDSE Physics Compulsory Part: Radioactivity and Nuclear Energy). Classified DSE papers live in each subsection as separate MC and LQ end-of-section quizzes (one item at a time, Prev/Next), not as year chips on those bullets and not as a dump on `summary.html`. Images come from gitignored `notes/book5/_local/dse/`. Browser interactives are covered by each chapter's `js/notes.interactives.test.mjs` (needs Google Chrome; the DSE-quiz test also needs those local scans, so it fails in a checkout without `_local/dse/`).
 
+Hosting: `notes/` is served by nginx in a container on Cloud Run (`deploy/cloudrun/README.md` has project, service URL, and access model). `.github/workflows/deploy.yml` runs `deploy/cloudrun/deploy.sh` on push to `main`; `deploy/cloudrun/provision.sh` is the idempotent source of truth for the cloud resources. The root `.dockerignore` keeps `notes/_source/`, `_local/`, and tests out of the image.
+
 ## Maintaining this file
 
 Keep this file for knowledge useful to almost every future agent session in this project.
