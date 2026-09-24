@@ -84,6 +84,43 @@ function isKnownLocalOnly(withoutFragment) {
   return withoutFragment.split("/").includes("_local");
 }
 
+// Map cards (.toc / .chapter-cards links) may embed KaTeX inline math, which
+// renders as nested <span> elements. A bare descendant selector such as
+// `.toc a span:not(.num)` also matches those KaTeX-internal spans and forces
+// them to display:block, stacking the equation vertically (see Book 5 Ch.2
+// map, 26.1 card). Card description rules must use the child combinator
+// (`.toc a > span:not(.num)`) so they only hit the direct description span.
+function checkMapCardCss() {
+  if (!existsSync(book5Dir)) return;
+  const cssFiles = walkCssFiles(book5Dir);
+  const badSelectorRe = /(^|[,}\s])(\.toc|\.chapter-cards)\s+a\s+span(?![\w-])/;
+  for (const file of cssFiles) {
+    const contents = readFileSync(file, "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const rules = contents.split("{");
+    for (let i = 0; i < rules.length - 1; i++) {
+      const selector = rules[i].slice(rules[i].lastIndexOf("}") + 1);
+      if (badSelectorRe.test(" " + selector)) {
+        fail(
+          `Map card CSS uses a descendant span selector that also restyles KaTeX internals in ${relative(repoRoot, file)}: "${selector.trim()}" (use ".toc a > span" / ".chapter-cards a > span" instead)`
+        );
+      }
+    }
+  }
+}
+
+function walkCssFiles(dir, out = []) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      if (entry.name === "vendor") continue;
+      walkCssFiles(full, out);
+    } else if (entry.isFile() && entry.name.endsWith(".css")) {
+      out.push(full);
+    }
+  }
+  return out;
+}
+
 function checkRelativeLinks() {
   if (!existsSync(notesDir)) return;
   const htmlFiles = walkHtmlFiles(notesDir);
@@ -118,6 +155,8 @@ if (existsSync(book5Dir)) {
 }
 
 checkRelativeLinks();
+
+checkMapCardCss();
 
 if (errors.length > 0) {
   console.error(`ci-check: ${errors.length} problem(s) found:\n`);
