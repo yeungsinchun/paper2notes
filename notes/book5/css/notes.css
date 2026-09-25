@@ -490,7 +490,7 @@ p { margin: 0.45rem 0; }
   font-weight: 600;
 }
 
-.toc a span:not(.num), .chapter-cards a span:not(.num) {
+.toc a > span:not(.num), .chapter-cards a > span:not(.num) {
   display: block;
   grid-column: 2;
   color: var(--muted);
