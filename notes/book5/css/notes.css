@@ -498,13 +498,6 @@ p { margin: 0.45rem 0; }
   margin-top: 0.15rem;
 }
 
-/* KaTeX renders math as nested spans; the child combinator above keeps
-   card rules off those internals, and this keeps an inline equation in a
-   card description on one line (it wraps only as a whole). */
-.toc a .katex, .chapter-cards a .katex {
-  white-space: nowrap;
-}
-
 /* ---------- sections ---------- */
 
 .idea {
