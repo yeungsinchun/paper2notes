@@ -27,3 +27,6 @@ __pycache__/
 # Generated scratch
 *.tmp
 notes/_source/**/_scratch/
+
+# Lavish review pages (local review artifacts; never committed)
+.lavish/

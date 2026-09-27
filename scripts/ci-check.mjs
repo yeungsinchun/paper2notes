@@ -150,6 +150,63 @@ if (!existsSync(notesDir)) {
   process.exit(0);
 }
 
+// The Cloud Run service moved from asia-east1 to asia-east2 and the old
+// asia-east1 service was deleted, so any *.run.app URL pointing at the old
+// region serves Google's generic "Error: Page not found" page for every
+// path (including /, /book5/ and /book5/index.html), which looks like a
+// missing route in the container. Guard against reintroducing the stale
+// host: every region-scoped *.run.app URL in the deploy docs/config must
+// use the Deploy workflow's GCP_REGION, and the deploy scripts' region
+// defaults must agree with it.
+const SITE_URL_FILES = [
+  "README.md",
+  "deploy/cloudrun/README.md",
+  "deploy/cloudrun/deploy.sh",
+  "deploy/cloudrun/provision.sh",
+  ".github/workflows/deploy.yml",
+];
+const REGION_SCOPED_RUN_APP_RE = /[A-Za-z0-9-]+\.(asia-[a-z]+\d+)\.run\.app/g;
+
+function checkSiteRegionConsistency() {
+  const workflowFile = join(repoRoot, ".github/workflows/deploy.yml");
+  if (!existsSync(workflowFile)) {
+    fail("Cannot determine deploy region: .github/workflows/deploy.yml is missing");
+    return;
+  }
+  const workflow = readFileSync(workflowFile, "utf8");
+  const regionMatch = workflow.match(/GCP_REGION:\s*([a-z0-9-]+)/);
+  if (!regionMatch) {
+    fail("Cannot determine deploy region: GCP_REGION not found in .github/workflows/deploy.yml");
+    return;
+  }
+  const region = regionMatch[1];
+
+  for (const script of ["deploy/cloudrun/deploy.sh", "deploy/cloudrun/provision.sh"]) {
+    const file = join(repoRoot, script);
+    if (!existsSync(file)) continue;
+    const contents = readFileSync(file, "utf8");
+    const defMatch = contents.match(/\$\{GCP_REGION:-([a-z0-9-]+)\}/);
+    if (defMatch && defMatch[1] !== region) {
+      fail(`${script} defaults to region "${defMatch[1]}" but the Deploy workflow uses "${region}"`);
+    }
+  }
+
+  for (const name of SITE_URL_FILES) {
+    const file = join(repoRoot, name);
+    if (!existsSync(file)) continue;
+    const contents = readFileSync(file, "utf8");
+    let match;
+    REGION_SCOPED_RUN_APP_RE.lastIndex = 0;
+    while ((match = REGION_SCOPED_RUN_APP_RE.exec(contents)) !== null) {
+      if (match[1] !== region) {
+        fail(`${name} references a *.run.app URL in region "${match[1]}" but the Deploy workflow uses "${region}" (stale region hosts serve a generic not-found page for every path)`);
+      }
+    }
+  }
+}
+
+checkSiteRegionConsistency();
+
 if (existsSync(book5Dir)) {
   checkBook5Structure();
 }
