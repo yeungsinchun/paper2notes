@@ -352,7 +352,7 @@ async function tryCdpScreenshots(pageUrls, serverPort, outDir, figureInfos) {
           const quad = box.model.border;
           const rect = { x: Math.min(quad[0], quad[2], quad[4], quad[6]), y: Math.min(quad[1], quad[3], quad[5], quad[7]), width: box.model.width, height: box.model.height };
           if (!rect.width || !rect.height || rect.width > 5000 || rect.height > 5000) throw new Error(`Invalid figure bounds ${i}`);
-          const shot = await withTimeout(cdp.send("Page.captureScreenshot", { format: "png", captureBeyondViewport: true, clip: { ...rect, scale: 2 } }), CAPTURE_MS, `capture ${i}`);
+          const shot = await withTimeout(cdp.send("Page.captureScreenshot", { format: "png", captureBeyondViewport: true, clip: { ...rect, scale: 1 } }), CAPTURE_MS, `capture ${i}`);
           fs.writeFileSync(path.join(outDir, `fig-${fig.page}-${fig.anchor}-${frame}.png`), Buffer.from(shot.data, "base64"));
         }
       }
