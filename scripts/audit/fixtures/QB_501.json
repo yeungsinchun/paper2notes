@@ -1,0 +1,91 @@
+{
+  "bank": "QB_501",
+  "generated_at": "2026-09-26T17:35:24.727Z",
+  "items": [
+    {
+      "id": "PHY15011101",
+      "bank": "QB_501",
+      "book": "5",
+      "chapter": "01",
+      "type": "mc",
+      "marks": 2,
+      "level": "easy",
+      "part": "core",
+      "stem": {
+        "text": "Which statements about ionizing radiation is/are correct? (1) energy high enough to strike electrons out (2) radiation in form of ions (3) X-rays are ionizing",
+        "ocr": "",
+        "equations": 0,
+        "has_figure": false
+      },
+      "options": [
+        {
+          "label": "A",
+          "text": "(1) only"
+        },
+        {
+          "label": "B",
+          "text": "(2) only"
+        },
+        {
+          "label": "C",
+          "text": "(1) and (3) only"
+        },
+        {
+          "label": "D",
+          "text": "(2) and (3) only"
+        }
+      ],
+      "answer": {
+        "status": "present",
+        "key": "C"
+      },
+      "images": {
+        "stem": [],
+        "answer": []
+      },
+      "sources": []
+    },
+    {
+      "id": "PHY15011201",
+      "bank": "QB_501",
+      "book": "5",
+      "chapter": "01",
+      "type": "sq",
+      "marks": 3,
+      "level": "easy",
+      "part": "core",
+      "stem": {
+        "text": "Describe how X-rays are produced in an X-ray tube.",
+        "ocr": ""
+      },
+      "answer": {
+        "status": "present"
+      },
+      "images": {
+        "stem": [],
+        "answer": []
+      }
+    },
+    {
+      "id": "PHY15011301",
+      "bank": "QB_501",
+      "book": "5",
+      "chapter": "01",
+      "type": "lq",
+      "marks": 6,
+      "level": "avg",
+      "part": "core",
+      "stem": {
+        "text": "Compare alpha, beta and gamma in penetrating power and ionizing power.",
+        "ocr": ""
+      },
+      "answer": {
+        "status": "present"
+      },
+      "images": {
+        "stem": [],
+        "answer": []
+      }
+    }
+  ]
+}
