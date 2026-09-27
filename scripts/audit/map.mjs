@@ -16,6 +16,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { pagesForBank } from "./bank-pages.mjs";
@@ -27,7 +28,7 @@ function readPrompt(p) {
   return fs.readFileSync(path.join(__dirname, "prompts", p), "utf8");
 }
 function parseArgs(argv) {
-  const out = { items: null, bank: null, outDir: path.join(repoRoot, ".audit/mapping"), bundleDir: null, fixture: null };
+  const out = { items: null, bank: null, outDir: path.join(repoRoot, ".audit/mapping"), bundleDir: null, fixture: null, force: false };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--items" && argv[i + 1]) out.items = path.resolve(argv[++i]);
@@ -35,6 +36,7 @@ function parseArgs(argv) {
     else if (a === "--out" && argv[i + 1]) out.outDir = path.resolve(argv[++i]);
     else if (a === "--bundle" && argv[i + 1]) out.bundleDir = path.resolve(argv[++i]);
     else if (a === "--fixture" && argv[i + 1]) out.fixture = path.resolve(argv[++i]);
+    else if (a === "--force") out.force = true;
   }
   return out;
 }
@@ -127,7 +129,7 @@ ${bundleNotes ? bundleNotes.slice(0, 8000) : "(no bundle)"}
 }
 
 async function main() {
-  const { items, bank, outDir, bundleDir, fixture } = parseArgs(process.argv.slice(2));
+  const { items, bank, outDir, bundleDir, fixture, force } = parseArgs(process.argv.slice(2));
   fs.mkdirSync(outDir, { recursive: true });
 
   let itemFiles = [];
@@ -176,6 +178,20 @@ async function main() {
       if (fs.existsSync(possibleBundle)) bundleNotes = fs.readFileSync(possibleBundle, "utf8");
     }
 
+    const outFile = path.join(outDir, `${bankName}.json`);
+    const piVersion = (() => { try { return spawnSync(process.env.PI_BIN || "pi", ["--version"], { encoding: "utf8" }).stdout.trim(); } catch { return "unknown"; } })();
+    const hash = crypto.createHash("sha256");
+    for (const part of [fs.readFileSync(file), readPrompt("map.system.md"), fs.readFileSync(fileURLToPath(import.meta.url)), piVersion, bundleNotes.replace(/^Generated: .*$/m, ""), ...sectionPages.flatMap((p) => [path.relative(repoRoot, p), fs.readFileSync(p)])]) hash.update(part).update("\0");
+    const inputsSha = hash.digest("hex");
+    if (!force && fs.existsSync(outFile)) {
+      try {
+        if (JSON.parse(fs.readFileSync(outFile, "utf8")).inputs_sha === inputsSha) {
+          console.log(`Mapping unchanged ${outFile}`);
+          continue;
+        }
+      } catch {}
+    }
+
     const mappings = [];
     for (const item of itemsList) {
       const res = await callPi(item, sectionInfos, bundleNotes);
@@ -186,11 +202,11 @@ async function main() {
       await new Promise((r) => setTimeout(r, 10));
     }
 
-    const outFile = path.join(outDir, `${bankName}.json`);
     const payload = {
       bank: bankName,
       generated_at: new Date().toISOString(),
-      tool_versions: { pi: (() => { try { return spawnSync(process.env.PI_BIN || "pi", ["--version"], { encoding: "utf8" }).stdout.trim(); } catch { return "unknown"; } })() },
+      inputs_sha: inputsSha,
+      tool_versions: { pi: piVersion },
       section_pages: sectionPages.map((p) => path.relative(repoRoot, p)),
       mappings,
     };

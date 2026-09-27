@@ -13,6 +13,7 @@
  */
 
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import crypto from "node:crypto";
 import { spawnSync, execFile } from "node:child_process";
@@ -159,55 +160,57 @@ async function processItem(item, bank, opts) {
   const solveScript = path.join(__dirname, "solve.mjs");
   const judgeScript = path.join(__dirname, "judge.mjs");
 
-  // Create item temp file
-  const tmpDir = fs.mkdtempSync(path.join(opts.outDir, "item-"));
-  const tmpItem = path.join(tmpDir, "item.json");
-  fs.writeFileSync(tmpItem, JSON.stringify(item), "utf8");
-
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "audit-item-"));
   const tiers = { S: { samples: [] }, B: { samples: [] } };
+  try {
+    const tmpItem = path.join(tmpDir, "item.json");
+    fs.writeFileSync(tmpItem, JSON.stringify(item), "utf8");
 
-  for (const tier of ["S", "B"]) {
-    const tierBundle = tier === "S" ? sBundle : bundleDir;
-    for (let sample = 0; sample < k; sample++) {
-      // Solve
-      const solveOut = path.join(tmpDir, `solve-${tier}-${sample}.json`);
-      const solveArgs = ["node", solveScript, "--item", tmpItem, "--bundle", tierBundle, "--out", solveOut, "--sample", String(sample)];
-      let sRes;
-      try { await execFileAsync(process.execPath, solveArgs.slice(1), { cwd: repoRoot, encoding: "utf8", timeout: 180000, maxBuffer: 20 * 1024 * 1024, env: process.env }); sRes = { status: 0 }; }
-      catch (error) { sRes = { status: error.code || 1, error, stderr: error.stderr }; }
-      let solveData;
-      try { solveData = JSON.parse(fs.readFileSync(solveOut, "utf8")); } catch {}
-      if (sRes.status !== 0 || solveData?.error || solveData?.solver?._fallback || !solveData) {
-        const error = [sRes.error && String(sRes.error), sRes.status !== 0 && `solve exited ${sRes.status}`, solveData?.error, solveData?.raw, sRes.stderr].filter(Boolean).join("; ").slice(0, 4000);
-        tiers[tier].samples.push({ error: error || "solve produced no result", judge: { cause: "execution-error" } });
-        try { fs.unlinkSync(solveOut); } catch {}
-        continue;
+    for (const tier of ["S", "B"]) {
+      const tierBundle = tier === "S" ? sBundle : bundleDir;
+      for (let sample = 0; sample < k; sample++) {
+        // Solve
+        const solveOut = path.join(tmpDir, `solve-${tier}-${sample}.json`);
+        const solveArgs = ["node", solveScript, "--item", tmpItem, "--bundle", tierBundle, "--out", solveOut, "--sample", String(sample)];
+        let sRes;
+        try { await execFileAsync(process.execPath, solveArgs.slice(1), { cwd: repoRoot, encoding: "utf8", timeout: 180000, maxBuffer: 20 * 1024 * 1024, env: process.env }); sRes = { status: 0 }; }
+        catch (error) { sRes = { status: error.code || 1, error, stderr: error.stderr }; }
+        let solveData;
+        try { solveData = JSON.parse(fs.readFileSync(solveOut, "utf8")); } catch {}
+        if (sRes.status !== 0 || solveData?.error || solveData?.solver?._fallback || !solveData) {
+          const error = [sRes.error && String(sRes.error), sRes.status !== 0 && `solve exited ${sRes.status}`, solveData?.error, solveData?.raw, sRes.stderr].filter(Boolean).join("; ").slice(0, 4000);
+          tiers[tier].samples.push({ error: error || "solve produced no result", judge: { cause: "execution-error" } });
+          try { fs.unlinkSync(solveOut); } catch {}
+          continue;
+        }
+        // Judge
+        const judgeOut = path.join(tmpDir, `judge-${tier}-${sample}.json`);
+        const judgeArgs = ["node", judgeScript, "--solve", solveOut, "--item", tmpItem, "--bundle", tierBundle, "--out", judgeOut];
+        let judgeError;
+        try { await execFileAsync(process.execPath, judgeArgs.slice(1), { cwd: repoRoot, encoding: "utf8", timeout: 180000, maxBuffer: 20 * 1024 * 1024, env: process.env }); }
+        catch (error) { judgeError = error; }
+        try {
+          const judgeData = JSON.parse(fs.readFileSync(judgeOut, "utf8"));
+          if (judgeError || judgeData.error || judgeData.judge?.cause === "unjudged") throw new Error(String(judgeError?.stderr || judgeError || judgeData.error || "judge returned unjudged"));
+          tiers[tier].samples.push({ answer: solveData.solver || solveData, judge: judgeData.judge || judgeData, quote_check: judgeData.quote_check, leakage: judgeData.leakage });
+          // cleanup tmp solve/judge
+          try { fs.unlinkSync(solveOut); } catch {}
+          try { fs.unlinkSync(judgeOut); } catch {}
+        } catch (e) {
+          tiers[tier].samples.push({ error: String(e), judge: { cause: "execution-error" } });
+        }
       }
-      // Judge
-      const judgeOut = path.join(tmpDir, `judge-${tier}-${sample}.json`);
-      const judgeArgs = ["node", judgeScript, "--solve", solveOut, "--item", tmpItem, "--bundle", tierBundle, "--out", judgeOut];
-      let judgeError;
-      try { await execFileAsync(process.execPath, judgeArgs.slice(1), { cwd: repoRoot, encoding: "utf8", timeout: 180000, maxBuffer: 20 * 1024 * 1024, env: process.env }); }
-      catch (error) { judgeError = error; }
-      try {
-        const judgeData = JSON.parse(fs.readFileSync(judgeOut, "utf8"));
-        if (judgeError || judgeData.error || judgeData.judge?.cause === "unjudged") throw new Error(String(judgeError?.stderr || judgeError || judgeData.error || "judge returned unjudged"));
-        tiers[tier].samples.push({ answer: solveData.solver || solveData, judge: judgeData.judge || judgeData, quote_check: judgeData.quote_check, leakage: judgeData.leakage });
-        // cleanup tmp solve/judge
-        try { fs.unlinkSync(solveOut); } catch {}
-        try { fs.unlinkSync(judgeOut); } catch {}
-      } catch (e) {
-        tiers[tier].samples.push({ error: String(e), judge: { cause: "execution-error" } });
-      }
+      // Verdict per tier: need ≥2 of 3 samples satisfying condition (plan §4.7)
+      // For K=3 need 2, for K=1 need 1, general ceil(K*2/3).
+      const need = Math.max(1, Math.ceil(tiers[tier].samples.length * 2 / 3));
+      const passCount = tiers[tier].samples.filter(s => {
+        const j = s.judge || {};
+        return j.cause === "ok" && s.quote_check?.passed === true && !j.step_judgements?.some(step => step.verdict !== "supported") && (item.type === "mc" ? j.mc_correct === true : Array.isArray(j.marking) && j.marking.length > 0 && j.marking.every(point => point.verdict === "earned"));
+      }).length;
+      tiers[tier].verdict = passCount >= need ? "pass" : (tiers[tier].samples.some(s => s.judge.cause === "execution-error") ? "error" : tiers[tier].samples.some(s => s.judge.cause === "knowledge-gap") ? "gap" : "fail");
     }
-    // Verdict per tier: need ≥2 of 3 samples satisfying condition (plan §4.7)
-    // For K=3 need 2, for K=1 need 1, general ceil(K*2/3).
-    const need = Math.max(1, Math.ceil(tiers[tier].samples.length * 2 / 3));
-    const passCount = tiers[tier].samples.filter(s => {
-      const j = s.judge || {};
-      return j.cause === "ok" && s.quote_check?.passed === true && !j.step_judgements?.some(step => step.verdict !== "supported") && (item.type === "mc" ? j.mc_correct === true : Array.isArray(j.marking) && j.marking.length > 0 && j.marking.every(point => point.verdict === "earned"));
-    }).length;
-    tiers[tier].verdict = passCount >= need ? "pass" : (tiers[tier].samples.some(s => s.judge.cause === "execution-error") ? "error" : tiers[tier].samples.some(s => s.judge.cause === "knowledge-gap") ? "gap" : "fail");
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 
   // Determine overall verdict per plan §4.7
@@ -243,7 +246,6 @@ async function processItem(item, bank, opts) {
   ensureDir(cacheDir);
   if (verdict !== "error") fs.writeFileSync(cachePath, JSON.stringify(result, null, 2), "utf8");
   fs.writeFileSync(resultPath, JSON.stringify(result, null, 2), "utf8");
-  fs.rmSync(tmpDir, { recursive: true, force: true });
   return { id: item.id, cached: false, result };
 }
 
@@ -280,8 +282,9 @@ async function main() {
       const fixture = opts.fixture;
       const args = ["node", mapScript, "--bank", bank, "--out", opts.mappingDir, "--bundle", bundleDir];
       if (fixture) args.push("--fixture", fixture);
+      if (opts.regress) args.push("--force");
       console.log(`Mapping ${bank}...`);
-      const r = spawnSync(process.execPath, args.slice(1), { encoding: "utf8", timeout: 120000, env: process.env });
+      const r = spawnSync(process.execPath, args.slice(1), { encoding: "utf8", env: process.env });
       if (r.status !== 0) throw new Error(`map ${bank} failed: ${r.stderr?.slice(0, 500)}`);
   }
 
