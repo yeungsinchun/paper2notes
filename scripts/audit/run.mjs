@@ -3,9 +3,9 @@
  * run.mjs — Global concurrency pool, resume, cache (plan §§4.3-4.7, 5 P2 detail)
  *
  * Features per plan:
- * - Global concurrency pool (ramp 8 → 16 → 32, back-off on 429)
- * - Resume: skip items whose result already exists on disk
- * - Cache keyed by item sha + bundle sha + prompt sha + model + pi version
+ * - Global concurrency pool with configurable size and failure back-off
+ * - Resume: reuse results only when the current input cache key matches
+ * - Cache keyed by item, image, bundle, mapping, prompt, code, model, pi version, and sample count
  * - Prompts are versioned via sha256
  * - Supports --bank, --all, --regress, --fixture, --concurrency
  *

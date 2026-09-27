@@ -6,7 +6,7 @@
  * Inputs: item crop + text, section titles + LO bullets, idea headings.
  * Returns {section, confidence, secondary[]}
  *
- * Book 2 maps trivially to its chapter page, but still records A-D sub-section.
+ * Each item is mapped by pi to a section page in its bank's chapter.
  * Items with confidence < 0.6 get tier S = all sections of the chapter.
  *
  * Output: .audit/mapping/<bank>.json
@@ -145,7 +145,7 @@ async function main() {
     if (found) itemFiles = [found];
     else {
       console.error(`No item file for bank ${bank}. Tried: ${candidates.join(", ")}`);
-      // Allow empty mapping for fixture-less test: create 3-item fixture
+      // Leave itemFiles empty so the missing input is reported below.
       itemFiles = [];
     }
   } else if (fixture) {

@@ -4,11 +4,11 @@
  *
  * Inputs: .audit/results/<bank>/<id>.json
  * Outputs:
- * - .audit/coverage.json (per-section / per-chapter coverage, §4.7 completeness)
- * - .audit/lavish/qb-audit/index.html (Lavish board, local only, contains QB crops)
+ * - .audit/coverage.json (per-bank and per-section coverage)
+ * - .audit/lavish/qb-audit/index.html (local coverage board with item ids)
  *
  * Never pastes QB stems or crops into notes/ or PR (plan D3): board lives under .audit/ (gitignored)
- * and is not copied into notes/. The coverage JSON contains only ids and counts.
+ * and is not copied into notes/. The coverage JSON contains ids, counts, and verdicts.
  */
 
 import fs from "node:fs";

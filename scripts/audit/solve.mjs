@@ -3,9 +3,9 @@
  * solve.mjs — Notes-only solver (plan §4.5)
  *
  * One item = one stateless pi -p --no-tools process.
- * The solver sees ONLY the NOTES bundle (notes.md + fig-*.png) plus the
- * numbered PRIOR allowlist and the item crop/image. It never sees the
- * answer crop or key.
+ * The solver sees ONLY the NOTES bundle (notes.md, figures, and available
+ * in-page DSE deck images), the numbered PRIOR allowlist, and the item stem
+ * and image. It never sees the answer crop or key.
  *
  * Sampling: K=3 independent samples at thinking high; judge runs at max.
  * No-notes baseline: K=1 with empty NOTES file (for prior-leak calibration).

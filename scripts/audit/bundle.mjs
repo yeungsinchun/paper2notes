@@ -3,7 +3,7 @@
  * bundle.mjs — Notes bundle extractor (plan §4.3 + D4 override)
  *
  * Extracts student-visible content from one or more notes HTML pages into
- * a deterministic bundle for the notes-only solver. Implements plan
+ * a bundle for the notes-only solver. Implements plan
  * sections 4.3–4.7 as adjusted by captain decision D4:
  *   - D4: the bundle INCLUDES the in-page DSE past-paper decks
  *         (section.section-dse), like the existing 25.1 page shows them.
