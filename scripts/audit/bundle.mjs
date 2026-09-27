@@ -278,10 +278,10 @@ const chromePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome
 
 async function tryCdpScreenshots(pageUrls, serverPort, outDir, figureInfos) {
   // Hard timeout for the whole CDP session (plan requirement: never block indefinitely)
-  const OVERALL_MS = 120000;
+  const OVERALL_MS = 360000;
   const NAV_MS = 15000;
   const EVALUATE_MS = 8000;
-  const CAPTURE_MS = 5000;
+  const CAPTURE_MS = 15000;
   if (!fs.existsSync(chromePath)) return false;
   let chromeProc = null;
   let profileDir = null;
@@ -293,7 +293,6 @@ async function tryCdpScreenshots(pageUrls, serverPort, outDir, figureInfos) {
       chromePath,
       [
         "--headless=new",
-        "--use-angle=swiftshader",
         "--no-first-run",
         "--no-default-browser-check",
         "--disable-extensions",

@@ -78,9 +78,11 @@ function pLimit(concurrency) {
 
 function buildBundle(pages, outDir) {
   ensureDir(outDir);
-  const result = spawnSync("node", [path.join(__dirname, "bundle.mjs"), ...pages, "--out", outDir], { encoding: "utf8", timeout: 120000 });
-  if (result.status !== 0) throw new Error(`Bundle failed: ${result.stderr || result.stdout}`);
-  return JSON.parse(fs.readFileSync(path.join(outDir, "manifest.json"), "utf8"));
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const result = spawnSync("node", [path.join(__dirname, "bundle.mjs"), ...pages, "--out", outDir], { encoding: "utf8", timeout: 390000 });
+    if (result.status === 0) return JSON.parse(fs.readFileSync(path.join(outDir, "manifest.json"), "utf8"));
+    if (attempt === 1) throw new Error(`Bundle failed: ${result.stderr || result.stdout || result.error}`);
+  }
 }
 
 function buildBundleForBank(bank, bundleOut) {
@@ -121,7 +123,11 @@ async function processItem(item, bank, opts) {
   const sPages = mapped?.confidence >= 0.6 && chosen ? [chosen] : sectionPages;
   const summary = pages.filter(p => path.basename(p) === "summary.html");
   const sBundle = path.join(opts.bundleOut, bank, "S", sectionForTier);
-  buildBundle([...sPages, ...summary], sBundle);
+  const sectionKey = JSON.stringify([sBundle, ...sPages, ...summary]);
+  if (!opts.builtSections.has(sectionKey)) {
+    buildBundle([...sPages, ...summary], sBundle);
+    opts.builtSections.add(sectionKey);
+  }
   const bundleSha = [loadBundleSha(sBundle), loadBundleSha(bundleDir)].join(":");
   const itemSha = sha256Hex(JSON.stringify(item));
   const promptSha = readPromptSha("solver.system.md") + readPromptSha("solver.user.md") + readPromptSha("judge.system.md");
@@ -272,6 +278,8 @@ async function main() {
   const limit = pLimit(opts.concurrency);
   let total = 0;
   let completed = 0;
+  let failed = 0;
+  opts.builtSections = new Set();
   const start = Date.now();
   const backoff = { failures: 0 };
 
@@ -296,6 +304,7 @@ async function main() {
         }
         return res;
       } catch (e) {
+        failed++;
         backoff.failures++;
         console.error(`Item ${item.id} failed: ${e.message}`);
         // Write defect result
@@ -311,6 +320,7 @@ async function main() {
   console.log(`Done: ${completed}/${total} in ${elapsed}s, concurrency ${opts.concurrency}`);
   console.log(`Results: ${opts.outDir}`);
   console.log(`Cache: ${opts.cacheDir} (keyed by item sha + bundle sha + prompt sha + model + pi version)`);
+  if (failed || completed !== total) process.exitCode = 1;
 
 }
 
