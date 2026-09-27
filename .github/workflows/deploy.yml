@@ -1,19 +1,18 @@
-name: Deploy
+name: Deploy (disabled — cut over to paper2everything)
 
-# Publishes notes/ to Cloud Run after every merge to main. Authentication is
-# Workload Identity Federation: GitHub's OIDC token is exchanged for a
-# short-lived token of the deployer service account, so the repository holds
-# no cloud keys. The two secrets are identifiers written by
-# deploy/cloudrun/provision.sh, not credentials.
+# DISABLED: Cloud Run deploys have moved from this repository to the monorepo
+# yeungsinchun/paper2everything (see PR https://github.com/yeungsinchun/paper2everything/pull/1
+# and its stacked cutover PR). The monorepo's .github/workflows/deploy-notes.yml
+# now builds paper2notes/notes and rolls out to the SAME existing Cloud Run
+# service/region (paper2notes-site / asia-east2 /
+# https://paper2notes-152505675251.asia-east2.run.app/) so the public URL
+# keeps working. This workflow's `push` trigger has been removed so merges to
+# main in this repo no longer deploy, and the job is guarded with `if: false`
+# so even a manual `workflow_dispatch` does not roll out. Delete this file
+# entirely after the cutover is verified and the WIF/secrets have been moved
+# to paper2everything.
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "notes/**"
-      - "deploy/cloudrun/**"
-      - ".dockerignore"
-      - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
 concurrency:
@@ -26,6 +25,7 @@ permissions:
 
 jobs:
   deploy:
+    if: false
     name: Deploy to Cloud Run
     runs-on: ubuntu-latest
     environment:
