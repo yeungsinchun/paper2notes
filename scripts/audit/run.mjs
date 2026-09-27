@@ -15,12 +15,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
-import { spawnSync } from "node:child_process";
+import { spawnSync, execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import { pagesForBank, cumulativePagesForBank } from "./bank-pages.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "../..");
+const execFileAsync = promisify(execFile);
 
 function sha256Hex(s) { return crypto.createHash("sha256").update(s).digest("hex"); }
 function readPromptSha(name) {
@@ -76,16 +78,19 @@ function pLimit(concurrency) {
   });
 }
 
-function buildBundle(pages, outDir) {
+async function buildBundle(pages, outDir) {
   ensureDir(outDir);
   for (let attempt = 0; attempt < 2; attempt++) {
-    const result = spawnSync("node", [path.join(__dirname, "bundle.mjs"), ...pages, "--out", outDir], { encoding: "utf8", timeout: 390000 });
-    if (result.status === 0) return JSON.parse(fs.readFileSync(path.join(outDir, "manifest.json"), "utf8"));
-    if (attempt === 1) throw new Error(`Bundle failed: ${result.stderr || result.stdout || result.error}`);
+    try {
+      await execFileAsync(process.execPath, [path.join(__dirname, "bundle.mjs"), ...pages, "--out", outDir], { encoding: "utf8", timeout: 390000 });
+      return JSON.parse(fs.readFileSync(path.join(outDir, "manifest.json"), "utf8"));
+    } catch (error) {
+      if (attempt === 1) throw new Error(`Bundle failed: ${error.stderr || error.stdout || error}`);
+    }
   }
 }
 
-function buildBundleForBank(bank, bundleOut) {
+async function buildBundleForBank(bank, bundleOut) {
   return buildBundle(cumulativePagesForBank(repoRoot, bank), path.join(bundleOut, bank));
 }
 
@@ -122,27 +127,28 @@ async function processItem(item, bank, opts) {
   const chosen = sectionPages.find(p => path.basename(p, ".html") === sectionForTier);
   const sPages = mapped?.confidence >= 0.6 && chosen ? [chosen] : sectionPages;
   const summary = pages.filter(p => path.basename(p) === "summary.html");
-  const sBundle = path.join(opts.bundleOut, bank, "S", sectionForTier);
+  const sBundle = path.join(opts.bundleOut, bank, "S", mapped?.confidence >= 0.6 && chosen ? sectionForTier : "all");
   const sectionKey = JSON.stringify([sBundle, ...sPages, ...summary]);
-  if (!opts.builtSections.has(sectionKey)) {
-    buildBundle([...sPages, ...summary], sBundle);
-    opts.builtSections.add(sectionKey);
-  }
+  if (!opts.builtSections.has(sectionKey)) opts.builtSections.set(sectionKey, buildBundle([...sPages, ...summary], sBundle));
+  await opts.builtSections.get(sectionKey);
   const bundleSha = [loadBundleSha(sBundle), loadBundleSha(bundleDir)].join(":");
   const itemSha = sha256Hex(JSON.stringify(item));
-  const promptSha = readPromptSha("solver.system.md") + readPromptSha("solver.user.md") + readPromptSha("judge.system.md");
+  const promptSha = sha256Hex(["solver.system.md", "solver.user.md", "judge.system.md", "prior.md", "map.system.md"].map(readPromptSha).join("|"));
   const piVersion = getPiVersion();
   const model = "meta/muse-spark-1.2-contributor";
-  const key = cacheKey(itemSha, bundleSha, promptSha, model, piVersion);
+  const imageSha = sha256Hex([...(item.images?.stem || []), ...(item.images?.answer || [])].map(image => sha256Hex(fs.readFileSync(path.resolve(repoRoot, image)))).join("|"));
+  const mappingSha = sha256Hex(JSON.stringify(mapped || null));
+  const codeSha = sha256Hex(["run.mjs", "bundle.mjs", "map.mjs", "solve.mjs", "judge.mjs", "bank-pages.mjs"].map(name => sha256Hex(fs.readFileSync(path.join(__dirname, name)))).join("|"));
+  const key = cacheKey(itemSha, bundleSha, promptSha, model, [piVersion, mappingSha, imageSha, codeSha, k].join("|"));
   const cachePath = path.join(cacheDir, `${key}.json`);
   const resultPath = path.join(outDir, bank, `${item.id}.json`);
   if (!regress && fs.existsSync(resultPath)) {
     const existing = JSON.parse(fs.readFileSync(resultPath, "utf8"));
-    if (existing.verdict !== "error" && existing.bundle_sha === bundleSha && existing.prompt_sha === promptSha) return { id: item.id, cached: "result", result: existing };
+    if (existing.verdict !== "error" && existing.cache_key === key) return { id: item.id, cached: "result", result: existing };
   }
   if (!regress && fs.existsSync(cachePath)) {
     const cached = JSON.parse(fs.readFileSync(cachePath, "utf8"));
-    if (cached.verdict !== "error") {
+    if (cached.verdict !== "error" && cached.cache_key === key) {
       ensureDir(path.dirname(resultPath));
       fs.writeFileSync(resultPath, JSON.stringify(cached, null, 2));
       return { id: item.id, cached: "cache", result: cached };
@@ -154,7 +160,8 @@ async function processItem(item, bank, opts) {
   const judgeScript = path.join(__dirname, "judge.mjs");
 
   // Create item temp file
-  const tmpItem = path.join("/tmp", `item-${item.id}.json`);
+  const tmpDir = fs.mkdtempSync(path.join(opts.outDir, "item-"));
+  const tmpItem = path.join(tmpDir, "item.json");
   fs.writeFileSync(tmpItem, JSON.stringify(item), "utf8");
 
   const tiers = { S: { samples: [] }, B: { samples: [] } };
@@ -163,9 +170,11 @@ async function processItem(item, bank, opts) {
     const tierBundle = tier === "S" ? sBundle : bundleDir;
     for (let sample = 0; sample < k; sample++) {
       // Solve
-      const solveOut = path.join("/tmp", `solve-${item.id}-${tier}-${sample}.json`);
+      const solveOut = path.join(tmpDir, `solve-${tier}-${sample}.json`);
       const solveArgs = ["node", solveScript, "--item", tmpItem, "--bundle", tierBundle, "--out", solveOut, "--sample", String(sample)];
-      const sRes = spawnSync("node", solveArgs.slice(1), { cwd: repoRoot, encoding: "utf8", timeout: 180000, maxBuffer: 20 * 1024 * 1024, env: process.env });
+      let sRes;
+      try { await execFileAsync(process.execPath, solveArgs.slice(1), { cwd: repoRoot, encoding: "utf8", timeout: 180000, maxBuffer: 20 * 1024 * 1024, env: process.env }); sRes = { status: 0 }; }
+      catch (error) { sRes = { status: error.code || 1, error, stderr: error.stderr }; }
       let solveData;
       try { solveData = JSON.parse(fs.readFileSync(solveOut, "utf8")); } catch {}
       if (sRes.status !== 0 || solveData?.error || solveData?.solver?._fallback || !solveData) {
@@ -175,20 +184,20 @@ async function processItem(item, bank, opts) {
         continue;
       }
       // Judge
-      const judgeOut = path.join("/tmp", `judge-${item.id}-${tier}-${sample}.json`);
+      const judgeOut = path.join(tmpDir, `judge-${tier}-${sample}.json`);
       const judgeArgs = ["node", judgeScript, "--solve", solveOut, "--item", tmpItem, "--bundle", tierBundle, "--out", judgeOut];
-      const jRes = spawnSync("node", judgeArgs.slice(1), { cwd: repoRoot, encoding: "utf8", timeout: 180000, maxBuffer: 20 * 1024 * 1024, env: process.env });
-      if (jRes.status !== 0 && !fs.existsSync(judgeOut)) {
-        fs.writeFileSync(judgeOut, JSON.stringify({ id: item.id, judge: { cause: "knowledge-gap" }, quote_check: { passed: false } }, null, 2), "utf8");
-      }
+      let judgeError;
+      try { await execFileAsync(process.execPath, judgeArgs.slice(1), { cwd: repoRoot, encoding: "utf8", timeout: 180000, maxBuffer: 20 * 1024 * 1024, env: process.env }); }
+      catch (error) { judgeError = error; }
       try {
         const judgeData = JSON.parse(fs.readFileSync(judgeOut, "utf8"));
+        if (judgeError || judgeData.error || judgeData.judge?.cause === "unjudged") throw new Error(String(judgeError?.stderr || judgeError || judgeData.error || "judge returned unjudged"));
         tiers[tier].samples.push({ answer: solveData.solver || solveData, judge: judgeData.judge || judgeData, quote_check: judgeData.quote_check, leakage: judgeData.leakage });
         // cleanup tmp solve/judge
         try { fs.unlinkSync(solveOut); } catch {}
         try { fs.unlinkSync(judgeOut); } catch {}
       } catch (e) {
-        tiers[tier].samples.push({ error: String(e), judge: { cause: "item-defect" } });
+        tiers[tier].samples.push({ error: String(e), judge: { cause: "execution-error" } });
       }
     }
     // Verdict per tier: need ≥2 of 3 samples satisfying condition (plan §4.7)
@@ -227,13 +236,14 @@ async function processItem(item, bank, opts) {
     bundle_sha: bundleSha,
     prompt_sha: promptSha,
     pi_version: piVersion,
+    cache_key: key,
   };
   // Write cache and result
   ensureDir(path.dirname(resultPath));
   ensureDir(cacheDir);
   if (verdict !== "error") fs.writeFileSync(cachePath, JSON.stringify(result, null, 2), "utf8");
   fs.writeFileSync(resultPath, JSON.stringify(result, null, 2), "utf8");
-  try { fs.unlinkSync(tmpItem); } catch {}
+  fs.rmSync(tmpDir, { recursive: true, force: true });
   return { id: item.id, cached: false, result };
 }
 
@@ -260,23 +270,19 @@ async function main() {
 
   // Build bundles
   for (const bank of banks) {
-    const bundleDir = path.join(opts.bundleOut, bank);
-    if (!fs.existsSync(path.join(bundleDir, "manifest.json")) || opts.regress) buildBundleForBank(bank, opts.bundleOut);
+    await buildBundleForBank(bank, opts.bundleOut);
   }
 
-  // Build mappings if needed (map.mjs)
+  // Build mappings (map.mjs)
   for (const bank of banks) {
-    const mappingFile = path.join(opts.mappingDir, `${bank}.json`);
-    if (!fs.existsSync(mappingFile) || opts.regress) {
       const mapScript = path.join(__dirname, "map.mjs");
       const bundleDir = path.join(opts.bundleOut, bank);
       const fixture = opts.fixture;
       const args = ["node", mapScript, "--bank", bank, "--out", opts.mappingDir, "--bundle", bundleDir];
       if (fixture) args.push("--fixture", fixture);
       console.log(`Mapping ${bank}...`);
-      const r = spawnSync("node", args.slice(1), { encoding: "utf8", timeout: 120000, env: process.env });
+      const r = spawnSync(process.execPath, args.slice(1), { encoding: "utf8", timeout: 120000, env: process.env });
       if (r.status !== 0) throw new Error(`map ${bank} failed: ${r.stderr?.slice(0, 500)}`);
-    }
   }
 
   // Process items with global concurrency pool
@@ -284,10 +290,11 @@ async function main() {
   let total = 0;
   let completed = 0;
   let failed = 0;
-  opts.builtSections = new Set();
+  opts.builtSections = new Map();
   const start = Date.now();
   const backoff = { failures: 0 };
 
+  const pending = [];
   for (const bank of banks) {
     const { data: itemData } = loadItemsForBank(bank, opts.fixture);
     const items = itemData.items || [];
@@ -313,15 +320,15 @@ async function main() {
         failed++;
         backoff.failures++;
         console.error(`Item ${item.id} failed: ${e.message}`);
-        // Write defect result
         const defectPath = path.join(opts.outDir, bank, `${item.id}.json`);
         ensureDir(path.dirname(defectPath));
-        fs.writeFileSync(defectPath, JSON.stringify({ id: item.id, bank, verdict: "defect", error: String(e) }, null, 2), "utf8");
+        fs.writeFileSync(defectPath, JSON.stringify({ id: item.id, bank, verdict: "error", error: String(e) }, null, 2), "utf8");
         return null;
       }
     }));
-    await Promise.all(promises);
+    pending.push(...promises);
   }
+  await Promise.all(pending);
   const elapsed = ((Date.now() - start) / 1000).toFixed(1);
   console.log(`Done: ${completed}/${total} in ${elapsed}s, concurrency ${opts.concurrency}`);
   console.log(`Results: ${opts.outDir}`);

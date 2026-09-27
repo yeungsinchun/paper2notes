@@ -35,7 +35,6 @@ function parseArgs(argv) {
     else if (a === "--out" && argv[i + 1]) out.outDir = path.resolve(argv[++i]);
     else if (a === "--bundle" && argv[i + 1]) out.bundleDir = path.resolve(argv[++i]);
     else if (a === "--fixture" && argv[i + 1]) out.fixture = path.resolve(argv[++i]);
-    else if (a === "--all") out.all = true;
   }
   return out;
 }

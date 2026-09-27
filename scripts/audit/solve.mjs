@@ -32,7 +32,7 @@ function extractJsonBlock(text) {
 function readPrompt(name) { return fs.readFileSync(path.join(__dirname, "prompts", name), "utf8"); }
 
 function parseArgs(argv) {
-  const out = { item: null, bundle: null, out: null, sample: 0, noNotes: false, model: "meta/muse-spark-1.2-contributor", thinking: "high", k: 1 };
+  const out = { item: null, bundle: null, out: null, sample: 0, noNotes: false, model: "meta/muse-spark-1.2-contributor", thinking: "high" };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--item" && argv[i+1]) out.item = path.resolve(argv[++i]);
@@ -42,7 +42,6 @@ function parseArgs(argv) {
     else if (a === "--no-notes") out.noNotes = true;
     else if (a === "--model" && argv[i+1]) out.model = argv[++i];
     else if (a === "--thinking" && argv[i+1]) out.thinking = argv[++i];
-    else if (a === "--k" && argv[i+1]) out.k = parseInt(argv[++i], 10);
   }
   return out;
 }
@@ -144,7 +143,7 @@ function callPiSolve(item, bundleDir, opts) {
     return "no-bundle";
   })();
 
-  if (parsed) {
+  if (result.status === 0 && parsed) {
     parsed._meta = { pi: piVersion, model: opts.model, prompt_sha: promptSha, item_sha: itemSha, bundle_sha: bundleSha, raw_len: combined.length, sample: opts.sample };
     return { parsed, raw: combined, piVersion, promptSha, itemSha, bundleSha, error: null };
   }

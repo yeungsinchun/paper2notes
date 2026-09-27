@@ -207,7 +207,7 @@ ${priorMd.slice(0, 4000)}
   fs.rmSync(emptyDir, { recursive: true, force: true });
   const combined = (result.stdout || "") + "\n" + (result.stderr || "");
   const parsed = extractJsonBlock(combined);
-  if (parsed && parsed.cause) return { parsed, raw: combined, error: null };
+  if (result.status === 0 && parsed && parsed.cause) return { parsed, raw: combined, error: null };
   return {
     parsed: { id: item.id, cause: "unjudged", mc_correct: false, marking: [], step_judgements: [], _raw: combined.slice(0, 1000) },
     raw: combined,
@@ -261,6 +261,7 @@ async function main() {
     quote_check: { issues: quoteIssues, passed: quoteIssues.length === 0 },
     leakage: overlap,
     judge: judgeRes.parsed,
+    error: judgeRes.error,
     raw: judgeRes.raw.slice(0, 8000),
     run: { pi: (() => { try { return spawnSync(process.env.PI_BIN || "pi", ["--version"], { encoding: "utf8" }).stdout.trim(); } catch { return "unknown"; } })(), model: "meta/muse-spark-1.2-contributor", at: new Date().toISOString() },
   };
