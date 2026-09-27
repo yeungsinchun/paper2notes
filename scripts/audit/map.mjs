@@ -181,19 +181,22 @@ async function main() {
     const outFile = path.join(outDir, `${bankName}.json`);
     const piVersion = (() => { try { return spawnSync(process.env.PI_BIN || "pi", ["--version"], { encoding: "utf8" }).stdout.trim(); } catch { return "unknown"; } })();
     const hash = crypto.createHash("sha256");
-    for (const part of [fs.readFileSync(file), readPrompt("map.system.md"), fs.readFileSync(fileURLToPath(import.meta.url)), piVersion, bundleNotes.replace(/^Generated: .*$/m, ""), ...sectionPages.flatMap((p) => [path.relative(repoRoot, p), fs.readFileSync(p)])]) hash.update(part).update("\0");
+    for (const part of [fs.readFileSync(file), readPrompt("map.system.md"), fs.readFileSync(fileURLToPath(import.meta.url)), piVersion, bundleNotes.replace(/^(Generated|Notes ref): .*$/gm, ""), ...sectionPages.flatMap((p) => [path.relative(repoRoot, p), fs.readFileSync(p)])]) hash.update(part).update("\0");
     const inputsSha = hash.digest("hex");
+    const previous = new Map();
     if (!force && fs.existsSync(outFile)) {
       try {
-        if (JSON.parse(fs.readFileSync(outFile, "utf8")).inputs_sha === inputsSha) {
-          console.log(`Mapping unchanged ${outFile}`);
-          continue;
-        }
+        const existing = JSON.parse(fs.readFileSync(outFile, "utf8"));
+        if (existing.inputs_sha === inputsSha) for (const m of existing.mappings || []) if (m.method === "pi") previous.set(m.id, m);
       } catch {}
     }
 
     const mappings = [];
     for (const item of itemsList) {
+      if (previous.has(item.id)) {
+        mappings.push(previous.get(item.id));
+        continue;
+      }
       const res = await callPi(item, sectionInfos, bundleNotes);
       // Enforce confidence <0.6 handling later by run.mjs (tier S = all sections)
       const valid = sectionInfos.some(info => info.section === res.section);
@@ -211,7 +214,7 @@ async function main() {
       mappings,
     };
     fs.writeFileSync(outFile, JSON.stringify(payload, null, 2), "utf8");
-    console.log(`Mapping written ${outFile} (${mappings.length} items)`);
+    console.log(`Mapping written ${outFile} (${mappings.length} items, ${previous.size} reused)`);
   }
 }
 
