@@ -2,7 +2,7 @@
 
 This is the ONLY physics and maths a solver may use besides the NOTES and the question itself.
 
-## Force and motion (ch2.pdf LOs, P-FM-01..34)
+## Force and motion (listed force and motion knowledge)
 
 - P-FM-01: distance, displacement, speed, velocity
 - P-FM-02: acceleration, equations of uniformly accelerated motion
@@ -22,7 +22,6 @@ This is the ONLY physics and maths a solver may use besides the NOTES and the qu
 - P-FM-16: projectile motion (horizontal and vertical components)
 - P-FM-17: circular motion (centripetal force, period, frequency)
 - P-FM-18: Newton's law of gravitation
-- (remaining P-FM bullets map 1:1 to ch2.pdf LO table; full list lives in ch2.pdf p.24-28)
 
 ## Mathematics (P-MA-*)
 

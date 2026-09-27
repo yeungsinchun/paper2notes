@@ -33,7 +33,7 @@ function parseArgs(argv) {
 function completenessFor(items) {
   // Plan §4.7
   const total = items.length;
-  const core = items.filter(x => x.part === "core" || !x.part);
+  const core = items.filter(x => x.part === "core");
   const byVerdict = {};
   for (const x of items) {
     const v = x.verdict || "unknown";
@@ -42,8 +42,12 @@ function completenessFor(items) {
   const passed = (byVerdict.pass || 0) + (byVerdict["pass-leaked"] || 0) + (byVerdict["cross-ref"] || 0);
   const corePassed = core.filter(x => ["pass", "pass-leaked", "cross-ref"].includes(x.verdict)).length;
   const coreRate = core.length ? corePassed / core.length : 0;
-  const complete = coreRate >= 0.95; // ≥95% core items are pass/pass-leaked/cross-ref
-  return { total, core: core.length, byVerdict, passed, corePassed, coreRate, complete };
+  const failures = core.filter(x => !["pass", "pass-leaked", "cross-ref"].includes(x.verdict));
+  const concepts = new Map();
+  for (const x of failures) for (const concept of new Set(x.missing_concepts || [])) concepts.set(concept, (concepts.get(concept) || 0) + 1);
+  const mustFix = failures.filter(x => (x.marks >= 4 && x.section && x.section !== "unknown") || (x.missing_concepts || []).some(c => concepts.get(c) >= 2));
+  const complete = total > 0 && items.every(x => x.inventory_present && x.result_present && x.part) && coreRate >= 0.95 && mustFix.length === 0;
+  return { total, core: core.length, byVerdict, passed, corePassed, coreRate, mustFix: mustFix.map(x => x.id), complete };
 }
 
 function main() {
@@ -56,59 +60,34 @@ function main() {
     return;
   }
 
-  const banks = fs.readdirSync(resultsDir).filter(f => {
-    const full = path.join(resultsDir, f);
-    return fs.statSync(full).isDirectory();
-  });
-
+  const banks = fs.readdirSync(resultsDir).filter(f => fs.statSync(path.join(resultsDir, f)).isDirectory());
   const coverage = { generated_at: new Date().toISOString(), banks: {}, overall: null };
-  let allItems = [];
-
+  const allItems = [];
   for (const bank of banks) {
     const bankDir = path.join(resultsDir, bank);
-    const files = fs.readdirSync(bankDir).filter(f => f.endsWith(".json"));
-    const items = [];
-    for (const f of files) {
-      try {
-        const data = JSON.parse(fs.readFileSync(path.join(bankDir, f), "utf8"));
-        // Enrich with bank if missing
-        const enriched = { ...data, bank: data.bank || bank, id: data.id || f.replace(".json", "") };
-        // Try to load original item part/core for completeness
-        // Look up in fixtures or items (if available)
-        let part = enriched.part;
-        if (!part) {
-          // try to find in any fixture
-          const tryPaths = [path.join(repoRoot, `.audit/fixtures/${bank}.json`), path.join(repoRoot, `paper2db/qb-pdf/items/${bank}.json`)];
-          for (const tp of tryPaths) {
-            if (fs.existsSync(tp)) {
-              try {
-                const fd = JSON.parse(fs.readFileSync(tp, "utf8"));
-                const found = (fd.items || []).find(x => x.id === enriched.id);
-                if (found) { part = found.part || "core"; break; }
-              } catch {}
-            }
-          }
-          if (!part) part = "core";
-        }
-        items.push({ ...enriched, part });
-      } catch {}
+    const inventories = [path.join(repoRoot, `paper2db/qb-pdf/items/${bank}.json`), path.join(repoRoot, `.audit/fixtures/${bank}.json`), path.join(repoRoot, `scripts/audit/fixtures/${bank}.json`)];
+    const inventoryPath = inventories.find(p => fs.existsSync(p));
+    const inventory = inventoryPath ? JSON.parse(fs.readFileSync(inventoryPath, "utf8")).items || [] : [];
+    const results = new Map();
+    for (const f of fs.readdirSync(bankDir).filter(f => f.endsWith(".json"))) {
+      const data = JSON.parse(fs.readFileSync(path.join(bankDir, f), "utf8"));
+      results.set(data.id || path.basename(f, ".json"), data);
     }
+    const items = inventory.map(item => {
+      const result = results.get(item.id);
+      const missing_concepts = result ? [...new Set(Object.values(result.tiers || {}).flatMap(t => (t.samples || []).flatMap(sample => [...(sample.answer?.missing || []).map(m => m.concept), ...(sample.judge?.marking || []).filter(m => m.verdict === "lost-knowledge").map(m => m.concept)].filter(Boolean))))] : [];
+      return { ...result, id: item.id, bank, part: item.part, marks: item.marks, inventory_present: true, result_present: !!result, verdict: result?.verdict || "missing", missing_concepts };
+    });
+    for (const [id, result] of results) if (!inventory.some(item => item.id === id)) items.push({ ...result, id, bank, inventory_present: false, result_present: true, verdict: "unmatched" });
     const stats = completenessFor(items);
-    // Group by section if mapping available
     const bySection = {};
-    for (const it of items) {
-      const sec = it.section || "unknown";
-      if (!bySection[sec]) bySection[sec] = [];
-      bySection[sec].push(it);
-    }
-    const sections = {};
-    for (const [sec, list] of Object.entries(bySection)) {
-      sections[sec] = completenessFor(list);
-    }
-    coverage.banks[bank] = { ...stats, sections, items: items.map(x => ({ id: x.id, verdict: x.verdict, leaked: x.leaked, section: x.section })) };
+    for (const it of items) (bySection[it.section || "unknown"] ||= []).push(it);
+    const sections = Object.fromEntries(Object.entries(bySection).map(([sec, list]) => [sec, completenessFor(list)]));
+    coverage.banks[bank] = { ...stats, inventory_found: !!inventoryPath, sections, items: items.map(x => ({ id: x.id, verdict: x.verdict, leaked: x.leaked, section: x.section })) };
     allItems.push(...items);
   }
   coverage.overall = completenessFor(allItems);
+  coverage.overall.complete = coverage.overall.complete && Object.values(coverage.banks).every(b => b.complete);
 
   fs.mkdirSync(path.dirname(outCoverage), { recursive: true });
   fs.writeFileSync(outCoverage, JSON.stringify(coverage, null, 2), "utf8");

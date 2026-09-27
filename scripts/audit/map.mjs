@@ -16,16 +16,13 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import crypto from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { pagesForBank } from "./bank-pages.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "../..");
 
-function sha256Hex(s) {
-  return crypto.createHash("sha256").update(s).digest("hex");
-}
 function readPrompt(p) {
   return fs.readFileSync(path.join(__dirname, "prompts", p), "utf8");
 }
@@ -82,10 +79,6 @@ async function callPi(item, sectionInfos, bundleNotes) {
   const model = "meta/muse-spark-1.2-contributor";
   const systemPrompt = readPrompt("map.system.md");
 
-  const prior = (() => {
-    try { return readPrompt("prior.md").slice(0, 4000); } catch { return ""; }
-  })();
-
   const userContent = `Item ${item.id} (${item.bank} ${item.type} ${item.marks} marks):
 Text: ${item.stem ? item.stem.text.slice(0, 3000) : JSON.stringify(item).slice(0, 3000)}
 
@@ -131,32 +124,7 @@ ${bundleNotes ? bundleNotes.slice(0, 8000) : "(no bundle)"}
   const parsed = extractJsonBlock(out);
   if (parsed && parsed.section) return parsed;
 
-  // Fallback heuristic if pi failed (fake pi or timeout)
-  if (result.error) {
-    // fallback
-  }
-  // Heuristic: pick first section with matching book/chapter hint, else first
-  // For Book 2 trivial mapping already handled outside
-  let fallbackSection = sectionInfos[0]?.section || "unknown";
-  // Try keyword overlap: count LO words overlap with item text
-  if (item.stem && item.stem.text) {
-    let best = { score: -1, sec: fallbackSection };
-    for (const s of sectionInfos) {
-      const hay = (s.los.join(" ") + " " + s.ideas.join(" ") + " " + s.title).toLowerCase();
-      const needle = (item.stem.text || "").toLowerCase().slice(0, 500);
-      let score = 0;
-      for (const w of needle.split(/\W+/).slice(0, 30)) {
-        if (w.length > 3 && hay.includes(w)) score++;
-      }
-      if (score > best.score) { best = { score, sec: s.section }; }
-    }
-    if (best.score >= 0) fallbackSection = best.sec;
-  }
-  return { section: fallbackSection, confidence: 0.55, secondary: sectionInfos.filter(s => s.section !== fallbackSection).map(s => s.section).slice(0, 2), _fallback: true, _raw: out.slice(0, 500) };
-}
-
-function isBook2Item(item) {
-  return item.book === "2" || (item.bank && item.bank.startsWith("QB_2")) || (item.id && item.id.startsWith("PHY12"));
+  return { section: null, confidence: 0, secondary: [], _raw: out.slice(0, 500) };
 }
 
 async function main() {
@@ -169,10 +137,7 @@ async function main() {
   } else if (bank) {
     // Try paper2db location and fixture
     const candidates = [
-      path.join(repoRoot, `../paper2db/qb-pdf/items/${bank}.json`),
       path.join(repoRoot, `paper2db/qb-pdf/items/${bank}.json`),
-      path.join(repoRoot, `.audit/fixtures/${bank}.json`),
-      path.join(repoRoot, `scripts/audit/fixtures/${bank}.json`),
     ];
     if (fixture) candidates.unshift(fixture);
     const found = candidates.find((p) => fs.existsSync(p));
@@ -192,58 +157,15 @@ async function main() {
     }
   }
 
-  // If no items, create a 3-item fixture for P2 smoke (plan: P2 can run against 3-item fixture)
-  if (!itemFiles.length) {
-    console.log("No item files found – using 3-item synthetic fixture for P2 harness smoke.");
-    const fixtureDir = path.join(repoRoot, ".audit/fixtures");
-    fs.mkdirSync(fixtureDir, { recursive: true });
-    const fixturePath = path.join(fixtureDir, "QB_501.json");
-    if (!fs.existsSync(fixturePath)) {
-      const synthetic = {
-        bank: "QB_501",
-        generated_at: new Date().toISOString(),
-        items: [
-          { id: "PHY15011101", bank: "QB_501", book: "5", chapter: "01", type: "mc", marks: 2, level: "easy", part: "core", stem: { text: "Which statements about ionizing radiation is/are correct? (1) energy high enough to strike electrons out (2) radiation in form of ions (3) X-rays are ionizing", ocr: "", equations: 0, has_figure: false }, options: [{ label: "A", text: "(1) only" }, { label: "B", text: "(2) only" }, { label: "C", text: "(1) and (3) only" }, { label: "D", text: "(2) and (3) only" }], answer: { status: "present", key: "C" }, images: { stem: [], answer: [] }, sources: [] },
-          { id: "PHY15011201", bank: "QB_501", book: "5", chapter: "01", type: "sq", marks: 3, level: "easy", part: "core", stem: { text: "Describe how X-rays are produced in an X-ray tube.", ocr: "" }, answer: { status: "present" }, images: { stem: [], answer: [] } },
-          { id: "PHY15011301", bank: "QB_501", book: "5", chapter: "01", type: "lq", marks: 6, level: "avg", part: "core", stem: { text: "Compare alpha, beta and gamma in penetrating power and ionizing power.", ocr: "" }, answer: { status: "present" }, images: { stem: [], answer: [] } },
-        ],
-      };
-      fs.writeFileSync(fixturePath, JSON.stringify(synthetic, null, 2), "utf8");
-    }
-    itemFiles = [path.join(repoRoot, ".audit/fixtures/QB_501.json")];
-  }
+  if (!itemFiles.length) throw new Error("No item files found");
 
   for (const file of itemFiles) {
     const data = JSON.parse(fs.readFileSync(file, "utf8"));
     const itemsList = data.items || data || [];
-    const bankName = data.bank || path.basename(file, ".json");
-    // Discover section pages for this bank
-    let sectionPages = [];
-    // Map bank to notes pages per plan table §3.2
-    const bankToPages = {
-      QB_501: ["notes/book5/ch01-radiation-and-radioactivity/25-1.html", "notes/book5/ch01-radiation-and-radioactivity/25-2.html", "notes/book5/ch01-radiation-and-radioactivity/25-3.html"],
-      QB_502: ["notes/book5/ch02-rate-of-decay-and-uses-of-radionuclides/26-1.html", "notes/book5/ch02-rate-of-decay-and-uses-of-radionuclides/26-2.html", "notes/book5/ch02-rate-of-decay-and-uses-of-radionuclides/26-3.html"],
-    };
-    const candidatePages = bankToPages[bankName] || [];
-    sectionPages = candidatePages.map((p) => path.join(repoRoot, p)).filter((p) => fs.existsSync(p));
-    // Fallback: find any book5 pages
-    if (!sectionPages.length) {
-      const book5Dir = path.join(repoRoot, "notes/book5");
-      if (fs.existsSync(book5Dir)) {
-        // find all html under book5 ch01/ch02
-        const walk = (dir) => {
-          const out = [];
-          for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-            const full = path.join(dir, e.name);
-            if (e.isDirectory()) out.push(...walk(full));
-            else if (e.name.endsWith(".html") && !e.name.includes("index")) out.push(full);
-          }
-          return out;
-        };
-        sectionPages = walk(book5Dir).slice(0, 6);
-      }
-    }
-    const sectionInfos = sectionPages.length ? collectSectionInfo(sectionPages) : [{ section: bankName, title: bankName, los: [], ideas: [] }];
+    const bankName = bank || data.bank || path.basename(file, ".json");
+    if (data.bank && data.bank !== bankName) throw new Error(`Item bank ${data.bank} does not match ${bankName}`);
+    const sectionPages = pagesForBank(repoRoot, bankName).filter(p => path.basename(p) !== "summary.html");
+    const sectionInfos = collectSectionInfo(sectionPages);
 
     // Bundle notes for context (if bundleDir given, read notes.md)
     let bundleNotes = "";
@@ -257,15 +179,10 @@ async function main() {
 
     const mappings = [];
     for (const item of itemsList) {
-      // Book 2 trivial mapping
-      if (isBook2Item(item)) {
-        const chap = item.chapter ? `ch${item.chapter}` : bankName;
-        mappings.push({ id: item.id, section: `book2/${chap}`, confidence: 1.0, secondary: [], method: "book2-trivial" });
-        continue;
-      }
       const res = await callPi(item, sectionInfos, bundleNotes);
       // Enforce confidence <0.6 handling later by run.mjs (tier S = all sections)
-      mappings.push({ id: item.id, section: res.section, confidence: res.confidence ?? 0.7, secondary: res.secondary || [], raw: res._raw ? res._raw.slice(0, 200) : undefined, method: res._fallback ? "heuristic-fallback" : "pi" });
+      const valid = sectionInfos.some(info => info.section === res.section);
+      mappings.push({ id: item.id, section: valid ? res.section : null, confidence: valid ? (res.confidence ?? 0) : 0, secondary: res.secondary || [], raw: res._raw ? res._raw.slice(0, 200) : undefined, method: valid ? "pi" : "unmapped" });
       // slight delay to avoid hammering
       await new Promise((r) => setTimeout(r, 10));
     }

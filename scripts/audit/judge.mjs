@@ -16,14 +16,12 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import crypto from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "../..");
 
-function sha256Hex(s) { return crypto.createHash("sha256").update(s).digest("hex"); }
 function readPrompt(n) { return fs.readFileSync(path.join(__dirname, "prompts", n), "utf8"); }
 function extractJsonBlock(text) {
   const m = text.match(/```json\s*([\s\S]*?)```/i) || text.match(/```\s*([\s\S]*?)```/);
@@ -48,12 +46,6 @@ function deterministicQuoteCheck(solverOutput, notesMd) {
   const issues = [];
   const steps = solverOutput.steps || [];
   // Build anchor -> block map from notes.md (rough: split by headings)
-  const blockMap = new Map();
-  // headings like ### [§25-1.B #knockout] or #### [Fig ...]
-  const headingRe = /^#{2,4}\s+\[([^\]]+)\]/gm;
-  let lastIdx = 0;
-  let lastAnchor = "preamble";
-  // simple split
   const lines = notesMd.split("\n");
   let currentAnchor = "preamble";
   let currentBlock = [];
@@ -90,16 +82,7 @@ function deterministicQuoteCheck(solverOutput, notesMd) {
         issues.push({ step: i, verdict: "unsupported", reason: "missing quote for notes source" });
         continue;
       }
-      // Find block text for anchor
-      let blockText = "";
-      // try exact, then fallback to contains
-      if (blocks.has(anchor)) blockText = blocks.get(anchor);
-      else {
-        for (const [k, v] of blocks.entries()) {
-          if (k.includes(anchor) || anchor.includes(k)) { blockText = v; break; }
-        }
-        if (!blockText) blockText = notesMd;
-      }
+      const blockText = blocks.get(anchor) || "";
       const ratio = tokenSetRatio(quote, blockText);
       if (ratio < 0.9) {
         issues.push({ step: i, verdict: "unsupported", reason: `quote fuzzy ratio ${ratio.toFixed(2)} < 0.9`, anchor, quote: quote.slice(0, 80) });
@@ -108,7 +91,7 @@ function deterministicQuoteCheck(solverOutput, notesMd) {
       // check prior id exists
       const priorMd = (() => { try { return readPrompt("prior.md"); } catch { return ""; } })();
       const id = src.split(":")[1] || "";
-      if (!priorMd.includes(id)) {
+      if (!priorMd.split("\n").some(line => line.startsWith(`- ${id}:`))) {
         issues.push({ step: i, verdict: "unsupported", reason: `prior id ${id} not in allowlist` });
       }
     } else if (src === "given" || src.startsWith("math:")) {
@@ -199,7 +182,7 @@ ${priorMd.slice(0, 4000)}
   if (fs.existsSync(notesPath)) attachments.push("@" + notesPath);
   // Fig attachments limited
   if (fs.existsSync(bundleDir)) {
-    const figs = fs.readdirSync(bundleDir).filter(f => f.startsWith("fig-") && f.endsWith(".png")).slice(0, 8).map(f => path.join(bundleDir, f));
+    const figs = fs.readdirSync(bundleDir).filter(f => /^(fig-|dse-)/.test(f) && /\.(png|jpe?g|webp)$/i.test(f)).map(f => path.join(bundleDir, f));
     for (const f of figs) attachments.push("@" + f);
   }
   // Answer crop if exists (never shown to solver, but judge does see it)
@@ -225,44 +208,10 @@ ${priorMd.slice(0, 4000)}
   const combined = (result.stdout || "") + "\n" + (result.stderr || "");
   const parsed = extractJsonBlock(combined);
   if (parsed && parsed.cause) return { parsed, raw: combined, error: null };
-  // Fallback deterministic judge when pi not available or fake pi returns non-json
-  // Heuristic: compare solver answer to key
-  const solverAns = solverOutput.answer;
-  let mc_correct = null;
-  let cause = "ok";
-  let markingRes = [];
-  if (item.type === "mc" && answerInfo.key) {
-    const gotRaw = typeof solverAns === "string" ? solverAns : (solverAns != null ? JSON.stringify(solverAns) : "");
-    const got = String(gotRaw).trim().toUpperCase();
-    const want = String(answerInfo.key).trim().toUpperCase();
-    mc_correct = got.includes(want);
-    if (!mc_correct) cause = "knowledge-gap";
-  } else if (item.subparts || marking.length) {
-    // For structured, if solver blocked -> knowledge-gap
-    if (solverOutput.self_verdict === "blocked") cause = "knowledge-gap";
-    else if (solverOutput.self_verdict === "partial") cause = "reasoning-error";
-    else cause = "ok";
-    markingRes = (marking || []).map(m => ({ point: m.point || m.part || "a", verdict: cause === "ok" ? "earned" : "lost-knowledge", concept: cause === "knowledge-gap" ? "missing concept from notes" : undefined }));
-  } else {
-    if (solverOutput.self_verdict === "blocked") cause = "knowledge-gap";
-  }
-  // If deterministic quote issues exist, mark prior-leak or unsupported
-  const quoteIssues = deterministicQuoteCheck(solverOutput, notesMd);
-  const hasUnsupported = quoteIssues.length > 0;
-  if (hasUnsupported && cause === "ok") cause = "reasoning-error";
-
   return {
-    parsed: {
-      id: item.id,
-      step_judgements: quoteIssues.map(q => ({ step: q.step, verdict: q.verdict, reason: q.reason })),
-      marking: markingRes,
-      mc_correct,
-      cause,
-      _fallback: true,
-      _raw: combined.slice(0, 1000),
-    },
+    parsed: { id: item.id, cause: "unjudged", mc_correct: false, marking: [], step_judgements: [], _raw: combined.slice(0, 1000) },
     raw: combined,
-    error: result.error ? String(result.error) : null,
+    error: result.error ? String(result.error) : "No valid judge response",
   };
 }
 
@@ -304,10 +253,7 @@ async function main() {
   const overlap = overlapCheck(item, notesMd);
   const judgeRes = callPiJudge(solverOutput, item, bundleDir);
 
-  // Merge deterministic issues into judge verdict if needed
-  if (quoteIssues.length && judgeRes.parsed.cause === "ok") {
-    // keep ok but mark unsupported steps
-  }
+  if (quoteIssues.length && judgeRes.parsed.cause === "ok") judgeRes.parsed.cause = "reasoning-error";
 
   const output = {
     id: item.id,

@@ -92,12 +92,12 @@ function callPiSolve(item, bundleDir, opts) {
   const bundleNotes = opts.noNotes ? path.join(tmp, "empty.md") : path.join(bundleDir || tmp, "notes.md");
   if (opts.noNotes) fs.writeFileSync(bundleNotes, "# (no notes baseline – empty)\n", "utf8");
 
-  const figPatterns = opts.noNotes ? [] : fs.existsSync(bundleDir || "") ? fs.readdirSync(bundleDir).filter(f => f.startsWith("fig-") && f.endsWith(".png")).map(f => path.join(bundleDir, f)) : [];
+  const figPatterns = opts.noNotes ? [] : fs.existsSync(bundleDir || "") ? fs.readdirSync(bundleDir).filter(f => /^(fig-|dse-)/.test(f) && /\.(png|jpe?g|webp)$/i.test(f)).map(f => path.join(bundleDir, f)) : [];
 
   // Collect attachments: bundle notes, figs, prior, item crop
   const attachments = [];
   if (fs.existsSync(bundleNotes)) attachments.push("@" + bundleNotes);
-  for (const f of figPatterns.slice(0, 12)) attachments.push("@" + f); // cap per plan tier B
+  for (const f of figPatterns) attachments.push("@" + f); // cap per plan tier B
   attachments.push("@" + priorPath);
   const itemImg = item.images && item.images.stem && item.images.stem[0] ? path.resolve(repoRoot, item.images.stem[0]) : null;
   if (itemImg && fs.existsSync(itemImg)) attachments.push("@" + itemImg);

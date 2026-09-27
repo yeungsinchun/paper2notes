@@ -17,6 +17,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { pagesForBank, cumulativePagesForBank } from "./bank-pages.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "../..");
@@ -40,7 +41,6 @@ function parseArgs(argv) {
     cacheDir: path.join(repoRoot, ".audit/cache"),
     mappingDir: path.join(repoRoot, ".audit/mapping"),
     k: 3,
-    dryRun: false,
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -52,7 +52,6 @@ function parseArgs(argv) {
     else if (a === "--k" && argv[i+1]) out.k = parseInt(argv[++i], 10);
     else if (a === "--out" && argv[i+1]) out.outDir = path.resolve(argv[++i]);
     else if (a === "--cache-dir" && argv[i+1]) out.cacheDir = path.resolve(argv[++i]);
-    else if (a === "--dry-run") out.dryRun = true;
     else if (a === "--bundle-out" && argv[i+1]) out.bundleOut = path.resolve(argv[++i]);
   }
   return out;
@@ -77,62 +76,28 @@ function pLimit(concurrency) {
   });
 }
 
-async function buildBundleForBank(bank, bundleOut) {
-  // Map bank to notes pages per plan §3.2
-  const bankToPages = {
-    QB_501: ["notes/book5/ch01-radiation-and-radioactivity/25-1.html", "notes/book5/ch01-radiation-and-radioactivity/25-2.html", "notes/book5/ch01-radiation-and-radioactivity/25-3.html", "notes/book5/ch01-radiation-and-radioactivity/summary.html"],
-    QB_502: ["notes/book5/ch02-rate-of-decay-and-uses-of-radionuclides/26-1.html", "notes/book5/ch02-rate-of-decay-and-uses-of-radionuclides/26-2.html", "notes/book5/ch02-rate-of-decay-and-uses-of-radionuclides/26-3.html", "notes/book5/ch02-rate-of-decay-and-uses-of-radionuclides/summary.html"],
-    QB_503: ["notes/book5/ch02-rate-of-decay-and-uses-of-radionuclides/26-1.html"], // fallback until ch27 exists
-  };
-  const pages = (bankToPages[bank] || bankToPages["QB_501"]).map(p => path.join(repoRoot, p)).filter(p => fs.existsSync(p));
-  // For tier S vs B, we build tier S as mapped section + summary, tier B as cumulative.
-  // Simplified: build one bundle per bank containing chapter pages (tier B) and also per-section bundles on demand.
-  // Here we build a single bundle for the bank tier S (first page + summary) as the default; run step will refine per item mapping.
-  if (!pages.length) {
-    console.warn(`No pages for bank ${bank}, skipping bundle build`);
-    return null;
-  }
-  // If only one page requested, build S tier for that page; else build B tier
-  const outDir = path.join(bundleOut, bank);
+function buildBundle(pages, outDir) {
   ensureDir(outDir);
-  // Call bundle.mjs via spawnSync to reuse its logic (also tests bundle.mjs directly)
-  const bundleScript = path.join(__dirname, "bundle.mjs");
-  const result = spawnSync("node", [bundleScript, ...pages, "--out", outDir], { encoding: "utf8", timeout: 120000 });
-  if (result.status !== 0) {
-    console.error(`bundle.mjs failed for ${bank}: ${result.stderr?.slice(0, 1000)}`);
-    // fallback: ensure notes.md exists at least
-    if (!fs.existsSync(path.join(outDir, "notes.md"))) throw new Error(`Bundle failed for ${bank}`);
-  }
-  const manifestPath = path.join(outDir, "manifest.json");
-  if (fs.existsSync(manifestPath)) {
-    return JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-  }
-  return null;
+  const result = spawnSync("node", [path.join(__dirname, "bundle.mjs"), ...pages, "--out", outDir], { encoding: "utf8", timeout: 120000 });
+  if (result.status !== 0) throw new Error(`Bundle failed: ${result.stderr || result.stdout}`);
+  return JSON.parse(fs.readFileSync(path.join(outDir, "manifest.json"), "utf8"));
+}
+
+function buildBundleForBank(bank, bundleOut) {
+  return buildBundle(cumulativePagesForBank(repoRoot, bank), path.join(bundleOut, bank));
 }
 
 function loadItemsForBank(bank, fixture) {
   const candidates = [];
   if (fixture) candidates.push(fixture);
-  candidates.push(path.join(repoRoot, `.audit/fixtures/${bank}.json`));
-  candidates.push(path.join(repoRoot, `scripts/audit/fixtures/${bank}.json`));
   candidates.push(path.join(repoRoot, `paper2db/qb-pdf/items/${bank}.json`));
-  candidates.push(path.join(repoRoot, `../paper2db/qb-pdf/items/${bank}.json`));
   for (const p of candidates) {
     if (fs.existsSync(p)) {
       const data = JSON.parse(fs.readFileSync(p, "utf8"));
       return { data, file: p };
     }
   }
-  // Synthetic 3-item fixture if none found (plan: P2 can run against 3-item fixture)
-  const items = [
-    { id: "PHY15011101", bank, book: "5", chapter: "01", type: "mc", marks: 2, level: "easy", part: "core", stem: { text: "Ionizing radiation correct statements (1)... (2)... (3) X-rays are ionizing", ocr: "" }, options: [{ label: "A", text: "(1) only" }, { label: "C", text: "(1) and (3) only" }], answer: { status: "present", key: "C", worked: "X-rays are ionizing" }, images: { stem: [], answer: [] }, sources: [] },
-    { id: "PHY15011201", bank, book: "5", chapter: "01", type: "sq", marks: 3, level: "easy", part: "core", stem: { text: "Describe X-ray production", ocr: "" }, answer: { status: "present" }, images: { stem: [], answer: [] } },
-    { id: "PHY15011301", bank, book: "5", chapter: "01", type: "lq", marks: 6, level: "avg", part: "core", stem: { text: "Compare alpha beta gamma", ocr: "" }, answer: { status: "present" }, images: { stem: [], answer: [] } },
-  ];
-  const syntheticPath = path.join(repoRoot, `.audit/fixtures/${bank}.json`);
-  ensureDir(path.dirname(syntheticPath));
-  fs.writeFileSync(syntheticPath, JSON.stringify({ bank, generated_at: new Date().toISOString(), items }, null, 2), "utf8");
-  return { data: { bank, items }, file: syntheticPath };
+  throw new Error(`No item file for ${bank}`);
 }
 
 function loadBundleSha(bundleDir) {
@@ -146,52 +111,35 @@ function loadBundleSha(bundleDir) {
 
 async function processItem(item, bank, opts) {
   const { outDir, bundleDir, cacheDir, k, regress } = opts;
-  const bundleSha = loadBundleSha(bundleDir);
+  const mappingFile = path.join(opts.mappingDir, `${bank}.json`);
+  const mapping = JSON.parse(fs.readFileSync(mappingFile, "utf8"));
+  const mapped = mapping.mappings?.find(x => x.id === item.id);
+  const pages = pagesForBank(repoRoot, bank);
+  const sectionPages = pages.filter(p => path.basename(p) !== "summary.html");
+  const sectionForTier = mapped?.section || "unknown";
+  const chosen = sectionPages.find(p => path.basename(p, ".html") === sectionForTier);
+  const sPages = mapped?.confidence >= 0.6 && chosen ? [chosen] : sectionPages;
+  const summary = pages.filter(p => path.basename(p) === "summary.html");
+  const sBundle = path.join(opts.bundleOut, bank, "S", sectionForTier);
+  buildBundle([...sPages, ...summary], sBundle);
+  const bundleSha = [loadBundleSha(sBundle), loadBundleSha(bundleDir)].join(":");
   const itemSha = sha256Hex(JSON.stringify(item));
-  const promptSha = readPromptSha("solver.system.md") + readPromptSha("solver.user.md");
+  const promptSha = readPromptSha("solver.system.md") + readPromptSha("solver.user.md") + readPromptSha("judge.system.md");
   const piVersion = getPiVersion();
   const model = "meta/muse-spark-1.2-contributor";
-
   const key = cacheKey(itemSha, bundleSha, promptSha, model, piVersion);
   const cachePath = path.join(cacheDir, `${key}.json`);
   const resultPath = path.join(outDir, bank, `${item.id}.json`);
-
-  // Resume: skip if result already exists and not regress
   if (!regress && fs.existsSync(resultPath)) {
-    try {
-      const existing = JSON.parse(fs.readFileSync(resultPath, "utf8"));
-      // Validate bundle sha hasn't drifted? If same bundle sha, skip; else re-run
-      if (existing.bundle_sha === bundleSha && existing.prompt_sha === promptSha) {
-        return { id: item.id, cached: "result", result: existing };
-      }
-    } catch {}
+    const existing = JSON.parse(fs.readFileSync(resultPath, "utf8"));
+    if (existing.bundle_sha === bundleSha && existing.prompt_sha === promptSha) return { id: item.id, cached: "result", result: existing };
   }
   if (!regress && fs.existsSync(cachePath)) {
-    try {
-      const cached = JSON.parse(fs.readFileSync(cachePath, "utf8"));
-      // Copy cached to result path for resume
-      ensureDir(path.dirname(resultPath));
-      fs.writeFileSync(resultPath, JSON.stringify(cached, null, 2), "utf8");
-      return { id: item.id, cached: "cache", result: cached };
-    } catch {}
+    const cached = JSON.parse(fs.readFileSync(cachePath, "utf8"));
+    ensureDir(path.dirname(resultPath));
+    fs.writeFileSync(resultPath, JSON.stringify(cached, null, 2));
+    return { id: item.id, cached: "cache", result: cached };
   }
-
-  // Prepare per-item bundle: for now use bank bundleDir (tier S/B logic could be per-section)
-  // Per plan: tier S is mapped section + summary; tier B is book-cumulative.
-  // Simplified: use the bank bundle for both tiers; judge will set verdict accordingly.
-  // Full per-item bundle would require map.mjs mapping; we read mapping if exists
-  let sectionForTier = null;
-  try {
-    const mappingFile = path.join(opts.mappingDir, `${bank}.json`);
-    if (fs.existsSync(mappingFile)) {
-      const mapping = JSON.parse(fs.readFileSync(mappingFile, "utf8"));
-      const m = mapping.mappings?.find(x => x.id === item.id);
-      if (m) sectionForTier = m.section;
-    }
-  } catch {}
-
-  // For now, tier S and B both use same bundleDir; a more precise implementation would rebuild per section
-  // We keep the manifest's bundle_sha as tier S sha, and if needed build tier B bundle separately.
 
   // Call solve K times + judge each
   const solveScript = path.join(__dirname, "solve.mjs");
@@ -203,9 +151,8 @@ async function processItem(item, bank, opts) {
 
   const tiers = { S: { samples: [] }, B: { samples: [] } };
 
-  // For demo, both tiers share same bundle; in full implementation B would be cumulative
   for (const tier of ["S", "B"]) {
-    const tierBundle = tier === "S" ? bundleDir : bundleDir; // placeholder for distinct bundles
+    const tierBundle = tier === "S" ? sBundle : bundleDir;
     for (let sample = 0; sample < k; sample++) {
       // Solve
       const solveOut = path.join("/tmp", `solve-${item.id}-${tier}-${sample}.json`);
@@ -235,11 +182,11 @@ async function processItem(item, bank, opts) {
       }
     }
     // Verdict per tier: need ≥2 of 3 samples satisfying condition (plan §4.7)
-    // For K=3 need 2, for K=1 need 1, general ceil(K*2/3). For our harness: pass if mc_correct true or cause ok
+    // For K=3 need 2, for K=1 need 1, general ceil(K*2/3).
     const need = Math.max(1, Math.ceil(tiers[tier].samples.length * 2 / 3));
     const passCount = tiers[tier].samples.filter(s => {
       const j = s.judge || {};
-      return j.cause === "ok" || j.mc_correct === true;
+      return j.cause === "ok" && s.quote_check?.passed === true && !j.step_judgements?.some(step => step.verdict !== "supported") && (item.type === "mc" ? j.mc_correct === true : Array.isArray(j.marking) && j.marking.length > 0 && j.marking.every(point => point.verdict === "earned"));
     }).length;
     tiers[tier].verdict = passCount >= need ? "pass" : (tiers[tier].samples.some(s => s.judge.cause === "knowledge-gap") ? "gap" : "fail");
   }
@@ -259,9 +206,9 @@ async function processItem(item, bank, opts) {
     id: item.id,
     bank,
     section: sectionForTier || "unknown",
-    mapping_conf: 0,
+    mapping_conf: mapped?.confidence ?? 0,
     notes_ref: { repo: "paper2notes", sha: (() => { try { return spawnSync("git", ["rev-parse", "HEAD"], { cwd: repoRoot, encoding: "utf8" }).stdout.trim(); } catch { return "unknown"; } })() },
-    bundle_sha: { S: loadBundleSha(bundleDir), B: loadBundleSha(bundleDir) },
+    tier_bundle_sha: { S: loadBundleSha(sBundle), B: loadBundleSha(bundleDir) },
     run: { pi: piVersion, model, solver_thinking: "high", judge_thinking: "max", prompt_sha: promptSha, at: new Date().toISOString() },
     tiers,
     verdict,
@@ -281,6 +228,7 @@ async function processItem(item, bank, opts) {
 
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
+  if (opts.fixture && opts.all) throw new Error("--fixture requires one --bank");
   ensureDir(opts.outDir);
   ensureDir(opts.cacheDir);
   ensureDir(opts.bundleOut);
@@ -302,9 +250,7 @@ async function main() {
   // Build bundles
   for (const bank of banks) {
     const bundleDir = path.join(opts.bundleOut, bank);
-    if (!fs.existsSync(path.join(bundleDir, "manifest.json")) || opts.regress) {
-      await buildBundleForBank(bank, opts.bundleOut);
-    }
+    if (!fs.existsSync(path.join(bundleDir, "manifest.json")) || opts.regress) buildBundleForBank(bank, opts.bundleOut);
   }
 
   // Build mappings if needed (map.mjs)
@@ -318,7 +264,7 @@ async function main() {
       if (fixture) args.push("--fixture", fixture);
       console.log(`Mapping ${bank}...`);
       const r = spawnSync("node", args.slice(1), { encoding: "utf8", timeout: 120000, env: process.env });
-      if (r.status !== 0) console.error(`map ${bank} stderr: ${r.stderr?.slice(0, 500)}`);
+      if (r.status !== 0) throw new Error(`map ${bank} failed: ${r.stderr?.slice(0, 500)}`);
     }
   }
 
@@ -366,8 +312,6 @@ async function main() {
   console.log(`Results: ${opts.outDir}`);
   console.log(`Cache: ${opts.cacheDir} (keyed by item sha + bundle sha + prompt sha + model + pi version)`);
 
-  // Also support --dry-run early exit
-  if (opts.dryRun) process.exit(0);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

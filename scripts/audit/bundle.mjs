@@ -16,8 +16,6 @@
  *
  * Copies the zero-dependency CDP pattern from notes.interactives.test.mjs
  * (node:net freePort, WebSocket, Page.captureScreenshot at DPR 2).
- * Falls back to HTML parsing + placeholder PNGs when Chrome is unavailable,
- * so the gate can still be validated in environments without Chrome.
  */
 
 import fs from "node:fs";
@@ -31,10 +29,6 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "../..");
 const DEFAULT_OUT = path.join(repoRoot, ".audit/bundles");
-
-// Minimal 1x1 transparent PNG
-const PLACEHOLDER_PNG_BASE64 =
-  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=";
 
 function sha256Hex(buf) {
   return crypto.createHash("sha256").update(buf).digest("hex");
@@ -284,7 +278,7 @@ const chromePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome
 
 async function tryCdpScreenshots(pageUrls, serverPort, outDir, figureInfos) {
   // Hard timeout for the whole CDP session (plan requirement: never block indefinitely)
-  const OVERALL_MS = 45000;
+  const OVERALL_MS = 120000;
   const NAV_MS = 15000;
   const EVALUATE_MS = 8000;
   const CAPTURE_MS = 5000;
@@ -339,58 +333,29 @@ async function tryCdpScreenshots(pageUrls, serverPort, outDir, figureInfos) {
     );
     const cdp = makeCdp(ws);
     await withTimeout(cdp.send("Page.enable"), 5000, "Page.enable");
+    await withTimeout(cdp.send("Page.setLifecycleEventsEnabled", { enabled: true }), 5000, "Page.setLifecycleEventsEnabled");
     await withTimeout(cdp.send("Runtime.enable"), 5000, "Runtime.enable");
     try {
       await withTimeout(cdp.send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 900, deviceScaleFactor: 2, mobile: false }), 5000, "Emulation");
     } catch {}
     for (const u of pageUrls) {
       await withTimeout(cdpNavigate(cdp, u), NAV_MS, "navigate " + u);
-      // Wait for KaTeX/three.js: at most 3s per plan, hard timeout 4s
-      await withTimeout(
-        cdp.send("Runtime.evaluate", { expression: `new Promise(r=>setTimeout(r, 800))`, awaitPromise: true }).catch(() => {}),
-        4000,
-        "katex wait"
-      );
-      await withTimeout(
-        cdp.evaluate(`(function(){
-          document.querySelectorAll('.explain[hidden], .model[hidden]').forEach(el=>el.removeAttribute('hidden'));
-          document.querySelectorAll('details').forEach(d=>d.setAttribute('open',''));
-          document.querySelectorAll('.quiz-slide[hidden]').forEach(el=>el.removeAttribute('hidden'));
-          return true;
-        })()`),
-        EVALUATE_MS,
-        "reveal"
-      );
-      const rects = await withTimeout(
-        cdp.evaluate(`(function(){
-          const figs = Array.from(document.querySelectorAll('figure.fig, figure.dse-paper, .visual'));
-          return figs.map((el,i)=>{
-            const r = el.getBoundingClientRect();
-            return {idx:i, x:r.x, y:r.y, width:r.width, height:r.height, cls:el.className};
-          });
-        })()`),
-        EVALUATE_MS,
-        "get rects"
-      );
-      // Limit per-page captures to avoid 8h runs: at most 16 figures per page
-      const limited = Array.isArray(rects) ? rects.slice(0, 16) : [];
-      for (let i = 0; i < limited.length; i++) {
-        const r = limited[i];
-        if (!r.width || !r.height || r.width > 5000 || r.height > 5000) continue;
-        try {
-          const shot = await withTimeout(
-            cdp.send("Page.captureScreenshot", {
-              format: "png",
-              captureBeyondViewport: true,
-              clip: { x: r.x, y: r.y, width: r.width, height: r.height, scale: 2 },
-            }),
-            CAPTURE_MS,
-            "capture " + i
-          );
-          const buf = Buffer.from(shot.data, "base64");
-          const name = `cdp-fig-${String(i).padStart(2, "0")}.png`;
-          fs.writeFileSync(path.join(outDir, name), buf);
-        } catch {}
+      const figs = figureInfos[pageUrls.indexOf(u)];
+      const document = await withTimeout(cdp.send("DOM.getDocument", { depth: 1 }), EVALUATE_MS, "DOM.getDocument");
+      const found = await withTimeout(cdp.send("DOM.querySelectorAll", { nodeId: document.root.nodeId, selector: "figure.fig" }), EVALUATE_MS, "DOM.querySelectorAll");
+      if (found.nodeIds.length !== figs.length) throw new Error(`Figure count mismatch: ${found.nodeIds.length} vs ${figs.length}`);
+      for (let i = 0; i < figs.length; i++) {
+        const fig = figs[i];
+        const frames = fig.kind === "animated" ? ["t0", "tmid", "tend"] : ["t0"];
+        for (const frame of frames) {
+          if (frame !== "t0") await new Promise(resolve => setTimeout(resolve, 900));
+          const box = await withTimeout(cdp.send("DOM.getBoxModel", { nodeId: found.nodeIds[i] }), EVALUATE_MS, `DOM.getBoxModel ${i}`);
+          const quad = box.model.border;
+          const rect = { x: Math.min(quad[0], quad[2], quad[4], quad[6]), y: Math.min(quad[1], quad[3], quad[5], quad[7]), width: box.model.width, height: box.model.height };
+          if (!rect.width || !rect.height || rect.width > 5000 || rect.height > 5000) throw new Error(`Invalid figure bounds ${i}`);
+          const shot = await withTimeout(cdp.send("Page.captureScreenshot", { format: "png", captureBeyondViewport: true, clip: { ...rect, scale: 2 } }), CAPTURE_MS, `capture ${i}`);
+          fs.writeFileSync(path.join(outDir, `fig-${fig.page}-${fig.anchor}-${frame}.png`), Buffer.from(shot.data, "base64"));
+        }
       }
     }
     return true;
@@ -398,8 +363,7 @@ async function tryCdpScreenshots(pageUrls, serverPort, outDir, figureInfos) {
   try {
     return await withTimeout(run(), OVERALL_MS, "tryCdpScreenshots overall");
   } catch (e) {
-    // console.error("CDP fallback:", e.message);
-    return false;
+    throw e;
   } finally {
     try { if (ws) ws.close(); } catch {}
     try { if (chromeProc) chromeProc.kill("SIGKILL"); } catch {}
@@ -412,8 +376,17 @@ async function tryCdpScreenshots(pageUrls, serverPort, outDir, figureInfos) {
 function makeCdp(ws) {
   let nextId = 1;
   const pending = new Map();
+  const lifecycle = [];
+  const waiters = [];
   ws.addEventListener("message", (ev) => {
     const msg = JSON.parse(ev.data);
+    if (msg.method === "Page.lifecycleEvent") {
+      lifecycle.push(msg.params);
+      for (const waiter of waiters.splice(0)) {
+        if (lifecycle.some(event => event.name === "load" && event.loaderId === waiter.loaderId)) waiter.resolve();
+        else waiters.push(waiter);
+      }
+    }
     if (msg.id && pending.has(msg.id)) {
       const { resolve, reject } = pending.get(msg.id);
       pending.delete(msg.id);
@@ -422,6 +395,10 @@ function makeCdp(ws) {
     }
   });
   return {
+    waitLoad(loaderId) {
+      if (!loaderId || lifecycle.some(event => event.name === "load" && event.loaderId === loaderId)) return Promise.resolve();
+      return new Promise(resolve => waiters.push({ loaderId, resolve }));
+    },
     send(method, params, timeoutMs = 20000) {
       const id = nextId++;
       return new Promise((resolve, reject) => {
@@ -444,11 +421,11 @@ function makeCdp(ws) {
   };
 }
 async function cdpNavigate(cdp, url) {
+  await cdp.send("Page.navigate", { url: "about:blank" });
   const nav = await withTimeout(cdp.send("Page.navigate", { url }), 8000, "Page.navigate");
-  if (nav && nav.errorText) throw new Error("navigate: " + nav.errorText);
-  await new Promise((r) => setTimeout(r, 900));
+  if (nav?.errorText) throw new Error("navigate: " + nav.errorText);
+  await withTimeout(cdp.waitLoad(nav?.loaderId), 15000, "page load");
   try { await withTimeout(cdp.send("Page.bringToFront"), 3000, "bringToFront"); } catch {}
-  await new Promise((r) => setTimeout(r, 300));
 }
 
 async function waitFor(fn, timeoutMs, label) {
@@ -470,9 +447,7 @@ function parseArgs(argv) {
     if (a === "--out" && argv[i + 1]) {
       out = path.resolve(argv[++i]);
     } else if (a.startsWith("--")) {
-      // ignore unknown flags but keep for future tier handling
-      if (a === "--tier" && argv[i + 1]) i++;
-      else if (a === "--book" && argv[i + 1]) i++;
+      throw new Error(`Unknown option ${a}`);
     } else {
       pages.push(path.resolve(a));
     }
@@ -496,6 +471,7 @@ async function main() {
   }
 
   fs.mkdirSync(out, { recursive: true });
+  for (const file of fs.readdirSync(out).filter(name => name.startsWith("fig-") || name.startsWith("dse-"))) fs.unlinkSync(path.join(out, file));
 
   // Determine book/section for naming
   // We keep out as requested; do not auto-subdir, but manifest records pages.
@@ -515,9 +491,9 @@ async function main() {
         const rel = path.relative(notesRoot, p).replace(/\\/g, "/");
         return `http://127.0.0.1:${serverPort}/${rel}`;
       });
-      cdpOk = await tryCdpScreenshots(pageUrls, serverPort, out, []);
-    } catch {}
-    finally {
+      const figureInfos = pages.map(p => extractFigures(fs.readFileSync(p, "utf8")).ideaFigs.map(fig => ({ ...fig, page: path.basename(p, ".html") })));
+      cdpOk = await tryCdpScreenshots(pageUrls, serverPort, out, figureInfos);
+    } finally {
       await closeServer(server, 2000);
     }
   }
@@ -671,51 +647,20 @@ async function main() {
   fs.writeFileSync(notesMdPath, notesMd, "utf8");
   const notesSha = sha256Hex(Buffer.from(notesMd, "utf8"));
 
-  // Generate figure PNGs: for each figure, 3 frames if animated, else 1
-  // If CDP already wrote some pngs, we keep them and ensure naming contract
-  const existingPngs = fs.readdirSync(out).filter((f) => f.endsWith(".png"));
-  // Determine figure pngs to create
   const figFiles = [];
   for (const fig of allFigures) {
-    const safeAnchor = fig.anchor.replace(/[^a-z0-9-_]/gi, "-").slice(0, 32) || "fig";
-    if (fig.kind === "animated") {
-      for (const t of ["t0", "tmid", "tend"]) {
-        const name = `fig-${safeAnchor}-${t}.png`;
-        const fp = path.join(out, name);
-        if (!fs.existsSync(fp)) {
-          fs.writeFileSync(fp, Buffer.from(PLACEHOLDER_PNG_BASE64, "base64"));
-        }
-        figFiles.push({ anchor: fig.anchor, file: name, frame: t, kind: "animated", page: fig.page });
-      }
-    } else {
-      // static or svg: one frame, but also provide t0 naming to satisfy gate's 1-frame check?
-      // Spec: fig-<anchor>-t{0,mid,end}.png for animated; SVG gets one frame. We'll emit t0 only.
-      const name = `fig-${safeAnchor}-t0.png`;
-      const fp = path.join(out, name);
-      if (!fs.existsSync(fp)) {
-        fs.writeFileSync(fp, Buffer.from(PLACEHOLDER_PNG_BASE64, "base64"));
-      }
-      figFiles.push({ anchor: fig.anchor, file: name, frame: "t0", kind: fig.kind, page: fig.page });
+    const frames = fig.kind === "animated" ? ["t0", "tmid", "tend"] : ["t0"];
+    for (const frame of frames) {
+      const name = `fig-${fig.page}-${fig.anchor}-${frame}.png`;
+      if (!fs.existsSync(path.join(out, name))) throw new Error(`Missing captured figure ${name}`);
+      figFiles.push({ anchor: fig.anchor, file: name, frame, kind: fig.kind, page: fig.page });
     }
   }
-  // DSE deck image placeholders: if image missing but we want deterministic manifest, we don't create fig for missing assets; manifest records missing.
-  // However ensure DSE section itself is captured as figure if needed: create placeholder for each present DSE asset?
-  // For gate, DSE decks must be included in bundle: notes.md already includes them, plus we record manifest.
-  // Optionally copy present DSE images into bundle for solver visibility (deterministic include what is present)
   for (const asset of allDseAssets) {
-    if (asset.present) {
-      const srcName = path.basename(asset.src);
-      const dest = path.join(out, `dse-${srcName}`);
-      if (!fs.existsSync(dest)) {
-        try {
-          fs.copyFileSync(path.join(repoRoot, asset.resolved), dest);
-          figFiles.push({ anchor: srcName, file: `dse-${srcName}`, kind: "dse", present: true });
-        } catch {
-          // fallback placeholder
-          fs.writeFileSync(dest, Buffer.from(PLACEHOLDER_PNG_BASE64, "base64"));
-        }
-      }
-    }
+    if (!asset.present) continue;
+    const name = `dse-${sha256Hex(asset.src).slice(0, 12)}${path.extname(asset.src)}`;
+    fs.copyFileSync(path.join(repoRoot, asset.resolved), path.join(out, name));
+    figFiles.push({ anchor: asset.src, file: name, kind: "dse", present: true });
   }
 
   // If no figures found (edge), ensure at least we scanned correctly – don't fail gate, just record
@@ -746,7 +691,7 @@ async function main() {
     includes_dse: true, // D4 override
   };
   // Bundle sha is sha of notes.md + figure list (deterministic)
-  const bundleSha = sha256Hex(Buffer.from(notesSha + JSON.stringify(figFiles) + JSON.stringify(allDseAssets.map((a) => a.src + ":" + a.present)), "utf8"));
+  const bundleSha = sha256Hex(Buffer.from(notesSha + JSON.stringify(figFiles.map(f => [f.file, sha256File(path.join(out, f.file))])), "utf8"));
   manifest.bundle_sha = bundleSha;
 
   fs.writeFileSync(path.join(out, "manifest.json"), JSON.stringify(manifest, null, 2), "utf8");
