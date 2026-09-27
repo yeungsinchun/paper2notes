@@ -138,13 +138,15 @@ async function processItem(item, bank, opts) {
   const resultPath = path.join(outDir, bank, `${item.id}.json`);
   if (!regress && fs.existsSync(resultPath)) {
     const existing = JSON.parse(fs.readFileSync(resultPath, "utf8"));
-    if (existing.bundle_sha === bundleSha && existing.prompt_sha === promptSha) return { id: item.id, cached: "result", result: existing };
+    if (existing.verdict !== "error" && existing.bundle_sha === bundleSha && existing.prompt_sha === promptSha) return { id: item.id, cached: "result", result: existing };
   }
   if (!regress && fs.existsSync(cachePath)) {
     const cached = JSON.parse(fs.readFileSync(cachePath, "utf8"));
-    ensureDir(path.dirname(resultPath));
-    fs.writeFileSync(resultPath, JSON.stringify(cached, null, 2));
-    return { id: item.id, cached: "cache", result: cached };
+    if (cached.verdict !== "error") {
+      ensureDir(path.dirname(resultPath));
+      fs.writeFileSync(resultPath, JSON.stringify(cached, null, 2));
+      return { id: item.id, cached: "cache", result: cached };
+    }
   }
 
   // Call solve K times + judge each
@@ -164,10 +166,13 @@ async function processItem(item, bank, opts) {
       const solveOut = path.join("/tmp", `solve-${item.id}-${tier}-${sample}.json`);
       const solveArgs = ["node", solveScript, "--item", tmpItem, "--bundle", tierBundle, "--out", solveOut, "--sample", String(sample)];
       const sRes = spawnSync("node", solveArgs.slice(1), { cwd: repoRoot, encoding: "utf8", timeout: 180000, maxBuffer: 20 * 1024 * 1024, env: process.env });
-      if (sRes.status !== 0 && !fs.existsSync(solveOut)) {
-        // create fallback solve output
-        fs.mkdirSync(path.dirname(solveOut), { recursive: true });
-        fs.writeFileSync(solveOut, JSON.stringify({ id: item.id, solver: { self_verdict: "blocked", answer: null, missing: [{ concept: "solve failed" }] }, run: { pi: piVersion, model } }, null, 2), "utf8");
+      let solveData;
+      try { solveData = JSON.parse(fs.readFileSync(solveOut, "utf8")); } catch {}
+      if (sRes.status !== 0 || solveData?.error || solveData?.solver?._fallback || !solveData) {
+        const error = [sRes.error && String(sRes.error), sRes.status !== 0 && `solve exited ${sRes.status}`, solveData?.error, solveData?.raw, sRes.stderr].filter(Boolean).join("; ").slice(0, 4000);
+        tiers[tier].samples.push({ error: error || "solve produced no result", judge: { cause: "execution-error" } });
+        try { fs.unlinkSync(solveOut); } catch {}
+        continue;
       }
       // Judge
       const judgeOut = path.join("/tmp", `judge-${item.id}-${tier}-${sample}.json`);
@@ -177,7 +182,6 @@ async function processItem(item, bank, opts) {
         fs.writeFileSync(judgeOut, JSON.stringify({ id: item.id, judge: { cause: "knowledge-gap" }, quote_check: { passed: false } }, null, 2), "utf8");
       }
       try {
-        const solveData = JSON.parse(fs.readFileSync(solveOut, "utf8"));
         const judgeData = JSON.parse(fs.readFileSync(judgeOut, "utf8"));
         tiers[tier].samples.push({ answer: solveData.solver || solveData, judge: judgeData.judge || judgeData, quote_check: judgeData.quote_check, leakage: judgeData.leakage });
         // cleanup tmp solve/judge
@@ -194,7 +198,7 @@ async function processItem(item, bank, opts) {
       const j = s.judge || {};
       return j.cause === "ok" && s.quote_check?.passed === true && !j.step_judgements?.some(step => step.verdict !== "supported") && (item.type === "mc" ? j.mc_correct === true : Array.isArray(j.marking) && j.marking.length > 0 && j.marking.every(point => point.verdict === "earned"));
     }).length;
-    tiers[tier].verdict = passCount >= need ? "pass" : (tiers[tier].samples.some(s => s.judge.cause === "knowledge-gap") ? "gap" : "fail");
+    tiers[tier].verdict = passCount >= need ? "pass" : (tiers[tier].samples.some(s => s.judge.cause === "execution-error") ? "error" : tiers[tier].samples.some(s => s.judge.cause === "knowledge-gap") ? "gap" : "fail");
   }
 
   // Determine overall verdict per plan §4.7
@@ -202,7 +206,8 @@ async function processItem(item, bank, opts) {
   let verdict = "gap";
   const leaked = tiers.S.samples.some(s => s.leakage?.leaked) || tiers.B.samples.some(s => s.leakage?.leaked);
   const isDefect = tiers.S.samples.some(s => s.judge.cause === "item-defect" || s.judge.cause === "key-defect");
-  if (isDefect) verdict = "defect";
+  if (tiers.S.verdict === "error" || tiers.B.verdict === "error") verdict = "error";
+  else if (isDefect) verdict = "defect";
   else if (tiers.S.verdict === "pass") verdict = leaked ? "pass-leaked" : "pass";
   else if (tiers.B.verdict === "pass" && tiers.S.verdict !== "pass") verdict = "cross-ref";
   else if (tiers.S.samples.some(s => s.judge.cause === "knowledge-gap") || tiers.B.samples.some(s => s.judge.cause === "knowledge-gap")) verdict = "gap";
@@ -226,7 +231,7 @@ async function processItem(item, bank, opts) {
   // Write cache and result
   ensureDir(path.dirname(resultPath));
   ensureDir(cacheDir);
-  fs.writeFileSync(cachePath, JSON.stringify(result, null, 2), "utf8");
+  if (verdict !== "error") fs.writeFileSync(cachePath, JSON.stringify(result, null, 2), "utf8");
   fs.writeFileSync(resultPath, JSON.stringify(result, null, 2), "utf8");
   try { fs.unlinkSync(tmpItem); } catch {}
   return { id: item.id, cached: false, result };
@@ -298,6 +303,7 @@ async function main() {
       try {
         const res = await processItem(item, bank, { ...opts, bundleDir });
         completed++;
+        if (res.result.verdict === "error") failed++;
         if (completed % 10 === 0 || completed === total) {
           const elapsed = ((Date.now() - start) / 1000).toFixed(1);
           console.log(`Progress ${completed}/${total} (${((completed/total)*100).toFixed(1)}%) elapsed ${elapsed}s`);
