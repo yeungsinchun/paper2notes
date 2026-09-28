@@ -1,0 +1,12 @@
+/* Chapter 3 overrides. Shared rules live in ../../css/notes.css. */
+
+#fission-vis canvas.scene-canvas,
+#chain-vis canvas.scene-canvas,
+#fusion-vis canvas.scene-canvas,
+#balance-vis canvas.scene-canvas { height: 340px; }
+
+#reactor-vis canvas.scene-canvas,
+#rtg-vis canvas.scene-canvas { height: 300px; }
+
+table.uses th:first-child,
+table.uses td:first-child { white-space: nowrap; }
