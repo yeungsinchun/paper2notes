@@ -245,6 +245,18 @@ p { margin: 0.45rem 0; }
 
 .quiz-export:hover { text-decoration: underline; }
 
+.quiz-export-group {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.quiz-export-group .quiz-export {
+  font-size: inherit;
+}
+
 .quiz-letter:focus-visible,
 .quiz-export:focus-visible,
 .quiz-nav button:focus-visible {

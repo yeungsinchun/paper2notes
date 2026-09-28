@@ -1401,6 +1401,25 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
       var firstImg = visibleMc[0] && visibleMc[0].querySelector("img");
       var nav = mc && mc.querySelector(".quiz-nav");
       var slidesBox = mc && mc.querySelector(".quiz-slides");
+      function deckInfo(deck) {
+        if (!deck) return null;
+        var sec = deck.querySelector('a[data-quiz-export][data-quiz-scope="section"]');
+        var chap = deck.querySelector('a[data-quiz-export][data-quiz-scope="chapter"]');
+        var group = deck.querySelector(".quiz-export-group");
+        return {
+          sectionHref: sec && sec.getAttribute("href"),
+          chapterHref: chap && chap.getAttribute("href"),
+          sectionTarget: sec && sec.getAttribute("target"),
+          chapterTarget: chap && chap.getAttribute("target"),
+          sectionScope: sec && sec.getAttribute("data-quiz-scope"),
+          chapterScope: chap && chap.getAttribute("data-quiz-scope"),
+          sectionText: sec && sec.textContent.trim(),
+          chapterText: chap && chap.textContent.trim(),
+          count: deck.querySelectorAll('a[data-quiz-export]').length,
+          groupRole: group && group.getAttribute("role"),
+          groupLabel: group && group.getAttribute("aria-label")
+        };
+      }
       return {
         heading: mc && mc.querySelector("h2") && mc.querySelector("h2").textContent,
         slides: slides.map(function (s) { return s.id; }),
@@ -1411,8 +1430,8 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
         navAfterSlides: !!(nav && slidesBox && (nav.compareDocumentPosition(slidesBox) & Node.DOCUMENT_POSITION_PRECEDING)),
         letters: mc ? mc.querySelectorAll("[data-quiz-choice]").length : 0,
         hasLq: !!(lq && lq.querySelector(".quiz-slide")),
-        mcPdf: mc && mc.querySelector('a[data-quiz-export="mc"]') && mc.querySelector('a[data-quiz-export="mc"]').getAttribute("href"),
-        lqPdf: lq && lq.querySelector('a[data-quiz-export="lq"]') && lq.querySelector('a[data-quiz-export="lq"]').getAttribute("href"),
+        mc: deckInfo(mc),
+        lq: deckInfo(lq),
         pdfButtons: document.querySelectorAll("button[data-quiz-export]").length,
         lo: document.querySelector(".quiz-lo") && document.querySelector(".quiz-lo").textContent.trim()
       };
@@ -1422,8 +1441,27 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
     assert.equal(practice.hasNext, true, page + " needs Next");
     assert.equal(practice.navAfterSlides, true, page + " Prev/Next must sit under the question");
     assert.ok(practice.letters >= 4, page + " needs A B C D options");
-    assert.equal(practice.mcPdf, "../_local/dse/mc/25/combined.pdf", page + " MC deck links its Export PDF to the chapter MC bank");
-    if (practice.hasLq) assert.equal(practice.lqPdf, "../_local/dse/lq/25/combined.pdf", page + " LQ deck links its Export PDF to the chapter LQ bank");
+    var section = page.replace(".html", "").replace("-", ".");
+    assert.equal(practice.mc.sectionHref, "../_local/dse/mc/25/" + section + ".pdf", page + " MC deck section link points at its own PDF");
+    assert.equal(practice.mc.chapterHref, "../_local/dse/mc/25/combined.pdf", page + " MC deck chapter link points at the chapter MC bank");
+    assert.equal(practice.mc.sectionScope, "section");
+    assert.equal(practice.mc.chapterScope, "chapter");
+    assert.equal(practice.mc.sectionText, "This section");
+    assert.equal(practice.mc.chapterText, "Whole chapter");
+    assert.equal(practice.mc.sectionTarget, "_blank");
+    assert.equal(practice.mc.chapterTarget, "_blank");
+    assert.equal(practice.mc.count, 2, page + " MC deck exposes exactly two scope links");
+    assert.equal(practice.mc.groupRole, "group");
+    assert.equal(practice.mc.groupLabel, "Export MC PDF");
+    if (practice.hasLq) {
+      assert.equal(practice.lq.sectionHref, "../_local/dse/lq/25/" + section + ".pdf", page + " LQ deck section link points at its own PDF");
+      assert.equal(practice.lq.chapterHref, "../_local/dse/lq/25/combined.pdf", page + " LQ deck chapter link points at the chapter LQ bank");
+      assert.equal(practice.lq.sectionTarget, "_blank");
+      assert.equal(practice.lq.chapterTarget, "_blank");
+      assert.equal(practice.lq.count, 2, page + " LQ deck exposes exactly two scope links");
+      assert.equal(practice.lq.groupRole, "group");
+      assert.equal(practice.lq.groupLabel, "Export LQ PDF");
+    }
     assert.equal(practice.pdfButtons, 0, page + " quiz export is a plain PDF link, not a generated print document");
     assert.match(practice.lo || "", /^LO \d+/, page + " needs an LO number and description at the top of the quiz");
     assert.equal(practice.hasLq, true, page + " needs a separate LQ section");
@@ -1487,13 +1525,15 @@ chromeTest("each Ch.1 subsection quizzes its DSE papers one at a time", async ()
       results: results,
       dots: mc.querySelectorAll(".quiz-dot").length,
       status: mc.querySelector(".quiz-status") && mc.querySelector(".quiz-status").textContent,
-      exportLabel: mc.querySelector("[data-quiz-export]") && mc.querySelector("[data-quiz-export]").textContent
+      exports: Array.from(mc.querySelectorAll("a[data-quiz-export]")).map(function (a) { return a.textContent.trim(); }),
+      scopes: Array.from(mc.querySelectorAll("a[data-quiz-export]")).map(function (a) { return a.getAttribute("data-quiz-scope"); })
     };
   })()`);
   assert.equal(marking.hasPp35, true, "PP/35 is in the 25.3 MC deck");
   assert.ok(marking.dots >= 2, "quiz-dots remain as a second progress channel");
   assert.match(marking.status || "", /\d+ of \d+/);
-  assert.equal(marking.exportLabel, "Export PDF");
+  assert.deepEqual(marking.exports, ["This section", "Whole chapter"]);
+  assert.deepEqual(marking.scopes, ["section", "chapter"]);
   marking.results.forEach(function (item) {
     assert.equal(item.marked, true, item.id + " must mark after an A-D pick");
     assert.match(item.pct, /correct|not quite/i, item.id + " needs a verdict");

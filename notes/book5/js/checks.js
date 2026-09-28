@@ -138,6 +138,8 @@
      the PDF is the notes themselves. */
   function initNotesExport() {
     $all("[data-notes-export]").forEach(function (btn) {
+      if (btn.getAttribute("data-notes-export-ready")) return;
+      btn.setAttribute("data-notes-export-ready", "true");
       btn.addEventListener("click", function () { window.print(); });
     });
   }
@@ -189,18 +191,39 @@
         slide.appendChild(pct);
       });
 
-      var pdf = deck.getAttribute("data-quiz-pdf");
-      if (pdf && !$("[data-quiz-export]", deck)) {
-        var exp = document.createElement("a");
-        exp.className = "quiz-export";
-        exp.setAttribute("data-quiz-export", isLq ? "lq" : "mc");
-        exp.href = pdf;
-        exp.target = "_blank";
-        exp.rel = "noopener";
-        exp.textContent = "Export PDF";
+      var chapterPdf = deck.getAttribute("data-quiz-pdf");
+      var sectionPdf = deck.getAttribute("data-quiz-section-pdf");
+      if ((chapterPdf || sectionPdf) && !$("[data-quiz-export]", deck)) {
+        var group = document.createElement("div");
+        group.className = "quiz-export-group";
+        group.setAttribute("role", "group");
+        group.setAttribute("aria-label", isLq ? "Export LQ PDF" : "Export MC PDF");
+        if (sectionPdf) {
+          var sec = document.createElement("a");
+          sec.className = "quiz-export";
+          sec.setAttribute("data-quiz-export", isLq ? "lq" : "mc");
+          sec.setAttribute("data-quiz-scope", "section");
+          sec.href = sectionPdf;
+          sec.target = "_blank";
+          sec.rel = "noopener";
+          sec.textContent = "This section";
+          group.appendChild(sec);
+        }
+        if (chapterPdf && sectionPdf) group.appendChild(document.createTextNode(" \u00b7 "));
+        if (chapterPdf) {
+          var chap = document.createElement("a");
+          chap.className = "quiz-export";
+          chap.setAttribute("data-quiz-export", isLq ? "lq" : "mc");
+          chap.setAttribute("data-quiz-scope", "chapter");
+          chap.href = chapterPdf;
+          chap.target = "_blank";
+          chap.rel = "noopener";
+          chap.textContent = "Whole chapter";
+          group.appendChild(chap);
+        }
         var head = $("header", deck);
-        if (head) head.appendChild(exp);
-        else deck.insertBefore(exp, deck.firstChild);
+        if (head) head.appendChild(group);
+        else deck.insertBefore(group, deck.firstChild);
       }
 
       var loLabel = $(".quiz-lo", deck);
